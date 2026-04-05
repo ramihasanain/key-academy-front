@@ -16,23 +16,61 @@ export const AdminOverview = () => {
     const [stats, setStats] = useState(null)
     const [period, setPeriod] = useState('all')
     const [teacher, setTeacher] = useState('all')
+    const [grade, setGrade] = useState('all')
+    const [subject, setSubject] = useState('all')
+    
     const [teachersList, setTeachersList] = useState([])
+    const [gradesList, setGradesList] = useState([])
+    const [subjectsList, setSubjectsList] = useState([])
     const navigate = useNavigate()
 
     useEffect(() => {
-        const fetchTeachers = async () => {
+        const fetchFiltersData = async () => {
             const tk = localStorage.getItem('access_token')
             try {
-                const res = await fetch(API + '/api/hq/teachers/?page_size=100', {
+                // Fetch Teachers
+                let res = await fetch(API + '/api/hq/teachers/?page_size=100', {
+                    headers: { 'Authorization': `Bearer ${tk}` }
+                })
+                if (res.ok) setTeachersList((await res.json()).results || [])
+                
+                // Fetch Grades
+                res = await fetch(API + '/api/hq/grades/?page_size=100', {
                     headers: { 'Authorization': `Bearer ${tk}` }
                 })
                 if (res.ok) {
-                    const data = await res.json()
-                    setTeachersList(data.results || data || [])
+                    const data = (await res.json()).results || []
+                    const uniqueMap = new Map()
+                    const cleanGrades = []
+                    for(const g of data) {
+                        const val = g.grade_name || g.title
+                        if(!uniqueMap.has(val)) {
+                            uniqueMap.set(val, true)
+                            cleanGrades.push({ val: val })
+                        }
+                    }
+                    setGradesList(cleanGrades)
+                }
+
+                // Fetch Subjects
+                res = await fetch(API + '/api/hq/subjects/?page_size=100', {
+                    headers: { 'Authorization': `Bearer ${tk}` }
+                })
+                if (res.ok) {
+                    const data = (await res.json()).results || []
+                    const uniqueMap = new Map()
+                    const cleanSubjects = []
+                    for(const s of data) {
+                        if(!uniqueMap.has(s.name)) {
+                            uniqueMap.set(s.name, true)
+                            cleanSubjects.push({ val: s.name })
+                        }
+                    }
+                    setSubjectsList(cleanSubjects)
                 }
             } catch (err) {}
         }
-        fetchTeachers()
+        fetchFiltersData()
     }, [])
 
     useEffect(() => {
@@ -43,6 +81,8 @@ export const AdminOverview = () => {
                 const url = new URL(API + '/api/hq/stats/')
                 url.searchParams.append('period', period)
                 url.searchParams.append('teacher', teacher)
+                url.searchParams.append('grade', grade)
+                url.searchParams.append('subject', subject)
                 
                 const res = await fetch(url.toString(), {
                     headers: { 'Authorization': `Bearer ${tk}` }
@@ -56,7 +96,7 @@ export const AdminOverview = () => {
             }
         }
         fetchStats()
-    }, [period, teacher])
+    }, [period, teacher, grade, subject])
 
     if (!stats) return <div className="hq-loading">جاري سحب وتحليل ملايين البيانات...</div>
 
@@ -93,6 +133,28 @@ export const AdminOverview = () => {
                         <option value="daily">اليوم (آخر 24 ساعة)</option>
                         <option value="weekly">هذا الأسبوع (آخر 7 أيام)</option>
                         <option value="monthly">هذا الشهر (آخر 30 يوم)</option>
+                    </select>
+
+                    <select
+                        value={grade}
+                        onChange={(e) => setGrade(e.target.value)}
+                        style={{ background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 15px', color: 'white', minWidth: '150px', outline: 'none' }}
+                    >
+                        <option value="all">جميع المراحل</option>
+                        {gradesList.map((g, idx) => (
+                            <option key={`g-${idx}`} value={g.val}>{g.val}</option>
+                        ))}
+                    </select>
+
+                    <select
+                        value={subject}
+                        onChange={(e) => setSubject(e.target.value)}
+                        style={{ background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 15px', color: 'white', minWidth: '150px', outline: 'none' }}
+                    >
+                        <option value="all">جميع المواد</option>
+                        {subjectsList.map((s, idx) => (
+                            <option key={`s-${idx}`} value={s.val}>{s.val}</option>
+                        ))}
                     </select>
 
                     <select
