@@ -78,6 +78,9 @@ export const AdminLayout = () => {
     const navItems = [
         { path: '', icon: <HiOutlineHome />, label: 'اللوحة الرئيسية (Overview)' },
         { path: 'users', icon: <HiOutlineUsers />, label: 'إدارة النظام' },
+        { path: 'branches', icon: <HiOutlineBookOpen />, label: 'الفروع (علمي/أدبي)' },
+        { path: 'grades', icon: <HiOutlineAcademicCap />, label: 'الصفوف والمراحل' },
+        { path: 'subjects', icon: <HiOutlineDocumentText />, label: 'المواد الدراسية' },
         { path: 'students', icon: <HiOutlineUsers />, label: 'الطلاب المسجلين' },
         { path: 'courses', icon: <HiOutlineBookOpen />, label: 'المناهج والدورات' },
         { path: 'teachers', icon: <HiOutlineAcademicCap />, label: 'الأساتذة' },

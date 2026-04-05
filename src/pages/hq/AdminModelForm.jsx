@@ -110,8 +110,16 @@ const SCHEMAS = {
     subjects: {
         title: 'مادة دراسية', endpoint: 'subjects',
         fields: [
-            { key: 'grade', label: 'رقم الصف (ID)', type: 'number', required: true },
             { key: 'name', label: 'اسم المادة', type: 'text', required: true },
+            { key: 'grade', label: 'رقم الصف المشرف (ID)', type: 'number', required: true },
+            { key: 'branches', label: 'الفروع', type: 'multiselect', endpoint: 'branches', labelField: 'name', valueField: 'id', required: true },
+            { key: 'order', label: 'الترتيب', type: 'number' }
+        ]
+    },
+    branches: {
+        title: 'فرع دراسي', endpoint: 'branches',
+        fields: [
+            { key: 'name', label: 'اسم الفرع', type: 'text', required: true },
             { key: 'order', label: 'الترتيب', type: 'number' }
         ]
     },
