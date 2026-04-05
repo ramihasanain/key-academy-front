@@ -144,7 +144,7 @@ export const AdminModelGrid = () => {
         }, 300)
 
         return () => clearTimeout(delayDebounceFn)
-    }, [model, searchTerm, location.search])
+    }, [model, searchTerm, location.search, activeFilters])
 
     const handleDelete = async (id) => {
         if (!window.confirm("هل أنت متأكد من حذف هذا العنصر نهائياً؟ لا يمكن التراجع عن هذه الخطوة.")) return;
