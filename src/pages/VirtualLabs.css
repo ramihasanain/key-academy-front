@@ -1,0 +1,241 @@
+.vl-page {
+    padding-top: 100px;
+    padding-bottom: 60px;
+    min-height: 100vh;
+    background: var(--bg-dark);
+}
+
+.vl-header {
+    text-align: center;
+    margin-bottom: 50px;
+}
+
+.vl-header p {
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.vl-filters {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 40px;
+    flex-wrap: wrap;
+}
+
+.vl-filter-btn {
+    background: var(--bg-glass);
+    border: 1px solid var(--border-glass);
+    color: var(--text-primary);
+    padding: 10px 24px;
+    border-radius: 30px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 500;
+}
+
+.vl-filter-btn:hover {
+    background: rgba(255,255,255,0.05);
+}
+
+.vl-filter-btn.active {
+    background: var(--primary-gradient);
+    color: #fff;
+    border-color: transparent;
+    box-shadow: 0 4px 15px rgba(236, 54, 101, 0.3);
+}
+
+.vl-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 30px;
+}
+
+.vl-card {
+    background: var(--bg-glass);
+    border: 1px solid var(--border-glass);
+    border-radius: 20px;
+    overflow: hidden;
+    position: relative;
+    cursor: pointer;
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.4s ease;
+}
+
+.vl-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+}
+
+.vl-card-img-wrap {
+    width: 100%;
+    height: 180px;
+    position: relative;
+    overflow: hidden;
+}
+
+.vl-card-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+}
+
+.vl-card:hover .vl-card-img {
+    transform: scale(1.05);
+}
+
+.vl-card-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.vl-card:hover .vl-card-overlay {
+    opacity: 1;
+}
+
+.vl-play-icon {
+    font-size: 3rem;
+    color: #fff;
+    filter: drop-shadow(0 4px 10px rgba(0,0,0,0.5));
+}
+
+.vl-card-body {
+    padding: 24px;
+}
+
+.vl-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 12px;
+}
+
+.vl-card h3 {
+    margin: 0 0 10px 0;
+    font-size: 1.2rem;
+}
+
+.vl-card p {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    line-height: 1.5;
+    margin: 0 0 20px 0;
+}
+
+.vl-card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid var(--border-light);
+    padding-top: 15px;
+}
+
+.vl-grade {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.vl-launch-btn {
+    background: none;
+    border: none;
+    color: var(--pink);
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.95rem;
+    transition: color 0.2s;
+}
+
+.vl-launch-btn:hover {
+    color: #fff;
+}
+
+/* Modal Styles */
+.vl-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.85);
+    backdrop-filter: blur(10px);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.vl-modal-content {
+    background: var(--bg-dark);
+    width: 100%;
+    max-width: 1200px;
+    height: 85vh;
+    border-radius: 24px;
+    border: 1px solid var(--border-glass);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+}
+
+.vl-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 24px;
+    border-bottom: 1px solid var(--border-glass);
+    background: rgba(255,255,255,0.02);
+}
+
+.vl-modal-header h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.vl-modal-close {
+    background: rgba(255,255,255,0.1);
+    border: none;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    color: #fff;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.vl-modal-close:hover {
+    background: var(--pink);
+    transform: scale(1.1);
+}
+
+.vl-modal-body {
+    flex: 1;
+    position: relative;
+    background: #fff; /* PhET simulations usually need white bg */
+}
+
+.vl-modal-iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+}

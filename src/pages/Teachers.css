@@ -1,0 +1,635 @@
+/* Teachers Page */
+.teachers-hero {
+    padding: 160px 0 80px;
+    position: relative;
+    background: var(--gradient-hero);
+    text-align: center;
+    overflow: hidden;
+}
+
+.teachers-hero h1 {
+    font-size: 3rem;
+    font-weight: 900;
+    margin-bottom: 16px;
+}
+
+.teachers-hero p {
+    font-size: 1.15rem;
+    color: var(--text-secondary);
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.teachers-page-section {
+    position: relative;
+}
+
+/* Subjects Filter Wrapper */
+.subjects-filter-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    margin-bottom: 30px;
+    border-bottom: 1px solid var(--border-glass);
+    padding-bottom: 10px;
+}
+
+/* Scroll Arrows */
+.scroll-arrow {
+    background: var(--bg-glass);
+    border: 1px solid var(--border-glass);
+    color: var(--text-primary);
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    cursor: pointer;
+    flex-shrink: 0;
+    z-index: 10;
+    transition: all var(--transition-normal);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.scroll-arrow:hover {
+    background: var(--gradient-button);
+    color: white;
+    border-color: transparent;
+    transform: scale(1.05);
+}
+
+.left-arrow {
+    margin-right: 12px;
+}
+
+.right-arrow {
+    margin-left: 12px;
+}
+
+/* Subjects Filter (Horizontal) */
+.subjects-filter-container {
+    display: flex;
+    overflow-x: auto;
+    gap: 16px;
+    padding: 10px 0;
+    scrollbar-width: none;
+    /* Firefox */
+    scroll-behavior: smooth;
+    flex: 1;
+}
+
+.subjects-filter-container::-webkit-scrollbar {
+    display: none;
+    /* Chrome/Safari */
+}
+
+.subject-filter-btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 28px;
+    background: var(--bg-glass);
+    border: 1px solid var(--border-glass);
+    border-radius: 50px;
+    color: var(--text-secondary);
+    font-size: 1.05rem;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all var(--transition-normal);
+}
+
+.subject-filter-btn .s-icon {
+    font-size: 1.5rem;
+    display: flex;
+    align-items: center;
+    transition: transform var(--transition-normal);
+}
+
+.subject-filter-btn:hover {
+    background: rgba(0, 0, 0, 0.05);
+    color: var(--text-primary);
+    transform: translateY(-2px);
+    border-color: rgba(0, 0, 0, 0.1);
+}
+
+.subject-filter-btn:hover .s-icon {
+    transform: scale(1.1) rotate(5deg);
+    color: var(--pink);
+}
+
+.subject-filter-btn.active {
+    background: var(--gradient-button);
+    color: white;
+    border-color: transparent;
+    box-shadow: 0 8px 25px rgba(233, 30, 99, 0.4);
+}
+
+.subject-filter-btn.active .s-icon {
+    color: white;
+    transform: scale(1.1);
+}
+
+.teachers-layout {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    gap: 30px;
+}
+
+/* Filter Sidebar */
+.teachers-filter {
+    position: sticky;
+    top: 100px;
+    align-self: start;
+    padding: 24px;
+    height: fit-content;
+}
+
+.filter-group {
+    margin-bottom: 24px;
+}
+
+.filter-group h4 {
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+    color: white;
+}
+
+.filter-group label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 0;
+    cursor: pointer;
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 0.95rem;
+    transition: color var(--transition-normal);
+}
+
+.filter-group label:hover {
+    color: white;
+}
+
+.filter-group input[type="radio"],
+.filter-group input[type="checkbox"] {
+    accent-color: var(--pink);
+    width: 16px;
+    height: 16px;
+}
+
+/* Teachers Grid */
+.teachers-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 24px;
+}
+
+.teacher-page-card {
+    padding: 0;
+    overflow: hidden;
+    text-align: center;
+    transition: all var(--transition-normal);
+    display: flex;
+    flex-direction: column;
+}
+
+.teacher-page-card:hover {
+    transform: translateY(-8px) scale(1.04) !important;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+    z-index: 2;
+}
+
+.teacher-page-card .teacher-avatar {
+    width: 100%;
+    height: 260px;
+    margin: 0 0 16px 0;
+    overflow: hidden;
+    position: relative;
+    border-radius: 0;
+}
+
+.teacher-page-card .teacher-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+}
+
+.teacher-page-card:hover .teacher-avatar img {
+    transform: scale(1.1);
+}
+
+.teacher-page-card .teacher-info {
+    padding: 0 20px 24px 20px;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.teacher-page-card .teacher-avatar-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--gradient-card);
+    font-size: 2rem;
+    color: var(--text-secondary);
+    border-radius: 0;
+}
+
+.teacher-page-card h4 {
+    font-size: 1.25rem;
+    font-weight: 800;
+    margin-bottom: 6px;
+    color: var(--text-primary);
+}
+
+.teacher-page-card .t-subject {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--pink);
+    margin-bottom: 4px;
+}
+
+.teacher-page-card .t-grade {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 4px;
+}
+
+.teacher-page-card .t-rating {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    margin-bottom: 16px;
+    color: #FFC107;
+    font-size: 0.9rem;
+}
+
+.teacher-page-card .btn-primary {
+    padding: 8px 24px;
+    font-size: 0.85rem;
+}
+
+/* Teacher Profile Page - New Design */
+.profile-page {
+    position: relative;
+    background: var(--bg-primary);
+}
+
+.profile-hero-bg {
+    height: 280px;
+    background: var(--gradient-hero);
+    position: relative;
+    overflow: hidden;
+}
+
+.profile-hero-bg::after {
+    content: '';
+    position: absolute;
+    bottom: -50px;
+    left: 0;
+    right: 0;
+    height: 100px;
+    background: var(--bg-primary);
+    transform: skewY(-2deg);
+    z-index: 1;
+}
+
+.profile-main-section {
+    position: relative;
+    z-index: 10;
+    margin-top: -120px;
+    padding-bottom: 80px;
+}
+
+.profile-split-layout {
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    gap: 30px;
+    align-items: start;
+}
+
+/* Sidebar */
+.profile-sidebar {
+    position: sticky;
+    top: 100px;
+}
+
+.teacher-sidebar-card {
+    padding: 30px 24px;
+    text-align: center;
+    border-radius: 20px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+}
+
+.sidebar-avatar-wrapper {
+    position: relative;
+    width: 130px;
+    height: 130px;
+    margin: 0 auto 20px;
+    border-radius: 50%;
+    padding: 5px;
+    background: var(--gradient-button);
+}
+
+.sidebar-avatar {
+    width: 100%;
+    height: 100%;
+    background: var(--bg-primary);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3.5rem;
+    font-weight: 800;
+    color: var(--text-primary);
+}
+
+.sidebar-name {
+    font-size: 1.6rem;
+    font-weight: 800;
+    margin-bottom: 5px;
+}
+
+.sidebar-subject {
+    font-size: 1.1rem;
+    color: var(--pink);
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.sidebar-grade {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    margin-bottom: 25px;
+}
+
+.sidebar-stats {
+    display: flex;
+    justify-content: space-between;
+    padding: 20px 0;
+    border-top: 1px solid var(--border-glass);
+    border-bottom: 1px solid var(--border-glass);
+    margin-bottom: 25px;
+}
+
+.s-stat {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+}
+
+.center-border {
+    border-right: 1px solid var(--border-glass);
+    border-left: 1px solid var(--border-glass);
+}
+
+.s-stat-icon {
+    font-size: 1.5rem;
+    margin-bottom: 5px;
+}
+
+.s-stat-info span {
+    display: block;
+    font-size: 1.1rem;
+    font-weight: 800;
+    line-height: 1.2;
+}
+
+.s-stat-info small {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+/* Main Content & Tabs */
+.profile-tabs-wrapper {
+    display: flex;
+    margin-bottom: 30px;
+    background: var(--bg-glass);
+    padding: 8px;
+    border-radius: 12px;
+    border: 1px solid var(--border-glass);
+}
+
+.profile-tabs {
+    display: flex;
+    gap: 8px;
+    width: 100%;
+}
+
+.profile-tab {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 14px 24px;
+    border-radius: 8px;
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    background: transparent;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.profile-tab.active {
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    /* Color will be applied via the dynamic class */
+}
+
+.profile-tab:not(.active):hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-primary);
+}
+
+/* CV Section */
+.cv-bio {
+    padding: 24px 30px;
+    border-radius: 16px;
+}
+
+.cv-bio h3 {
+    margin-bottom: 12px;
+    font-size: 1.3rem;
+    color: var(--text-primary);
+}
+
+.cv-bio p {
+    color: var(--text-secondary);
+    line-height: 1.8;
+    font-size: 1.05rem;
+}
+
+.cv-section {
+    margin-top: 40px;
+}
+
+.cv-section-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 1.4rem;
+    font-weight: 800;
+    margin-bottom: 24px;
+    color: var(--text-primary);
+}
+
+.cv-title-icon {
+    font-size: 1.6rem;
+}
+
+.cv-timeline {
+    position: relative;
+    padding-right: 20px; /* Space for line in RTL */
+    border-right: 2px dashed rgba(255, 255, 255, 0.1);
+}
+
+.cv-timeline-item {
+    position: relative;
+    margin-bottom: 24px;
+}
+
+.cv-timeline-dot {
+    position: absolute;
+    right: -28px; /* Align to the border */
+    top: 50%;
+    transform: translateY(-50%);
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: 3px solid var(--bg-primary);
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.05);
+}
+
+.cv-timeline-content {
+    padding: 16px 24px;
+    border-radius: 12px;
+    margin-right: 10px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.cv-timeline-content:hover {
+    transform: translateX(-5px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+}
+
+.cv-timeline-content p {
+    font-size: 1.05rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    margin: 0;
+    line-height: 1.6;
+}
+
+/* Courses Grid Updates */
+.profile-courses-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 24px;
+}
+
+.profile-course-card {
+    padding: 0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.course-card-img {
+    height: 180px;
+    position: relative;
+    overflow: hidden;
+}
+
+.course-card-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+}
+
+.profile-course-card:hover .course-card-img img {
+    transform: scale(1.1);
+}
+
+.course-lessons-badge {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(4px);
+    color: var(--text-primary);
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.course-card-content {
+    padding: 24px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.course-card-content h4 {
+    font-size: 1.25rem;
+    font-weight: 900;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+.course-card-content p {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 24px;
+    flex: 1;
+}
+
+/* Responsive */
+@media (max-width: 992px) {
+    .profile-split-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .profile-sidebar {
+        position: relative;
+        top: 0;
+    }
+    
+    .profile-main-section {
+        margin-top: -60px;
+    }
+}
+
+@media (max-width: 768px) {
+    .profile-tabs {
+        flex-direction: column;
+    }
+    
+    .cv-timeline {
+        border-right: none;
+        padding-right: 0;
+    }
+    
+    .cv-timeline-dot {
+        display: none;
+    }
+    
+    .cv-timeline-content {
+        margin-right: 0;
+    }
+}

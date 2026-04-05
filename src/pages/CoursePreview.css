@@ -1,0 +1,635 @@
+/* ===== Saffah Course Preview Styling (Ultra Premium Light) ===== */
+.preview-page {
+    min-height: 100vh;
+    background: #f8faff; /* Premium light background */
+    color: var(--text-primary);
+    font-family: var(--font-ar);
+    position: relative;
+    overflow-x: hidden;
+    padding-bottom: 80px;
+}
+
+/* Ambient Background Blobs (Saffah Style Light) */
+.preview-mesh {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
+    opacity: 0.15;
+}
+
+.preview-blob {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(140px);
+}
+
+.blob-orange-1 { width: 50vw; height: 50vh; background: #FF512F; top: -10vh; right: -10vw; }
+.blob-orange-2 { width: 40vw; height: 40vh; background: #DD2476; bottom: -20vh; left: 10vw; }
+
+.blob-pink-1 { width: 60vw; height: 60vh; background: #DA4453; top: -10vh; right: -20vw; }
+.blob-pink-2 { width: 40vw; height: 40vh; background: #89216B; bottom: -10vh; left: 0; }
+
+.blob-purple-1 { width: 50vw; height: 50vh; background: #8E2DE2; top: -10vh; right: 0; }
+.blob-purple-2 { width: 40vw; height: 40vh; background: #4A00E0; bottom: -10vh; left: -10vw; }
+
+/* Smart Navbar (Glass Light) */
+.preview-nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 80px;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    transition: all 0.4s ease;
+    border-bottom: 1px solid transparent;
+}
+
+.preview-nav.nav-scrolled {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.04);
+}
+
+.preview-nav-inner {
+    max-width: 1300px;
+    margin: 0 auto;
+    width: 100%;
+    padding: 0 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.preview-back-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-weight: 800;
+    transition: color 0.3s ease;
+}
+
+.preview-back-btn:hover {
+    color: var(--purple);
+}
+
+.preview-nav-title h3 {
+    font-size: 1.2rem;
+    font-weight: 900;
+    margin: 0;
+    background: linear-gradient(90deg, var(--purple), var(--pink));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* Layout Container */
+.preview-container {
+    max-width: 1300px;
+    margin: 120px auto 0;
+    padding: 0 40px;
+    display: grid;
+    grid-template-columns: 1fr 400px;
+    gap: 50px;
+    position: relative;
+    z-index: 10;
+}
+
+@media (max-width: 1024px) {
+    .preview-container {
+        grid-template-columns: 1fr;
+    }
+    .preview-sidebar-col {
+        order: -1;
+    }
+}
+
+/* Main Content Column */
+.preview-main-col {
+    display: flex;
+    flex-direction: column;
+    gap: 50px;
+}
+
+/* Hero Title Section */
+.hero-content {
+    margin-bottom: 20px;
+    padding: 40px;
+    background: white;
+    border-radius: var(--radius-xl);
+    box-shadow: 0 10px 40px rgba(0,0,0,0.04);
+    border: 1px solid rgba(0,0,0,0.03);
+    position: relative;
+    overflow: hidden;
+}
+
+.hero-content::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; height: 6px;
+}
+
+.preview-hero.theme-orange .hero-content::before { background: var(--orange); }
+.preview-hero.theme-pink .hero-content::before { background: var(--pink); }
+.preview-hero.theme-purple .hero-content::before { background: var(--purple); }
+
+.hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(131, 42, 150, 0.1);
+    color: var(--purple);
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 800;
+    margin-bottom: 20px;
+}
+
+.hero-title {
+    font-size: 2.8rem;
+    font-weight: 900;
+    line-height: 1.3;
+    margin-bottom: 30px;
+    color: var(--text-primary);
+}
+
+/* Smart Teacher Profile injected in Hero */
+.smart-teacher-card {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    background: #f8faff;
+    border: 1px solid rgba(0,0,0,0.05);
+    padding: 20px 30px;
+    border-radius: var(--radius-xl);
+    margin-bottom: 30px;
+}
+
+.st-avatar-wrap {
+    position: relative;
+    width: 80px;
+    height: 80px;
+}
+
+.st-avatar {
+    width: 100%;
+    height: 100%;
+    border-radius: 20px;
+    object-fit: cover;
+    position: relative;
+    z-index: 2;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.st-avatar-ring {
+    position: absolute;
+    inset: -4px;
+    border: 2px dashed rgba(131, 42, 150, 0.4);
+    border-radius: 24px;
+    animation: spin 15s linear infinite;
+    z-index: 1;
+}
+
+.st-info h3 {
+    font-size: 1.5rem;
+    font-weight: 900;
+    margin-bottom: 4px;
+    color: var(--text-primary);
+}
+
+.st-info p {
+    color: var(--text-secondary);
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+.hero-stats-row {
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+    padding-top: 10px;
+}
+
+.h-stat {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-muted);
+    font-weight: 800;
+    font-size: 1.05rem;
+}
+
+.h-stat .stat-icn {
+    font-size: 1.4rem;
+    color: var(--text-primary);
+}
+
+.text-yellow { color: #facc15 !important; }
+
+/* Sections */
+.preview-section {
+    opacity: 0;
+    animation: fadeInUp 0.8s forwards;
+    background: white;
+    padding: 40px;
+    border-radius: var(--radius-xl);
+    box-shadow: 0 10px 40px rgba(0,0,0,0.02);
+    border: 1px solid rgba(0,0,0,0.03);
+}
+
+@keyframes fadeInUp {
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.section-title {
+    font-size: 1.8rem;
+    font-weight: 900;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: var(--text-primary);
+}
+
+.section-subtitle {
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+    margin-bottom: 30px;
+    font-weight: 600;
+}
+
+.preview-about-text {
+    font-size: 1.15rem;
+    line-height: 1.8;
+    color: var(--text-secondary);
+    font-weight: 600;
+    background: #f8faff;
+    padding: 30px;
+    border-right: 4px solid var(--purple);
+    border-radius: var(--radius-md);
+}
+
+/* Modules & Curriculum List */
+.preview-modules-list {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.preview-module-card {
+    background: white;
+    border: 1px solid rgba(0,0,0,0.08);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.02);
+}
+
+.preview-module-card:hover {
+    border-color: rgba(131, 42, 150, 0.3);
+    box-shadow: 0 10px 25px rgba(131, 42, 150, 0.08);
+}
+
+.p-mod-header {
+    padding: 24px 30px;
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+    background: #fdfdfd;
+}
+
+.p-mod-title-area {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.mod-free-badge {
+    background: rgba(76, 175, 80, 0.1);
+    color: #4CAF50;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 800;
+    align-self: flex-start;
+}
+
+.mod-locked-badge {
+    background: rgba(0, 0, 0, 0.05);
+    color: var(--text-muted);
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 800;
+    align-self: flex-start;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.p-mod-title-area h3 {
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: var(--text-primary);
+}
+
+.mod-duration {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    font-weight: 700;
+}
+
+/* Lessons Blur System for Locked */
+.p-mod-lessons {
+    position: relative;
+    padding: 10px 0;
+    background: white;
+}
+
+.module-premium-locked .blurry-lock-fx {
+    user-select: none;
+    pointer-events: none;
+}
+
+.blurry-lock-fx .p-lesson-row {
+    filter: blur(4px) grayscale(20%);
+    opacity: 0.6;
+}
+
+.p-lesson-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 30px;
+    border-bottom: 1px dashed rgba(0,0,0,0.05);
+}
+.p-lesson-row:last-child { border-bottom: none; }
+
+.p-lesson-info {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: var(--text-primary);
+}
+
+.ls-icn {
+    font-size: 1.4rem;
+    color: var(--purple);
+}
+
+.ls-time {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    font-weight: 800;
+    background: #f4f6f9;
+    padding: 4px 10px;
+    border-radius: 12px;
+}
+
+.ls-play-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(131, 42, 150, 0.1);
+    color: var(--purple);
+    border: none;
+    padding: 8px 16px;
+    border-radius: var(--radius-sm);
+    font-weight: 800;
+    cursor: auto;
+    transition: all 0.3s ease;
+    pointer-events: auto;
+}
+
+.ls-play-btn:hover {
+    background: var(--purple);
+    color: white;
+    transform: scale(1.05);
+    cursor: pointer;
+}
+
+/* Light Mode Locked Overlay Prompt */
+.premium-overlay-prompt {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    pointer-events: auto;
+    background: rgba(255,255,255,0.6); /* Frosty light overlay */
+    backdrop-filter: blur(2px);
+}
+
+.huge-lock {
+    font-size: 4rem;
+    color: var(--pink);
+    margin-bottom: 16px;
+    filter: drop-shadow(0 10px 20px rgba(236, 54, 101, 0.2));
+}
+
+.premium-overlay-prompt h4 {
+    font-size: 1.4rem;
+    font-weight: 900;
+    color: var(--text-primary);
+    background: white;
+    padding: 12px 28px;
+    border-radius: 30px;
+    border: 1px solid rgba(0,0,0,0.1);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+}
+
+/* ===== Saffah Light Premium Card ===== */
+.preview-sidebar-col {
+    position: relative;
+    perspective: 1000px;
+}
+
+.light-glass-card {
+    position: sticky;
+    top: 100px;
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(40px);
+    -webkit-backdrop-filter: blur(40px);
+    border: 1px solid rgba(131, 42, 150, 0.1);
+    border-radius: var(--radius-xl);
+    padding: 32px;
+    box-shadow: 0 20px 50px rgba(131, 42, 150, 0.05), inset 0 2px 0 rgba(255,255,255,1);
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s;
+}
+
+.light-glass-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 30px 60px rgba(131, 42, 150, 0.08), inset 0 2px 0 rgba(255,255,255,1);
+}
+
+.light-card-header {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.lc-teacher-info {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.lc-teacher-img {
+    width: 65px;
+    height: 65px;
+    border-radius: 18px;
+    object-fit: cover;
+    box-shadow: 0 8px 24px rgba(131, 42, 150, 0.15);
+    border: 2px solid white;
+}
+
+.lc-badge {
+    display: inline-block;
+    background: linear-gradient(90deg, rgba(131, 42, 150, 0.1), rgba(236, 54, 101, 0.05));
+    color: var(--purple);
+    font-size: 0.8rem;
+    font-weight: 800;
+    padding: 4px 12px;
+    border-radius: 20px;
+    margin-bottom: 6px;
+    border: 1px solid rgba(131, 42, 150, 0.15);
+}
+
+.lc-teacher-info h3 {
+    font-size: 1.35rem;
+    font-weight: 900;
+    color: var(--text-primary);
+    line-height: 1.3;
+}
+
+.lc-price-pill {
+    background: #f8faff;
+    border: 2px dashed rgba(131, 42, 150, 0.15);
+    border-radius: var(--radius-lg);
+    padding: 16px;
+    text-align: center;
+    font-size: 2rem;
+    font-weight: 900;
+    color: var(--purple);
+    margin-top: 4px;
+}
+
+.lc-divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(131, 42, 150, 0.1), transparent);
+    margin: 24px 0;
+}
+
+.lc-activation-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.lc-form-label {
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: var(--text-primary);
+}
+
+.lc-input-wrap {
+    position: relative;
+}
+
+.lc-input-icon {
+    position: absolute;
+    right: 18px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 1.4rem;
+    color: var(--purple);
+    opacity: 0.5;
+}
+
+.lc-input {
+    width: 100%;
+    background: white;
+    border: 2px solid rgba(131, 42, 150, 0.15);
+    padding: 18px 48px 18px 20px;
+    border-radius: var(--radius-md);
+    font-family: var(--font-ar);
+    font-size: 1.05rem;
+    font-weight: 900;
+    color: var(--text-primary);
+    transition: all 0.3s;
+}
+
+.lc-input:focus {
+    outline: none;
+    border-color: var(--purple);
+    box-shadow: 0 0 0 4px rgba(131, 42, 150, 0.1);
+}
+
+.lc-input::placeholder {
+    color: var(--text-muted);
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+.lc-submit-btn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 18px;
+    border-radius: var(--radius-md);
+    font-size: 1.15rem;
+    font-weight: 900;
+    color: white;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 10px 20px rgba(131, 42, 150, 0.2);
+}
+
+.lc-submit-btn.bg-orange { background: var(--gradient-button); box-shadow: 0 10px 20px rgba(253, 186, 1, 0.25); }
+.lc-submit-btn.bg-pink { background: linear-gradient(135deg, var(--pink), var(--purple)); box-shadow: 0 10px 20px rgba(236, 54, 101, 0.25); }
+.lc-submit-btn.bg-purple { background: linear-gradient(135deg, var(--purple), #2a0845); box-shadow: 0 10px 20px rgba(131, 42, 150, 0.25); }
+
+.lc-submit-btn:hover:not(:disabled) {
+    transform: translateY(-3px);
+    box-shadow: 0 15px 30px rgba(131, 42, 150, 0.3);
+    filter: brightness(1.1);
+}
+
+.lc-submit-btn:disabled {
+    opacity: 0.7;
+    cursor: wait;
+    transform: none;
+}
+
+.lc-features {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.lcf-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    font-weight: 800;
+}
+
+.lcf-item svg {
+    color: #4CAF50;
+    font-size: 1.4rem;
+}

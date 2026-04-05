@@ -1,0 +1,188 @@
+/* Grades Page */
+.grades-hero {
+    padding: 160px 0 80px;
+    position: relative;
+    background: var(--gradient-hero);
+    text-align: center;
+    overflow: hidden;
+}
+
+.grades-hero h1 {
+    font-size: 3rem;
+    font-weight: 900;
+    margin-bottom: 16px;
+}
+
+.grades-hero p {
+    font-size: 1.15rem;
+    color: var(--text-secondary);
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.grade-section {
+    position: relative;
+}
+
+.grade-section:nth-child(even) {
+    background: var(--bg-secondary);
+}
+
+.grade-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 40px;
+}
+
+.grade-header-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 16px;
+    background: var(--gradient-button);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: white;
+}
+
+.grade-header h2 {
+    font-size: 1.8rem;
+    font-weight: 800;
+}
+
+.branch-title {
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--text-primary);
+}
+
+.branch-title svg {
+    color: var(--orange);
+}
+
+.subjects-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 20px;
+    margin-bottom: 40px;
+}
+
+.subject-card {
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 12px;
+}
+
+.subject-card .s-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+}
+
+.subject-card .s-icon.math {
+    background: rgba(253, 186, 1, 0.12);
+    color: var(--orange);
+}
+
+.subject-card .s-icon.phys {
+    background: rgba(33, 150, 243, 0.12);
+    color: #42A5F5;
+}
+
+.subject-card .s-icon.chem {
+    background: rgba(76, 175, 80, 0.12);
+    color: #66BB6A;
+}
+
+.subject-card .s-icon.bio {
+    background: rgba(236, 54, 101, 0.12);
+    color: var(--pink);
+}
+
+.subject-card .s-icon.eng {
+    background: rgba(131, 42, 150, 0.12);
+    color: var(--pink-neon);
+}
+
+.subject-card .s-icon.arab {
+    background: rgba(255, 193, 7, 0.12);
+    color: #FFC107;
+}
+
+.subject-card .s-icon.islam {
+    background: rgba(0, 150, 136, 0.12);
+    color: #26A69A;
+}
+
+.subject-card .s-icon.french {
+    background: rgba(244, 67, 54, 0.12);
+    color: #EF5350;
+}
+
+.subject-card .s-icon.geo {
+    background: rgba(121, 85, 72, 0.12);
+    color: #8D6E63;
+}
+
+.subject-card .s-icon.hist {
+    background: rgba(158, 158, 158, 0.12);
+    color: #BDBDBD;
+}
+
+.subject-card .s-icon.phil {
+    background: rgba(103, 58, 183, 0.12);
+    color: #7E57C2;
+}
+
+.subject-card .s-icon.econ {
+    background: rgba(0, 188, 212, 0.12);
+    color: #26C6DA;
+}
+
+.subject-card .s-icon.socio {
+    background: rgba(255, 87, 34, 0.12);
+    color: #FF7043;
+}
+
+.subject-card h4 {
+    font-size: 1.05rem;
+    font-weight: 600;
+}
+
+.subject-card .course-count {
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.subject-card .btn-primary {
+    padding: 8px 22px;
+    font-size: 0.85rem;
+    margin-top: 4px;
+}
+
+@media (max-width: 768px) {
+    .grades-hero h1 {
+        font-size: 2.2rem;
+    }
+
+    .subjects-grid {
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    }
+
+    .grade-header h2 {
+        font-size: 1.4rem;
+    }
+}
