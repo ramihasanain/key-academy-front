@@ -5,6 +5,36 @@ import { HiOutlineUserMinus, HiOutlineClock, HiOutlineChatBubbleBottomCenterText
 export const TAMutedStudents = () => {
     const [mutedStudents, setMutedStudents] = useState([])
     const [isLoading, setIsLoading] = useState(true)
+    const [filters, setFilters] = useState({
+        search: '',
+        course: '',
+        teacher: '',
+        moderator: '',
+        type: '',
+        date: ''
+    })
+
+    const filteredMuted = mutedStudents.filter(item => {
+        if (filters.search) {
+            const term = filters.search.toLowerCase()
+            if (!item.full_name.toLowerCase().includes(term) && !item.username.toLowerCase().includes(term)) return false
+        }
+        if (filters.course && item.course_name !== filters.course) return false
+        if (filters.teacher && item.teacher_name !== filters.teacher) return false
+        if (filters.moderator && item.moderator !== filters.moderator) return false
+        if (filters.type && item.mute_type !== filters.type) return false
+        if (filters.date) {
+            const d1 = item.created_at ? item.created_at.split('T')[0] : '';
+            const d2 = item.muted_until ? item.muted_until.split('T')[0] : '';
+            if (d1 !== filters.date && d2 !== filters.date) return false;
+        }
+        return true
+    })
+
+    const uniqueCourses = [...new Set(mutedStudents.map(m => m.course_name))].filter(Boolean)
+    const uniqueTeachers = [...new Set(mutedStudents.map(m => m.teacher_name))].filter(Boolean)
+    const uniqueModerators = [...new Set(mutedStudents.map(m => m.moderator))].filter(Boolean)
+    const uniqueTypes = [...new Set(mutedStudents.map(m => m.mute_type))].filter(Boolean)
 
     const fetchMuted = async () => {
         const tk = localStorage.getItem('access_token')
@@ -74,7 +104,47 @@ export const TAMutedStudents = () => {
                 <p style={{ color: 'var(--hq-text-muted)', marginTop: '5px' }}>هنا يمكنك متابعة الطلاب الذين تم تقييدهم من الدردشة والتعليقات.</p>
             </div>
 
-            {mutedStudents.length === 0 ? (
+            <div className="hq-filters-bar" style={{ display: 'flex', flexWrap: 'wrap', gap: '15px', marginBottom: '20px', background: '#1e293b', padding: '20px', borderRadius: '16px', border: '1px solid var(--hq-border)' }}>
+                <input 
+                    className="hq-input" 
+                    placeholder="بحث باسم الطالب أو اليوزر..." 
+                    value={filters.search} 
+                    onChange={e => setFilters({...filters, search: e.target.value})}
+                    style={{ flex: '1 1 200px', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '10px 15px', color: 'white' }}
+                />
+                
+                <select className="hq-input" value={filters.course} onChange={e => setFilters({...filters, course: e.target.value})} style={{ flex: '1 1 150px', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '10px 15px', color: 'white' }}>
+                    <option value="">كل الدورات</option>
+                    {uniqueCourses.map(c => <option key={c} value={c}>{c}</option>)}
+                </select>
+
+                <select className="hq-input" value={filters.teacher} onChange={e => setFilters({...filters, teacher: e.target.value})} style={{ flex: '1 1 150px', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '10px 15px', color: 'white' }}>
+                    <option value="">كل الأساتذة</option>
+                    {uniqueTeachers.map(t => <option key={t} value={t}>{t}</option>)}
+                </select>
+
+                <select className="hq-input" value={filters.moderator} onChange={e => setFilters({...filters, moderator: e.target.value})} style={{ flex: '1 1 130px', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '10px 15px', color: 'white' }}>
+                    <option value="">كل المسؤولين (المراقبين)</option>
+                    {uniqueModerators.map(m => <option key={m} value={m}>{m}</option>)}
+                </select>
+
+                <select className="hq-input" value={filters.type} onChange={e => setFilters({...filters, type: e.target.value})} style={{ flex: '1 1 130px', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '10px 15px', color: 'white' }}>
+                    <option value="">نوع الحظر (الكل)</option>
+                    {uniqueTypes.map(t => <option key={t} value={t}>{t}</option>)}
+                </select>
+
+                <input 
+                    type="date"
+                    className="hq-input" 
+                    value={filters.date} 
+                    onChange={e => setFilters({...filters, date: e.target.value})}
+                    style={{ flex: '1 1 150px', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '10px 15px', color: 'white', colorScheme: 'dark' }}
+                />
+
+                <button onClick={() => setFilters({search:'', course:'', teacher:'', moderator:'', type:'', date:''})} style={{ padding: '10px 20px', background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', border: '1px solid rgba(239, 68, 68, 0.2)', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}>تفريغ الفلاتر</button>
+            </div>
+
+            {filteredMuted.length === 0 ? (
                 <div style={{ textAlign: 'center', padding: '100px', border: '2px dashed var(--hq-border)', borderRadius: '20px', color: 'var(--hq-text-muted)' }}>
                     <h3>لا يوجد طلاب محظورون حالياً!</h3>
                     <p>كل الطلاب لديهم صلاحيات كاملة.</p>
@@ -94,7 +164,7 @@ export const TAMutedStudents = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            {mutedStudents.map((student, idx) => (
+                            {filteredMuted.map((student, idx) => (
                                 <tr key={`${student.id}-${idx}`} style={{ borderBottom: '1px solid var(--hq-border)' }}>
                                     <td style={{ padding: '15px' }}>
                                         <div style={{ fontWeight: 'bold' }}>{student.full_name}</div>
