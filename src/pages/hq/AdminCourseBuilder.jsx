@@ -467,10 +467,16 @@ export const AdminCourseBuilder = ({ id }) => {
                         <select value={course.teacher || ''} onChange={e => {
                             const tId = e.target.value;
                             const t = teachers.find(x => x.id == tId);
-                            setCourse({ ...course, teacher: tId, subject: t ? t.subject : '', grade: t ? t.grade : '', branches: t && t.branches ? t.branches : [] })
+                            setCourse({ 
+                                ...course, 
+                                teacher: tId, 
+                                subject: t && t.subjects && t.subjects.length > 0 ? t.subjects[0] : '', 
+                                grade: t && t.grades && t.grades.length > 0 ? t.grades[0] : '', 
+                                branches: t && t.branches ? t.branches : [] 
+                            })
                         }}>
                             <option value="">-- يرجى اختيار الأستاذ --</option>
-                            {teachers.map(t => <option key={t.id} value={t.id}>م. {t.name || t.user} - {t.subject}</option>)}
+                            {teachers.map(t => <option key={t.id} value={t.id}>م. {t.name || t.user}</option>)}
                         </select>
                     </div>
                     <div className="hq-df-group">
