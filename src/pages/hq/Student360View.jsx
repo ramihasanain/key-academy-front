@@ -65,60 +65,67 @@ export const Student360View = ({ id }) => {
     }
 
     const handleMuteStudent = async () => {
-        // Step 1: Selection - Type
         setDialog({
-            type: 'choices',
-            message: 'اختر نوع التقييد للطالب:',
+            type: 'multi_select',
+            message: 'اختر الدورة (دورة واحدة أو أكثر):',
             options: [
-                { label: '🚫 حظر كلي (دردشة + أسئلة)', value: 'all' },
-                { label: '💬 منع من الدردشة فقط', value: 'chat' },
-                { label: '❓ منع من طرح الأسئلة فقط', value: 'qa' }
+                { label: 'كل الدورات (شامل)', value: 'all' },
+                ...data.courses.map(c => ({ label: 'دورة - ' + c.title, value: c.id }))
             ],
-            onConfirm: (muteType) => {
-                // Step 2: Selection - Duration
+            onConfirm: (selectedCourses) => {
                 setDialog({
                     type: 'choices',
-                    message: 'حدد مدة الحظر:',
+                    message: 'اختر نوع التقييد للطالب:',
                     options: [
-                        { label: '⏱️ 24 ساعة', value: '24h' },
-                        { label: '📅 أسبوع', value: 'week' },
-                        { label: '♾️ للأبد', value: 'forever' }
+                        { label: '🚫 حظر كلي (دردشة + أسئلة)', value: 'all' },
+                        { label: '💬 منع من الدردشة فقط', value: 'chat' },
+                        { label: '❓ منع من طرح الأسئلة فقط', value: 'qa' }
                     ],
-                    onConfirm: (duration) => {
-                        // Step 3: Input - Reason
+                    onConfirm: (muteType) => {
                         setDialog({
-                            type: 'input',
-                            message: 'ما سبب الحظر؟ (للتوثيق الإداري)',
-                            placeholder: 'مثلاً: سلوك غير لائق بالدردشة...',
-                            onConfirm: async (reason) => {
-                                closeDialog()
-                                const tk = localStorage.getItem('access_token')
-                                try {
-                                    const res = await fetch(`${API}/api/interactions/moderate/mute/${id}/`, {
-                                        method: 'POST',
-                                        headers: {
-                                            'Authorization': `Bearer ${tk}`,
-                                            'Content-Type': 'application/json'
-                                        },
-                                        body: JSON.stringify({ mute_type: muteType, duration, reason })
-                                    })
-                                    if (res.ok) {
-                                        const result = await res.json()
-                                        setDialog({
-                                            type: 'alert',
-                                            message: `تم تنفيذ الحظر بنجاح حتى: ${new Date(result.muted_until).toLocaleString('ar-IQ')}`,
-                                            onConfirm: () => window.location.reload()
-                                        })
+                            type: 'choices',
+                            message: 'حدد مدة الحظر:',
+                            options: [
+                                { label: '⏱️ 24 ساعة', value: '24h' },
+                                { label: '📅 أسبوع', value: 'week' },
+                                { label: '♾️ للأبد', value: 'forever' }
+                            ],
+                            onConfirm: (duration) => {
+                                setDialog({
+                                    type: 'input',
+                                    message: 'ما سبب الحظر؟ (للتوثيق الإداري)',
+                                    placeholder: 'مثلاً: سلوك غير لائق بالدردشة...',
+                                    onConfirm: async (reason) => {
+                                        closeDialog();
+                                        const tk = localStorage.getItem('access_token');
+                                        try {
+                                            const res = await fetch(`${API}/api/interactions/moderate/mute/${id}/`, {
+                                                method: 'POST',
+                                                headers: {
+                                                    'Authorization': `Bearer ${tk}`,
+                                                    'Content-Type': 'application/json'
+                                                },
+                                                body: JSON.stringify({ mute_type: muteType, duration: duration, reason: reason, course_ids: selectedCourses })
+                                            });
+                                            if (res.ok) {
+                                                const result = await res.json();
+                                                setDialog({
+                                                    type: 'alert',
+                                                    message: 'تم تنفيذ الحظر بنجاح حتى: ' + (result.muted_until ? new Date(result.muted_until).toLocaleString('ar-IQ') : '---'),
+                                                    onConfirm: () => window.location.reload()
+                                                });
+                                            }
+                                        } catch (e) {
+                                            console.error(e);
+                                        }
                                     }
-                                } catch (e) {
-                                    console.error(e)
-                                }
+                                });
                             }
-                        })
+                        });
                     }
-                })
+                });
             }
-        })
+        });
     }
 
     const handleHideInteraction = async (type, pk) => {
@@ -390,6 +397,21 @@ export const Student360View = ({ id }) => {
                             </div>
                         )}
 
+                        {dialog.type === 'multi_select' && (
+                            <div style={{ marginBottom: '25px' }}>
+                                <select 
+                                    multiple 
+                                    id="hq-dialog-multi-select" 
+                                    style={{ width: '100%', padding: '15px', borderRadius: '12px', border: '1px solid #334155', background: '#0f172a', color: '#f8fafc', fontSize: '14px', minHeight: '150px' }}
+                                >
+                                    {dialog.options.map(opt => (
+                                        <option key={opt.value} value={opt.value} style={{ padding: '8px', cursor: 'pointer' }}>{opt.label}</option>
+                                    ))}
+                                </select>
+                                <p style={{fontSize:'0.8rem', color:'#94a3b8', marginTop:'10px', textAlign: 'center'}}>* يُرجى الضغط على المفتاح Ctrl لاختيار أكثر من دورة معاً</p>
+                            </div>
+                        )}
+
                         {dialog.type === 'input' && (
                             <div style={{ marginBottom: '25px' }}>
                                 <textarea
@@ -419,6 +441,17 @@ export const Student360View = ({ id }) => {
                             )}
                             {dialog.type === 'choices' && (
                                 <button onClick={closeDialog} style={{ background: 'transparent', color: '#94a3b8', border: '1px solid #334155', padding: '12px 25px', borderRadius: '12px', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.95rem' }}>إلغاء</button>
+                            )}
+                            {dialog.type === 'multi_select' && (
+                                <>
+                                    <button onClick={() => { 
+                                        const select = document.getElementById('hq-dialog-multi-select');
+                                        const selectedValues = Array.from(select.selectedOptions).map(opt => opt.value);
+                                        if (selectedValues.length === 0) { alert('الرجاء اختيار خيار واحد على الأقل'); return; }
+                                        dialog.onConfirm(selectedValues.includes('all') ? ['all'] : selectedValues);
+                                    }} style={{ background: '#6366f1', color: 'white', border: 'none', padding: '12px 30px', borderRadius: '12px', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.95rem' }}>استمرار</button>
+                                    <button onClick={closeDialog} style={{ background: 'transparent', color: '#94a3b8', border: '1px solid #334155', padding: '12px 25px', borderRadius: '12px', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.95rem' }}>إغلاق</button>
+                                </>
                             )}
                         </div>
                     </div>
