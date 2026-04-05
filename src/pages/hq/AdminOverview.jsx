@@ -14,13 +14,37 @@ import {
 
 export const AdminOverview = () => {
     const [stats, setStats] = useState(null)
+    const [period, setPeriod] = useState('all')
+    const [teacher, setTeacher] = useState('all')
+    const [teachersList, setTeachersList] = useState([])
     const navigate = useNavigate()
 
     useEffect(() => {
-        const fetchStats = async () => {
+        const fetchTeachers = async () => {
             const tk = localStorage.getItem('access_token')
             try {
-                const res = await fetch(API + '/api/hq/stats/', {
+                const res = await fetch(API + '/api/hq/teachers/?page_size=100', {
+                    headers: { 'Authorization': `Bearer ${tk}` }
+                })
+                if (res.ok) {
+                    const data = await res.json()
+                    setTeachersList(data.results || data || [])
+                }
+            } catch (err) {}
+        }
+        fetchTeachers()
+    }, [])
+
+    useEffect(() => {
+        const fetchStats = async () => {
+            setStats(null)
+            const tk = localStorage.getItem('access_token')
+            try {
+                const url = new URL(API + '/api/hq/stats/')
+                url.searchParams.append('period', period)
+                url.searchParams.append('teacher', teacher)
+                
+                const res = await fetch(url.toString(), {
                     headers: { 'Authorization': `Bearer ${tk}` }
                 })
                 if (res.ok) {
@@ -32,7 +56,7 @@ export const AdminOverview = () => {
             }
         }
         fetchStats()
-    }, [])
+    }, [period, teacher])
 
     if (!stats) return <div className="hq-loading">جاري سحب وتحليل ملايين البيانات...</div>
 
@@ -52,9 +76,36 @@ export const AdminOverview = () => {
 
     return (
         <div className="hq-overview">
-            <div className="hq-page-header">
-                <h2>مركز القيادة والتحليلات 📊</h2>
-                <p>مراقبة حية وشاملة لكل ما يدور داخل أروقة المنصة التعليمية</p>
+            <div className="hq-page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '20px' }}>
+                <div>
+                    <h2>مركز القيادة والتحليلات 📊</h2>
+                    <p>مراقبة حية وشاملة لكل ما يدور داخل أروقة المنصة التعليمية</p>
+                </div>
+                
+                {/* Global Dashboard Filters */}
+                <div style={{ display: 'flex', gap: '10px', background: '#1e293b', padding: '15px', borderRadius: '12px', border: '1px solid var(--hq-border)', flexWrap: 'wrap' }}>
+                    <select
+                        value={period}
+                        onChange={(e) => setPeriod(e.target.value)}
+                        style={{ background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 15px', color: 'white', minWidth: '150px', outline: 'none' }}
+                    >
+                        <option value="all">شامل (كل الأوقات)</option>
+                        <option value="daily">اليوم (آخر 24 ساعة)</option>
+                        <option value="weekly">هذا الأسبوع (آخر 7 أيام)</option>
+                        <option value="monthly">هذا الشهر (آخر 30 يوم)</option>
+                    </select>
+
+                    <select
+                        value={teacher}
+                        onChange={(e) => setTeacher(e.target.value)}
+                        style={{ background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 15px', color: 'white', minWidth: '180px', outline: 'none' }}
+                    >
+                        <option value="all">جميع الأساتذة العاملين</option>
+                        {teachersList.map(t => (
+                            <option key={t.id} value={t.id}>{t.name}</option>
+                        ))}
+                    </select>
+                </div>
             </div>
 
             {/* Core Stats Grid */}
