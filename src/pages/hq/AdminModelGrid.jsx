@@ -8,8 +8,8 @@ import './Admin.css'
 const SCHEMAS = {
     users: { title: 'المستخدمين (مدراء النظام)', endpoint: 'users', columns: [{ key: 'username', label: 'الاسم' }, { key: 'email', label: 'البريد' }, { key: 'is_superuser', label: 'Super Admin', type: 'boolean' }], filters: [{ key: 'is_superuser', label: 'نوع الحساب', options: [{ value: 'true', label: 'Super Admin' }, { value: 'false', label: 'مستخدم عادي' }] }] },
     students: {
-        title: 'الطلاب المسجلين', endpoint: 'students', columns: [ { key: 'first_name', label: 'الاسم الأول' }, { key: 'last_name', label: 'الاسم الأخير' }, { key: 'phone', label: 'الهاتف' }, { key: 'parent_phone', label: 'هاتف الوالد' }, { key: 'city', label: 'المدينة' }, { key: 'grade', label: 'المرحلة' }, { key: 'branch', label: 'الفرع' }, { key: 'date_joined', label: 'الإنضمام', type: 'datetime' } ],
-        filters: [{ key: 'grade__icontains', label: 'المرحلة', optionsKey: 'grades' }, { key: 'branch__icontains', label: 'الفرع', optionsKey: 'branches' }, { key: 'is_active', label: 'حالة الحساب', options: [{ value: 'true', label: 'فعال' }, { value: 'false', label: 'مجمد' }] }]
+        title: 'الطلاب المسجلين', endpoint: 'students', columns: [ { key: 'first_name', label: 'الاسم الأول' }, { key: 'last_name', label: 'الاسم الأخير' }, { key: 'phone', label: 'الهاتف' }, { key: 'parent_phone', label: 'هاتف الوالد' }, { key: 'city', label: 'المدينة' }, { key: 'grade', label: 'المرحلة' }, { key: 'branch_str', label: 'الفرع' }, { key: 'date_joined', label: 'الإنضمام', type: 'datetime' } ],
+        filters: [{ key: 'grade__icontains', label: 'المرحلة', optionsKey: 'grades' }, { key: 'branch__name__icontains', label: 'الفرع', optionsKey: 'branches' }, { key: 'is_active', label: 'حالة الحساب', options: [{ value: 'true', label: 'فعال' }, { value: 'false', label: 'مجمد' }] }]
     },
     courses: { title: 'الدورات المجانية والمدفوعة', endpoint: 'courses', columns: [{ key: 'title', label: 'اسم الدورة' }, { key: 'price', label: 'السعر', type: 'currency' }, { key: 'enrollments_count', label: 'عدد الطلاب', type: 'number_badge' }, { key: 'is_published', label: 'فعالة', type: 'boolean' }], filters: [{ key: 'teacher', label: 'الأستاذ', optionsKey: 'teachers' }, { key: 'subject__icontains', label: 'المادة', optionsKey: 'subjects' }, { key: 'grade__icontains', label: 'المرحلة', optionsKey: 'grades' }, { key: 'is_published', label: 'حالة النشر', options: [{ value: 'true', label: 'منشور' }, { value: 'false', label: 'مسودة' }] }] },
     teachers: { title: 'الأساتذة', endpoint: 'teachers', columns: [{ key: 'name', label: 'الاسم ' }, { key: 'subject', label: 'المادة' }, { key: 'grade', label: 'الصف' }, { key: 'enrollments_count', label: 'الطلاب المسجلين', type: 'number_badge' }, { key: 'is_active', label: 'مفعل', type: 'boolean' }], filters: [{ key: 'subject__icontains', label: 'المادة', optionsKey: 'subjects' }, { key: 'grade__icontains', label: 'المرحلة', optionsKey: 'grades' }, { key: 'is_active', label: 'حالة الحساب', options: [{ value: 'true', label: 'مفعل' }, { value: 'false', label: 'معطل' }] }] },
@@ -22,7 +22,7 @@ const SCHEMAS = {
     contactmessages: { title: 'الاستفسارات وتواصل معنا', endpoint: 'contactmessages', columns: [{ key: 'name', label: 'الاسم' }, { key: 'subject', label: 'الموضوع' }, { key: 'created_at', label: 'التاريخ', type: 'datetime' }, { key: 'is_read', label: 'محلولة', type: 'boolean' }], filters: [{ key: 'is_read', label: 'حالة الاستفسار', options: [{ value: 'true', label: 'تم تقديم حل' }, { value: 'false', label: 'قيد الانتظار لمعالجته' }] }] },
     faqs: { title: 'الأسئلة الشائعة', endpoint: 'faqs', columns: [{ key: 'question', label: 'السؤال' }, { key: 'category', label: 'التصنيف' }, { key: 'order', label: 'الترتيب' }] },
     subjects: { title: 'المواد الدراسية', endpoint: 'subjects', columns: [{ key: 'name', label: 'اسم المادة' }, { key: 'grade', label: 'الصف' }], filters: [{ key: 'grade__grade_name__icontains', label: 'المرحلة', optionsKey: 'grades' }] },
-    grades: { title: 'الصفوف والمراحل', endpoint: 'grades', columns: [{ key: 'title', label: 'العنوان' }, { key: 'branch', label: 'الفرع' }], filters: [{ key: 'branch__icontains', label: 'الفرع', options: [{ value: 'علمي', label: 'علمي' }, { value: 'ادبي', label: 'أدبي' }, { value: 'مهني', label: 'مهني' }, { value: 'متوسط', label: 'متوسط' }] }] },
+    grades: { title: 'الصفوف والمراحل', endpoint: 'grades', columns: [{ key: 'title', label: 'العنوان' }, { key: 'branch_str', label: 'الفرع' }], filters: [{ key: 'branch__name__icontains', label: 'الفرع', options: [{ value: 'علمي', label: 'علمي' }, { value: 'ادبي', label: 'أدبي' }, { value: 'مهني', label: 'مهني' }, { value: 'متوسط', label: 'متوسط' }] }] },
     qaposts: { title: 'التفاعلات والأسئلة', endpoint: 'qaposts', columns: [{ key: 'content', label: 'نص السؤال' }, { key: 'student', label: 'رقم الطالب' }, { key: 'created_at', label: 'تاريخ النشر', type: 'datetime' }] },
     lessons: { title: 'الدروس ومحتوى الفيديو', endpoint: 'lessons', columns: [{ key: 'title', label: 'العنوان' }, { key: 'module', label: 'الفصل الدراسي' }, { key: 'is_free', label: 'مجاني', type: 'boolean' }, { key: 'order', label: 'الترتيب' }], filters: [{ key: 'type', label: 'النوع', options: [{ value: 'video', label: 'دروس مرئية (فيديو)' }, { value: 'document', label: 'مذكرات وملازم (PDF)' }] }, { key: 'is_free', label: 'نوع الدفع', options: [{ value: 'true', label: 'المشاهدة مجانية' }, { value: 'false', label: 'يحتاج اشتراك' }] }, { key: 'is_locked', label: 'حالة الدرس', options: [{ value: 'true', label: 'مقفول مؤقتاً' }, { value: 'false', label: 'مفتوح للطلاب' }] }] },
     notes: { title: 'مذكرات الطلاب الخاصة', endpoint: 'notes', columns: [{ key: 'student', label: 'الطالب' }, { key: 'lesson', label: 'الدرس' }, { key: 'content', label: 'المحتوى' }, { key: 'updated_at', label: 'تاريخ التحديث', type: 'datetime' }] },
@@ -40,6 +40,7 @@ export const AdminModelGrid = () => {
     const schema = SCHEMAS[model]
 
     const [data, setData] = useState([])
+    const [totalCount, setTotalCount] = useState(0)
     const [loading, setLoading] = useState(true)
     const [searchTerm, setSearchTerm] = useState('')
 
@@ -137,6 +138,7 @@ export const AdminModelGrid = () => {
                 if (res.ok) {
                     const d = await res.json()
                     setData(d.results || d)
+                    setTotalCount(d.count !== undefined ? d.count : (d.results || d).length)
                 }
             } catch (err) {
                 console.error(err)
@@ -227,7 +229,14 @@ export const AdminModelGrid = () => {
         <div className="hq-grid-wrap">
             <div className="hq-page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div>
-                    <h2>إدارة {schema.title}</h2>
+                    <h2 style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                        إدارة {schema.title}
+                        {totalCount > 0 && !loading && (
+                            <span style={{ fontSize: '13px', background: 'rgba(255,255,255,0.1)', padding: '4px 12px', borderRadius: '20px', color: 'var(--blue-main)', fontWeight: 'bold', border: '1px solid rgba(255,255,255,0.05)' }}>
+                                {totalCount} سجل مطابق
+                            </span>
+                        )}
+                    </h2>
                     <p>عرض، إضافة وتعديل البيانات</p>
                 </div>
                 {canAdd && (
