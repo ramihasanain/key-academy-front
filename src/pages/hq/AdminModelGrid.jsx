@@ -9,7 +9,7 @@ const SCHEMAS = {
     users: { title: 'المستخدمين (مدراء النظام)', endpoint: 'users', columns: [{ key: 'username', label: 'الاسم' }, { key: 'email', label: 'البريد' }, { key: 'is_superuser', label: 'Super Admin', type: 'boolean' }], filters: [{ key: 'is_superuser', label: 'نوع الحساب', options: [{ value: 'true', label: 'Super Admin' }, { value: 'false', label: 'مستخدم عادي' }] }] },
     students: {
         title: 'الطلاب المسجلين', endpoint: 'students', columns: [ { key: 'first_name', label: 'الاسم الأول' }, { key: 'last_name', label: 'الاسم الأخير' }, { key: 'phone', label: 'الهاتف' }, { key: 'parent_phone', label: 'هاتف الوالد' }, { key: 'city', label: 'المدينة' }, { key: 'grade', label: 'المرحلة' }, { key: 'branch', label: 'الفرع' }, { key: 'date_joined', label: 'الإنضمام', type: 'datetime' } ],
-        filters: [{ key: 'grade__icontains', label: 'المرحلة', optionsKey: 'grades' }, { key: 'branch__icontains', label: 'الفرع', options: [{ value: 'علمي', label: 'علمي' }, { value: 'أدبي', label: 'أدبي' }, { value: 'مهني', label: 'مهني' }] }, { key: 'is_active', label: 'حالة الحساب', options: [{ value: 'true', label: 'فعال' }, { value: 'false', label: 'مجمد' }] }]
+        filters: [{ key: 'grade__icontains', label: 'المرحلة', options: [{ value: 'السادس', label: 'السادس' }, { value: 'الثالث', label: 'الثالث المتوسط' }, { value: 'الخامس', label: 'الخامس' }, { value: 'الرابع', label: 'الرابع' }] }, { key: 'branch__icontains', label: 'الفرع', options: [{ value: 'علمي', label: 'الفرع العلمي' }, { value: 'أدبي', label: 'الفرع الأدبي' }, { value: 'مهني', label: 'الفرع المهني' }] }, { key: 'is_active', label: 'حالة الحساب', options: [{ value: 'true', label: 'فعال' }, { value: 'false', label: 'مجمد' }] }]
     },
     courses: { title: 'الدورات المجانية والمدفوعة', endpoint: 'courses', columns: [{ key: 'title', label: 'اسم الدورة' }, { key: 'price', label: 'السعر', type: 'currency' }, { key: 'enrollments_count', label: 'عدد الطلاب', type: 'number_badge' }, { key: 'is_published', label: 'فعالة', type: 'boolean' }], filters: [{ key: 'teacher', label: 'الأستاذ', optionsKey: 'teachers' }, { key: 'subject__icontains', label: 'المادة', optionsKey: 'subjects' }, { key: 'grade__icontains', label: 'المرحلة', optionsKey: 'grades' }, { key: 'is_published', label: 'حالة النشر', options: [{ value: 'true', label: 'منشور' }, { value: 'false', label: 'مسودة' }] }] },
     teachers: { title: 'الأساتذة', endpoint: 'teachers', columns: [{ key: 'name', label: 'الاسم ' }, { key: 'subject', label: 'المادة' }, { key: 'grade', label: 'الصف' }, { key: 'enrollments_count', label: 'الطلاب المسجلين', type: 'number_badge' }, { key: 'is_active', label: 'مفعل', type: 'boolean' }], filters: [{ key: 'subject__icontains', label: 'المادة', optionsKey: 'subjects' }, { key: 'grade__icontains', label: 'المرحلة', optionsKey: 'grades' }, { key: 'is_active', label: 'حالة الحساب', options: [{ value: 'true', label: 'مفعل' }, { value: 'false', label: 'معطل' }] }] },
@@ -249,12 +249,12 @@ export const AdminModelGrid = () => {
                             }
                         }
                     } else if (f.optionsKey === 'grades') {
-                        // Deduplicate grades by grade_name
+                        // Deduplicate grades by grade_name and force clean
                         const uniqueMap = new Map();
                         for (const t of filterOptions.grades || []) {
-                            // t.grade_name is e.g. "الصف السادس", t.title is "الصف السادس - علمي"
-                            const val = t.grade_name || t.title;
-                            if (!uniqueMap.has(val)) {
+                            let val = t.grade_name || t.title || '';
+                            val = val.split('-')[0].trim(); // remove branch
+                            if (!uniqueMap.has(val) && val) {
                                 uniqueMap.set(val, true);
                                 dynamicOptions.push({ value: val, label: val });
                             }
