@@ -235,47 +235,62 @@ export const AdminModelGrid = () => {
                 )}
             </div>
 
-            <div className="hq-table-card">
-                <div className="hq-tc-toolbar">
-                    <div className="hq-tc-search">
-                        <HiOutlineMagnifyingGlass />
-                        <input
-                            type="text"
-                            placeholder={`بحث في ${schema.title}...`}
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                        />
-                    </div>
-                    {/* Dynamic Filters */}
-                    {(model === 'enrollments' || model === 'courses') && (
-                        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-                            <select
-                                className="hq-filter-select"
-                                value={activeFilters[model === 'enrollments' ? 'course__teacher' : 'teacher'] || ''}
-                                onChange={(e) => setActiveFilters(p => ({ ...p, [model === 'enrollments' ? 'course__teacher' : 'teacher']: e.target.value }))}
-                            >
-                                <option value="">جميع الأساتذة</option>
-                                {filterOptions.teachers.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
-                            </select>
-                            <select
-                                className="hq-filter-select"
-                                value={activeFilters[model === 'enrollments' ? 'course__subject' : 'subject'] || ''}
-                                onChange={(e) => setActiveFilters(p => ({ ...p, [model === 'enrollments' ? 'course__subject' : 'subject']: e.target.value }))}
-                            >
-                                <option value="">كل المواد</option>
-                                {filterOptions.subjects.map(t => <option key={t.id} value={t.name}>{t.name}</option>)}
-                            </select>
-                            <select
-                                className="hq-filter-select"
-                                value={activeFilters[model === 'enrollments' ? 'course__grade' : 'grade'] || ''}
-                                onChange={(e) => setActiveFilters(p => ({ ...p, [model === 'enrollments' ? 'course__grade' : 'grade']: e.target.value }))}
-                            >
-                                <option value="">جميع الصفوف</option>
-                                {filterOptions.grades.map(t => <option key={t.id} value={t.title}>{t.title}</option>)}
-                            </select>
-                        </div>
-                    )}
+            <div className="hq-filters-bar" style={{ display: 'flex', flexWrap: 'wrap', gap: '15px', marginBottom: '20px', background: '#1e293b', padding: '20px', borderRadius: '16px', border: '1px solid var(--hq-border)' }}>
+                <div className="hq-tc-search" style={{ flex: '1 1 250px', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '10px 15px', color: 'white', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <HiOutlineMagnifyingGlass size={20} color="#94a3b8" />
+                    <input
+                        type="text"
+                        placeholder={`بحث ذكي في ${schema.title}...`}
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        style={{ background: 'transparent', border: 'none', color: 'white', width: '100%', outline: 'none', fontSize: '15px' }}
+                    />
                 </div>
+                
+                {/* Dynamic Filters */}
+                {(model === 'enrollments' || model === 'courses') && (
+                    <>
+                        <select
+                            className="hq-input"
+                            value={activeFilters[model === 'enrollments' ? 'course__teacher' : 'teacher'] || ''}
+                            onChange={(e) => setActiveFilters(p => ({ ...p, [model === 'enrollments' ? 'course__teacher' : 'teacher']: e.target.value }))}
+                            style={{ flex: '1 1 180px', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '10px 15px', color: 'white' }}
+                        >
+                            <option value="">جميع الأساتذة</option>
+                            {filterOptions.teachers.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
+                        </select>
+                        <select
+                            className="hq-input"
+                            value={activeFilters[model === 'enrollments' ? 'course__subject' : 'subject'] || ''}
+                            onChange={(e) => setActiveFilters(p => ({ ...p, [model === 'enrollments' ? 'course__subject' : 'subject']: e.target.value }))}
+                            style={{ flex: '1 1 180px', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '10px 15px', color: 'white' }}
+                        >
+                            <option value="">كل المواد</option>
+                            {filterOptions.subjects.map(t => <option key={t.id} value={t.name}>{t.name}</option>)}
+                        </select>
+                        <select
+                            className="hq-input"
+                            value={activeFilters[model === 'enrollments' ? 'course__grade' : 'grade'] || ''}
+                            onChange={(e) => setActiveFilters(p => ({ ...p, [model === 'enrollments' ? 'course__grade' : 'grade']: e.target.value }))}
+                            style={{ flex: '1 1 180px', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '10px 15px', color: 'white' }}
+                        >
+                            <option value="">جميع الصفوف</option>
+                            {filterOptions.grades.map(t => <option key={t.id} value={t.title}>{t.title}</option>)}
+                        </select>
+                        
+                        {(Object.keys(activeFilters).length > 0) && (
+                            <button 
+                                onClick={() => setActiveFilters({})} 
+                                style={{ padding: '10px 20px', background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', border: '1px solid rgba(239, 68, 68, 0.2)', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}
+                            >
+                                تفريغ الفلاتر
+                            </button>
+                        )}
+                    </>
+                )}
+            </div>
+
+            <div className="hq-table-card">
 
                 <div className="hq-table-container">
                     {loading ? <div className="hq-loading" style={{ padding: '40px' }}>جاري تحميل البيانات...</div> : (
