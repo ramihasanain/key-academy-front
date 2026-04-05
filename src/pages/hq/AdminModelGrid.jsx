@@ -9,25 +9,25 @@ const SCHEMAS = {
     users: { title: 'المستخدمين (مدراء النظام)', endpoint: 'users', columns: [{ key: 'username', label: 'الاسم' }, { key: 'email', label: 'البريد' }, { key: 'is_superuser', label: 'Super Admin', type: 'boolean' }], filters: [{ key: 'is_superuser', label: 'نوع الحساب', options: [{ value: 'true', label: 'Super Admin' }, { value: 'false', label: 'مستخدم عادي' }] }] },
     students: {
         title: 'الطلاب المسجلين', endpoint: 'students', columns: [ { key: 'first_name', label: 'الاسم الأول' }, { key: 'last_name', label: 'الاسم الأخير' }, { key: 'phone', label: 'الهاتف' }, { key: 'parent_phone', label: 'هاتف الوالد' }, { key: 'city', label: 'المدينة' }, { key: 'grade', label: 'المرحلة' }, { key: 'branch', label: 'الفرع' }, { key: 'date_joined', label: 'الإنضمام', type: 'datetime' } ],
-        filters: [{ key: 'grade', label: 'المرحلة', optionsKey: 'grades' }, { key: 'branch', label: 'الفرع', options: [{ value: 'علمي', label: 'علمي' }, { value: 'ادبي', label: 'أدبي' }, { value: 'مهني', label: 'مهني' }] }, { key: 'is_active', label: 'حالة الحساب', options: [{ value: 'true', label: 'فعال' }, { value: 'false', label: 'مجمد' }] }]
+        filters: [{ key: 'grade__icontains', label: 'المرحلة', optionsKey: 'grades' }, { key: 'branch__icontains', label: 'الفرع', options: [{ value: 'علمي', label: 'علمي' }, { value: 'أدبي', label: 'أدبي' }, { value: 'مهني', label: 'مهني' }] }, { key: 'is_active', label: 'حالة الحساب', options: [{ value: 'true', label: 'فعال' }, { value: 'false', label: 'مجمد' }] }]
     },
-    courses: { title: 'الدورات المجانية والمدفوعة', endpoint: 'courses', columns: [{ key: 'title', label: 'اسم الدورة' }, { key: 'price', label: 'السعر', type: 'currency' }, { key: 'enrollments_count', label: 'عدد الطلاب', type: 'number_badge' }, { key: 'is_published', label: 'فعالة', type: 'boolean' }], filters: [{ key: 'teacher', label: 'الأستاذ', optionsKey: 'teachers' }, { key: 'subject', label: 'المادة', optionsKey: 'subjects' }, { key: 'grade', label: 'الصف', optionsKey: 'grades' }, { key: 'is_published', label: 'حالة النشر', options: [{ value: 'true', label: 'منشور' }, { value: 'false', label: 'مسودة' }] }] },
-    teachers: { title: 'الأساتذة', endpoint: 'teachers', columns: [{ key: 'name', label: 'الاسم ' }, { key: 'subject', label: 'المادة' }, { key: 'grade', label: 'الصف' }, { key: 'enrollments_count', label: 'الطلاب المسجلين', type: 'number_badge' }, { key: 'is_active', label: 'مفعل', type: 'boolean' }], filters: [{ key: 'subject', label: 'المادة', optionsKey: 'subjects' }, { key: 'grade', label: 'الصف', optionsKey: 'grades' }, { key: 'is_active', label: 'حالة الحساب', options: [{ value: 'true', label: 'مفعل' }, { value: 'false', label: 'معطل' }] }] },
+    courses: { title: 'الدورات المجانية والمدفوعة', endpoint: 'courses', columns: [{ key: 'title', label: 'اسم الدورة' }, { key: 'price', label: 'السعر', type: 'currency' }, { key: 'enrollments_count', label: 'عدد الطلاب', type: 'number_badge' }, { key: 'is_published', label: 'فعالة', type: 'boolean' }], filters: [{ key: 'teacher', label: 'الأستاذ', optionsKey: 'teachers' }, { key: 'subject__icontains', label: 'المادة', optionsKey: 'subjects' }, { key: 'grade__icontains', label: 'المرحلة', optionsKey: 'grades' }, { key: 'is_published', label: 'حالة النشر', options: [{ value: 'true', label: 'منشور' }, { value: 'false', label: 'مسودة' }] }] },
+    teachers: { title: 'الأساتذة', endpoint: 'teachers', columns: [{ key: 'name', label: 'الاسم ' }, { key: 'subject', label: 'المادة' }, { key: 'grade', label: 'الصف' }, { key: 'enrollments_count', label: 'الطلاب المسجلين', type: 'number_badge' }, { key: 'is_active', label: 'مفعل', type: 'boolean' }], filters: [{ key: 'subject__icontains', label: 'المادة', optionsKey: 'subjects' }, { key: 'grade__icontains', label: 'المرحلة', optionsKey: 'grades' }, { key: 'is_active', label: 'حالة الحساب', options: [{ value: 'true', label: 'مفعل' }, { value: 'false', label: 'معطل' }] }] },
     teacherassistants: {
         title: 'مساعدين الأساتذة', endpoint: 'teacherassistants',
         columns: [ { key: 'name', label: 'اسم المساعد' }, { key: 'teacher', label: 'التابع للأستاذ' }, { key: 'phone', label: 'رقم الهاتف' }, { key: 'total_replies', label: 'إجابات الأسئلة', type: 'number_badge' }, { key: 'total_messages', label: 'رسائل التوجيه', type: 'number_badge' }, { key: 'avg_response_time_min', label: 'سرعة الرد (دقائق)', type: 'number_badge' }, { key: 'is_active', label: 'مفعل', type: 'boolean' } ],
         filters: [{ key: 'teacher', label: 'التابع للأستاذ', optionsKey: 'teachers' }, { key: 'is_active', label: 'الحالة', options: [{ value: 'true', label: 'مفعل' }, { value: 'false', label: 'معطل' }] }]
     },
-    enrollments: { title: 'الطلاب المشتركين بالدورات', endpoint: 'enrollments', columns: [{ key: 'student', label: 'الطالب' }, { key: 'student_username', label: 'اليوزر (@)' }, { key: 'course', label: 'اسم الدورة' }, { key: 'chat_shard', label: 'المجموعة (الشات)' }, { key: 'is_completed', label: 'مكتمل', type: 'boolean' }, { key: 'is_active', label: 'مفعل', type: 'boolean' }], filters: [{ key: 'course__teacher', label: 'الأستاذ', optionsKey: 'teachers' }, { key: 'course__subject', label: 'المادة', optionsKey: 'subjects' }, { key: 'course__grade', label: 'الصف', optionsKey: 'grades' }, { key: 'is_active', label: 'حالة الاشتراك', options: [{ value: 'true', label: 'فعال' }, { value: 'false', label: 'مجمد' }] }, { key: 'is_completed', label: 'الختمة', options: [{ value: 'true', label: 'منهي الكورس' }, { value: 'false', label: 'قيد المشاهدة' }] }] },
+    enrollments: { title: 'الطلاب المشتركين بالدورات', endpoint: 'enrollments', columns: [{ key: 'student', label: 'الطالب' }, { key: 'student_username', label: 'اليوزر (@)' }, { key: 'course', label: 'اسم الدورة' }, { key: 'chat_shard', label: 'المجموعة (الشات)' }, { key: 'is_completed', label: 'مكتمل', type: 'boolean' }, { key: 'is_active', label: 'مفعل', type: 'boolean' }], filters: [{ key: 'course__teacher', label: 'الأستاذ', optionsKey: 'teachers' }, { key: 'course__subject__icontains', label: 'المادة', optionsKey: 'subjects' }, { key: 'course__grade__icontains', label: 'المرحلة', optionsKey: 'grades' }, { key: 'is_active', label: 'حالة الاشتراك', options: [{ value: 'true', label: 'فعال' }, { value: 'false', label: 'مجمد' }] }, { key: 'is_completed', label: 'الختمة', options: [{ value: 'true', label: 'منهي الكورس' }, { value: 'false', label: 'قيد المشاهدة' }] }] },
     contactmessages: { title: 'الاستفسارات وتواصل معنا', endpoint: 'contactmessages', columns: [{ key: 'name', label: 'الاسم' }, { key: 'subject', label: 'الموضوع' }, { key: 'created_at', label: 'التاريخ', type: 'datetime' }, { key: 'is_read', label: 'محلولة', type: 'boolean' }], filters: [{ key: 'is_read', label: 'حالة الاستفسار', options: [{ value: 'true', label: 'تم تقديم حل' }, { value: 'false', label: 'قيد الانتظار لمعالجته' }] }] },
     faqs: { title: 'الأسئلة الشائعة', endpoint: 'faqs', columns: [{ key: 'question', label: 'السؤال' }, { key: 'category', label: 'التصنيف' }, { key: 'order', label: 'الترتيب' }] },
-    subjects: { title: 'المواد الدراسية', endpoint: 'subjects', columns: [{ key: 'name', label: 'اسم المادة' }, { key: 'grade', label: 'الصف' }], filters: [{ key: 'grade', label: 'الصف والمرحلة', optionsKey: 'grades' }] },
-    grades: { title: 'الصفوف والمراحل', endpoint: 'grades', columns: [{ key: 'title', label: 'العنوان' }, { key: 'branch', label: 'الفرع' }], filters: [{ key: 'branch', label: 'الفرع', options: [{ value: 'علمي', label: 'علمي' }, { value: 'ادبي', label: 'أدبي' }, { value: 'مهني', label: 'مهني' }, { value: 'متوسط', label: 'متوسط' }] }] },
+    subjects: { title: 'المواد الدراسية', endpoint: 'subjects', columns: [{ key: 'name', label: 'اسم المادة' }, { key: 'grade', label: 'الصف' }], filters: [{ key: 'grade__grade_name__icontains', label: 'المرحلة', optionsKey: 'grades' }] },
+    grades: { title: 'الصفوف والمراحل', endpoint: 'grades', columns: [{ key: 'title', label: 'العنوان' }, { key: 'branch', label: 'الفرع' }], filters: [{ key: 'branch__icontains', label: 'الفرع', options: [{ value: 'علمي', label: 'علمي' }, { value: 'ادبي', label: 'أدبي' }, { value: 'مهني', label: 'مهني' }, { value: 'متوسط', label: 'متوسط' }] }] },
     qaposts: { title: 'التفاعلات والأسئلة', endpoint: 'qaposts', columns: [{ key: 'content', label: 'نص السؤال' }, { key: 'student', label: 'رقم الطالب' }, { key: 'created_at', label: 'تاريخ النشر', type: 'datetime' }] },
     lessons: { title: 'الدروس ومحتوى الفيديو', endpoint: 'lessons', columns: [{ key: 'title', label: 'العنوان' }, { key: 'module', label: 'الفصل الدراسي' }, { key: 'is_free', label: 'مجاني', type: 'boolean' }, { key: 'order', label: 'الترتيب' }], filters: [{ key: 'type', label: 'النوع', options: [{ value: 'video', label: 'دروس مرئية (فيديو)' }, { value: 'document', label: 'مذكرات وملازم (PDF)' }] }, { key: 'is_free', label: 'نوع الدفع', options: [{ value: 'true', label: 'المشاهدة مجانية' }, { value: 'false', label: 'يحتاج اشتراك' }] }, { key: 'is_locked', label: 'حالة الدرس', options: [{ value: 'true', label: 'مقفول مؤقتاً' }, { value: 'false', label: 'مفتوح للطلاب' }] }] },
     notes: { title: 'مذكرات الطلاب الخاصة', endpoint: 'notes', columns: [{ key: 'student', label: 'الطالب' }, { key: 'lesson', label: 'الدرس' }, { key: 'content', label: 'المحتوى' }, { key: 'updated_at', label: 'تاريخ التحديث', type: 'datetime' }] },
     activationcards: { title: 'كروت تفعيل الرصيد', endpoint: 'activationcards', columns: [{ key: 'code', label: 'الكود' }, { key: 'course', label: 'الدورة المرتبطة' }, { key: 'is_used', label: 'مستخدم', type: 'boolean' }], filters: [{ key: 'is_used', label: 'حالة الكارت', options: [{ value: 'true', label: 'مستهلك ومستخدم' }, { value: 'false', label: 'متاح للبيع' }] }] },
-    virtuallabs: { title: 'المختبرات الافتراضية 3D', endpoint: 'virtuallabs', columns: [{ key: 'title', label: 'المختبر' }, { key: 'subject', label: 'المادة' }, { key: 'url', label: 'الرابط المضمن (IFrame)' }], filters: [{ key: 'subject', label: 'المادة', optionsKey: 'subjects' }] },
+    virtuallabs: { title: 'المختبرات الافتراضية 3D', endpoint: 'virtuallabs', columns: [{ key: 'title', label: 'المختبر' }, { key: 'subject', label: 'المادة' }, { key: 'url', label: 'الرابط المضمن (IFrame)' }], filters: [{ key: 'subject__icontains', label: 'المادة', optionsKey: 'subjects' }] },
     modules: { title: 'الفصول والوحدات', endpoint: 'modules', columns: [{ key: 'title', label: 'عنوان الوحدة' }, { key: 'course', label: 'الدورة الأم' }, { key: 'order', label: 'ترتيب العرض' }] },
     coursegroups: { title: 'المجموعات الطلابية المنفصلة', endpoint: 'coursegroups', columns: [{ key: 'course', label: 'رقم الدورة' }, { key: 'index', label: 'رقم المجموعة (الخلية)' }, { key: 'assistant', label: 'رقم المساعد (المشرف)' }] }
 }
@@ -236,9 +236,30 @@ export const AdminModelGrid = () => {
                 {/* Dynamic Filters UI Engine */}
                 {schema.filters && schema.filters.map(f => {
                     let dynamicOptions = [];
-                    if (f.optionsKey === 'teachers') dynamicOptions = (filterOptions.teachers || []).map(t => ({ value: t.id, label: t.name }));
-                    else if (f.optionsKey === 'subjects') dynamicOptions = (filterOptions.subjects || []).map(t => ({ value: t.name, label: t.name }));
-                    else if (f.optionsKey === 'grades') dynamicOptions = (filterOptions.grades || []).map(t => ({ value: t.title, label: t.title }));
+                    
+                    if (f.optionsKey === 'teachers') {
+                        dynamicOptions = (filterOptions.teachers || []).map(t => ({ value: t.id, label: t.name }));
+                    } else if (f.optionsKey === 'subjects') {
+                        // Deduplicate subjects
+                        const uniqueMap = new Map();
+                        for (const t of filterOptions.subjects || []) {
+                            if (!uniqueMap.has(t.name)) {
+                                uniqueMap.set(t.name, true);
+                                dynamicOptions.push({ value: t.name, label: t.name });
+                            }
+                        }
+                    } else if (f.optionsKey === 'grades') {
+                        // Deduplicate grades by grade_name
+                        const uniqueMap = new Map();
+                        for (const t of filterOptions.grades || []) {
+                            // t.grade_name is e.g. "الصف السادس", t.title is "الصف السادس - علمي"
+                            const val = t.grade_name || t.title;
+                            if (!uniqueMap.has(val)) {
+                                uniqueMap.set(val, true);
+                                dynamicOptions.push({ value: val, label: val });
+                            }
+                        }
+                    }
                     
                     const opts = f.options || dynamicOptions;
                     if (!opts || opts.length === 0) return null;
