@@ -73,22 +73,15 @@ export const AdminModelGrid = () => {
             const h = { 'Authorization': `Bearer ${tk}` };
             
             try {
-                const keys = new Set(schema.filters.map(f => f.optionsKey).filter(Boolean));
-                const promises = [];
-                const resKeys = [];
-                
-                if (keys.has('teachers')) { promises.push(fetch(API + '/api/hq/teachers/?page_size=100', { headers: h })); resKeys.push('teachers'); }
-                if (keys.has('subjects')) { promises.push(fetch(API + '/api/hq/subjects/?page_size=100', { headers: h })); resKeys.push('subjects'); }
-                if (keys.has('grades')) { promises.push(fetch(API + '/api/hq/grades/?page_size=100', { headers: h })); resKeys.push('grades'); }
-
-                const responses = await Promise.all(promises);
-                const newState = { teachers: [], subjects: [], grades: [] };
-                
-                for (let i = 0; i < responses.length; i++) {
-                    const data = responses[i].ok ? await responses[i].json() : { results: [] };
-                    newState[resKeys[i]] = data.results || data || [];
+                const res = await fetch(API + '/api/hq/filter-lookups/', { headers: h });
+                if (res.ok) {
+                    const data = await res.json();
+                    setFilterOptions({
+                        teachers: data.teachers || [],
+                        subjects: data.subjects || [],
+                        grades: data.grades || []
+                    });
                 }
-                setFilterOptions(prev => ({ ...prev, ...newState }));
             } catch (err) { }
         };
         fetchFilters();
@@ -249,15 +242,9 @@ export const AdminModelGrid = () => {
                             }
                         }
                     } else if (f.optionsKey === 'grades') {
-                        // Deduplicate grades by grade_name and force clean
-                        const uniqueMap = new Map();
+                        // Grades are already clean and unique from the Absolute Truth API
                         for (const t of filterOptions.grades || []) {
-                            let val = t.grade_name || t.title || '';
-                            val = val.split('-')[0].trim(); // remove branch
-                            if (!uniqueMap.has(val) && val) {
-                                uniqueMap.set(val, true);
-                                dynamicOptions.push({ value: val, label: val });
-                            }
+                            dynamicOptions.push({ value: t.name, label: t.name });
                         }
                     }
                     

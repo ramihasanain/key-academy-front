@@ -28,45 +28,14 @@ export const AdminOverview = () => {
         const fetchFiltersData = async () => {
             const tk = localStorage.getItem('access_token')
             try {
-                // Fetch Teachers
-                let res = await fetch(API + '/api/hq/teachers/?page_size=100', {
-                    headers: { 'Authorization': `Bearer ${tk}` }
-                })
-                if (res.ok) setTeachersList((await res.json()).results || [])
-                
-                // Fetch Grades
-                res = await fetch(API + '/api/hq/grades/?page_size=100', {
+                const res = await fetch(API + '/api/hq/filter-lookups/', {
                     headers: { 'Authorization': `Bearer ${tk}` }
                 })
                 if (res.ok) {
-                    const data = (await res.json()).results || []
-                    const uniqueMap = new Map()
-                    const cleanGrades = []
-                    for(const g of data) {
-                        const val = g.grade_name || g.title
-                        if(!uniqueMap.has(val)) {
-                            uniqueMap.set(val, true)
-                            cleanGrades.push({ val: val })
-                        }
-                    }
-                    setGradesList(cleanGrades)
-                }
-
-                // Fetch Subjects
-                res = await fetch(API + '/api/hq/subjects/?page_size=100', {
-                    headers: { 'Authorization': `Bearer ${tk}` }
-                })
-                if (res.ok) {
-                    const data = (await res.json()).results || []
-                    const uniqueMap = new Map()
-                    const cleanSubjects = []
-                    for(const s of data) {
-                        if(!uniqueMap.has(s.name)) {
-                            uniqueMap.set(s.name, true)
-                            cleanSubjects.push({ val: s.name })
-                        }
-                    }
-                    setSubjectsList(cleanSubjects)
+                    const data = await res.json()
+                    setTeachersList(data.teachers || [])
+                    setSubjectsList((data.subjects || []).map(s => ({ val: s.name })))
+                    setGradesList((data.grades || []).map(g => ({ val: g.name })))
                 }
             } catch (err) {}
         }
