@@ -45,7 +45,7 @@ const SCHEMAS = {
             { key: 'name', label: 'اسم الأستاذ', type: 'text', required: true },
             { key: 'subject', label: 'المادة التي يدرّسها', type: 'select', endpoint: 'subjects', labelField: 'name', valueField: 'name', required: true },
             { key: 'grade', label: 'الصف', type: 'select', endpoint: 'grades', labelField: 'title', valueField: 'title', required: true },
-            { key: 'branch', label: 'الفرع', type: 'select', options: [{ value: 'علمي', label: 'علمي' }, { value: 'أدبي', label: 'أدبي' }, { value: 'مهني', label: 'مهني' }, { value: 'عام', label: 'عام' }] },
+            { key: 'branch', label: 'الفرع', type: 'select', endpoint: 'branches', labelField: 'name', valueField: 'id' },
             { key: 'image', label: 'الصورة الشخصية', type: 'file' },
             { key: 'subtitle', label: 'كلمات مفتاحية / وصف صغير تحت الاسم', type: 'text' },
             { key: 'bio', label: 'النبذة التعريفية', type: 'textarea' },
@@ -121,7 +121,7 @@ const SCHEMAS = {
             { key: 'slug', label: 'المعرف (إنجليزي فقط مثل class-6)', type: 'text', required: true },
             { key: 'title', label: 'العنوان الكامل', type: 'text', required: true },
             { key: 'grade_name', label: 'اسم الصف', type: 'text', required: true },
-            { key: 'branch', label: 'الفرع', type: 'text' }
+            { key: 'branch', label: 'الفرع', type: 'select', endpoint: 'branches', labelField: 'name', valueField: 'id', required: true }
         ]
     },
     coursegroups: {

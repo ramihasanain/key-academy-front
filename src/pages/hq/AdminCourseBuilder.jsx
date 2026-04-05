@@ -467,7 +467,7 @@ export const AdminCourseBuilder = ({ id }) => {
                         <select value={course.teacher || ''} onChange={e => {
                             const tId = e.target.value;
                             const t = teachers.find(x => x.id == tId);
-                            setCourse({ ...course, teacher: tId, subject: t ? t.subject : '', grade: t ? t.grade : '' })
+                            setCourse({ ...course, teacher: tId, subject: t ? t.subject : '', grade: t ? t.grade : '', branch: t ? t.branch : '' })
                         }}>
                             <option value="">-- يرجى اختيار الأستاذ --</option>
                             {teachers.map(t => <option key={t.id} value={t.id}>م. {t.name || t.user} - {t.subject}</option>)}
