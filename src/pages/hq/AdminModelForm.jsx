@@ -45,7 +45,7 @@ const SCHEMAS = {
             { key: 'name', label: 'اسم الأستاذ', type: 'text', required: true },
             { key: 'subject', label: 'المادة التي يدرّسها', type: 'select', endpoint: 'subjects', labelField: 'name', valueField: 'name', required: true },
             { key: 'grade', label: 'الصف', type: 'select', endpoint: 'grades', labelField: 'title', valueField: 'title', required: true },
-            { key: 'branch', label: 'الفرع', type: 'select', endpoint: 'branches', labelField: 'name', valueField: 'id' },
+            { key: 'branches', label: 'الفروع (اختر واحد أو أكثر)', type: 'multiselect', endpoint: 'branches', labelField: 'name', valueField: 'id' },
             { key: 'image', label: 'الصورة الشخصية', type: 'file' },
             { key: 'subtitle', label: 'كلمات مفتاحية / وصف صغير تحت الاسم', type: 'text' },
             { key: 'bio', label: 'النبذة التعريفية', type: 'textarea' },
