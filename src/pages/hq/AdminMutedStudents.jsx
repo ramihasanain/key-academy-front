@@ -29,8 +29,8 @@ export const AdminMutedStudents = () => {
 
     const [dialog, setDialog] = useState(null) // { type: 'confirm'|'reason'|'result', studentId: null, reason: '' }
 
-    const openUnmuteDialog = (studentId) => {
-        setDialog({ type: 'confirm', studentId })
+    const openUnmuteDialog = (studentId, courseId) => {
+        setDialog({ type: 'confirm', studentId, courseId })
     }
 
     const handleUnmute = async () => {
@@ -49,7 +49,8 @@ export const AdminMutedStudents = () => {
                 },
                 body: JSON.stringify({
                     duration: 'unmute',
-                    reason: dialog.reason || 'تم فك الحظر بواسطة الإدارة'
+                    reason: dialog.reason || 'تم فك الحظر بواسطة الإدارة',
+                    course_ids: [dialog.courseId]
                 })
             })
             if (res.ok) {
@@ -83,6 +84,7 @@ export const AdminMutedStudents = () => {
                     <thead>
                         <tr style={{ background: 'rgba(0,0,0,0.2)', borderBottom: '1px solid var(--hq-border)' }}>
                             <th style={{ padding: '18px' }}>الطالب</th>
+                            <th style={{ padding: '18px' }}>الدورة</th>
                             <th style={{ padding: '18px' }}>نطاق الحظر</th>
                             <th style={{ padding: '18px' }}>السبب</th>
                             <th style={{ padding: '18px' }}>بواسطة</th>
@@ -93,15 +95,20 @@ export const AdminMutedStudents = () => {
                     <tbody>
                         {muted.length === 0 ? (
                             <tr>
-                                <td colSpan="6" style={{ padding: '50px', textAlign: 'center', color: 'var(--hq-text-muted)' }}>
+                                <td colSpan="7" style={{ padding: '50px', textAlign: 'center', color: 'var(--hq-text-muted)' }}>
                                     ✨ لا يوجد طلاب محظورون حالياً. المنصة آمنة!
                                 </td>
                             </tr>
-                        ) : muted.map((item) => (
-                            <tr key={item.id} style={{ borderBottom: '1px solid var(--hq-border)', transition: 'background 0.2s' }} className="hq-table-row">
+                        ) : muted.map((item, idx) => (
+                            <tr key={`${item.id}-${idx}`} style={{ borderBottom: '1px solid var(--hq-border)', transition: 'background 0.2s' }} className="hq-table-row">
                                 <td style={{ padding: '15px 18px' }}>
                                     <div style={{ fontWeight: 'bold', color: 'var(--hq-primary-text)' }}>{item.full_name}</div>
                                     <div style={{ fontSize: '12px', color: 'var(--hq-text-muted)' }}>@{item.username}</div>
+                                </td>
+                                <td style={{ padding: '15px 18px' }}>
+                                    <div style={{ fontSize: '13px', color: item.course_name === 'تقييد شامل' ? '#ef4444' : 'var(--hq-primary-text)', fontWeight: item.course_name === 'تقييد شامل' ? 'bold' : 'normal' }}>
+                                        {item.course_name}
+                                    </div>
                                 </td>
                                 <td style={{ padding: '18px' }}>
                                     <span style={{
@@ -130,7 +137,7 @@ export const AdminMutedStudents = () => {
                                 </td>
                                 <td style={{ padding: '18px' }}>
                                     <button
-                                        onClick={() => openUnmuteDialog(item.id)}
+                                        onClick={() => openUnmuteDialog(item.id, item.course_id)}
                                         style={{
                                             background: 'rgba(52, 211, 153, 0.1)', color: '#34d399', border: '1px solid #34d399',
                                             padding: '6px 15px', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px',

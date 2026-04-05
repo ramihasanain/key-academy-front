@@ -27,8 +27,8 @@ export const TAMutedStudents = () => {
 
     const [dialog, setDialog] = useState(null) // { type: 'confirm'|'reason'|'result', studentId: null, reason: '' }
 
-    const openUnmuteDialog = (studentId) => {
-        setDialog({ type: 'confirm', studentId })
+    const openUnmuteDialog = (studentId, courseId) => {
+        setDialog({ type: 'confirm', studentId, courseId })
     }
 
     const handleUnmute = async () => {
@@ -47,7 +47,8 @@ export const TAMutedStudents = () => {
                 },
                 body: JSON.stringify({
                     duration: 'unmute',
-                    reason: dialog.reason || 'تم فك الحظر بواسطة المساعد'
+                    reason: dialog.reason || 'تم فك الحظر بواسطة المساعد',
+                    course_ids: [dialog.courseId]
                 })
             })
             if (res.ok) {
@@ -82,8 +83,9 @@ export const TAMutedStudents = () => {
                 <div className="hq-card" style={{ padding: 0, overflow: 'hidden', border: '1px solid var(--hq-border)' }}>
                     <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'right' }}>
                         <thead>
-                            <tr style={{ background: 'rgba(0,0,0,0.2)', borderBottom: '1px solid var(--hq-border)' }}>
+                        <tr style={{ background: 'rgba(0,0,0,0.2)', borderBottom: '1px solid var(--hq-border)' }}>
                                 <th style={{ padding: '15px' }}>الطالب</th>
+                                <th style={{ padding: '15px' }}>الدورة</th>
                                 <th style={{ padding: '15px' }}>نوع الحظر</th>
                                 <th style={{ padding: '15px' }}>محظور حتى</th>
                                 <th style={{ padding: '15px' }}>السبب</th>
@@ -92,11 +94,16 @@ export const TAMutedStudents = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            {mutedStudents.map(student => (
-                                <tr key={student.id} style={{ borderBottom: '1px solid var(--hq-border)' }}>
+                            {mutedStudents.map((student, idx) => (
+                                <tr key={`${student.id}-${idx}`} style={{ borderBottom: '1px solid var(--hq-border)' }}>
                                     <td style={{ padding: '15px' }}>
                                         <div style={{ fontWeight: 'bold' }}>{student.full_name}</div>
                                         <div style={{ fontSize: '12px', color: 'var(--hq-text-muted)' }}>@{student.username}</div>
+                                    </td>
+                                    <td style={{ padding: '15px' }}>
+                                        <div style={{ fontSize: '13px', color: student.course_name === 'تقييد شامل' ? '#ef4444' : 'var(--hq-primary-text)', fontWeight: student.course_name === 'تقييد شامل' ? 'bold' : 'normal' }}>
+                                            {student.course_name}
+                                        </div>
                                     </td>
                                     <td style={{ padding: '15px' }}>
                                         <span style={{
@@ -123,7 +130,7 @@ export const TAMutedStudents = () => {
                                     <td style={{ padding: '15px' }}>{student.moderator}</td>
                                     <td style={{ padding: '15px' }}>
                                         <button
-                                            onClick={() => openUnmuteDialog(student.id)}
+                                            onClick={() => openUnmuteDialog(student.id, student.course_id)}
                                             style={{
                                                 background: 'rgba(16, 185, 129, 0.1)',
                                                 color: '#10b981',
