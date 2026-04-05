@@ -22,6 +22,7 @@ export const AdminOverview = () => {
     const [teachersList, setTeachersList] = useState([])
     const [gradesList, setGradesList] = useState([])
     const [subjectsList, setSubjectsList] = useState([])
+    const [combinations, setCombinations] = useState([])
     const navigate = useNavigate()
 
     useEffect(() => {
@@ -33,6 +34,7 @@ export const AdminOverview = () => {
                 })
                 if (res.ok) {
                     const data = await res.json()
+                    setCombinations(data.combinations || [])
                     setTeachersList(data.teachers || [])
                     setSubjectsList((data.subjects || []).map(s => ({ val: s.name })))
                     setGradesList((data.grades || []).map(g => ({ val: g.name })))
@@ -41,6 +43,50 @@ export const AdminOverview = () => {
         }
         fetchFiltersData()
     }, [])
+
+    // Dynamic Cascading Filters Effect
+    useEffect(() => {
+        if (combinations.length === 0) return;
+
+        // grades options: affected by subject, teacher
+        let gradesFiltered = combinations;
+        if (subject !== 'all') gradesFiltered = gradesFiltered.filter(c => c.subject === subject);
+        if (teacher !== 'all') gradesFiltered = gradesFiltered.filter(c => c.teacher_id.toString() === teacher.toString());
+        const uniqueGrades = new Set(gradesFiltered.map(c => c.grade).filter(Boolean));
+        setGradesList(Array.from(uniqueGrades).sort().map(g => ({ val: g })));
+
+        // subjects options: affected by grade, teacher
+        let subjectsFiltered = combinations;
+        if (grade !== 'all') subjectsFiltered = subjectsFiltered.filter(c => c.grade === grade);
+        if (teacher !== 'all') subjectsFiltered = subjectsFiltered.filter(c => c.teacher_id.toString() === teacher.toString());
+        const uniqueSubjects = new Set(subjectsFiltered.map(c => c.subject).filter(Boolean));
+        setSubjectsList(Array.from(uniqueSubjects).sort().map(s => ({ val: s })));
+
+        // teachers options: affected by grade, subject
+        let teachersFiltered = combinations;
+        if (grade !== 'all') teachersFiltered = teachersFiltered.filter(c => c.grade === grade);
+        if (subject !== 'all') teachersFiltered = teachersFiltered.filter(c => c.subject === subject);
+        const uniqueTeachers = new Map();
+        teachersFiltered.forEach(c => {
+            if (c.teacher_id && c.teacher_id !== -1) uniqueTeachers.set(c.teacher_id, { id: c.teacher_id, name: c.teacher });
+        });
+        setTeachersList(Array.from(uniqueTeachers.values()).sort((a,b) => a.name.localeCompare(b.name)));
+
+        // Strict Intersection for Auto-reset
+        let strictFiltered = combinations;
+        if (grade !== 'all') strictFiltered = strictFiltered.filter(c => c.grade === grade);
+        if (subject !== 'all') strictFiltered = strictFiltered.filter(c => c.subject === subject);
+        if (teacher !== 'all') strictFiltered = strictFiltered.filter(c => c.teacher_id.toString() === teacher.toString());
+        
+        const strictSubjects = new Set(strictFiltered.map(c => c.subject).filter(Boolean));
+        const strictGrades = new Set(strictFiltered.map(c => c.grade).filter(Boolean));
+        const strictTeachers = new Set(strictFiltered.map(c => c.teacher_id));
+
+        if (subject !== 'all' && !strictSubjects.has(subject)) setSubject('all');
+        if (grade !== 'all' && !strictGrades.has(grade)) setGrade('all');
+        if (teacher !== 'all' && !strictTeachers.has(parseInt(teacher))) setTeacher('all');
+
+    }, [grade, subject, teacher, combinations])
 
     useEffect(() => {
         const fetchStats = async () => {

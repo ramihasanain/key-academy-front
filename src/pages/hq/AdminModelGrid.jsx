@@ -80,7 +80,8 @@ export const AdminModelGrid = () => {
                         teachers: data.teachers || [],
                         subjects: data.subjects || [],
                         grades: data.grades || [],
-                        branches: data.branches || []
+                        branches: data.branches || [],
+                        combinations: data.combinations || []
                     });
                 }
             } catch (err) { }
@@ -88,6 +89,27 @@ export const AdminModelGrid = () => {
         fetchFilters();
         setActiveFilters({});
     }, [model]);
+
+    // Cascading Filters Auto-Reset
+    useEffect(() => {
+        if (!filterOptions.combinations || filterOptions.combinations.length === 0) return;
+        const combs = filterOptions.combinations;
+        let strictFiltered = [...combs];
+
+        Object.entries(activeFilters).forEach(([k, v]) => {
+            if (v && v !== 'all') {
+                if (k.includes('grade')) strictFiltered = strictFiltered.filter(c => c.grade === v);
+                if (k.includes('subject')) strictFiltered = strictFiltered.filter(c => c.subject === v);
+                if (k.includes('branch')) strictFiltered = strictFiltered.filter(c => c.branch === v);
+                if (k.includes('teacher')) strictFiltered = strictFiltered.filter(c => String(c.teacher_id) === String(v));
+            }
+        });
+
+        // If the current combination is impossible, clear the active filters completely to allow a fresh tree selection
+        if (strictFiltered.length === 0 && Object.values(activeFilters).some(v => v)) {
+            setActiveFilters({});
+        }
+    }, [activeFilters, filterOptions.combinations]);
 
     useEffect(() => {
         if (!schema) return
@@ -230,26 +252,32 @@ export const AdminModelGrid = () => {
                 {/* Dynamic Filters UI Engine */}
                 {schema.filters && schema.filters.map(f => {
                     let dynamicOptions = [];
-                    
-                    if (f.optionsKey === 'teachers') {
-                        dynamicOptions = (filterOptions.teachers || []).map(t => ({ value: t.id, label: t.name }));
-                    } else if (f.optionsKey === 'subjects') {
-                        // Deduplicate subjects
-                        const uniqueMap = new Map();
-                        for (const t of filterOptions.subjects || []) {
-                            if (!uniqueMap.has(t.name)) {
-                                uniqueMap.set(t.name, true);
-                                dynamicOptions.push({ value: t.name, label: t.name });
+                    const combs = filterOptions.combinations || [];
+
+                    if (f.optionsKey) {
+                        let allowedCombs = [...combs];
+                        
+                        // Filter by ALL OTHER active filters to compute allowed nodes in the tree
+                        Object.entries(activeFilters).forEach(([k, v]) => {
+                            if (v && k !== f.key) { // Ignore self to preserve sibling choices
+                                if (k.includes('grade')) allowedCombs = allowedCombs.filter(c => c.grade === v);
+                                if (k.includes('subject')) allowedCombs = allowedCombs.filter(c => c.subject === v);
+                                if (k.includes('branch')) allowedCombs = allowedCombs.filter(c => c.branch === v);
+                                if (k.includes('teacher')) allowedCombs = allowedCombs.filter(c => String(c.teacher_id) === String(v));
                             }
-                        }
-                    } else if (f.optionsKey === 'grades') {
-                        // Grades are already clean and unique from the Absolute Truth API
-                        for (const t of filterOptions.grades || []) {
-                            dynamicOptions.push({ value: t.name, label: t.name });
-                        }
-                    } else if (f.optionsKey === 'branches') {
-                        for (const t of filterOptions.branches || []) {
-                            dynamicOptions.push({ value: t.name, label: t.name });
+                        });
+
+                        const uniqueMap = new Map();
+                        allowedCombs.forEach(c => {
+                            if (f.optionsKey === 'grades' && c.grade) uniqueMap.set(c.grade, { value: c.grade, label: c.grade });
+                            if (f.optionsKey === 'subjects' && c.subject) uniqueMap.set(c.subject, { value: c.subject, label: c.subject });
+                            if (f.optionsKey === 'branches' && c.branch) uniqueMap.set(c.branch, { value: c.branch, label: c.branch });
+                            if (f.optionsKey === 'teachers' && c.teacher_id && c.teacher_id !== -1) uniqueMap.set(c.teacher_id, { value: c.teacher_id, label: c.teacher });
+                        });
+
+                        dynamicOptions = Array.from(uniqueMap.values());
+                        if (f.optionsKey !== 'teachers') {
+                            dynamicOptions.sort((a,b) => String(a.label).localeCompare(String(b.label)));
                         }
                     }
                     
