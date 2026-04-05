@@ -121,7 +121,7 @@ const SCHEMAS = {
             { key: 'slug', label: 'المعرف (إنجليزي فقط مثل class-6)', type: 'text', required: true },
             { key: 'title', label: 'العنوان الكامل', type: 'text', required: true },
             { key: 'grade_name', label: 'اسم الصف', type: 'text', required: true },
-            { key: 'branch', label: 'الفرع', type: 'select', endpoint: 'branches', labelField: 'name', valueField: 'id', required: true }
+            { key: 'branches', label: 'الفروع', type: 'multiselect', endpoint: 'branches', labelField: 'name', valueField: 'id', required: true }
         ]
     },
     coursegroups: {
