@@ -362,7 +362,7 @@ export const AdminModelGrid = () => {
                                                             c.type === 'datetime' ? (row[c.key] ? new Date(row[c.key]).toLocaleDateString('ar-EG') : '-') :
                                                                 c.type === 'number_badge' ? <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(56,189,248,0.15)', color: '#38bdf8', padding: '4px 12px', borderRadius: '20px', fontWeight: 'bold' }}>{row[c.key] || 0}</span> :
                                                                         c.key === 'student' && typeof row[c.key] === 'string' ? row[c.key].replace(/\s*[-—]\s*@[^\s]+/g, '').trim() :
-                                                                        c.key === 'student_username' || c.key === 'username' ? `@${row[c.key] || '-'}` :
+                                                                        c.key === 'student_username' || c.key === 'username' ? <span dir="ltr">{`@${row[c.key] || '-'}`}</span> :
                                                                         c.key.includes('course') || c.key.includes('user') ? `#${row[c.key] || 'غير محدد'}` :
                                                                             row[c.key]?.toString().substring(0, 40) || '-'}
                                                 </td>
