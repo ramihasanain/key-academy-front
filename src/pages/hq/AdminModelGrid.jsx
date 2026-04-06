@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useParams, useNavigate, useOutletContext, useLocation } from 'react-router-dom'
 import { API } from '../../config'
-import { HiOutlinePlus, HiOutlinePencilSquare, HiOutlineTrash, HiOutlineMagnifyingGlass, HiOutlineEye, HiOutlineUsers, HiOutlineNoSymbol, HiOutlinePlay, HiOutlineCheck, HiOutlineExclamationCircle } from 'react-icons/hi2'
+import { HiOutlinePlus, HiOutlinePencilSquare, HiOutlineTrash, HiOutlineMagnifyingGlass, HiOutlineEye, HiOutlineUsers, HiOutlineNoSymbol, HiOutlinePlay, HiOutlineCheck, HiOutlineExclamationCircle, HiOutlineAcademicCap } from 'react-icons/hi2'
 import './Admin.css'
 
 // Configuration for models
@@ -374,7 +374,10 @@ export const AdminModelGrid = () => {
                                                     canChange && <button className="hq-action-btn edit" onClick={() => navigate(`/hq/${model}/${row.id}`)}><HiOutlinePencilSquare /></button>
                                                 )}
                                                 {model === 'teachers' && (
-                                                    <button className="hq-action-btn edit" style={{ color: '#8b5cf6', background: 'rgba(139,92,246,0.1)', borderColor: '#8b5cf6' }} onClick={() => navigate(`/hq/teacherassistants?teacher=${row.id}`)} title="عرض المساعدين لهذا الأستاذ"><HiOutlineUsers /></button>
+                                                    <>
+                                                        <button className="hq-action-btn edit" style={{ color: '#8b5cf6', background: 'rgba(139,92,246,0.1)', borderColor: '#8b5cf6', marginRight: '5px' }} onClick={() => navigate(`/hq/teacherassistants?teacher=${row.id}`)} title="عرض المساعدين لهذا الأستاذ"><HiOutlineUsers /></button>
+                                                        <button className="hq-action-btn edit" style={{ color: '#0ea5e9', background: 'rgba(14,165,233,0.1)', borderColor: '#0ea5e9' }} onClick={() => navigate(`/hq/enrollments?course__teacher=${row.id}`)} title="عرض طلاب هذا الأستاذ"><HiOutlineAcademicCap /></button>
+                                                    </>
                                                 )}
                                                 {model === 'courses' && (
                                                     <button className="hq-action-btn edit" style={{ color: '#6366f1', background: 'rgba(99,102,241,0.1)', borderColor: '#6366f1' }} onClick={() => navigate(`/hq/enrollments?course=${row.id}`)} title="عرض الطلبة المشتركين"><HiOutlineUsers /></button>
