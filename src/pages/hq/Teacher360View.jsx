@@ -243,12 +243,12 @@ export const Teacher360View = ({ id }) => {
                         placeholder="بحث باسم الطالب أو @يوزر..."
                         value={studentFilter}
                         onChange={(e) => setStudentFilter(e.target.value)}
-                        style={{ flex: '1 1 250px', background: 'rgba(0,0,0,0.2)', border: '1px solid rgba(255,255,255,0.1)', color: 'white', padding: '10px 15px', borderRadius: '8px', outline: 'none' }}
+                        style={{ flex: '1 1 250px', background: 'var(--hq-bg)', border: '1px solid var(--hq-border)', color: 'var(--hq-text)', padding: '10px 15px', borderRadius: '8px', outline: 'none' }}
                     />
                     <select
                         value={courseFilter}
                         onChange={(e) => setCourseFilter(e.target.value)}
-                        style={{ flex: '1 1 200px', background: 'rgba(0,0,0,0.2)', border: '1px solid rgba(255,255,255,0.1)', color: 'white', padding: '10px 15px', borderRadius: '8px', outline: 'none' }}
+                        style={{ flex: '1 1 200px', background: 'var(--hq-bg)', border: '1px solid var(--hq-border)', color: 'var(--hq-text)', padding: '10px 15px', borderRadius: '8px', outline: 'none' }}
                     >
                         <option value="">جميع دورات الأستاذ</option>
                         {data.recent_courses?.map(c => (
@@ -280,15 +280,17 @@ export const Teacher360View = ({ id }) => {
                                     </tr>
                                 ) : (
                                     enrollments.map((enr, i) => (
-                                        <tr key={enr.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.02)' }}>
+                                        <tr key={enr.id} style={{ borderBottom: '1px solid rgba(150,150,150,0.1)' }}>
                                             <td style={{ padding: '12px 15px' }}>{i + 1}</td>
                                             <td style={{ padding: '12px 15px' }}>
-                                                <button onClick={() => navigate(`/hq/students/${enr.student}/360`)} style={{ background: 'none', border: 'none', color: '#38bdf8', cursor: 'pointer', outline: 'none', padding: 0, fontSize: '15px' }}>
-                                                    {enr.student_str?.split(' - ')[0] || enr.student}
+                                                <button onClick={() => navigate(`/hq/students/${enr.student}/360`)} style={{ background: 'none', border: 'none', color: '#0ea5e9', cursor: 'pointer', outline: 'none', padding: 0, fontSize: '14px', fontWeight: 'bold' }}>
+                                                    {enr.student_str?.replace(/\s*[-—]\s*.*/, '') || enr.student}
                                                 </button>
                                             </td>
                                             <td style={{ padding: '12px 15px' }} dir="ltr">
-                                                {enr.student_str?.includes('@') ? `@${enr.student_str.split('@')[1]}` : '-'}
+                                                <button onClick={() => navigate(`/hq/students/${enr.student}/360`)} style={{ background: 'none', border: 'none', color: 'var(--hq-text-muted)', cursor: 'pointer', outline: 'none', padding: 0, fontSize: '14px' }}>
+                                                    {enr.student_str?.match(/(@[^\s()]+)/)?.[1] || '-'}
+                                                </button>
                                             </td>
                                             <td style={{ padding: '12px 15px' }}>{enr.course_str || enr.course}</td>
                                             <td style={{ padding: '12px 15px' }}>{new Date(enr.enrolled_at || enr.created_at).toLocaleDateString('ar-EG')}</td>
