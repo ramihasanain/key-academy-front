@@ -45,6 +45,7 @@ export const TeacherAssistants = () => {
                             <tr>
                                 <th>اسم المساعد</th>
                                 <th>صلاحية النظام</th>
+                                <th>عدد الطلاب</th>
                                 <th>الردود النقاشية (Q&A)</th>
                                 <th>رسائل الجروبات (Chat)</th>
                                 <th>متوسط سرعة الإجابة</th>
@@ -56,6 +57,7 @@ export const TeacherAssistants = () => {
                                 <tr key={ta.id}>
                                     <td style={{ fontWeight: 'bold' }}>{ta.name}</td>
                                     <td><span className="hq-badge-purple" style={{ background: 'rgba(0,0,0,0.05)', color: 'var(--hq-text-muted)' }}>{ta.role || 'مساعد'}</span></td>
+                                    <td><span className="hq-badge-blue" style={{ background: 'rgba(56, 189, 248, 0.1)', color: '#38bdf8' }}>{ta.students_count || 0} طالب</span></td>
                                     <td><span className="hq-badge-blue">{ta.qa_replies} رد</span></td>
                                     <td><span className="hq-badge-purple">{ta.chat_messages} رسالة</span></td>
                                     <td>
