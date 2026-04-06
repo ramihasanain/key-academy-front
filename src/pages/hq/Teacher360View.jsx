@@ -13,6 +13,13 @@ export const Teacher360View = ({ id }) => {
     const [data, setData] = useState(null)
     const [loading, setLoading] = useState(true)
 
+    // Enrollments State
+    const [enrollments, setEnrollments] = useState([])
+    const [enrollmentsLoading, setEnrollmentsLoading] = useState(true)
+    const [studentFilter, setStudentFilter] = useState('')
+    const [courseFilter, setCourseFilter] = useState('')
+
+    // Fetch Base Data
     useEffect(() => {
         const fetchData = async () => {
             const tk = localStorage.getItem('access_token')
@@ -32,7 +39,46 @@ export const Teacher360View = ({ id }) => {
             }
         }
         fetchData()
-    }, [id])
+    }, [finalId])
+
+    // Fetch Enrollments Data with Debounce
+    useEffect(() => {
+        const fetchEnrollments = async () => {
+            setEnrollmentsLoading(true)
+            const tk = localStorage.getItem('access_token')
+            try {
+                const queryParams = new URLSearchParams()
+                queryParams.append('course__teacher', finalId)
+                queryParams.append('page_size', '100') // Max 100 limit to prevent overloading
+                
+                if (studentFilter) {
+                    queryParams.append('search', studentFilter) // DRF search will handle name/username if configured, or we can use specific filters
+                }
+                if (courseFilter) {
+                    queryParams.append('course', courseFilter)
+                }
+
+                const res = await fetch(`${API}/api/hq/enrollments/?${queryParams.toString()}`, {
+                    headers: { 'Authorization': `Bearer ${tk}` }
+                })
+                
+                if (res.ok) {
+                    const json = await res.json()
+                    setEnrollments(json.results || json)
+                }
+            } catch (e) {
+                console.error(e)
+            } finally {
+                setEnrollmentsLoading(false)
+            }
+        }
+        
+        const timeoutId = setTimeout(() => {
+            fetchEnrollments()
+        }, 500)
+        
+        return () => clearTimeout(timeoutId)
+    }, [finalId, studentFilter, courseFilter])
 
     if (loading) return <div className="hq-loading" style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>جاري تحميل الملف الشامل للاستاذ...</div>
     if (!data) return <div style={{ padding: '20px', color: '#ef4444', textAlign: 'center' }}>البيانات غير متوفرة.</div>
@@ -181,6 +227,82 @@ export const Teacher360View = ({ id }) => {
                     )}
                 </div>
 
+            </div>
+
+            {/* سجل الاشتراكات مع الفلتر */}
+            <div className="glass-card" style={{ padding: '25px', borderRadius: '15px', marginTop: '30px' }}>
+                <h3 style={{ margin: '0 0 20px', fontSize: '18px', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '10px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <HiOutlineUserGroup style={{ color: '#0ea5e9' }} />
+                    سجل الاشتراكات والطلاب ({enrollments.length})
+                </h3>
+
+                {/* Filters */}
+                <div style={{ display: 'flex', gap: '15px', flexWrap: 'wrap', marginBottom: '20px' }}>
+                    <input
+                        type="text"
+                        placeholder="بحث باسم الطالب أو @يوزر..."
+                        value={studentFilter}
+                        onChange={(e) => setStudentFilter(e.target.value)}
+                        style={{ flex: '1 1 250px', background: 'rgba(0,0,0,0.2)', border: '1px solid rgba(255,255,255,0.1)', color: 'white', padding: '10px 15px', borderRadius: '8px', outline: 'none' }}
+                    />
+                    <select
+                        value={courseFilter}
+                        onChange={(e) => setCourseFilter(e.target.value)}
+                        style={{ flex: '1 1 200px', background: 'rgba(0,0,0,0.2)', border: '1px solid rgba(255,255,255,0.1)', color: 'white', padding: '10px 15px', borderRadius: '8px', outline: 'none' }}
+                    >
+                        <option value="">جميع دورات الأستاذ</option>
+                        {data.recent_courses?.map(c => (
+                            <option key={c.id} value={c.id}>{c.title}</option>
+                        ))}
+                    </select>
+                </div>
+
+                {/* Table */}
+                <div style={{ overflowX: 'auto', background: 'rgba(0,0,0,0.1)', borderRadius: '10px', padding: '1px' }}>
+                    {enrollmentsLoading ? (
+                        <div style={{ textAlign: 'center', padding: '40px', color: 'var(--hq-primary)' }}>جاري البحث وتحديث القائمة...</div>
+                    ) : (
+                        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'right' }}>
+                            <thead>
+                                <tr style={{ background: 'rgba(255,255,255,0.05)' }}>
+                                    <th style={{ padding: '12px 15px', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>#</th>
+                                    <th style={{ padding: '12px 15px', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>اسم الطالب</th>
+                                    <th style={{ padding: '12px 15px', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>معرف اليوزر</th>
+                                    <th style={{ padding: '12px 15px', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>الدورة</th>
+                                    <th style={{ padding: '12px 15px', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>تاريخ الانضمام</th>
+                                    <th style={{ padding: '12px 15px', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>حالة الاشتراك</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {enrollments.length === 0 ? (
+                                    <tr>
+                                        <td colSpan="6" style={{ textAlign: 'center', padding: '30px', color: 'var(--hq-text-muted)' }}>لا توجد نتائج مطابقة لبحثك.</td>
+                                    </tr>
+                                ) : (
+                                    enrollments.map((enr, i) => (
+                                        <tr key={enr.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.02)' }}>
+                                            <td style={{ padding: '12px 15px' }}>{i + 1}</td>
+                                            <td style={{ padding: '12px 15px' }}>
+                                                <button onClick={() => navigate(`/hq/students/${enr.student}/360`)} style={{ background: 'none', border: 'none', color: '#38bdf8', cursor: 'pointer', outline: 'none', padding: 0, fontSize: '15px' }}>
+                                                    {enr.student_str?.split(' - ')[0] || enr.student}
+                                                </button>
+                                            </td>
+                                            <td style={{ padding: '12px 15px' }} dir="ltr">
+                                                {enr.student_str?.includes('@') ? `@${enr.student_str.split('@')[1]}` : '-'}
+                                            </td>
+                                            <td style={{ padding: '12px 15px' }}>{enr.course_str || enr.course}</td>
+                                            <td style={{ padding: '12px 15px' }}>{new Date(enr.enrolled_at || enr.created_at).toLocaleDateString('ar-EG')}</td>
+                                            <td style={{ padding: '12px 15px' }}>
+                                                {enr.is_active ? <span style={{ color: '#10b981', background: 'rgba(16,185,129,0.1)', padding: '4px 8px', borderRadius: '4px', fontSize: '12px' }}>نشط</span> : <span style={{ color: '#ef4444', background: 'rgba(239,68,68,0.1)', padding: '4px 8px', borderRadius: '4px', fontSize: '12px' }}>غير نشط</span>}
+                                            </td>
+                                        </tr>
+                                    ))
+                                )}
+                            </tbody>
+                        </table>
+                    )}
+                </div>
+                {enrollments.length === 100 && <div style={{ textAlign: 'center', marginTop: '10px', fontSize: '12px', color: '#f59e0b' }}>⚠️ تم عرض أحدث 100 نتيجة فقط لتخفيف الضغط. يرجى استخدام منقب البيانات لنتائج أعمق.</div>}
             </div>
         </div>
     )
