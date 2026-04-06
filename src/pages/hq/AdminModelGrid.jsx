@@ -16,11 +16,10 @@ const SCHEMAS = {
             { key: 'is_superuser', label: 'صلاحيات عليا', type: 'boolean' }
         ],
         filters: [{ 
-            key: 'role', label: 'الدور', 
+            key: 'is_superuser', label: 'نوع الإدارة', 
             options: [
-                { value: 'admin', label: 'مدير منصة (Admin)' }, 
-                { value: 'assistant', label: 'مساعد (Assistant)' },
-                { value: 'teacher', label: 'أستاذ (Teacher)' }
+                { value: 'true', label: 'مدير خارق (Super Admin)' }, 
+                { value: 'false', label: 'مدير فرعي (Admin)' }
             ] 
         }] 
     },
