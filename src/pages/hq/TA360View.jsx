@@ -170,7 +170,7 @@ export const TA360View = ({ id }) => {
                 <div className="glass-card" style={{ padding: '25px', borderRadius: '15px' }}>
                     <h3 style={{ margin: '0 0 20px', fontSize: '18px', borderBottom: '1px solid var(--hq-border)', paddingBottom: '10px', display: 'flex', alignItems: 'center', gap: '10px' }}>
                         <HiOutlineChatBubbleOvalLeftEllipsis style={{ color: '#10b981' }} />
-                        آخر إجاباته للطلبة بالطيلة الفائتة
+                        آخر إجاباته للطلبة
                     </h3>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', maxHeight: '400px', overflowY: 'auto' }}>
                         {recent_qa.length === 0 ? <p style={{ color: 'var(--hq-text-muted)', textAlign: 'center' }}>لا توجد نتائج مطابقة.</p> : recent_qa.map((qa, i) => (

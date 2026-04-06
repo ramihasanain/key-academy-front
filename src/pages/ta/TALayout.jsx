@@ -77,7 +77,7 @@ export const TALayout = () => {
 
     const navItems = [
         { path: '', icon: <HiOutlineAcademicCap />, label: 'إحصائيات وأداء الطلاب' },
-        { path: 'qa', icon: <HiOutlineChatBubbleLeftRight />, label: 'لوحة الأسئلة المجتمعية (Q&A)' },
+        { path: 'qa', icon: <HiOutlineChatBubbleLeftRight />, label: 'سؤال وجواب' },
         { path: 'groups', icon: <HiOutlineUsers />, label: 'إدارة مجموعات الدردشة' },
         { path: 'notes', icon: <HiOutlinePencilSquare />, label: 'دفتر المهام والملاحظات' },
         { path: 'muted', icon: <HiOutlineNoSymbol />, label: 'قائمة الطلاب المحظورين' },
