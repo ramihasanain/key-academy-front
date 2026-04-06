@@ -9,7 +9,9 @@ const SCHEMAS = {
     users: {
         title: 'مدير نظام', endpoint: 'users',
         fields: [
-            { key: 'username', label: 'اسم المستخدم', type: 'text', required: true },
+            { key: 'phone', label: 'رقم الهاتف (لتسجيل الدخول)', type: 'text', required: true },
+            { key: 'username', label: 'اسم المستخدم (المعرف باللغة الإنجليزية)', type: 'text', required: true },
+            { key: 'password', label: 'كلمة المرور (دخول لوحة التحكم)', type: 'text' },
             { key: 'first_name', label: 'الاسم الأول', type: 'text' },
             { key: 'last_name', label: 'الاسم الأخير', type: 'text' },
             { key: 'email', label: 'البريد الإلكتروني', type: 'text' },
