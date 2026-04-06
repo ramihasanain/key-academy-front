@@ -163,6 +163,21 @@ export const Student360View = ({ id }) => {
 
     const { student, kpis, courses, history, quizzes, questions, notes, chats } = data
 
+    const renderHierarchy = (item, timeField) => (
+        <div style={{ marginTop: '8px', fontSize: '0.8rem', color: 'var(--hq-text-muted)', display: 'flex', flexWrap: 'wrap', gap: '6px', alignItems: 'center' }}>
+            <span style={{background: 'rgba(99, 102, 241, 0.1)', color: '#6366f1', padding: '2px 6px', borderRadius: '4px'}}>{item.subject_title || 'عام'}</span>
+            <span>-</span>
+            <span style={{color: 'var(--hq-primary-text)'}}>{item.course_title || '-'}</span>
+            <span>-</span>
+            <span style={{color: 'var(--hq-text-muted)'}}>{item.module_title || '-'}</span>
+            <span>-</span>
+            <span style={{color: '#34d399'}}>{item.lesson_title || '-'}</span>
+            <span style={{marginRight: 'auto', background: 'rgba(56, 189, 248, 0.1)', color: '#38bdf8', padding: '2px 8px', borderRadius: '4px', fontSize: '0.75rem'}}>
+                {item[timeField] ? new Date(item[timeField]).toLocaleString('ar-EG') : '-'}
+            </span>
+        </div>
+    );
+
     const subjectsList = [...new Set(courses.map(c => c.subject))];
     const teachersList = [...new Set(courses.map(c => c.teacher))];
     const coursesList = [...new Set(courses.map(c => c.title))];
@@ -345,8 +360,8 @@ export const Student360View = ({ id }) => {
                                     <HiOutlineClock size={20} />
                                 </div>
                                 <div>
-                                    <p style={{ margin: '0 0 5px', fontWeight: '500', color: 'var(--hq-primary-text)' }}>{h.lesson_title}</p>
-                                    <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--hq-text-muted)' }}>{h.course_title} - {new Date(h.last_visited).toLocaleString('ar-EG')}</p>
+                                    <p style={{ margin: '0 0 5px', fontWeight: 'bold', color: 'var(--hq-primary-text)' }}>درس: {h.lesson_title}</p>
+                                    {renderHierarchy(h, 'last_visited')}
                                 </div>
                             </div>
                         ))}
@@ -359,9 +374,9 @@ export const Student360View = ({ id }) => {
                     <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
                         {filteredQuizzes.length === 0 ? <p style={{ color: 'var(--hq-text-muted)' }}>لا يوجد اختبارات تطابق الفلتر</p> : filteredQuizzes.map((q, i) => (
                             <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--hq-bg)', padding: '10px 15px', borderRadius: '8px' }}>
-                                <div>
-                                    <p style={{ margin: '0 0 5px', fontWeight: '500', color: 'var(--hq-primary-text)' }}>{q.quiz_title}</p>
-                                    <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--hq-text-muted)' }}>{new Date(q.attempted_at).toLocaleDateString('ar-EG')}</p>
+                                <div style={{flex: 1}}>
+                                    <p style={{ margin: '0 0 5px', fontWeight: 'bold', color: 'var(--hq-primary-text)' }}>{q.quiz_title}</p>
+                                    {renderHierarchy(q, 'attempted_at')}
                                 </div>
                                 <div style={{ fontWeight: 'bold', background: q.percentage >= 50 ? 'rgba(52,211,153,0.1)' : 'rgba(239,68,68,0.1)', color: q.percentage >= 50 ? '#34d399' : '#ef4444', padding: '5px 12px', borderRadius: '20px' }}>
                                     {q.percentage}%
@@ -379,8 +394,8 @@ export const Student360View = ({ id }) => {
                     <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
                         {filteredQuestions.length === 0 ? <p style={{ color: 'var(--hq-text-muted)' }}>لا يوجد أسئلة تطابق الفلتر</p> : filteredQuestions.map((q, i) => (
                             <div key={i} style={{ background: 'var(--hq-bg)', padding: '15px', borderRadius: '8px', borderLeft: q.is_resolved ? '3px solid #34d399' : '3px solid #fbbf24', position: 'relative' }}>
-                                <p style={{ margin: '0 0 10px', color: 'var(--hq-primary-text)', lineHeight: '1.5', paddingRight: '25px' }}>{q.content}</p>
-                                <div style={{ fontSize: '0.8rem', color: 'var(--hq-text-muted)' }}>درس: {q.lesson_title}</div>
+                                <p style={{ margin: '0 0 10px', color: 'var(--hq-primary-text)', lineHeight: '1.5', paddingRight: '25px', fontSize: '0.95rem' }}>{q.content}</p>
+                                {renderHierarchy(q, 'created_at')}
                                 <button
                                     onClick={() => handleHideInteraction('qapost', q.pk || q.id)}
                                     style={{ position: 'absolute', top: '10px', right: '10px', background: 'transparent', border: 'none', color: '#ef4444', cursor: 'pointer', opacity: 0.6 }}
@@ -398,8 +413,8 @@ export const Student360View = ({ id }) => {
                     <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
                         {filteredNotes.length === 0 ? <p style={{ color: 'var(--hq-text-muted)' }}>لا يوجد ملاحظات تطابق الفلتر</p> : filteredNotes.map((n, i) => (
                             <div key={i} style={{ background: 'var(--hq-bg)', padding: '15px', borderRadius: '8px', borderLeft: '3px solid #6366f1' }}>
-                                <p style={{ margin: '0 0 10px', color: 'var(--hq-primary-text)', lineHeight: '1.5' }}>{n.content}</p>
-                                <div style={{ fontSize: '0.8rem', color: 'var(--hq-text-muted)' }}>درس: {n.lesson_title}</div>
+                                <p style={{ margin: '0 0 10px', color: 'var(--hq-primary-text)', lineHeight: '1.5', fontSize: '0.95rem' }}>{n.content}</p>
+                                {renderHierarchy(n, 'created_at')}
                             </div>
                         ))}
                     </div>
@@ -410,8 +425,8 @@ export const Student360View = ({ id }) => {
                     <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
                         {!filteredChats || filteredChats.length === 0 ? <p style={{ color: 'var(--hq-text-muted)' }}>لا يوجد دردشات تطابق الفلتر</p> : filteredChats.map((c, i) => (
                             <div key={i} style={{ background: 'var(--hq-bg)', padding: '15px', borderRadius: '8px', borderLeft: '3px solid #ec4899', position: 'relative' }}>
-                                <p style={{ margin: '0 0 10px', color: 'var(--hq-primary-text)', lineHeight: '1.5', paddingRight: '25px' }}>{c.content}</p>
-                                <div style={{ fontSize: '0.8rem', color: 'var(--hq-text-muted)' }}>دورة: {c.course_title}</div>
+                                <p style={{ margin: '0 0 10px', color: 'var(--hq-primary-text)', lineHeight: '1.5', paddingRight: '25px', fontSize: '0.95rem' }}>{c.content}</p>
+                                {renderHierarchy(c, 'created_at')}
                                 <button
                                     onClick={() => handleHideInteraction('groupmessage', c.pk || c.id)}
                                     style={{ position: 'absolute', top: '10px', right: '10px', background: 'transparent', border: 'none', color: '#ef4444', cursor: 'pointer', opacity: 0.6 }}
