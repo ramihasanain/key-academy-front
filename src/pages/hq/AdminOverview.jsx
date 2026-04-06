@@ -162,6 +162,24 @@ export const AdminOverview = () => {
                     <h2>مركز القيادة والتحليلات 📊</h2>
                     <p>مراقبة حية وشاملة لكل ما يدور داخل أروقة المنصة التعليمية</p>
                 </div>
+                <button 
+                    className="hq-submit-btn" 
+                    style={{ background: 'var(--red-main)', padding: '8px 16px', display: 'flex', alignItems: 'center', gap: '8px', opacity: 0.9 }}
+                    onClick={() => {
+                        setPeriod('all');
+                        setDateFrom('');
+                        setDateTo('');
+                        setGrade('all');
+                        setBranch('all');
+                        setSubject('all');
+                        setTeacher('all');
+                        setCourse('all');
+                        setStudentUsername('');
+                    }}
+                    title="تفريغ جميع الفلاتر"
+                >
+                    تفريغ الفلاتر ✖
+                </button>
             </div>
 
             {/* Global Dashboard Filters */}
