@@ -46,7 +46,7 @@ const SCHEMAS = {
     activationcards: { title: 'كروت تفعيل الرصيد', endpoint: 'activationcards', columns: [{ key: 'code', label: 'الكود' }, { key: 'course', label: 'الدورة المرتبطة' }, { key: 'is_used', label: 'مستخدم', type: 'boolean' }], filters: [{ key: 'is_used', label: 'حالة الكارت', options: [{ value: 'true', label: 'مستهلك ومستخدم' }, { value: 'false', label: 'متاح للبيع' }] }] },
     virtuallabs: { title: 'المختبرات الافتراضية 3D', endpoint: 'virtuallabs', columns: [{ key: 'title', label: 'المختبر' }, { key: 'subject', label: 'المادة' }, { key: 'url', label: 'الرابط المضمن (IFrame)' }], filters: [{ key: 'subject__icontains', label: 'المادة', optionsKey: 'subjects' }] },
     modules: { title: 'الفصول والوحدات', endpoint: 'modules', columns: [{ key: 'title', label: 'عنوان الوحدة' }, { key: 'course', label: 'الدورة الأم' }, { key: 'order', label: 'ترتيب العرض' }] },
-    coursegroups: { title: 'المجموعات الطلابية المنفصلة', endpoint: 'coursegroups', columns: [{ key: 'course_str', label: 'الدورة الأم' }, { key: 'index', label: 'رقم المجموعة (الخلية)' }, { key: 'assistant_str', label: 'المساعد (المشرف)' }] }
+    coursegroups: { title: 'المجموعات الطلابية المنفصلة', endpoint: 'coursegroups', columns: [{ key: 'course_str', label: 'الدورة الأم' }, { key: 'index', label: 'رقم المجموعة (الخلية)' }, { key: 'assistant_str', label: 'المساعد (المشرف)' }, { key: 'students_count', label: 'عدد الطلاب', type: 'number_badge' }], filters: [{ key: 'course__teacher', label: 'التابع للأستاذ', optionsKey: 'teachers' }] }
 }
 
 export const AdminModelGrid = () => {
@@ -366,6 +366,7 @@ export const AdminModelGrid = () => {
                                                         c.type === 'currency' ? `${row[c.key] || 0}` :
                                                             c.type === 'datetime' ? (row[c.key] ? new Date(row[c.key]).toLocaleDateString('ar-EG') : '-') :
                                                                 c.type === 'number_badge' ? <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(56,189,248,0.15)', color: '#38bdf8', padding: '4px 12px', borderRadius: '20px', fontWeight: 'bold' }}>{row[c.key] || 0}</span> :
+                                                                        c.key === 'students_count' ? <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(16,185,129,0.15)', color: '#10b981', padding: '4px 12px', borderRadius: '20px', fontWeight: 'bold' }}>{row[c.key] || 0}</span> :
                                                                         c.key === 'student' && typeof row[c.key] === 'string' ? row[c.key].replace(/\s*[-—]\s*@[^\s]+/g, '').trim() :
                                                                         c.key === 'student_username' || c.key === 'username' ? <span dir="ltr">{`@${row[c.key] || '-'}`}</span> :
                                                                         c.key.includes('course') || c.key.includes('user') ? `#${row[c.key] || 'غير محدد'}` :
@@ -417,6 +418,9 @@ export const AdminModelGrid = () => {
                                                     >
                                                         {row.is_active !== false ? <HiOutlineNoSymbol /> : <HiOutlinePlay />}
                                                     </button>
+                                                )}
+                                                {model === 'coursegroups' && (
+                                                    <button className="hq-action-btn edit" style={{ color: '#0ea5e9', background: 'rgba(14,165,233,0.1)', borderColor: '#0ea5e9' }} onClick={() => navigate(`/hq/enrollments?chat_shard=${row.id}`)} title="عرض طلاب المجموعة (الخلية)"><HiOutlineUsers /></button>
                                                 )}
                                                 {model === 'contactmessages' && (
                                                     <button className="hq-action-btn edit"
