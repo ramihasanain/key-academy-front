@@ -36,7 +36,7 @@ export const TANotebook = () => {
     })
 
     const fetchNotes = async () => {
-        const tk = localStorage.getItem('access_token')
+        const tk = sessionStorage.getItem('spy_token') || localStorage.getItem('access_token')
         try {
             const res = await fetch(API + '/api/interactions/ta-notes/', {
                 headers: { 'Authorization': `Bearer ${tk}` }
@@ -55,7 +55,7 @@ export const TANotebook = () => {
     useEffect(() => { fetchNotes() }, [])
 
     const handleSave = async () => {
-        const tk = localStorage.getItem('access_token')
+        const tk = sessionStorage.getItem('spy_token') || localStorage.getItem('access_token')
         const url = editingNote
             ? `${API}/api/interactions/ta-notes/${editingNote.id}/`
             : API + '/api/interactions/ta-notes/'
@@ -82,7 +82,7 @@ export const TANotebook = () => {
 
     const handleDelete = async (id) => {
         if (!window.confirm('هل أنت متأكد من حذف هذه الملاحظة؟')) return
-        const tk = localStorage.getItem('access_token')
+        const tk = sessionStorage.getItem('spy_token') || localStorage.getItem('access_token')
         try {
             await fetch(`${API}/api/interactions/ta-notes/${id}/`, {
                 method: 'DELETE',
@@ -93,7 +93,7 @@ export const TANotebook = () => {
     }
 
     const toggleStatus = async (note, field) => {
-        const tk = localStorage.getItem('access_token')
+        const tk = sessionStorage.getItem('spy_token') || localStorage.getItem('access_token')
         try {
             await fetch(`${API}/api/interactions/ta-notes/${note.id}/`, {
                 method: 'PATCH',

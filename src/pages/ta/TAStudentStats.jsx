@@ -15,7 +15,7 @@ export const TAStudentStats = () => {
     const [loading, setLoading] = useState(true)
 
     const fetchStats = async () => {
-        const tk = localStorage.getItem('access_token')
+        const tk = sessionStorage.getItem('spy_token') || localStorage.getItem('access_token')
         const url = courseId
             ? `${API}/api/interactions/ta-stats/?course_id=${courseId}`
             : API + '/api/interactions/ta-stats/'

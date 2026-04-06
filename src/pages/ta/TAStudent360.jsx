@@ -12,7 +12,7 @@ export const TAStudent360 = () => {
 
     useEffect(() => {
         const fetchData = async () => {
-            const tk = localStorage.getItem('access_token')
+            const tk = sessionStorage.getItem('spy_token') || localStorage.getItem('access_token')
             try {
                 const res = await fetch(`${API}/api/interactions/ta-students/${id}/360/`, {
                     headers: { 'Authorization': `Bearer ${tk}` }

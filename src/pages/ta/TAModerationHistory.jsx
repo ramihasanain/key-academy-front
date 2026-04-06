@@ -7,7 +7,7 @@ export const TAModerationHistory = () => {
     const [loading, setLoading] = useState(true)
 
     const fetchHistory = async () => {
-        const tk = localStorage.getItem('access_token')
+        const tk = sessionStorage.getItem('spy_token') || localStorage.getItem('access_token')
         try {
             const res = await fetch(API + '/api/interactions/moderate/mute-history/', {
                 headers: { 'Authorization': `Bearer ${tk}` }

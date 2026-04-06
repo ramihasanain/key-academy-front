@@ -37,7 +37,7 @@ export const TAMutedStudents = () => {
     const uniqueTypes = [...new Set(mutedStudents.map(m => m.mute_type))].filter(Boolean)
 
     const fetchMuted = async () => {
-        const tk = localStorage.getItem('access_token')
+        const tk = sessionStorage.getItem('spy_token') || localStorage.getItem('access_token')
         try {
             const res = await fetch(API + '/api/interactions/moderate/muted-students/', {
                 headers: { 'Authorization': `Bearer ${tk}` }
@@ -67,7 +67,7 @@ export const TAMutedStudents = () => {
             return
         }
 
-        const tk = localStorage.getItem('access_token')
+        const tk = sessionStorage.getItem('spy_token') || localStorage.getItem('access_token')
         try {
             const res = await fetch(`${API}/api/interactions/moderate/mute/${dialog.studentId}/`, {
                 method: 'POST',
