@@ -53,10 +53,10 @@ export const TA360View = ({ id }) => {
     }
 
     return (
-        <div style={{ marginBottom: '40px', background: 'rgba(34, 211, 238, 0.03)', borderRadius: '12px', border: '1px solid #22d3ee', padding: '25px' }}>
+        <div className="hq-360-container" style={{ marginBottom: '40px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '25px' }}>
                 <h2 style={{ color: '#22d3ee', display: 'flex', alignItems: 'center', gap: '10px', margin: 0 }}>
-                    <HiOutlineChartBar size={28} /> التقرير الشامل والمراقبة الذكية (TA-Spy 360)
+                    <HiOutlineChartBar size={28} /> الملف الشامل والمراقبة الذكية (TA-Spy 360)
                 </h2>
                 <button
                     onClick={handleImpersonate}
@@ -66,36 +66,71 @@ export const TA360View = ({ id }) => {
                 </button>
             </div>
 
+            {/* بطاقة التعريف Profile Card */}
+            <div className="glass-card" style={{ padding: '25px', borderRadius: '15px', marginBottom: '30px', display: 'flex', flexWrap: 'wrap', gap: '20px', alignItems: 'center' }}>
+                <div style={{
+                    width: '100px', height: '100px', borderRadius: '50%',
+                    background: `linear-gradient(135deg, var(--hq-primary), #3b82f6)`,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontSize: '36px', fontWeight: 'bold', color: 'white', flexShrink: 0
+                }}>
+                    {profile.initials || '?'}
+                </div>
+                <div style={{ flex: '1 1 300px' }}>
+                    <h2 style={{ margin: '0 0 10px', fontSize: '22px' }}>{profile.name}</h2>
+                    <p style={{ margin: '0 0 5px', color: '#10b981', fontSize: '14px', fontWeight: 'bold' }}>
+                        المشرف المنفذ لـ: {profile.teacher}
+                    </p>
+                    <p style={{ margin: '0', color: 'var(--hq-text-muted)', fontSize: '14px' }}>
+                        الخلايا المقيدة: {profile.groups_str}
+                    </p>
+                    <p style={{ margin: '5px 0 0', color: 'var(--hq-text-muted)', fontSize: '14px', display: 'flex', gap: '10px' }}>
+                        <span>الهاتف: <span dir="ltr">{profile.phone}</span></span>
+                        <span>اليوزر: <span dir="ltr">{profile.username}</span></span>
+                    </p>
+                </div>
+                <div style={{ flexShrink: 0, textAlign: 'center', padding: '15px 30px', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                    <div style={{ fontSize: '13px', color: 'var(--hq-text-muted)', marginBottom: '5px' }}>حالة החשבון</div>
+                    {profile.is_active ? (
+                        <div style={{ fontSize: '18px', fontWeight: 'bold', color: '#10b981', padding: '5px 15px', background: 'rgba(16, 185, 129, 0.1)', borderRadius: '20px' }}>فعال النشاط</div>
+                    ) : (
+                        <div style={{ fontSize: '18px', fontWeight: 'bold', color: '#ef4444', padding: '5px 15px', background: 'rgba(239, 68, 68, 0.1)', borderRadius: '20px' }}>حساب معطل</div>
+                    )}
+                </div>
+            </div>
+
             {/* Stats KPI */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '15px', marginBottom: '30px' }}>
-                <div className="hq-stat-card" style={{ padding: '15px', background: 'var(--hq-bg)' }}>
-                    <div className="hq-sc-icon" style={{ background: 'rgba(16, 185, 129, 0.1)', color: '#10b981', width: '40px', height: '40px' }}><HiOutlineChatBubbleOvalLeftEllipsis size={20} /></div>
-                    <div className="hq-sc-info">
-                        <h3 style={{ fontSize: '0.85rem' }}>إجمالي الردود (الأسئلة)</h3>
-                        <div className="hq-sc-value" style={{ fontSize: '1.3rem' }}>{stats.total_replies}</div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '20px', marginBottom: '30px' }}>
+                <div className="glass-card" style={{ padding: '20px', borderRadius: '12px', display: 'flex', alignItems: 'center', gap: '15px' }}>
+                    <div style={{ width: '50px', height: '50px', borderRadius: '10px', background: 'rgba(16, 185, 129, 0.1)', color: '#10b981', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px' }}><HiOutlineChatBubbleOvalLeftEllipsis /></div>
+                    <div>
+                        <div style={{ fontSize: '13px', color: 'var(--hq-text-muted)' }}>إجمالي الردود (الأسئلة)</div>
+                        <div style={{ fontSize: '24px', fontWeight: 'bold' }}>{stats.total_replies}</div>
                     </div>
                 </div>
-                <div className="hq-stat-card" style={{ padding: '15px', background: 'var(--hq-bg)' }}>
-                    <div className="hq-sc-icon" style={{ background: 'rgba(236, 72, 153, 0.1)', color: '#ec4899', width: '40px', height: '40px' }}><HiOutlineChatBubbleLeftRight size={20} /></div>
-                    <div className="hq-sc-info">
-                        <h3 style={{ fontSize: '0.85rem' }}>رسائل المجموعات اللايف</h3>
-                        <div className="hq-sc-value" style={{ fontSize: '1.3rem' }}>{stats.total_messages}</div>
+                <div className="glass-card" style={{ padding: '20px', borderRadius: '12px', display: 'flex', alignItems: 'center', gap: '15px' }}>
+                    <div style={{ width: '50px', height: '50px', borderRadius: '10px', background: 'rgba(236, 72, 153, 0.1)', color: '#ec4899', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px' }}><HiOutlineChatBubbleLeftRight /></div>
+                    <div>
+                        <div style={{ fontSize: '13px', color: 'var(--hq-text-muted)' }}>رسائل المجموعات اللايف</div>
+                        <div style={{ fontSize: '24px', fontWeight: 'bold' }}>{stats.total_messages}</div>
                     </div>
                 </div>
-                <div className="hq-stat-card" style={{ padding: '15px', background: 'var(--hq-bg)' }}>
-                    <div className="hq-sc-icon" style={{ background: 'rgba(245, 158, 11, 0.1)', color: '#f59e0b', width: '40px', height: '40px' }}><HiOutlineClock size={20} /></div>
-                    <div className="hq-sc-info">
-                        <h3 style={{ fontSize: '0.85rem' }}>متوسط سرعة الرد</h3>
-                        <div className="hq-sc-value" style={{ fontSize: '1.3rem' }}>{stats.avg_response_time_min} دقيقة</div>
+                <div className="glass-card" style={{ padding: '20px', borderRadius: '12px', display: 'flex', alignItems: 'center', gap: '15px' }}>
+                    <div style={{ width: '50px', height: '50px', borderRadius: '10px', background: 'rgba(245, 158, 11, 0.1)', color: '#f59e0b', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px' }}><HiOutlineClock /></div>
+                    <div>
+                        <div style={{ fontSize: '13px', color: 'var(--hq-text-muted)' }}>متوسط سرعة الرد</div>
+                        <div style={{ fontSize: '24px', fontWeight: 'bold' }}>{stats.avg_response_time_min} دقيقة</div>
                     </div>
                 </div>
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '25px' }}>
-                {/* QA Log */}
-                <div className="hq-table-card" style={{ border: '1px solid var(--hq-border)' }}>
-                    <h3 style={{ padding: '20px', borderBottom: '1px solid var(--hq-border)', color: 'var(--hq-primary)', margin: 0 }}>آخر إجاباته للطلبة بالطيلة الفائتة</h3>
-                    <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '15px', maxHeight: '400px', overflowY: 'auto' }}>
+                <div className="glass-card" style={{ padding: '25px', borderRadius: '15px' }}>
+                    <h3 style={{ margin: '0 0 20px', fontSize: '18px', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '10px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <HiOutlineChatBubbleOvalLeftEllipsis style={{ color: '#10b981' }} />
+                        آخر إجاباته للطلبة بالطيلة الفائتة
+                    </h3>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', maxHeight: '400px', overflowY: 'auto' }}>
                         {recent_qa.length === 0 ? <p style={{ color: 'var(--hq-text-muted)', textAlign: 'center' }}>لم يجب على أي سؤال بعد.</p> : recent_qa.map((qa, i) => (
                             <div key={i} style={{ background: 'var(--hq-bg)', padding: '15px', borderRadius: '8px', borderRight: '3px solid #10b981' }}>
                                 <div style={{ fontSize: '0.8rem', color: 'var(--hq-text-muted)', marginBottom: '8px' }}>سؤال الطالب:</div>
@@ -108,10 +143,12 @@ export const TA360View = ({ id }) => {
                     </div>
                 </div>
 
-                {/* Chat Log */}
-                <div className="hq-table-card" style={{ border: '1px solid var(--hq-border)' }}>
-                    <h3 style={{ padding: '20px', borderBottom: '1px solid var(--hq-border)', color: '#ec4899', margin: 0 }}>آخر مشاركاته بمجموعات المحادثة الحية</h3>
-                    <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '15px', maxHeight: '400px', overflowY: 'auto' }}>
+                <div className="glass-card" style={{ padding: '25px', borderRadius: '15px' }}>
+                    <h3 style={{ margin: '0 0 20px', fontSize: '18px', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '10px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <HiOutlineChatBubbleLeftRight style={{ color: '#ec4899' }} />
+                        آخر مشاركاته بمجموعات المحادثة الحية
+                    </h3>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', maxHeight: '400px', overflowY: 'auto' }}>
                         {recent_chat.length === 0 ? <p style={{ color: 'var(--hq-text-muted)', textAlign: 'center' }}>لم يرسل أي رسائل في المجموعات.</p> : recent_chat.map((m, i) => (
                             <div key={i} style={{ background: 'var(--hq-bg)', padding: '15px', borderRadius: '8px', borderRight: '3px solid #ec4899' }}>
                                 {m.content && <p style={{ margin: '0 0 10px', color: 'white', lineHeight: '1.5' }}>{m.content}</p>}
