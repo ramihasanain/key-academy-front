@@ -161,7 +161,7 @@ export const Student360View = ({ id }) => {
     if (loading) return <div className="hq-loading" style={{ padding: '50px' }}>جاري سحب بيانات الطالب التفصيلية (360)...</div>
     if (!data) return <div className="hq-loading" style={{ color: 'red' }}>لم يتم العثور على الطالب.</div>
 
-    const { student, kpis, courses, history, quizzes, questions, notes, chats } = data
+    const { student, kpis, courses, history, quizzes, questions, notes, chats, cards } = data
 
     const renderHierarchy = (item, timeField) => (
         <div style={{ marginTop: '8px', fontSize: '0.8rem', color: 'var(--hq-text-muted)', display: 'flex', flexWrap: 'wrap', gap: '6px', alignItems: 'center' }}>
@@ -196,6 +196,7 @@ export const Student360View = ({ id }) => {
     const filteredQuestions = questions.filter(q => checkCourse(q.course_title));
     const filteredNotes = notes.filter(n => checkCourse(n.course_title));
     const filteredChats = chats.filter(c => checkCourse(c.course_title));
+    const filteredCards = (cards || []).filter(c => checkCourse(c.course_title));
 
     return (
         <div className="hq-form-wrap">
@@ -387,8 +388,8 @@ export const Student360View = ({ id }) => {
                 </div>
             </div>
 
-            {/* Notes, QA, Chats */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px', marginTop: '20px' }}>
+            {/* Notes, QA, Chats, Cards */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '20px', marginTop: '20px' }}>
                 <div className="hq-table-card">
                     <h3 style={{ padding: '20px', borderBottom: '1px solid var(--hq-border)', color: 'var(--hq-primary)' }}>أسئلة واستفسارات</h3>
                     <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
@@ -434,6 +435,23 @@ export const Student360View = ({ id }) => {
                                 >
                                     🗑️
                                 </button>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+                <div className="hq-table-card">
+                    <h3 style={{ padding: '20px', borderBottom: '1px solid var(--hq-border)', color: 'var(--hq-primary)' }}>كروت التفعيل (الأكواد)</h3>
+                    <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                        {!filteredCards || filteredCards.length === 0 ? <p style={{ color: 'var(--hq-text-muted)' }}>لا يوجد كروت تفعيل تطابق الفلتر</p> : filteredCards.map((c, i) => (
+                            <div key={i} style={{ background: 'var(--hq-bg)', padding: '15px', borderRadius: '8px', borderLeft: c.is_used ? '3px solid #34d399' : '3px solid #ef4444', position: 'relative' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                                    <span style={{ fontSize: '1.2rem', fontWeight: 'bold', color: 'var(--hq-primary-text)', letterSpacing: '2px' }}>{c.code}</span>
+                                    <span style={{ background: c.is_used ? 'rgba(52,211,153,0.1)' : 'rgba(239,68,68,0.1)', color: c.is_used ? '#34d399' : '#ef4444', padding: '4px 10px', borderRadius: '20px', fontSize: '0.8rem', fontWeight: 'bold' }}>
+                                        {c.is_used ? '✅ مستخدم' : '❌ متاح'}
+                                    </span>
+                                </div>
+                                {renderHierarchy(c, 'used_at')}
                             </div>
                         ))}
                     </div>
