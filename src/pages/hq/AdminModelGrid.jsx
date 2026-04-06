@@ -380,7 +380,16 @@ export const AdminModelGrid = () => {
                                                     <button className="hq-action-btn edit" style={{ color: '#6366f1', background: 'rgba(99,102,241,0.1)', borderColor: '#6366f1' }} onClick={() => navigate(`/hq/enrollments?course=${row.id}`)} title="عرض الطلبة المشتركين"><HiOutlineUsers /></button>
                                                 )}
                                                 {model === 'grades' && (
-                                                    <button className="hq-action-btn edit" style={{ color: '#38bdf8', background: 'rgba(56,189,248,0.1)', borderColor: '#38bdf8' }} onClick={() => navigate(`/hq/students?grade__icontains=${row.title}`)} title="عرض طلاب المرحلة"><HiOutlineUsers /></button>
+                                                    <button className="hq-action-btn edit" style={{ color: '#38bdf8', background: 'rgba(56,189,248,0.1)', borderColor: '#38bdf8' }} onClick={() => {
+                                                        let g = row.title || '';
+                                                        if (g.includes('سادس') || g.includes('السادس')) g = 'السادس';
+                                                        else if (g.includes('خامس') || g.includes('الخامس')) g = 'الخامس';
+                                                        else if (g.includes('رابع') || g.includes('الرابع')) g = 'الرابع';
+                                                        else if (g.includes('ثالث') || g.includes('الثالث')) g = 'الثالث المتوسط';
+                                                        else if (g.includes('ثاني') || g.includes('الثاني')) g = 'الثاني المتوسط';
+                                                        else if (g.includes('أول') || g.includes('الاول') || g.includes('الأول')) g = 'الأول المتوسط';
+                                                        navigate(`/hq/students?grade__icontains=${g}`);
+                                                    }} title="عرض طلاب المرحلة"><HiOutlineUsers /></button>
                                                 )}
                                                 {model === 'branches' && (
                                                     <button className="hq-action-btn edit" style={{ color: '#38bdf8', background: 'rgba(56,189,248,0.1)', borderColor: '#38bdf8' }} onClick={() => navigate(`/hq/students?branch__name__icontains=${row.name}`)} title="عرض طلاب الفرع"><HiOutlineUsers /></button>
