@@ -6,7 +6,24 @@ import './Admin.css'
 
 // Configuration for models
 const SCHEMAS = {
-    users: { title: 'المستخدمين (مدراء النظام)', endpoint: 'users', columns: [{ key: 'username', label: 'الاسم' }, { key: 'email', label: 'البريد' }, { key: 'is_superuser', label: 'Super Admin', type: 'boolean' }], filters: [{ key: 'is_superuser', label: 'نوع الحساب', options: [{ value: 'true', label: 'Super Admin' }, { value: 'false', label: 'مستخدم عادي' }] }] },
+    users: { 
+        title: 'المستخدمين (مدراء النظام)', endpoint: 'users',
+        columns: [
+            { key: 'first_name', label: 'الاسم الأول' },
+            { key: 'last_name', label: 'الاسم الأخير' },
+            { key: 'phone', label: 'رقم الهاتف' },
+            { key: 'role', label: 'الصلاحية (الدور)' },
+            { key: 'is_superuser', label: 'صلاحيات عليا', type: 'boolean' }
+        ],
+        filters: [{ 
+            key: 'role', label: 'الدور', 
+            options: [
+                { value: 'admin', label: 'مدير منصة (Admin)' }, 
+                { value: 'assistant', label: 'مساعد (Assistant)' },
+                { value: 'teacher', label: 'أستاذ (Teacher)' }
+            ] 
+        }] 
+    },
     students: {
         title: 'الطلاب المسجلين', endpoint: 'students', columns: [ { key: 'first_name', label: 'الاسم الأول' }, { key: 'last_name', label: 'الاسم الأخير' }, { key: 'phone', label: 'الهاتف' }, { key: 'parent_phone', label: 'هاتف الوالد' }, { key: 'city', label: 'المدينة' }, { key: 'grade', label: 'المرحلة' }, { key: 'branch_str', label: 'الفرع' }, { key: 'date_joined', label: 'الإنضمام', type: 'datetime' } ],
         filters: [{ key: 'grade__icontains', label: 'المرحلة', optionsKey: 'grades' }, { key: 'branch__name__icontains', label: 'الفرع', optionsKey: 'branches' }, { key: 'is_active', label: 'حالة الحساب', options: [{ value: 'true', label: 'فعال' }, { value: 'false', label: 'مجمد' }] }]
