@@ -162,7 +162,7 @@ export const AdminModelGrid = () => {
             } finally {
                 setLoading(false)
             }
-        }, 300)
+        }, 600)
 
         return () => clearTimeout(delayDebounceFn)
     }, [model, searchTerm, location.search, activeFilters])
