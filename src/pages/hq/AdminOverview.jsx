@@ -191,10 +191,6 @@ export const AdminOverview = () => {
                     <option value="monthly">هذا الشهر (آخر 30 يوم)</option>
                 </select>
 
-                <div style={{ display: 'flex', gap: '10px', gridColumn: 'span 2' }}>
-                    <input className="hq-filter-input" type="date" value={dateFrom} onChange={(e) => { setDateFrom(e.target.value); setPeriod('all'); }} title="من تاريخ" />
-                    <input className="hq-filter-input" type="date" value={dateTo} onChange={(e) => { setDateTo(e.target.value); setPeriod('all'); }} title="إلى تاريخ" />
-                </div>
 
                 <select className="hq-filter-input" value={grade} onChange={(e) => setGrade(e.target.value)}>
                     <option value="all">الصف (الجميع)</option>
