@@ -46,6 +46,7 @@ export const AdminOverview = () => {
                     setTeachersList(data.teachers || [])
                     setSubjectsList((data.subjects || []).map(s => ({ val: s.name })))
                     setGradesList((data.grades || []).map(g => ({ val: g.name })))
+                    setBranchesList((data.branches || []).map(b => ({ val: b.name })))
                 }
             } catch (err) {}
         }
@@ -58,19 +59,19 @@ export const AdminOverview = () => {
 
         let filtered = combinations;
 
-        // 0. Populate root Grades
-        const uniqueGrades = new Set(combinations.map(c => c.grade).filter(Boolean));
-        setGradesList(Array.from(uniqueGrades).sort().map(g => ({ val: g })));
-
-        // 1. Filter by Grade to reveal available branches
-        if (grade !== 'all') filtered = filtered.filter(c => c.grade === grade);
-        const uniqueBranches = new Set(filtered.map(c => c.branch).filter(Boolean));
-        setBranchesList(Array.from(uniqueBranches).sort().map(b => ({ val: b })));
+        // 1. Filter by Grade to reveal available branches (or keep static if 'all')
+        if (grade !== 'all') {
+            filtered = filtered.filter(c => c.grade === grade);
+            const uniqueBranches = new Set(filtered.map(c => c.branch).filter(Boolean));
+            setBranchesList(Array.from(uniqueBranches).sort().map(b => ({ val: b })));
+        }
 
         // 2. Filter by Branch to reveal available subjects
-        if (branch !== 'all') filtered = filtered.filter(c => c.branch === branch);
-        const uniqueSubjects = new Set(filtered.map(c => c.subject).filter(Boolean));
-        setSubjectsList(Array.from(uniqueSubjects).sort().map(s => ({ val: s })));
+        if (branch !== 'all') {
+            filtered = filtered.filter(c => c.branch === branch);
+            const uniqueSubjects = new Set(filtered.map(c => c.subject).filter(Boolean));
+            setSubjectsList(Array.from(uniqueSubjects).sort().map(s => ({ val: s })));
+        }
 
         // 3. Filter by Subject to reveal available teachers
         if (subject !== 'all') filtered = filtered.filter(c => c.subject === subject);
