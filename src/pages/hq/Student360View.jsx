@@ -406,7 +406,7 @@ export const Student360View = ({ id }) => {
                 </div>
 
                 <div className="hq-table-card">
-                    <h3 style={{ padding: '20px', borderBottom: '1px solid var(--hq-border)', color: 'var(--hq-primary)' }}>المشاركات العامة (الدردشات)</h3>
+                    <h3 style={{ padding: '20px', borderBottom: '1px solid var(--hq-border)', color: 'var(--hq-primary)' }}>المشاركات العامة في المجموعة</h3>
                     <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
                         {!filteredChats || filteredChats.length === 0 ? <p style={{ color: 'var(--hq-text-muted)' }}>لا يوجد دردشات تطابق الفلتر</p> : filteredChats.map((c, i) => (
                             <div key={i} style={{ background: 'var(--hq-bg)', padding: '15px', borderRadius: '8px', borderLeft: '3px solid #ec4899', position: 'relative' }}>
