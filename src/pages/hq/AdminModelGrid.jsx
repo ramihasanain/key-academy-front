@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useParams, useNavigate, useOutletContext, useLocation } from 'react-router-dom'
 import { API } from '../../config'
-import { HiOutlinePlus, HiOutlinePencilSquare, HiOutlineTrash, HiOutlineMagnifyingGlass, HiOutlineEye, HiOutlineUsers, HiOutlineNoSymbol, HiOutlinePlay, HiOutlineCheck, HiOutlineExclamationCircle, HiOutlineAcademicCap } from 'react-icons/hi2'
+import { HiOutlinePlus, HiOutlinePencilSquare, HiOutlineTrash, HiOutlineMagnifyingGlass, HiOutlineEye, HiOutlineUsers, HiOutlineNoSymbol, HiOutlinePlay, HiOutlineCheck, HiOutlineExclamationCircle, HiOutlineAcademicCap, HiOutlineArrowRight } from 'react-icons/hi2'
 import './Admin.css'
 
 // Configuration for models
@@ -34,7 +34,7 @@ const SCHEMAS = {
         columns: [ { key: 'name', label: 'اسم المساعد' }, { key: 'teacher', label: 'التابع للأستاذ' }, { key: 'phone', label: 'رقم الهاتف' }, { key: 'total_replies', label: 'إجابات الأسئلة', type: 'number_badge' }, { key: 'total_messages', label: 'رسائل التوجيه', type: 'number_badge' }, { key: 'avg_response_time_min', label: 'سرعة الرد (دقائق)', type: 'number_badge' }, { key: 'is_active', label: 'مفعل', type: 'boolean' } ],
         filters: [{ key: 'teacher', label: 'التابع للأستاذ', optionsKey: 'teachers' }, { key: 'is_active', label: 'الحالة', options: [{ value: 'true', label: 'مفعل' }, { value: 'false', label: 'معطل' }] }]
     },
-    enrollments: { title: 'الطلاب المشتركين بالدورات', endpoint: 'enrollments', columns: [{ key: 'student', label: 'الطالب' }, { key: 'student_username', label: 'اليوزر (@)' }, { key: 'course', label: 'اسم الدورة' }, { key: 'chat_shard', label: 'المجموعة (الشات)' }, { key: 'is_completed', label: 'مكتمل', type: 'boolean' }, { key: 'is_active', label: 'مفعل', type: 'boolean' }], filters: [{ key: 'course__teacher', label: 'الأستاذ', optionsKey: 'teachers' }, { key: 'course__subject__name', label: 'المادة', optionsKey: 'subjects' }, { key: 'course__grade__title', label: 'المرحلة', optionsKey: 'grades' }, { key: 'is_active', label: 'حالة الاشتراك', options: [{ value: 'true', label: 'فعال' }, { value: 'false', label: 'مجمد' }] }, { key: 'is_completed', label: 'الختمة', options: [{ value: 'true', label: 'منهي الكورس' }, { value: 'false', label: 'قيد المشاهدة' }] }] },
+    enrollments: { title: 'الطلاب المشتركين بالدورات', endpoint: 'enrollments', columns: [{ key: 'student_str', label: 'الطالب' }, { key: 'student_username', label: 'اليوزر (@)' }, { key: 'course_str', label: 'اسم الدورة' }, { key: 'chat_shard_str', label: 'المجموعة (الشات)' }, { key: 'is_completed', label: 'مكتمل', type: 'boolean' }, { key: 'is_active', label: 'مفعل', type: 'boolean' }], filters: [{ key: 'course__teacher', label: 'الأستاذ', optionsKey: 'teachers' }, { key: 'course__subject__name', label: 'المادة', optionsKey: 'subjects' }, { key: 'course__grade__title', label: 'المرحلة', optionsKey: 'grades' }, { key: 'is_active', label: 'حالة الاشتراك', options: [{ value: 'true', label: 'فعال' }, { value: 'false', label: 'مجمد' }] }, { key: 'is_completed', label: 'الختمة', options: [{ value: 'true', label: 'منهي الكورس' }, { value: 'false', label: 'قيد المشاهدة' }] }] },
     contactmessages: { title: 'الاستفسارات وتواصل معنا', endpoint: 'contactmessages', columns: [{ key: 'name', label: 'الاسم' }, { key: 'subject', label: 'الموضوع' }, { key: 'created_at', label: 'التاريخ', type: 'datetime' }, { key: 'is_read', label: 'محلولة', type: 'boolean' }], filters: [{ key: 'is_read', label: 'حالة الاستفسار', options: [{ value: 'true', label: 'تم تقديم حل' }, { value: 'false', label: 'قيد الانتظار لمعالجته' }] }] },
     faqs: { title: 'الأسئلة الشائعة', endpoint: 'faqs', columns: [{ key: 'question', label: 'السؤال' }, { key: 'category', label: 'التصنيف' }, { key: 'order', label: 'الترتيب' }] },
     branches: { title: 'الفروع الدراسية', endpoint: 'branches', columns: [{ key: 'name', label: 'اسم الفرع' }, { key: 'order', label: 'الترتيب' }] },
@@ -245,16 +245,21 @@ export const AdminModelGrid = () => {
     return (
         <div className="hq-grid-wrap">
             <div className="hq-page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div>
-                    <h2 style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-                        إدارة {schema.title}
-                        {totalCount > 0 && !loading && (
-                            <span style={{ fontSize: '13px', background: 'rgba(255,255,255,0.1)', padding: '4px 12px', borderRadius: '20px', color: 'var(--blue-main)', fontWeight: 'bold', border: '1px solid rgba(255,255,255,0.05)' }}>
-                                {totalCount} سجل مطابق
-                            </span>
-                        )}
-                    </h2>
-                    <p>عرض، إضافة وتعديل البيانات</p>
+                <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
+                    <button className="hq-action-btn edit" onClick={() => navigate(-1)} style={{ color: 'var(--hq-text-muted)', background: 'rgba(255,255,255,0.05)', fontSize: '20px', width: '45px', height: '45px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }} title="العودة للصفحة السابقة">
+                        <HiOutlineArrowRight />
+                    </button>
+                    <div>
+                        <h2 style={{ display: 'flex', alignItems: 'center', gap: '15px', margin: 0 }}>
+                            إدارة {schema.title}
+                            {totalCount > 0 && !loading && (
+                                <span style={{ fontSize: '13px', background: 'rgba(255,255,255,0.1)', padding: '4px 12px', borderRadius: '20px', color: 'var(--blue-main)', fontWeight: 'bold', border: '1px solid rgba(255,255,255,0.05)' }}>
+                                    {totalCount} سجل مطابق
+                                </span>
+                            )}
+                        </h2>
+                        <p style={{ margin: '5px 0 0' }}>عرض، إضافة وتعديل البيانات</p>
+                    </div>
                 </div>
                 {canAdd && (
                     <button className="hq-btn-primary" onClick={() => navigate(`/hq/${model}/new`)}>
