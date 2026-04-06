@@ -16,7 +16,7 @@ const SCHEMAS = {
             { key: 'last_name', label: 'الاسم الأخير', type: 'text' },
             { key: 'email', label: 'البريد الإلكتروني', type: 'text' },
             { key: 'is_staff', label: 'صلاحيات الموظفين (دخول لوحة التحكم)', type: 'boolean' },
-            { key: 'is_superuser', label: 'مدير عام علوي (الوصول الشامل)', type: 'boolean' }
+            { key: 'is_superuser', label: 'صلاحيات كاملة', type: 'boolean' }
         ]
     },
     students: {
