@@ -373,74 +373,76 @@ export const AdminModelGrid = () => {
                                                                             row[c.key]?.toString().substring(0, 150) || '-'}
                                                 </td>
                                             ))}
-                                            <td className="hq-actions-cell" style={{ display: 'flex', gap: '8px', justifyContent: 'center', alignItems: 'center', flexWrap: 'wrap' }}>
-                                                {model === 'students' ? (
-                                                    <button className="hq-action-btn edit" style={{ color: '#38bdf8', background: 'rgba(56,189,248,0.1)', borderColor: '#38bdf8' }} onClick={() => navigate(`/hq/${model}/${row.id}/360`)} title="عرض الملف الثلاثي الأبعاد"><HiOutlineEye /></button>
-                                                ) : (model === 'teachers' || model === 'teacherassistants') ? (
-                                                    <button className="hq-action-btn edit" style={{ color: '#38bdf8', background: 'rgba(56,189,248,0.1)', borderColor: '#38bdf8', marginRight: '5px' }} onClick={() => navigate(`/hq/${model}/${row.id}/360`)} title="عرض التقرير السري 360"><HiOutlineEye /></button>
-                                                ) : null}
-                                                {canChange && <button className="hq-action-btn edit" onClick={() => navigate(`/hq/${model}/${row.id}`)}><HiOutlinePencilSquare /></button>}
-                                                {model === 'teachers' && (
-                                                    <>
-                                                        <button className="hq-action-btn edit" style={{ color: '#8b5cf6', background: 'rgba(139,92,246,0.1)', borderColor: '#8b5cf6', marginRight: '5px' }} onClick={() => navigate(`/hq/teacherassistants?teacher=${row.id}`)} title="عرض المساعدين لهذا الأستاذ"><HiOutlineUsers /></button>
-                                                        <button className="hq-action-btn edit" style={{ color: '#0ea5e9', background: 'rgba(14,165,233,0.1)', borderColor: '#0ea5e9' }} onClick={() => navigate(`/hq/enrollments?course__teacher=${row.id}`)} title="عرض طلاب هذا الأستاذ"><HiOutlineAcademicCap /></button>
-                                                    </>
-                                                )}
-                                                {model === 'teacherassistants' && (
-                                                    <button className="hq-action-btn edit" style={{ color: '#0ea5e9', background: 'rgba(14,165,233,0.1)', borderColor: '#0ea5e9' }} onClick={() => navigate(`/hq/enrollments?chat_shard__assistant=${row.id}`)} title="عرض الطلاب المقيدين لدى هذا المساعد"><HiOutlineUsers /></button>
-                                                )}
-                                                {model === 'courses' && (
-                                                    <button className="hq-action-btn edit" style={{ color: '#6366f1', background: 'rgba(99,102,241,0.1)', borderColor: '#6366f1' }} onClick={() => navigate(`/hq/enrollments?course=${row.id}`)} title="عرض الطلبة المشتركين"><HiOutlineUsers /></button>
-                                                )}
-                                                {model === 'grades' && (
-                                                    <button className="hq-action-btn edit" style={{ color: '#38bdf8', background: 'rgba(56,189,248,0.1)', borderColor: '#38bdf8' }} onClick={() => {
-                                                        let g = row.title || '';
-                                                        if (g.includes('سادس') || g.includes('السادس')) g = 'السادس';
-                                                        else if (g.includes('خامس') || g.includes('الخامس')) g = 'الخامس';
-                                                        else if (g.includes('رابع') || g.includes('الرابع')) g = 'الرابع';
-                                                        else if (g.includes('ثالث') || g.includes('الثالث')) g = 'الثالث المتوسط';
-                                                        else if (g.includes('ثاني') || g.includes('الثاني')) g = 'الثاني المتوسط';
-                                                        else if (g.includes('أول') || g.includes('الاول') || g.includes('الأول')) g = 'الأول المتوسط';
-                                                        navigate(`/hq/students?grade__icontains=${g}`);
-                                                    }} title="عرض طلاب المرحلة"><HiOutlineUsers /></button>
-                                                )}
-                                                {model === 'branches' && (
-                                                    <button className="hq-action-btn edit" style={{ color: '#38bdf8', background: 'rgba(56,189,248,0.1)', borderColor: '#38bdf8' }} onClick={() => navigate(`/hq/students?branch__name__icontains=${row.name}`)} title="عرض طلاب الفرع"><HiOutlineUsers /></button>
-                                                )}
-                                                {model === 'subjects' && (
-                                                    <button className="hq-action-btn edit" style={{ color: '#6366f1', background: 'rgba(99,102,241,0.1)', borderColor: '#6366f1' }} onClick={() => navigate(`/hq/enrollments?course__subject__name=${row.name}`)} title="عرض الطلبة المشتركين بالمادة"><HiOutlineUsers /></button>
-                                                )}
-                                                {model === 'enrollments' && (
-                                                    <button className="hq-action-btn edit" style={{ color: '#8b5cf6', background: 'rgba(139,92,246,0.1)', borderColor: '#8b5cf6' }} onClick={() => navigate(`/hq/students/${row.student}/360`)} title="عرض ملف الطالب"><HiOutlineEye /></button>
-                                                )}
-                                                {model === 'enrollments' && (
-                                                    <button className="hq-action-btn edit"
-                                                        style={{ color: row.is_active !== false ? '#ef4444' : '#10b981', background: row.is_active !== false ? 'rgba(239,68,68,0.1)' : 'rgba(16,185,129,0.1)', borderColor: row.is_active !== false ? '#ef4444' : '#10b981' }}
-                                                        onClick={() => handleToggleBoolean(row.id, 'is_active', row.is_active !== false ? true : false)}
-                                                        title={row.is_active !== false ? "تجميد الاشتراك" : "تفعيل الاشتراك"}
-                                                    >
-                                                        {row.is_active !== false ? <HiOutlineNoSymbol /> : <HiOutlinePlay />}
-                                                    </button>
-                                                )}
-                                                {model === 'coursegroups' && (
-                                                    <button className="hq-action-btn edit" style={{ color: '#0ea5e9', background: 'rgba(14,165,233,0.1)', borderColor: '#0ea5e9' }} onClick={() => navigate(`/hq/enrollments?chat_shard=${row.id}`)} title="عرض طلاب المجموعة (الخلية)"><HiOutlineUsers /></button>
-                                                )}
-                                                {model === 'contactmessages' && (
-                                                    <button className="hq-action-btn edit"
-                                                        style={{ color: '#38bdf8', background: 'rgba(56,189,248,0.1)', borderColor: '#38bdf8' }}
-                                                        onClick={() => {
-                                                            setPreviewContact(row);
-                                                            setResolutionNote(row.resolution_note || '');
-                                                        }}
-                                                        title="استعراض التفاصيل وحل المشكلة"
-                                                    >
-                                                        <HiOutlineEye />
-                                                    </button>
-                                                )}
-                                                {model === 'courses' && (
-                                                    <button className="hq-action-btn edit" style={{ color: '#10b981', background: 'rgba(16,185,129,0.1)', borderColor: '#10b981' }} onClick={() => window.open(`/course/${row.id}`, '_blank')} title="عرض الدورة للطلاب"><HiOutlineEye /></button>
-                                                )}
-                                                {canDelete && <button className="hq-action-btn delete" onClick={() => handleDelete(row.id)}><HiOutlineTrash /></button>}
+                                            <td className="hq-actions-cell" style={{ verticalAlign: 'middle', whiteSpace: 'nowrap', textAlign: 'center' }}>
+                                                <div style={{ display: 'inline-flex', gap: '8px', justifyContent: 'center', alignItems: 'center' }}>
+                                                    {model === 'students' ? (
+                                                        <button className="hq-action-btn edit" style={{ color: '#38bdf8', background: 'rgba(56,189,248,0.1)', borderColor: '#38bdf8' }} onClick={() => navigate(`/hq/${model}/${row.id}/360`)} title="عرض الملف الثلاثي الأبعاد"><HiOutlineEye /></button>
+                                                    ) : (model === 'teachers' || model === 'teacherassistants') ? (
+                                                        <button className="hq-action-btn edit" style={{ color: '#38bdf8', background: 'rgba(56,189,248,0.1)', borderColor: '#38bdf8', marginRight: '5px' }} onClick={() => navigate(`/hq/${model}/${row.id}/360`)} title="عرض التقرير السري 360"><HiOutlineEye /></button>
+                                                    ) : null}
+                                                    {canChange && <button className="hq-action-btn edit" onClick={() => navigate(`/hq/${model}/${row.id}`)}><HiOutlinePencilSquare /></button>}
+                                                    {model === 'teachers' && (
+                                                        <>
+                                                            <button className="hq-action-btn edit" style={{ color: '#8b5cf6', background: 'rgba(139,92,246,0.1)', borderColor: '#8b5cf6', marginRight: '5px' }} onClick={() => navigate(`/hq/teacherassistants?teacher=${row.id}`)} title="عرض المساعدين لهذا الأستاذ"><HiOutlineUsers /></button>
+                                                            <button className="hq-action-btn edit" style={{ color: '#0ea5e9', background: 'rgba(14,165,233,0.1)', borderColor: '#0ea5e9' }} onClick={() => navigate(`/hq/enrollments?course__teacher=${row.id}`)} title="عرض طلاب هذا الأستاذ"><HiOutlineAcademicCap /></button>
+                                                        </>
+                                                    )}
+                                                    {model === 'teacherassistants' && (
+                                                        <button className="hq-action-btn edit" style={{ color: '#0ea5e9', background: 'rgba(14,165,233,0.1)', borderColor: '#0ea5e9' }} onClick={() => navigate(`/hq/enrollments?chat_shard__assistant=${row.id}`)} title="عرض الطلاب المقيدين لدى هذا المساعد"><HiOutlineUsers /></button>
+                                                    )}
+                                                    {model === 'courses' && (
+                                                        <>
+                                                            <button className="hq-action-btn edit" style={{ color: '#6366f1', background: 'rgba(99,102,241,0.1)', borderColor: '#6366f1' }} onClick={() => navigate(`/hq/enrollments?course=${row.id}`)} title="عرض الطلبة المشتركين"><HiOutlineUsers /></button>
+                                                            <button className="hq-action-btn edit" style={{ color: '#10b981', background: 'rgba(16,185,129,0.1)', borderColor: '#10b981' }} onClick={() => window.open(`/course/${row.id}`, '_blank')} title="عرض الدورة للطلاب"><HiOutlineEye /></button>
+                                                        </>
+                                                    )}
+                                                    {model === 'grades' && (
+                                                        <button className="hq-action-btn edit" style={{ color: '#38bdf8', background: 'rgba(56,189,248,0.1)', borderColor: '#38bdf8' }} onClick={() => {
+                                                            let g = row.title || '';
+                                                            if (g.includes('سادس') || g.includes('السادس')) g = 'السادس';
+                                                            else if (g.includes('خامس') || g.includes('الخامس')) g = 'الخامس';
+                                                            else if (g.includes('رابع') || g.includes('الرابع')) g = 'الرابع';
+                                                            else if (g.includes('ثالث') || g.includes('الثالث')) g = 'الثالث المتوسط';
+                                                            else if (g.includes('ثاني') || g.includes('الثاني')) g = 'الثاني المتوسط';
+                                                            else if (g.includes('أول') || g.includes('الاول') || g.includes('الأول')) g = 'الأول المتوسط';
+                                                            navigate(`/hq/students?grade__icontains=${g}`);
+                                                        }} title="عرض طلاب المرحلة"><HiOutlineUsers /></button>
+                                                    )}
+                                                    {model === 'branches' && (
+                                                        <button className="hq-action-btn edit" style={{ color: '#38bdf8', background: 'rgba(56,189,248,0.1)', borderColor: '#38bdf8' }} onClick={() => navigate(`/hq/students?branch__name__icontains=${row.name}`)} title="عرض طلاب الفرع"><HiOutlineUsers /></button>
+                                                    )}
+                                                    {model === 'subjects' && (
+                                                        <button className="hq-action-btn edit" style={{ color: '#6366f1', background: 'rgba(99,102,241,0.1)', borderColor: '#6366f1' }} onClick={() => navigate(`/hq/enrollments?course__subject__name=${row.name}`)} title="عرض الطلبة المشتركين بالمادة"><HiOutlineUsers /></button>
+                                                    )}
+                                                    {model === 'enrollments' && (
+                                                        <button className="hq-action-btn edit" style={{ color: '#8b5cf6', background: 'rgba(139,92,246,0.1)', borderColor: '#8b5cf6' }} onClick={() => navigate(`/hq/students/${row.student}/360`)} title="عرض ملف الطالب"><HiOutlineEye /></button>
+                                                    )}
+                                                    {model === 'enrollments' && (
+                                                        <button className="hq-action-btn edit"
+                                                            style={{ color: row.is_active !== false ? '#ef4444' : '#10b981', background: row.is_active !== false ? 'rgba(239,68,68,0.1)' : 'rgba(16,185,129,0.1)', borderColor: row.is_active !== false ? '#ef4444' : '#10b981' }}
+                                                            onClick={() => handleToggleBoolean(row.id, 'is_active', row.is_active !== false ? true : false)}
+                                                            title={row.is_active !== false ? "تجميد الاشتراك" : "تفعيل الاشتراك"}
+                                                        >
+                                                            {row.is_active !== false ? <HiOutlineNoSymbol /> : <HiOutlinePlay />}
+                                                        </button>
+                                                    )}
+                                                    {model === 'coursegroups' && (
+                                                        <button className="hq-action-btn edit" style={{ color: '#0ea5e9', background: 'rgba(14,165,233,0.1)', borderColor: '#0ea5e9' }} onClick={() => navigate(`/hq/enrollments?chat_shard=${row.id}`)} title="عرض طلاب المجموعة (الخلية)"><HiOutlineUsers /></button>
+                                                    )}
+                                                    {model === 'contactmessages' && (
+                                                        <button className="hq-action-btn edit"
+                                                            style={{ color: '#38bdf8', background: 'rgba(56,189,248,0.1)', borderColor: '#38bdf8' }}
+                                                            onClick={() => {
+                                                                setPreviewContact(row);
+                                                                setResolutionNote(row.resolution_note || '');
+                                                            }}
+                                                            title="استعراض التفاصيل وحل المشكلة"
+                                                        >
+                                                            <HiOutlineExclamationCircle />
+                                                        </button>
+                                                    )}
+                                                    {canDelete && <button className="hq-action-btn delete" onClick={() => handleDelete(row.id)}><HiOutlineTrash /></button>}
+                                                </div>
                                             </td>
                                         </tr>
                                     ))

@@ -179,7 +179,14 @@ export const TA360View = ({ id }) => {
                                 <p style={{ margin: '0 0 10px', color: 'var(--hq-text)', fontStyle: 'italic', fontSize: '0.9rem' }}>"{qa.post_content}"</p>
                                 <div style={{ fontSize: '0.8rem', color: '#10b981', marginBottom: '5px', fontWeight: 'bold' }}>رد المساعد:</div>
                                 <p style={{ margin: '0 0 8px', color: 'var(--hq-text)', fontSize: '0.95rem' }}>{qa.my_reply}</p>
-                                <div style={{ fontSize: '0.75rem', color: 'var(--hq-text-muted)', textAlign: 'left' }}>{new Date(qa.time).toLocaleString('ar-EG')}</div>
+                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'center', justifyContent: 'space-between' }}>
+                                    <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap' }}>
+                                        {qa.course && <span style={{ background: 'rgba(56,189,248,0.1)', color: '#38bdf8', padding: '3px 8px', borderRadius: '12px', fontSize: '11px' }}>{qa.course}</span>}
+                                        {qa.module && <span style={{ background: 'rgba(139,92,246,0.1)', color: '#8b5cf6', padding: '3px 8px', borderRadius: '12px', fontSize: '11px' }}>{qa.module}</span>}
+                                        {qa.lesson && <span style={{ background: 'rgba(236,72,153,0.1)', color: '#ec4899', padding: '3px 8px', borderRadius: '12px', fontSize: '11px' }}>{qa.lesson}</span>}
+                                    </div>
+                                    <div style={{ fontSize: '0.75rem', color: 'var(--hq-text-muted)', textAlign: 'left' }}>{new Date(qa.time).toLocaleString('ar-EG')}</div>
+                                </div>
                             </div>
                         ))}
                     </div>
