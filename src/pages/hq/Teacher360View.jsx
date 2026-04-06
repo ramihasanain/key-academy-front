@@ -1,10 +1,14 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { API } from '../../config'
-import { HiOutlineArrowRight, HiOutlineUserGroup, HiOutlineBookOpen, HiOutlineBriefcase, HiOutlineUser, HiOutlineInformationCircle } from 'react-icons/hi2'
+import { HiOutlineUserGroup, HiOutlineBookOpen, HiOutlineBriefcase, HiOutlineUser, HiOutlineInformationCircle } from 'react-icons/hi2'
 import './Admin.css'
+import { useParams, useNavigate } from 'react-router-dom'
+import { HiOutlineArrowRight } from 'react-icons/hi2'
 
 export const Teacher360View = ({ id }) => {
+    const { id: paramId } = useParams()
+    const finalId = id || paramId
     const navigate = useNavigate()
     const [data, setData] = useState(null)
     const [loading, setLoading] = useState(true)
@@ -13,7 +17,7 @@ export const Teacher360View = ({ id }) => {
         const fetchData = async () => {
             const tk = localStorage.getItem('access_token')
             try {
-                const res = await fetch(`${API}/api/hq/teachers/${id}/360/`, {
+                const res = await fetch(`${API}/api/hq/teachers/${finalId}/360/`, {
                     headers: { 'Authorization': `Bearer ${tk}` }
                 })
                 if (res.ok) {

@@ -21,6 +21,9 @@ import { AdminLayout } from './pages/hq/AdminLayout'
 import { AdminOverview } from './pages/hq/AdminOverview'
 import { AdminModelGrid } from './pages/hq/AdminModelGrid'
 import { AdminModelForm } from './pages/hq/AdminModelForm'
+import { Student360View } from './pages/hq/Student360View'
+import { Teacher360View } from './pages/hq/Teacher360View'
+import { TA360View } from './pages/hq/TA360View'
 import { AdminMutedStudents } from './pages/hq/AdminMutedStudents'
 import { AdminModerationHistory } from './pages/hq/AdminModerationHistory'
 import { TALayout } from './pages/ta/TALayout'
@@ -87,6 +90,9 @@ function App() {
                         <Route path="muted-students" element={<AdminMutedStudents />} />
                         <Route path="moderation-history" element={<AdminModerationHistory />} />
                         <Route path=":model" element={<AdminModelGrid />} />
+                        <Route path="students/:id/360" element={<Student360View />} />
+                        <Route path="teachers/:id/360" element={<Teacher360View />} />
+                        <Route path="teacherassistants/:id/360" element={<TA360View />} />
                         <Route path=":model/:id" element={<AdminModelForm />} />
                     </Route>
 

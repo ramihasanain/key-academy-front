@@ -369,15 +369,16 @@ export const AdminModelGrid = () => {
                                                                         c.key === 'student' && typeof row[c.key] === 'string' ? row[c.key].replace(/\s*[-—]\s*@[^\s]+/g, '').trim() :
                                                                         c.key === 'student_username' || c.key === 'username' ? <span dir="ltr">{`@${row[c.key] || '-'}`}</span> :
                                                                         c.key.includes('course') || c.key.includes('user') ? `#${row[c.key] || 'غير محدد'}` :
-                                                                            row[c.key]?.toString().substring(0, 40) || '-'}
+                                                                            row[c.key]?.toString().substring(0, 150) || '-'}
                                                 </td>
                                             ))}
                                             <td className="hq-actions-cell">
                                                 {model === 'students' ? (
-                                                    <button className="hq-action-btn edit" style={{ color: '#38bdf8', background: 'rgba(56,189,248,0.1)', borderColor: '#38bdf8' }} onClick={() => navigate(`/hq/${model}/${row.id}`)} title="عرض الملف الثلاثي الأبعاد"><HiOutlineEye /></button>
-                                                ) : (
-                                                    canChange && <button className="hq-action-btn edit" onClick={() => navigate(`/hq/${model}/${row.id}`)}><HiOutlinePencilSquare /></button>
-                                                )}
+                                                    <button className="hq-action-btn edit" style={{ color: '#38bdf8', background: 'rgba(56,189,248,0.1)', borderColor: '#38bdf8' }} onClick={() => navigate(`/hq/${model}/${row.id}/360`)} title="عرض الملف الثلاثي الأبعاد"><HiOutlineEye /></button>
+                                                ) : (model === 'teachers' || model === 'teacherassistants') ? (
+                                                    <button className="hq-action-btn edit" style={{ color: '#38bdf8', background: 'rgba(56,189,248,0.1)', borderColor: '#38bdf8', marginRight: '5px' }} onClick={() => navigate(`/hq/${model}/${row.id}/360`)} title="عرض التقرير السري 360"><HiOutlineEye /></button>
+                                                ) : null}
+                                                {canChange && <button className="hq-action-btn edit" onClick={() => navigate(`/hq/${model}/${row.id}`)}><HiOutlinePencilSquare /></button>}
                                                 {model === 'teachers' && (
                                                     <>
                                                         <button className="hq-action-btn edit" style={{ color: '#8b5cf6', background: 'rgba(139,92,246,0.1)', borderColor: '#8b5cf6', marginRight: '5px' }} onClick={() => navigate(`/hq/teacherassistants?teacher=${row.id}`)} title="عرض المساعدين لهذا الأستاذ"><HiOutlineUsers /></button>
@@ -406,7 +407,7 @@ export const AdminModelGrid = () => {
                                                     <button className="hq-action-btn edit" style={{ color: '#6366f1', background: 'rgba(99,102,241,0.1)', borderColor: '#6366f1' }} onClick={() => navigate(`/hq/enrollments?course__subject__name=${row.name}`)} title="عرض الطلبة المشتركين بالمادة"><HiOutlineUsers /></button>
                                                 )}
                                                 {model === 'enrollments' && (
-                                                    <button className="hq-action-btn edit" style={{ color: '#8b5cf6', background: 'rgba(139,92,246,0.1)', borderColor: '#8b5cf6' }} onClick={() => navigate(`/hq/students/${row.student}`)} title="عرض ملف الطالب"><HiOutlineEye /></button>
+                                                    <button className="hq-action-btn edit" style={{ color: '#8b5cf6', background: 'rgba(139,92,246,0.1)', borderColor: '#8b5cf6' }} onClick={() => navigate(`/hq/students/${row.student}/360`)} title="عرض ملف الطالب"><HiOutlineEye /></button>
                                                 )}
                                                 {model === 'enrollments' && (
                                                     <button className="hq-action-btn edit"

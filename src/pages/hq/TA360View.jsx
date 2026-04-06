@@ -2,16 +2,27 @@ import React, { useState, useEffect } from 'react'
 import { API } from '../../config'
 import { HiOutlineUser, HiOutlinePhone, HiOutlineChartBar, HiOutlineClock, HiOutlineChatBubbleOvalLeftEllipsis, HiOutlineChatBubbleLeftRight } from 'react-icons/hi2'
 import './Admin.css'
+import { useParams, useNavigate } from 'react-router-dom'
+import { HiOutlineArrowRight } from 'react-icons/hi2'
 
 export const TA360View = ({ id }) => {
+    const { id: paramId } = useParams()
+    const finalId = id || paramId
+    const navigate = useNavigate()
     const [data, setData] = useState(null)
     const [loading, setLoading] = useState(true)
+    const [studentFilter, setStudentFilter] = useState('')
+    const [dateFilter, setDateFilter] = useState('')
 
     useEffect(() => {
         const fetchData = async () => {
             const tk = localStorage.getItem('access_token')
             try {
-                const res = await fetch(`${API}/api/hq/teacherassistants/${id}/360/`, {
+                const queryParams = new URLSearchParams()
+                if (studentFilter) queryParams.append('student', studentFilter)
+                if (dateFilter) queryParams.append('date', dateFilter)
+                
+                const res = await fetch(`${API}/api/hq/teacherassistants/${finalId}/360/?${queryParams.toString()}`, {
                     headers: { 'Authorization': `Bearer ${tk}` }
                 })
                 if (res.ok) {
@@ -23,8 +34,14 @@ export const TA360View = ({ id }) => {
                 setLoading(false)
             }
         }
-        fetchData()
-    }, [id])
+        
+        // Debounce to prevent spam requests while typing
+        const timeoutId = setTimeout(() => {
+            fetchData()
+        }, 500)
+        
+        return () => clearTimeout(timeoutId)
+    }, [finalId, studentFilter, dateFilter])
 
     if (loading) return <div className="hq-loading" style={{ padding: '20px' }}>جاري سحب التقرير الاستخباراتي للمساعد... 🕵️‍♂️</div>
     if (!data) return null
@@ -33,7 +50,7 @@ export const TA360View = ({ id }) => {
 
     const handleImpersonate = async () => {
         try {
-            const res = await fetch(`${API}/api/hq/teacherassistants/${id}/impersonate/`, {
+            const res = await fetch(`${API}/api/hq/teacherassistants/${finalId}/impersonate/`, {
                 method: 'POST',
                 headers: { 'Authorization': `Bearer ${localStorage.getItem('access_token')}` }
             })
@@ -54,16 +71,21 @@ export const TA360View = ({ id }) => {
 
     return (
         <div className="hq-360-container" style={{ marginBottom: '40px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '25px' }}>
-                <h2 style={{ color: '#22d3ee', display: 'flex', alignItems: 'center', gap: '10px', margin: 0 }}>
-                    <HiOutlineChartBar size={28} /> الملف الشامل والمراقبة الذكية (TA-Spy 360)
-                </h2>
-                <button
-                    onClick={handleImpersonate}
-                    style={{ background: '#ef4444', color: 'white', border: 'none', padding: '10px 20px', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '8px', boxShadow: '0 4px 6px rgba(239, 68, 68, 0.3)' }}
-                >
-                    🕵️‍♂️ الدخول ومراقبة لوحته (View Only)
+            <div style={{ display: 'flex', gap: '15px', alignItems: 'center', marginBottom: '25px' }}>
+                <button className="hq-back-btn" onClick={() => navigate(-1)} style={{ color: 'var(--hq-primary)', background: 'rgba(34, 211, 238, 0.1)', fontSize: '20px', width: '45px', height: '45px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: 'none', cursor: 'pointer' }} title="العودة للصفحة السابقة">
+                    <HiOutlineArrowRight />
                 </button>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flex: 1 }}>
+                    <h2 style={{ color: '#22d3ee', display: 'flex', alignItems: 'center', gap: '10px', margin: 0 }}>
+                        <HiOutlineChartBar size={28} /> الملف الشامل والمراقبة الذكية (TA-Spy 360)
+                    </h2>
+                    <button
+                        onClick={handleImpersonate}
+                        style={{ background: '#ef4444', color: 'white', border: 'none', padding: '10px 20px', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '8px', boxShadow: '0 4px 6px rgba(239, 68, 68, 0.3)' }}
+                    >
+                        🕵️‍♂️ الدخول ومراقبة لوحته (View Only)
+                    </button>
+                </div>
             </div>
 
             {/* بطاقة التعريف Profile Card */}
@@ -124,6 +146,26 @@ export const TA360View = ({ id }) => {
                 </div>
             </div>
 
+            {/* Filters / أدوات المنقّب */}
+            <div className="glass-card" style={{ padding: '20px', borderRadius: '12px', marginBottom: '25px', display: 'flex', gap: '20px', alignItems: 'center', flexWrap: 'wrap' }}>
+                <h3 style={{ margin: 0, color: 'var(--hq-primary)', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '16px' }}>
+                    <HiOutlineChartBar /> منقب البيانات:
+                </h3>
+                <input
+                    type="text"
+                    placeholder="بحث باسم الطالب أو محتوى الرسالة..."
+                    value={studentFilter}
+                    onChange={(e) => setStudentFilter(e.target.value)}
+                    style={{ flex: '1 1 250px', background: 'rgba(0,0,0,0.2)', border: '1px solid rgba(255,255,255,0.1)', color: 'white', padding: '10px 15px', borderRadius: '8px', outline: 'none' }}
+                />
+                <input
+                    type="date"
+                    value={dateFilter}
+                    onChange={(e) => setDateFilter(e.target.value)}
+                    style={{ background: 'rgba(0,0,0,0.2)', border: '1px solid rgba(255,255,255,0.1)', color: 'white', padding: '10px 15px', borderRadius: '8px', outline: 'none' }}
+                />
+            </div>
+
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '25px' }}>
                 <div className="glass-card" style={{ padding: '25px', borderRadius: '15px' }}>
                     <h3 style={{ margin: '0 0 20px', fontSize: '18px', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '10px', display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -131,9 +173,9 @@ export const TA360View = ({ id }) => {
                         آخر إجاباته للطلبة بالطيلة الفائتة
                     </h3>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', maxHeight: '400px', overflowY: 'auto' }}>
-                        {recent_qa.length === 0 ? <p style={{ color: 'var(--hq-text-muted)', textAlign: 'center' }}>لم يجب على أي سؤال بعد.</p> : recent_qa.map((qa, i) => (
+                        {recent_qa.length === 0 ? <p style={{ color: 'var(--hq-text-muted)', textAlign: 'center' }}>لا توجد نتائج مطابقة.</p> : recent_qa.map((qa, i) => (
                             <div key={i} style={{ background: 'var(--hq-bg)', padding: '15px', borderRadius: '8px', borderRight: '3px solid #10b981' }}>
-                                <div style={{ fontSize: '0.8rem', color: 'var(--hq-text-muted)', marginBottom: '8px' }}>سؤال الطالب:</div>
+                                <div style={{ fontSize: '0.8rem', color: 'var(--hq-text-muted)', marginBottom: '8px' }}>سؤال الطالب (<strong style={{ color: 'white' }}>{qa.student_name}</strong>):</div>
                                 <p style={{ margin: '0 0 10px', color: '#cbd5e1', fontStyle: 'italic', fontSize: '0.9rem' }}>"{qa.post_content}"</p>
                                 <div style={{ fontSize: '0.8rem', color: '#10b981', marginBottom: '5px', fontWeight: 'bold' }}>رد المساعد:</div>
                                 <p style={{ margin: '0 0 8px', color: 'white', fontSize: '0.95rem' }}>{qa.my_reply}</p>
@@ -149,7 +191,7 @@ export const TA360View = ({ id }) => {
                         آخر مشاركاته بمجموعات المحادثة الحية
                     </h3>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', maxHeight: '400px', overflowY: 'auto' }}>
-                        {recent_chat.length === 0 ? <p style={{ color: 'var(--hq-text-muted)', textAlign: 'center' }}>لم يرسل أي رسائل في المجموعات.</p> : recent_chat.map((m, i) => (
+                        {recent_chat.length === 0 ? <p style={{ color: 'var(--hq-text-muted)', textAlign: 'center' }}>لا توجد نتائج مطابقة.</p> : recent_chat.map((m, i) => (
                             <div key={i} style={{ background: 'var(--hq-bg)', padding: '15px', borderRadius: '8px', borderRight: '3px solid #ec4899' }}>
                                 {m.content && <p style={{ margin: '0 0 10px', color: 'white', lineHeight: '1.5' }}>{m.content}</p>}
                                 {m.attachment && (

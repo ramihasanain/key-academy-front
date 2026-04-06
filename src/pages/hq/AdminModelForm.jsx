@@ -158,11 +158,6 @@ export const AdminModelForm = () => {
         return <AdminCourseBuilder id={id} />
     }
 
-    // 🌟 INTERCEPT STUDENTS -> USE 360 VIEW 🌟
-    if (model === 'students' && id !== 'new') {
-        return <Student360View id={id} />
-    }
-
     const schema = SCHEMAS[model]
 
     const isNew = id === 'new'
@@ -328,10 +323,6 @@ export const AdminModelForm = () => {
                     <p>يرجى تعبئة الحقول المطلوبة بدقة</p>
                 </div>
             </div>
-
-            {model === 'teacherassistants' && !isNew && <TA360View id={id} />}
-            {model === 'teachers' && !isNew && <Teacher360View id={id} />}
-
             <div className="hq-form-card">
                 {loading ? <div className="hq-loading" style={{ padding: '50px' }}>جاري جلب البيانات...</div> : (
                     <form onSubmit={handleSubmit} className="hq-dynamic-form">
