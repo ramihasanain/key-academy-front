@@ -24,7 +24,7 @@ const SCHEMAS = {
         }] 
     },
     students: {
-        title: 'الطلاب المسجلين', endpoint: 'students', columns: [ { key: 'first_name', label: 'الاسم الأول' }, { key: 'last_name', label: 'الاسم الأخير' }, { key: 'phone', label: 'الهاتف' }, { key: 'parent_phone', label: 'هاتف الوالد' }, { key: 'city', label: 'المدينة' }, { key: 'grade', label: 'المرحلة' }, { key: 'branch_str', label: 'الفرع' }, { key: 'date_joined', label: 'الإنضمام', type: 'datetime' } ],
+        title: 'الطلاب المسجلين', endpoint: 'students', columns: [ { key: 'first_name', label: 'الاسم الأول' }, { key: 'last_name', label: 'الاسم الأخير' }, { key: 'username', label: 'اليوزر (@)' }, { key: 'phone', label: 'الهاتف' }, { key: 'parent_phone', label: 'هاتف الوالد' }, { key: 'city', label: 'المدينة' }, { key: 'grade', label: 'المرحلة' }, { key: 'branch_str', label: 'الفرع' }, { key: 'date_joined', label: 'الإنضمام', type: 'datetime' } ],
         filters: [{ key: 'grade__icontains', label: 'المرحلة', optionsKey: 'grades' }, { key: 'branch__name__icontains', label: 'الفرع', optionsKey: 'branches' }, { key: 'is_active', label: 'حالة الحساب', options: [{ value: 'true', label: 'فعال' }, { value: 'false', label: 'مجمد' }] }]
     },
     courses: { title: 'الدورات المجانية والمدفوعة', endpoint: 'courses', columns: [{ key: 'title', label: 'اسم الدورة' }, { key: 'price', label: 'السعر', type: 'currency' }, { key: 'subject_str', label: 'المتادة' }, { key: 'grade_str', label: 'الصفوف' }, { key: 'branches_str', label: 'الفروع' }, { key: 'enrollments_count', label: 'عدد الطلاب', type: 'number_badge' }, { key: 'is_published', label: 'فعالة', type: 'boolean' }], filters: [{ key: 'teacher', label: 'الأستاذ', optionsKey: 'teachers' }, { key: 'subject__name', label: 'المادة', optionsKey: 'subjects' }, { key: 'grade__title', label: 'المرحلة', optionsKey: 'grades' }, { key: 'branches__name__icontains', label: 'الفرع', optionsKey: 'branches' }, { key: 'is_published', label: 'حالة النشر', options: [{ value: 'true', label: 'منشور' }, { value: 'false', label: 'مسودة' }] }] },
@@ -362,7 +362,7 @@ export const AdminModelGrid = () => {
                                                             c.type === 'datetime' ? (row[c.key] ? new Date(row[c.key]).toLocaleDateString('ar-EG') : '-') :
                                                                 c.type === 'number_badge' ? <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(56,189,248,0.15)', color: '#38bdf8', padding: '4px 12px', borderRadius: '20px', fontWeight: 'bold' }}>{row[c.key] || 0}</span> :
                                                                         c.key === 'student' && typeof row[c.key] === 'string' ? row[c.key].replace(/\s*[-—]\s*@[^\s]+/g, '').trim() :
-                                                                        c.key === 'student_username' ? `@${row[c.key] || '-'}` :
+                                                                        c.key === 'student_username' || c.key === 'username' ? `@${row[c.key] || '-'}` :
                                                                         c.key.includes('course') || c.key.includes('user') ? `#${row[c.key] || 'غير محدد'}` :
                                                                             row[c.key]?.toString().substring(0, 40) || '-'}
                                                 </td>
