@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { API } from '../../config'
 import { HiOutlineBookOpen, HiOutlineChartBar, HiOutlineCheckCircle, HiOutlineClock, HiOutlineDocumentText, HiOutlineNoSymbol } from 'react-icons/hi2'
 import './Admin.css'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 import { HiOutlineArrowRight } from 'react-icons/hi2'
 
 export const Student360View = ({ id }) => {
