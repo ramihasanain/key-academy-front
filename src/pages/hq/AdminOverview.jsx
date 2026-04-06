@@ -15,13 +15,20 @@ import {
 export const AdminOverview = () => {
     const [stats, setStats] = useState(null)
     const [period, setPeriod] = useState('all')
-    const [teacher, setTeacher] = useState('all')
+    const [dateFrom, setDateFrom] = useState('')
+    const [dateTo, setDateTo] = useState('')
     const [grade, setGrade] = useState('all')
+    const [branch, setBranch] = useState('all')
     const [subject, setSubject] = useState('all')
+    const [teacher, setTeacher] = useState('all')
+    const [course, setCourse] = useState('all')
+    const [studentUsername, setStudentUsername] = useState('')
     
-    const [teachersList, setTeachersList] = useState([])
     const [gradesList, setGradesList] = useState([])
+    const [branchesList, setBranchesList] = useState([])
     const [subjectsList, setSubjectsList] = useState([])
+    const [teachersList, setTeachersList] = useState([])
+    const [coursesList, setCoursesList] = useState([])
     const [combinations, setCombinations] = useState([])
     const navigate = useNavigate()
 
@@ -44,49 +51,50 @@ export const AdminOverview = () => {
         fetchFiltersData()
     }, [])
 
-    // Dynamic Cascading Filters Effect
+    // Dynamic Strict Cascading Filters Engine
     useEffect(() => {
         if (combinations.length === 0) return;
 
-        // grades options: affected by subject, teacher
-        let gradesFiltered = combinations;
-        if (subject !== 'all') gradesFiltered = gradesFiltered.filter(c => c.subject === subject);
-        if (teacher !== 'all') gradesFiltered = gradesFiltered.filter(c => c.teacher_id.toString() === teacher.toString());
-        const uniqueGrades = new Set(gradesFiltered.map(c => c.grade).filter(Boolean));
-        setGradesList(Array.from(uniqueGrades).sort().map(g => ({ val: g })));
+        let filtered = combinations;
 
-        // subjects options: affected by grade, teacher
-        let subjectsFiltered = combinations;
-        if (grade !== 'all') subjectsFiltered = subjectsFiltered.filter(c => c.grade === grade);
-        if (teacher !== 'all') subjectsFiltered = subjectsFiltered.filter(c => c.teacher_id.toString() === teacher.toString());
-        const uniqueSubjects = new Set(subjectsFiltered.map(c => c.subject).filter(Boolean));
+        // 1. Filter by Grade to reveal available branches
+        if (grade !== 'all') filtered = filtered.filter(c => c.grade === grade);
+        const uniqueBranches = new Set(filtered.map(c => c.branch).filter(Boolean));
+        setBranchesList(Array.from(uniqueBranches).sort().map(b => ({ val: b })));
+
+        // 2. Filter by Branch to reveal available subjects
+        if (branch !== 'all') filtered = filtered.filter(c => c.branch === branch);
+        const uniqueSubjects = new Set(filtered.map(c => c.subject).filter(Boolean));
         setSubjectsList(Array.from(uniqueSubjects).sort().map(s => ({ val: s })));
 
-        // teachers options: affected by grade, subject
-        let teachersFiltered = combinations;
-        if (grade !== 'all') teachersFiltered = teachersFiltered.filter(c => c.grade === grade);
-        if (subject !== 'all') teachersFiltered = teachersFiltered.filter(c => c.subject === subject);
+        // 3. Filter by Subject to reveal available teachers
+        if (subject !== 'all') filtered = filtered.filter(c => c.subject === subject);
         const uniqueTeachers = new Map();
-        teachersFiltered.forEach(c => {
+        filtered.forEach(c => {
             if (c.teacher_id && c.teacher_id !== -1) uniqueTeachers.set(c.teacher_id, { id: c.teacher_id, name: c.teacher });
         });
         setTeachersList(Array.from(uniqueTeachers.values()).sort((a,b) => a.name.localeCompare(b.name)));
 
-        // Strict Intersection for Auto-reset
-        let strictFiltered = combinations;
-        if (grade !== 'all') strictFiltered = strictFiltered.filter(c => c.grade === grade);
-        if (subject !== 'all') strictFiltered = strictFiltered.filter(c => c.subject === subject);
-        if (teacher !== 'all') strictFiltered = strictFiltered.filter(c => c.teacher_id.toString() === teacher.toString());
-        
-        const strictSubjects = new Set(strictFiltered.map(c => c.subject).filter(Boolean));
-        const strictGrades = new Set(strictFiltered.map(c => c.grade).filter(Boolean));
-        const strictTeachers = new Set(strictFiltered.map(c => c.teacher_id));
+        // 4. Filter by Teacher to reveal available courses
+        if (teacher !== 'all') filtered = filtered.filter(c => c.teacher_id.toString() === teacher.toString());
+        const uniqueCourses = new Map();
+        filtered.forEach(c => {
+            if (c.course_id && c.course_id !== -1) uniqueCourses.set(c.course_id, { id: c.course_id, title: c.course });
+        });
+        setCoursesList(Array.from(uniqueCourses.values()).sort((a,b) => a.title.localeCompare(b.title)));
 
-        if (subject !== 'all' && !strictSubjects.has(subject)) setSubject('all');
-        if (grade !== 'all' && !strictGrades.has(grade)) setGrade('all');
-        if (teacher !== 'all' && !strictTeachers.has(parseInt(teacher))) setTeacher('all');
+        // Strict Reset Check
+        const validBranches = new Set(filtered.map(c => c.branch).filter(Boolean));
+        const validSubjects = new Set(filtered.map(c => c.subject).filter(Boolean));
+        const validTeachers = new Set(filtered.map(c => c.teacher_id));
+        const validCourses = new Set(filtered.map(c => c.course_id));
 
-    }, [grade, subject, teacher, combinations])
+        if (branch !== 'all' && !validBranches.has(branch)) setBranch('all');
+        if (subject !== 'all' && !validSubjects.has(subject)) setSubject('all');
+        if (teacher !== 'all' && !validTeachers.has(parseInt(teacher))) setTeacher('all');
+        if (course !== 'all' && !validCourses.has(parseInt(course))) setCourse('all');
+
+    }, [grade, branch, subject, teacher, course, combinations])
 
     useEffect(() => {
         const fetchStats = async () => {
@@ -97,7 +105,12 @@ export const AdminOverview = () => {
                 url.searchParams.append('period', period)
                 url.searchParams.append('teacher', teacher)
                 url.searchParams.append('grade', grade)
+                url.searchParams.append('branch', branch)
                 url.searchParams.append('subject', subject)
+                url.searchParams.append('course', course)
+                url.searchParams.append('student', studentUsername)
+                if (dateFrom) url.searchParams.append('date_from', dateFrom)
+                if (dateTo) url.searchParams.append('date_to', dateTo)
                 
                 const res = await fetch(url.toString(), {
                     headers: { 'Authorization': `Bearer ${tk}` }
@@ -110,8 +123,12 @@ export const AdminOverview = () => {
                 console.error(err)
             }
         }
-        fetchStats()
-    }, [period, teacher, grade, subject])
+        
+        const debounce = setTimeout(() => {
+            fetchStats()
+        }, 300)
+        return () => clearTimeout(debounce)
+    }, [period, dateFrom, dateTo, grade, branch, subject, teacher, course, studentUsername])
 
     if (!stats) return <div className="hq-loading">جاري سحب وتحليل ملايين البيانات...</div>
 
@@ -131,58 +148,53 @@ export const AdminOverview = () => {
 
     return (
         <div className="hq-overview">
-            <div className="hq-page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '20px' }}>
+            <div className="hq-page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '5px' }}>
                 <div>
                     <h2>مركز القيادة والتحليلات 📊</h2>
                     <p>مراقبة حية وشاملة لكل ما يدور داخل أروقة المنصة التعليمية</p>
                 </div>
-                
-                {/* Global Dashboard Filters */}
-                <div style={{ display: 'flex', gap: '10px', background: '#1e293b', padding: '15px', borderRadius: '12px', border: '1px solid var(--hq-border)', flexWrap: 'wrap' }}>
-                    <select
-                        value={period}
-                        onChange={(e) => setPeriod(e.target.value)}
-                        style={{ background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 15px', color: 'white', minWidth: '150px', outline: 'none' }}
-                    >
-                        <option value="all">شامل (كل الأوقات)</option>
-                        <option value="daily">اليوم (آخر 24 ساعة)</option>
-                        <option value="weekly">هذا الأسبوع (آخر 7 أيام)</option>
-                        <option value="monthly">هذا الشهر (آخر 30 يوم)</option>
-                    </select>
+            </div>
 
-                    <select
-                        value={grade}
-                        onChange={(e) => setGrade(e.target.value)}
-                        style={{ background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 15px', color: 'white', minWidth: '150px', outline: 'none' }}
-                    >
-                        <option value="all">جميع المراحل</option>
-                        {gradesList.map((g, idx) => (
-                            <option key={`g-${idx}`} value={g.val}>{g.val}</option>
-                        ))}
-                    </select>
+            {/* Global Dashboard Filters */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '15px', background: '#1e293b', padding: '20px', borderRadius: '16px', border: '1px solid var(--hq-border)', marginBottom: '30px' }}>
+                <select value={period} onChange={(e) => { setPeriod(e.target.value); setDateFrom(''); setDateTo(''); }} style={{ background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '10px 15px', color: 'white', outline: 'none' }}>
+                    <option value="all">الأوقات (شامل)</option>
+                    <option value="daily">اليوم (آخر 24 ساعة)</option>
+                    <option value="weekly">هذا الأسبوع (آخر 7 أيام)</option>
+                    <option value="monthly">هذا الشهر (آخر 30 يوم)</option>
+                </select>
 
-                    <select
-                        value={subject}
-                        onChange={(e) => setSubject(e.target.value)}
-                        style={{ background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 15px', color: 'white', minWidth: '150px', outline: 'none' }}
-                    >
-                        <option value="all">جميع المواد</option>
-                        {subjectsList.map((s, idx) => (
-                            <option key={`s-${idx}`} value={s.val}>{s.val}</option>
-                        ))}
-                    </select>
-
-                    <select
-                        value={teacher}
-                        onChange={(e) => setTeacher(e.target.value)}
-                        style={{ background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '8px 15px', color: 'white', minWidth: '180px', outline: 'none' }}
-                    >
-                        <option value="all">جميع الأساتذة العاملين</option>
-                        {teachersList.map(t => (
-                            <option key={t.id} value={t.id}>{t.name}</option>
-                        ))}
-                    </select>
+                <div style={{ display: 'flex', gap: '10px', gridColumn: 'span 2' }}>
+                    <input type="date" value={dateFrom} onChange={(e) => { setDateFrom(e.target.value); setPeriod('all'); }} style={{ flex: 1, background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '10px 15px', color: 'white', outline: 'none' }} title="من تاريخ" />
+                    <input type="date" value={dateTo} onChange={(e) => { setDateTo(e.target.value); setPeriod('all'); }} style={{ flex: 1, background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '10px 15px', color: 'white', outline: 'none' }} title="إلى تاريخ" />
                 </div>
+
+                <select value={grade} onChange={(e) => setGrade(e.target.value)} style={{ background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '10px 15px', color: 'white', outline: 'none' }}>
+                    <option value="all">الصف (الجميع)</option>
+                    {gradesList.map((g, idx) => (<option key={`g-${idx}`} value={g.val}>{g.val}</option>))}
+                </select>
+
+                <select value={branch} onChange={(e) => setBranch(e.target.value)} style={{ background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '10px 15px', color: 'white', outline: 'none' }}>
+                    <option value="all">الفرع (الجميع)</option>
+                    {branchesList.map((b, idx) => (<option key={`b-${idx}`} value={b.val}>{b.val}</option>))}
+                </select>
+
+                <select value={subject} onChange={(e) => setSubject(e.target.value)} style={{ background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '10px 15px', color: 'white', outline: 'none' }}>
+                    <option value="all">المادة (الجميع)</option>
+                    {subjectsList.map((s, idx) => (<option key={`s-${idx}`} value={s.val}>{s.val}</option>))}
+                </select>
+
+                <select value={teacher} onChange={(e) => setTeacher(e.target.value)} style={{ background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '10px 15px', color: 'white', outline: 'none' }}>
+                    <option value="all">الأستاذ (الجميع)</option>
+                    {teachersList.map(t => (<option key={t.id} value={t.id}>{t.name}</option>))}
+                </select>
+
+                <select value={course} onChange={(e) => setCourse(e.target.value)} style={{ background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '10px 15px', color: 'white', outline: 'none', gridColumn: 'span 2' }}>
+                    <option value="all">الدورة (الجميع)</option>
+                    {coursesList.map(c => (<option key={c.id} value={c.id}>{c.title}</option>))}
+                </select>
+                
+                <input type="text" placeholder="بحث بيوزر الطالب (@User)..." value={studentUsername} onChange={(e) => setStudentUsername(e.target.value)} style={{ background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '10px 15px', color: 'white', outline: 'none', gridColumn: 'span 2' }} />
             </div>
 
             {/* Core Stats Grid */}
