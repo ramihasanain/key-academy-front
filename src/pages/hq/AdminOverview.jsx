@@ -134,7 +134,7 @@ export const AdminOverview = () => {
         
         const debounce = setTimeout(() => {
             fetchStats()
-        }, 300)
+        }, 600)
         return () => clearTimeout(debounce)
     }, [period, dateFrom, dateTo, grade, branch, subject, teacher, course, studentUsername])
 
