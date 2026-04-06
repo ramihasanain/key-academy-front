@@ -14,6 +14,7 @@ import {
 
 export const AdminOverview = () => {
     const [stats, setStats] = useState(null)
+    const [isLoading, setIsLoading] = useState(false)
     const [period, setPeriod] = useState('all')
     const [dateFrom, setDateFrom] = useState('')
     const [dateTo, setDateTo] = useState('')
@@ -57,6 +58,10 @@ export const AdminOverview = () => {
 
         let filtered = combinations;
 
+        // 0. Populate root Grades
+        const uniqueGrades = new Set(combinations.map(c => c.grade).filter(Boolean));
+        setGradesList(Array.from(uniqueGrades).sort().map(g => ({ val: g })));
+
         // 1. Filter by Grade to reveal available branches
         if (grade !== 'all') filtered = filtered.filter(c => c.grade === grade);
         const uniqueBranches = new Set(filtered.map(c => c.branch).filter(Boolean));
@@ -98,7 +103,7 @@ export const AdminOverview = () => {
 
     useEffect(() => {
         const fetchStats = async () => {
-            setStats(null)
+            if (!stats) setIsLoading(true)
             const tk = localStorage.getItem('access_token')
             try {
                 const url = new URL(API + '/api/hq/stats/')
@@ -121,6 +126,8 @@ export const AdminOverview = () => {
                 }
             } catch (err) {
                 console.error(err)
+            } finally {
+                setIsLoading(false)
             }
         }
         
@@ -130,7 +137,8 @@ export const AdminOverview = () => {
         return () => clearTimeout(debounce)
     }, [period, dateFrom, dateTo, grade, branch, subject, teacher, course, studentUsername])
 
-    if (!stats) return <div className="hq-loading">جاري سحب وتحليل ملايين البيانات...</div>
+    if (!stats && isLoading) return <div className="hq-loading">جاري سحب وتحليل ملايين البيانات...</div>
+    if (!stats) return null
 
     const coreCards = [
         { title: 'إجمالي الطلاب المسجلين', value: stats.total_users || 0, subtitle: 'مجتمع المنصة', icon: <HiOutlineUsers />, color: 'var(--blue-main)', link: '/hq/students' },
