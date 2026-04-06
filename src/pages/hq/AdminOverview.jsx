@@ -156,8 +156,8 @@ export const AdminOverview = () => {
             </div>
 
             {/* Global Dashboard Filters */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '15px', background: '#1e293b', padding: '20px', borderRadius: '16px', border: '1px solid var(--hq-border)', marginBottom: '30px' }}>
-                <select value={period} onChange={(e) => { setPeriod(e.target.value); setDateFrom(''); setDateTo(''); }} style={{ background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '10px 15px', color: 'white', outline: 'none' }}>
+            <div className="hq-filter-box" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))' }}>
+                <select className="hq-filter-input" value={period} onChange={(e) => { setPeriod(e.target.value); setDateFrom(''); setDateTo(''); }}>
                     <option value="all">الأوقات (شامل)</option>
                     <option value="daily">اليوم (آخر 24 ساعة)</option>
                     <option value="weekly">هذا الأسبوع (آخر 7 أيام)</option>
@@ -165,36 +165,36 @@ export const AdminOverview = () => {
                 </select>
 
                 <div style={{ display: 'flex', gap: '10px', gridColumn: 'span 2' }}>
-                    <input type="date" value={dateFrom} onChange={(e) => { setDateFrom(e.target.value); setPeriod('all'); }} style={{ flex: 1, background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '10px 15px', color: 'white', outline: 'none' }} title="من تاريخ" />
-                    <input type="date" value={dateTo} onChange={(e) => { setDateTo(e.target.value); setPeriod('all'); }} style={{ flex: 1, background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '10px 15px', color: 'white', outline: 'none' }} title="إلى تاريخ" />
+                    <input className="hq-filter-input" type="date" value={dateFrom} onChange={(e) => { setDateFrom(e.target.value); setPeriod('all'); }} title="من تاريخ" />
+                    <input className="hq-filter-input" type="date" value={dateTo} onChange={(e) => { setDateTo(e.target.value); setPeriod('all'); }} title="إلى تاريخ" />
                 </div>
 
-                <select value={grade} onChange={(e) => setGrade(e.target.value)} style={{ background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '10px 15px', color: 'white', outline: 'none' }}>
+                <select className="hq-filter-input" value={grade} onChange={(e) => setGrade(e.target.value)}>
                     <option value="all">الصف (الجميع)</option>
                     {gradesList.map((g, idx) => (<option key={`g-${idx}`} value={g.val}>{g.val}</option>))}
                 </select>
 
-                <select value={branch} onChange={(e) => setBranch(e.target.value)} style={{ background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '10px 15px', color: 'white', outline: 'none' }}>
+                <select className="hq-filter-input" value={branch} onChange={(e) => setBranch(e.target.value)}>
                     <option value="all">الفرع (الجميع)</option>
                     {branchesList.map((b, idx) => (<option key={`b-${idx}`} value={b.val}>{b.val}</option>))}
                 </select>
 
-                <select value={subject} onChange={(e) => setSubject(e.target.value)} style={{ background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '10px 15px', color: 'white', outline: 'none' }}>
+                <select className="hq-filter-input" value={subject} onChange={(e) => setSubject(e.target.value)}>
                     <option value="all">المادة (الجميع)</option>
                     {subjectsList.map((s, idx) => (<option key={`s-${idx}`} value={s.val}>{s.val}</option>))}
                 </select>
 
-                <select value={teacher} onChange={(e) => setTeacher(e.target.value)} style={{ background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '10px 15px', color: 'white', outline: 'none' }}>
+                <select className="hq-filter-input" value={teacher} onChange={(e) => setTeacher(e.target.value)}>
                     <option value="all">الأستاذ (الجميع)</option>
                     {teachersList.map(t => (<option key={t.id} value={t.id}>{t.name}</option>))}
                 </select>
 
-                <select value={course} onChange={(e) => setCourse(e.target.value)} style={{ background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '10px 15px', color: 'white', outline: 'none', gridColumn: 'span 2' }}>
+                <select className="hq-filter-input" value={course} onChange={(e) => setCourse(e.target.value)} style={{ gridColumn: 'span 2' }}>
                     <option value="all">الدورة (الجميع)</option>
                     {coursesList.map(c => (<option key={c.id} value={c.id}>{c.title}</option>))}
                 </select>
                 
-                <input type="text" placeholder="بحث بيوزر الطالب (@User)..." value={studentUsername} onChange={(e) => setStudentUsername(e.target.value)} style={{ background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '10px 15px', color: 'white', outline: 'none', gridColumn: 'span 2' }} />
+                <input className="hq-filter-input" type="text" placeholder="بحث بيوزر الطالب (@User)..." value={studentUsername} onChange={(e) => setStudentUsername(e.target.value)} style={{ gridColumn: 'span 2' }} />
             </div>
 
             {/* Core Stats Grid */}

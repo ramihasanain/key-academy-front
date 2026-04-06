@@ -247,15 +247,15 @@ export const AdminModelGrid = () => {
                 )}
             </div>
 
-            <div className="hq-filters-bar" style={{ display: 'flex', flexWrap: 'wrap', gap: '15px', marginBottom: '20px', background: '#1e293b', padding: '20px', borderRadius: '16px', border: '1px solid var(--hq-border)' }}>
-                <div className="hq-tc-search" style={{ flex: '1 1 250px', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '10px 15px', color: 'white', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <HiOutlineMagnifyingGlass size={20} color="#94a3b8" />
+            <div className="hq-filter-box">
+                <div className="hq-filter-input" style={{ flex: '1 1 250px', display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 15px' }}>
+                    <HiOutlineMagnifyingGlass size={20} color="#64748b" />
                     <input
                         type="text"
                         placeholder={`بحث ذكي في ${schema.title}...`}
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        style={{ background: 'transparent', border: 'none', color: 'white', width: '100%', outline: 'none', fontSize: '15px' }}
+                        style={{ background: 'transparent', border: 'none', color: 'inherit', width: '100%', outline: 'none', fontSize: '15px', fontWeight: '600' }}
                     />
                 </div>
                 
@@ -297,10 +297,10 @@ export const AdminModelGrid = () => {
                     return (
                         <select
                             key={f.key}
-                            className="hq-input"
+                            className="hq-filter-input"
                             value={activeFilters[f.key] || ''}
                             onChange={(e) => setActiveFilters(p => ({ ...p, [f.key]: e.target.value }))}
-                            style={{ flex: '1 1 180px', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '10px 15px', color: 'white' }}
+                            style={{ flex: '1 1 180px' }}
                         >
                             <option value="">{f.label} (الكل)</option>
                             {opts.map(opt => (

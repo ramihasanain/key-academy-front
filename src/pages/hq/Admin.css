@@ -461,3 +461,35 @@ body {
 .hq-df-footer {
     display: flex; justify-content: flex-end; padding-top: 24px; border-top: 1px solid var(--hq-border);
 }
+
+/* ===== GLOBAL FILTER BAR ===== */
+.hq-filter-box {
+    display: flex; flex-wrap: wrap; gap: 15px;
+    background: var(--hq-surface);
+    padding: 20px;
+    border-radius: 16px;
+    border: 1px solid var(--hq-border);
+    margin-bottom: 30px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.02);
+}
+
+.hq-filter-input {
+    background: #f1f5f9;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    padding: 10px 15px;
+    color: #0f172a;
+    outline: none;
+    font-family: inherit;
+    font-size: 0.95rem;
+    font-weight: 700;
+    transition: all 0.2s;
+    min-width: 150px;
+    flex: 1;
+}
+
+.hq-filter-input:focus {
+    border-color: var(--hq-primary);
+    box-shadow: 0 0 0 3px var(--hq-primary-bg);
+    background: white;
+}
