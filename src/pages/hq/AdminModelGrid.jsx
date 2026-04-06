@@ -361,8 +361,9 @@ export const AdminModelGrid = () => {
                                                         c.type === 'currency' ? `${row[c.key] || 0}` :
                                                             c.type === 'datetime' ? (row[c.key] ? new Date(row[c.key]).toLocaleDateString('ar-EG') : '-') :
                                                                 c.type === 'number_badge' ? <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(56,189,248,0.15)', color: '#38bdf8', padding: '4px 12px', borderRadius: '20px', fontWeight: 'bold' }}>{row[c.key] || 0}</span> :
-                                                                    row[`${c.key}_str`] ? row[`${c.key}_str`] :
-                                                                        c.key.includes('course') || c.key.includes('student') || c.key.includes('user') ? `#${row[c.key] || 'غير محدد'}` :
+                                                                        c.key === 'student' && typeof row[c.key] === 'string' ? row[c.key].replace(/\s*[-—]\s*@[^\s]+/g, '').trim() :
+                                                                        c.key === 'student_username' ? `@${row[c.key] || '-'}` :
+                                                                        c.key.includes('course') || c.key.includes('user') ? `#${row[c.key] || 'غير محدد'}` :
                                                                             row[c.key]?.toString().substring(0, 40) || '-'}
                                                 </td>
                                             ))}
@@ -377,6 +378,15 @@ export const AdminModelGrid = () => {
                                                 )}
                                                 {model === 'courses' && (
                                                     <button className="hq-action-btn edit" style={{ color: '#6366f1', background: 'rgba(99,102,241,0.1)', borderColor: '#6366f1' }} onClick={() => navigate(`/hq/enrollments?course=${row.id}`)} title="عرض الطلبة المشتركين"><HiOutlineUsers /></button>
+                                                )}
+                                                {model === 'grades' && (
+                                                    <button className="hq-action-btn edit" style={{ color: '#38bdf8', background: 'rgba(56,189,248,0.1)', borderColor: '#38bdf8' }} onClick={() => navigate(`/hq/students?grade__icontains=${row.title}`)} title="عرض طلاب المرحلة"><HiOutlineUsers /></button>
+                                                )}
+                                                {model === 'branches' && (
+                                                    <button className="hq-action-btn edit" style={{ color: '#38bdf8', background: 'rgba(56,189,248,0.1)', borderColor: '#38bdf8' }} onClick={() => navigate(`/hq/students?branch__name__icontains=${row.name}`)} title="عرض طلاب الفرع"><HiOutlineUsers /></button>
+                                                )}
+                                                {model === 'subjects' && (
+                                                    <button className="hq-action-btn edit" style={{ color: '#6366f1', background: 'rgba(99,102,241,0.1)', borderColor: '#6366f1' }} onClick={() => navigate(`/hq/enrollments?course__subject__name=${row.name}`)} title="عرض الطلبة المشتركين بالمادة"><HiOutlineUsers /></button>
                                                 )}
                                                 {model === 'enrollments' && (
                                                     <button className="hq-action-btn edit" style={{ color: '#8b5cf6', background: 'rgba(139,92,246,0.1)', borderColor: '#8b5cf6' }} onClick={() => navigate(`/hq/students/${row.student}`)} title="عرض ملف الطالب"><HiOutlineEye /></button>
