@@ -10,6 +10,9 @@ export const Student360View = ({ id }) => {
     const [loading, setLoading] = useState(true)
     const [toggling, setToggling] = useState(false)
     const [dialog, setDialog] = useState(null)
+    const [subjectFilter, setSubjectFilter] = useState('');
+    const [courseFilter, setCourseFilter] = useState('');
+    const [teacherFilter, setTeacherFilter] = useState('');
 
     useEffect(() => {
         const fetchData = async () => {
@@ -160,6 +163,25 @@ export const Student360View = ({ id }) => {
 
     const { student, kpis, courses, history, quizzes, questions, notes, chats } = data
 
+    const subjectsList = [...new Set(courses.map(c => c.subject))];
+    const teachersList = [...new Set(courses.map(c => c.teacher))];
+    const coursesList = [...new Set(courses.map(c => c.title))];
+
+    const filteredCourses = courses.filter(c => 
+        (!subjectFilter || c.subject === subjectFilter) &&
+        (!courseFilter || c.title === courseFilter) &&
+        (!teacherFilter || c.teacher === teacherFilter)
+    );
+
+    const validCourseTitles = filteredCourses.map(c => c.title);
+    const checkCourse = (cTitle) => validCourseTitles.includes(cTitle) || (cTitle === 'غير معروف' && !subjectFilter && !courseFilter && !teacherFilter) || (!cTitle && !subjectFilter && !courseFilter && !teacherFilter);
+
+    const filteredHistory = history.filter(h => checkCourse(h.course_title));
+    const filteredQuizzes = quizzes.filter(q => checkCourse(q.course_title));
+    const filteredQuestions = questions.filter(q => checkCourse(q.course_title));
+    const filteredNotes = notes.filter(n => checkCourse(n.course_title));
+    const filteredChats = chats.filter(c => checkCourse(c.course_title));
+
     return (
         <div className="hq-form-wrap">
             <div className="hq-page-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: '20px', borderBottom: '1px solid var(--hq-border)', marginBottom: '20px' }}>
@@ -169,7 +191,7 @@ export const Student360View = ({ id }) => {
                     </button>
                     <div>
                         <h2 style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
-                            ملف الطالب (360) - {student.full_name}
+                            ملف الطالب (360) - {student.full_name} (@{student.username})
                             {!student.is_active && <span style={{ fontSize: '0.7rem', background: '#ef4444', color: 'white', padding: '2px 8px', borderRadius: '12px' }}>مجمد ❄️</span>}
                         </h2>
                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', fontSize: '0.8rem', color: 'var(--hq-primary-text)' }}>
@@ -261,11 +283,33 @@ export const Student360View = ({ id }) => {
                 </div>
             </div>
 
+            {/* Filters */}
+            <div className="hq-table-card" style={{ marginBottom: '20px', padding: '15px 20px', display: 'flex', gap: '15px', alignItems: 'center', background: 'var(--hq-bg)', flexWrap: 'wrap' }}>
+                <strong style={{ color: 'var(--hq-primary-text)' }}>فلاتر السجل (360):</strong>
+                <select value={subjectFilter} onChange={e => setSubjectFilter(e.target.value)} style={{ padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--hq-border)', background: 'transparent', color: 'var(--hq-primary-text)', outline: 'none' }}>
+                    <option value="" style={{color: 'black'}}>كل المواد</option>
+                    {subjectsList.map(s => <option key={s} value={s} style={{color: 'black'}}>{s}</option>)}
+                </select>
+                <select value={courseFilter} onChange={e => setCourseFilter(e.target.value)} style={{ padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--hq-border)', background: 'transparent', color: 'var(--hq-primary-text)', outline: 'none' }}>
+                    <option value="" style={{color: 'black'}}>كل الدورات</option>
+                    {coursesList.map(c => <option key={c} value={c} style={{color: 'black'}}>{c}</option>)}
+                </select>
+                <select value={teacherFilter} onChange={e => setTeacherFilter(e.target.value)} style={{ padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--hq-border)', background: 'transparent', color: 'var(--hq-primary-text)', outline: 'none' }}>
+                    <option value="" style={{color: 'black'}}>كل الأساتذة</option>
+                    {teachersList.map(t => <option key={t} value={t} style={{color: 'black'}}>{t}</option>)}
+                </select>
+                {(subjectFilter || courseFilter || teacherFilter) && (
+                    <button onClick={() => { setSubjectFilter(''); setCourseFilter(''); setTeacherFilter(''); }} style={{ background: 'transparent', border: 'none', color: '#ef4444', cursor: 'pointer', textDecoration: 'underline' }}>
+                        مسح الفلاتر
+                    </button>
+                )}
+            </div>
+
             {/* Courses Progress */}
             <div className="hq-table-card" style={{ marginBottom: '30px' }}>
                 <h3 style={{ padding: '20px', borderBottom: '1px solid var(--hq-border)', color: 'var(--hq-primary)' }}>التقدم بالدورات</h3>
                 <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '15px' }}>
-                    {courses.length === 0 ? <p style={{ color: 'var(--hq-text-muted)' }}>لا يوجد اشتراكات فعالة</p> : courses.map(c => (
+                    {filteredCourses.length === 0 ? <p style={{ color: 'var(--hq-text-muted)' }}>لا يوجد اشتراكات تطابق الفلتر</p> : filteredCourses.map(c => (
                         <div key={c.id} style={{ background: 'var(--hq-bg)', padding: '15px', borderRadius: '10px', border: '1px solid var(--hq-border)' }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
                                 <h4 style={{ margin: 0, color: 'var(--hq-primary-text)' }}>{c.title}</h4>
@@ -278,6 +322,12 @@ export const Student360View = ({ id }) => {
                                 <span>الدروس المكتملة: {c.completed_lessons} من أصل {c.total_lessons}</span>
                                 <span>تاريخ الاشتراك: {new Date(c.enrolled_at).toLocaleDateString('ar-EG')}</span>
                             </div>
+                            <div style={{ display: 'flex', flexWrap:'wrap', gap:'10px', marginTop: '10px', fontSize: '0.80rem', color: 'var(--hq-text-muted)' }}>
+                                <span style={{background: 'rgba(99, 102, 241, 0.1)', color: '#6366f1', padding: '3px 8px', borderRadius: '4px'}}>المادة: {c.subject}</span>
+                                <span style={{background: 'rgba(52, 211, 153, 0.1)', color: '#34d399', padding: '3px 8px', borderRadius: '4px'}}>الأستاذ: {c.teacher}</span>
+                                <span style={{background: 'rgba(251, 191, 36, 0.1)', color: '#fbbf24', padding: '3px 8px', borderRadius: '4px'}}>المجموعة: {c.group_index}</span>
+                                <span style={{background: 'rgba(236, 72, 153, 0.1)', color: '#ec4899', padding: '3px 8px', borderRadius: '4px'}}>المساعد المشرف: {c.assistant}</span>
+                            </div>
                         </div>
                     ))}
                 </div>
@@ -289,7 +339,7 @@ export const Student360View = ({ id }) => {
                 <div className="hq-table-card">
                     <h3 style={{ padding: '20px', borderBottom: '1px solid var(--hq-border)', color: 'var(--hq-primary)' }}>آخر المشاهدات</h3>
                     <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                        {history.length === 0 ? <p style={{ color: 'var(--hq-text-muted)' }}>لا يوجد بيانات</p> : history.map((h, i) => (
+                        {filteredHistory.length === 0 ? <p style={{ color: 'var(--hq-text-muted)' }}>لا يوجد بيانات التزام تطابق الفلتر</p> : filteredHistory.map((h, i) => (
                             <div key={i} style={{ display: 'flex', gap: '15px', background: 'var(--hq-bg)', padding: '10px', borderRadius: '8px' }}>
                                 <div style={{ width: '40px', height: '40px', borderRadius: '8px', background: 'rgba(56,189,248,0.1)', color: '#38bdf8', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                     <HiOutlineClock size={20} />
@@ -307,7 +357,7 @@ export const Student360View = ({ id }) => {
                 <div className="hq-table-card">
                     <h3 style={{ padding: '20px', borderBottom: '1px solid var(--hq-border)', color: 'var(--hq-primary)' }}>سجل الاختبارات</h3>
                     <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                        {quizzes.length === 0 ? <p style={{ color: 'var(--hq-text-muted)' }}>لم يشارك في أي اختبار</p> : quizzes.map((q, i) => (
+                        {filteredQuizzes.length === 0 ? <p style={{ color: 'var(--hq-text-muted)' }}>لا يوجد اختبارات تطابق الفلتر</p> : filteredQuizzes.map((q, i) => (
                             <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--hq-bg)', padding: '10px 15px', borderRadius: '8px' }}>
                                 <div>
                                     <p style={{ margin: '0 0 5px', fontWeight: '500', color: 'var(--hq-primary-text)' }}>{q.quiz_title}</p>
@@ -327,7 +377,7 @@ export const Student360View = ({ id }) => {
                 <div className="hq-table-card">
                     <h3 style={{ padding: '20px', borderBottom: '1px solid var(--hq-border)', color: 'var(--hq-primary)' }}>أسئلة واستفسارات</h3>
                     <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                        {questions.length === 0 ? <p style={{ color: 'var(--hq-text-muted)' }}>ليس لديه استفسارات</p> : questions.map((q, i) => (
+                        {filteredQuestions.length === 0 ? <p style={{ color: 'var(--hq-text-muted)' }}>لا يوجد أسئلة تطابق الفلتر</p> : filteredQuestions.map((q, i) => (
                             <div key={i} style={{ background: 'var(--hq-bg)', padding: '15px', borderRadius: '8px', borderLeft: q.is_resolved ? '3px solid #34d399' : '3px solid #fbbf24', position: 'relative' }}>
                                 <p style={{ margin: '0 0 10px', color: 'var(--hq-primary-text)', lineHeight: '1.5', paddingRight: '25px' }}>{q.content}</p>
                                 <div style={{ fontSize: '0.8rem', color: 'var(--hq-text-muted)' }}>درس: {q.lesson_title}</div>
@@ -346,7 +396,7 @@ export const Student360View = ({ id }) => {
                 <div className="hq-table-card">
                     <h3 style={{ padding: '20px', borderBottom: '1px solid var(--hq-border)', color: 'var(--hq-primary)' }}>الملاحظات الشخصية</h3>
                     <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                        {notes.length === 0 ? <p style={{ color: 'var(--hq-text-muted)' }}>لم يدون شيئاً</p> : notes.map((n, i) => (
+                        {filteredNotes.length === 0 ? <p style={{ color: 'var(--hq-text-muted)' }}>لا يوجد ملاحظات تطابق الفلتر</p> : filteredNotes.map((n, i) => (
                             <div key={i} style={{ background: 'var(--hq-bg)', padding: '15px', borderRadius: '8px', borderLeft: '3px solid #6366f1' }}>
                                 <p style={{ margin: '0 0 10px', color: 'var(--hq-primary-text)', lineHeight: '1.5' }}>{n.content}</p>
                                 <div style={{ fontSize: '0.8rem', color: 'var(--hq-text-muted)' }}>درس: {n.lesson_title}</div>
@@ -358,7 +408,7 @@ export const Student360View = ({ id }) => {
                 <div className="hq-table-card">
                     <h3 style={{ padding: '20px', borderBottom: '1px solid var(--hq-border)', color: 'var(--hq-primary)' }}>المشاركات العامة (الدردشات)</h3>
                     <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                        {!chats || chats.length === 0 ? <p style={{ color: 'var(--hq-text-muted)' }}>ليس لديه مشاركات عامة بالمجموعات</p> : chats.map((c, i) => (
+                        {!filteredChats || filteredChats.length === 0 ? <p style={{ color: 'var(--hq-text-muted)' }}>لا يوجد دردشات تطابق الفلتر</p> : filteredChats.map((c, i) => (
                             <div key={i} style={{ background: 'var(--hq-bg)', padding: '15px', borderRadius: '8px', borderLeft: '3px solid #ec4899', position: 'relative' }}>
                                 <p style={{ margin: '0 0 10px', color: 'var(--hq-primary-text)', lineHeight: '1.5', paddingRight: '25px' }}>{c.content}</p>
                                 <div style={{ fontSize: '0.8rem', color: 'var(--hq-text-muted)' }}>دورة: {c.course_title}</div>
