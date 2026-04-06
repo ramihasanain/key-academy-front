@@ -373,7 +373,7 @@ export const AdminModelGrid = () => {
                                                                             row[c.key]?.toString().substring(0, 150) || '-'}
                                                 </td>
                                             ))}
-                                            <td className="hq-actions-cell">
+                                            <td className="hq-actions-cell" style={{ display: 'flex', gap: '8px', justifyContent: 'center', alignItems: 'center', flexWrap: 'wrap' }}>
                                                 {model === 'students' ? (
                                                     <button className="hq-action-btn edit" style={{ color: '#38bdf8', background: 'rgba(56,189,248,0.1)', borderColor: '#38bdf8' }} onClick={() => navigate(`/hq/${model}/${row.id}/360`)} title="عرض الملف الثلاثي الأبعاد"><HiOutlineEye /></button>
                                                 ) : (model === 'teachers' || model === 'teacherassistants') ? (
@@ -385,6 +385,9 @@ export const AdminModelGrid = () => {
                                                         <button className="hq-action-btn edit" style={{ color: '#8b5cf6', background: 'rgba(139,92,246,0.1)', borderColor: '#8b5cf6', marginRight: '5px' }} onClick={() => navigate(`/hq/teacherassistants?teacher=${row.id}`)} title="عرض المساعدين لهذا الأستاذ"><HiOutlineUsers /></button>
                                                         <button className="hq-action-btn edit" style={{ color: '#0ea5e9', background: 'rgba(14,165,233,0.1)', borderColor: '#0ea5e9' }} onClick={() => navigate(`/hq/enrollments?course__teacher=${row.id}`)} title="عرض طلاب هذا الأستاذ"><HiOutlineAcademicCap /></button>
                                                     </>
+                                                )}
+                                                {model === 'teacherassistants' && (
+                                                    <button className="hq-action-btn edit" style={{ color: '#0ea5e9', background: 'rgba(14,165,233,0.1)', borderColor: '#0ea5e9' }} onClick={() => navigate(`/hq/enrollments?chat_shard__assistant=${row.id}`)} title="عرض الطلاب المقيدين لدى هذا المساعد"><HiOutlineUsers /></button>
                                                 )}
                                                 {model === 'courses' && (
                                                     <button className="hq-action-btn edit" style={{ color: '#6366f1', background: 'rgba(99,102,241,0.1)', borderColor: '#6366f1' }} onClick={() => navigate(`/hq/enrollments?course=${row.id}`)} title="عرض الطلبة المشتركين"><HiOutlineUsers /></button>

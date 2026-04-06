@@ -156,29 +156,29 @@ export const TA360View = ({ id }) => {
                     placeholder="بحث باسم الطالب أو محتوى الرسالة..."
                     value={studentFilter}
                     onChange={(e) => setStudentFilter(e.target.value)}
-                    style={{ flex: '1 1 250px', background: 'rgba(0,0,0,0.2)', border: '1px solid rgba(255,255,255,0.1)', color: 'white', padding: '10px 15px', borderRadius: '8px', outline: 'none' }}
+                    style={{ flex: '1 1 250px', background: 'var(--hq-bg)', border: '1px solid var(--hq-border)', color: 'var(--hq-text)', padding: '10px 15px', borderRadius: '8px', outline: 'none' }}
                 />
                 <input
                     type="date"
                     value={dateFilter}
                     onChange={(e) => setDateFilter(e.target.value)}
-                    style={{ background: 'rgba(0,0,0,0.2)', border: '1px solid rgba(255,255,255,0.1)', color: 'white', padding: '10px 15px', borderRadius: '8px', outline: 'none' }}
+                    style={{ background: 'var(--hq-bg)', border: '1px solid var(--hq-border)', color: 'var(--hq-text)', padding: '10px 15px', borderRadius: '8px', outline: 'none' }}
                 />
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '25px' }}>
                 <div className="glass-card" style={{ padding: '25px', borderRadius: '15px' }}>
-                    <h3 style={{ margin: '0 0 20px', fontSize: '18px', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '10px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <h3 style={{ margin: '0 0 20px', fontSize: '18px', borderBottom: '1px solid var(--hq-border)', paddingBottom: '10px', display: 'flex', alignItems: 'center', gap: '10px' }}>
                         <HiOutlineChatBubbleOvalLeftEllipsis style={{ color: '#10b981' }} />
                         آخر إجاباته للطلبة بالطيلة الفائتة
                     </h3>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', maxHeight: '400px', overflowY: 'auto' }}>
                         {recent_qa.length === 0 ? <p style={{ color: 'var(--hq-text-muted)', textAlign: 'center' }}>لا توجد نتائج مطابقة.</p> : recent_qa.map((qa, i) => (
                             <div key={i} style={{ background: 'var(--hq-bg)', padding: '15px', borderRadius: '8px', borderRight: '3px solid #10b981' }}>
-                                <div style={{ fontSize: '0.8rem', color: 'var(--hq-text-muted)', marginBottom: '8px' }}>سؤال الطالب (<strong style={{ color: 'white' }}>{qa.student_name}</strong>):</div>
-                                <p style={{ margin: '0 0 10px', color: '#cbd5e1', fontStyle: 'italic', fontSize: '0.9rem' }}>"{qa.post_content}"</p>
+                                <div style={{ fontSize: '0.8rem', color: 'var(--hq-text-muted)', marginBottom: '8px' }}>سؤال الطالب (<strong style={{ color: 'var(--hq-text)' }}>{qa.student_name}</strong>):</div>
+                                <p style={{ margin: '0 0 10px', color: 'var(--hq-text)', fontStyle: 'italic', fontSize: '0.9rem' }}>"{qa.post_content}"</p>
                                 <div style={{ fontSize: '0.8rem', color: '#10b981', marginBottom: '5px', fontWeight: 'bold' }}>رد المساعد:</div>
-                                <p style={{ margin: '0 0 8px', color: 'white', fontSize: '0.95rem' }}>{qa.my_reply}</p>
+                                <p style={{ margin: '0 0 8px', color: 'var(--hq-text)', fontSize: '0.95rem' }}>{qa.my_reply}</p>
                                 <div style={{ fontSize: '0.75rem', color: 'var(--hq-text-muted)', textAlign: 'left' }}>{new Date(qa.time).toLocaleString('ar-EG')}</div>
                             </div>
                         ))}
@@ -186,14 +186,14 @@ export const TA360View = ({ id }) => {
                 </div>
 
                 <div className="glass-card" style={{ padding: '25px', borderRadius: '15px' }}>
-                    <h3 style={{ margin: '0 0 20px', fontSize: '18px', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '10px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <h3 style={{ margin: '0 0 20px', fontSize: '18px', borderBottom: '1px solid var(--hq-border)', paddingBottom: '10px', display: 'flex', alignItems: 'center', gap: '10px' }}>
                         <HiOutlineChatBubbleLeftRight style={{ color: '#ec4899' }} />
                         آخر مشاركاته بمجموعات المحادثة الحية
                     </h3>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', maxHeight: '400px', overflowY: 'auto' }}>
                         {recent_chat.length === 0 ? <p style={{ color: 'var(--hq-text-muted)', textAlign: 'center' }}>لا توجد نتائج مطابقة.</p> : recent_chat.map((m, i) => (
                             <div key={i} style={{ background: 'var(--hq-bg)', padding: '15px', borderRadius: '8px', borderRight: '3px solid #ec4899' }}>
-                                {m.content && <p style={{ margin: '0 0 10px', color: 'white', lineHeight: '1.5' }}>{m.content}</p>}
+                                {m.content && <p style={{ margin: '0 0 10px', color: 'var(--hq-text)', lineHeight: '1.5' }}>{m.content}</p>}
                                 {m.attachment && (
                                     <div style={{ marginBottom: '10px' }}>
                                         <a href={m.attachment} target="_blank" rel="noreferrer" style={{ color: '#ec4899', textDecoration: 'underline', fontSize: '0.85rem' }}>📄 عرض المُرفق الذي أرسله</a>
