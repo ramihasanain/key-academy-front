@@ -112,9 +112,9 @@ export const TA360View = ({ id }) => {
                     </p>
                 </div>
                 <div style={{ flexShrink: 0, textAlign: 'center', padding: '15px 30px', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                    <div style={{ fontSize: '13px', color: 'var(--hq-text-muted)', marginBottom: '5px' }}>حالة החשבון</div>
+                    <div style={{ fontSize: '13px', color: 'var(--hq-text-muted)', marginBottom: '5px' }}>حالة الحساب</div>
                     {profile.is_active ? (
-                        <div style={{ fontSize: '18px', fontWeight: 'bold', color: '#10b981', padding: '5px 15px', background: 'rgba(16, 185, 129, 0.1)', borderRadius: '20px' }}>فعال النشاط</div>
+                        <div style={{ fontSize: '18px', fontWeight: 'bold', color: '#10b981', padding: '5px 15px', background: 'rgba(16, 185, 129, 0.1)', borderRadius: '20px' }}>نشط</div>
                     ) : (
                         <div style={{ fontSize: '18px', fontWeight: 'bold', color: '#ef4444', padding: '5px 15px', background: 'rgba(239, 68, 68, 0.1)', borderRadius: '20px' }}>حساب معطل</div>
                     )}
