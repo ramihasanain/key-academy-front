@@ -46,7 +46,7 @@ const Teachers = () => {
     const filtered = allTeachers.filter(t => {
         if (filter.grade !== 'all' && !t.grade.includes(filter.grade)) return false
         if (filter.branch !== 'all' && t.branch && !t.branch.includes(filter.branch)) return false
-        if (filter.subject !== 'all' && t.subject !== filter.subject) return false
+        if (filter.subject !== 'all' && t.subject && !t.subject.includes(filter.subject)) return false
         return true
     })
 
