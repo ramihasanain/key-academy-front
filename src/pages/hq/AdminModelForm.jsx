@@ -147,6 +147,7 @@ const SCHEMAS = {
 import { AdminCourseBuilder } from './AdminCourseBuilder'
 import { Student360View } from './Student360View'
 import { TA360View } from './TA360View'
+import { Teacher360View } from './Teacher360View'
 
 export const AdminModelForm = () => {
     const { model, id } = useParams()
@@ -329,6 +330,7 @@ export const AdminModelForm = () => {
             </div>
 
             {model === 'teacherassistants' && !isNew && <TA360View id={id} />}
+            {model === 'teachers' && !isNew && <Teacher360View id={id} />}
 
             <div className="hq-form-card">
                 {loading ? <div className="hq-loading" style={{ padding: '50px' }}>جاري جلب البيانات...</div> : (
