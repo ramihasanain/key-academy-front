@@ -41,7 +41,7 @@ export const AdminCourseBuilder = ({ id }) => {
 
     // Trash Memory for intelligent deletion
     const [deletedItems, setDeletedItems] = useState({
-        modules: [], lessons: [], quizzes: [], questions: [], ministerialdocs: []
+        modules: [], lessons: [], quizzes: [], questions: [], ministerialdocs: [], weeklyexams: []
     })
 
     const trackDelete = (type, dbId) => {
@@ -66,12 +66,13 @@ export const AdminCourseBuilder = ({ id }) => {
                 const crsRes = await fetch(`${API}/api/hq/courses/${id}/`, { headers })
                 if (crsRes.ok) setCourse(await crsRes.json())
 
-                const [modRes, lessRes, quizRes, questRes, docsRes] = await Promise.all([
+                const [modRes, lessRes, quizRes, questRes, docsRes, examRes] = await Promise.all([
                     fetch(`${API}/api/hq/modules/?page_size=5000`, { headers }),
                     fetch(`${API}/api/hq/lessons/?page_size=5000`, { headers }),
                     fetch(`${API}/api/hq/quizzes/?page_size=5000`, { headers }),
                     fetch(`${API}/api/hq/questions/?page_size=10000`, { headers }),
-                    fetch(`${API}/api/hq/ministerialdocs/?page_size=1000`, { headers })
+                    fetch(`${API}/api/hq/ministerialdocs/?page_size=1000`, { headers }),
+                    fetch(`${API}/api/hq/weeklyexams/?page_size=5000`, { headers })
                 ])
 
                 const allModules = modRes.ok ? await modRes.json().then(d => d.results || d) : []
@@ -79,6 +80,7 @@ export const AdminCourseBuilder = ({ id }) => {
                 const allQuizzes = quizRes.ok ? await quizRes.json().then(d => d.results || d) : []
                 const allQuestions = questRes.ok ? await questRes.json().then(d => d.results || d) : []
                 const allDocs = docsRes.ok ? await docsRes.json().then(d => d.results || d) : []
+                const allExams = examRes.ok ? await examRes.json().then(d => d.results || d) : []
 
                 // Filter docs by course
                 setCourseDocs(allDocs.filter(d => d.course == id).map(d => ({ ...d, localId: d.id })))
@@ -86,9 +88,23 @@ export const AdminCourseBuilder = ({ id }) => {
                 const courseMods = allModules.filter(m => m.course == id).sort((a, b) => a.order - b.order)
 
                 const tree = courseMods.map(m => {
+                    const examData = allExams.find(ex => ex.module == m.id)
+                    if (examData) {
+                        return {
+                            ...m, localId: m.id,
+                            is_exam: true,
+                            exam_id: examData.id,
+                            exam_start_time: examData.start_time ? examData.start_time.slice(0,16) : '',
+                            exam_end_time: examData.end_time ? examData.end_time.slice(0,16) : '',
+                            exam_total_mark: examData.total_mark,
+                            exam_file: examData.file,
+                            lessons: []
+                        }
+                    }
+
                     const moduleLessons = allLessons.filter(l => l.module == m.id).sort((a, b) => a.order - b.order)
                     return {
-                        ...m, localId: m.id,
+                        ...m, localId: m.id, is_exam: false,
                         lessons: moduleLessons.map(l => {
                             const lessonQuizzes = allQuizzes.filter(q => q.lesson == l.id)
                             return {
@@ -124,8 +140,12 @@ export const AdminCourseBuilder = ({ id }) => {
     }, [id, isNew])
 
     // --- Module Operations ---
-    const addModule = () => {
-        setModules([...modules, { localId: Date.now(), title: '', order: modules.length + 1, is_free: false, lessons: [] }])
+    const addModule = (isExam = false) => {
+        if (isExam) {
+            setModules([...modules, { localId: Date.now(), title: '', order: modules.length + 1, is_free: false, is_exam: true, exam_start_time: '', exam_end_time: '', exam_total_mark: 100, exam_file: null, lessons: [] }])
+        } else {
+            setModules([...modules, { localId: Date.now(), title: '', order: modules.length + 1, is_free: false, is_exam: false, lessons: [] }])
+        }
         setExpandedModule(modules.length)
     }
 
@@ -133,6 +153,7 @@ export const AdminCourseBuilder = ({ id }) => {
         if (!window.confirm("متأكد من حذف هذه الوحدة بالكامل؟")) return
         const toDel = modules[mIndex]
         trackDelete('modules', toDel.id)
+        if (toDel.is_exam && toDel.exam_id) trackDelete('weeklyexams', toDel.exam_id)
         setModules(modules.filter((_, i) => i !== mIndex))
     }
 
@@ -331,14 +352,14 @@ export const AdminCourseBuilder = ({ id }) => {
 
         try {
             // 1. Process Trash Memory (Deletions) in precise order
-            for (const type of ['questions', 'quizzes', 'lessons', 'modules', 'ministerialdocs']) {
+            for (const type of ['questions', 'quizzes', 'lessons', 'weeklyexams', 'modules', 'ministerialdocs']) {
                 for (const dbId of deletedItems[type]) {
                     await fetch(`${API}/api/hq/${type}/${dbId}/`, { method: 'DELETE', headers: headersJson }).catch(() => { })
                 }
             }
 
             // 2. Clear trash cache locally
-            setDeletedItems({ modules: [], lessons: [], quizzes: [], questions: [], ministerialdocs: [] })
+            setDeletedItems({ modules: [], lessons: [], quizzes: [], questions: [], ministerialdocs: [], weeklyexams: [] })
 
             // 3. Save Course Base
             const cPayload = buildPayload(course)
@@ -368,7 +389,11 @@ export const AdminCourseBuilder = ({ id }) => {
             // 5. Save Modules -> Lessons -> Quizzes -> Questions (Deep Hierarchy Integration)
             for (const mod of modules) {
                 const modData = { ...mod, course: courseId }
+                
+                // Clean keys before saving module itself
                 delete modData.lessons; delete modData.localId;
+                delete modData.is_exam; delete modData.exam_id; delete modData.exam_file;
+                delete modData.exam_start_time; delete modData.exam_end_time; delete modData.exam_total_mark;
 
                 const pLoad = buildPayload(modData)
                 let mHdrs = pLoad.isMultipart ? headersMulti : headersJson;
@@ -379,6 +404,30 @@ export const AdminCourseBuilder = ({ id }) => {
                 const savedMod = await mRes.json()
 
                 mod.id = savedMod.id
+
+                // IF EXAM: Handle WeeklyExam creation
+                if (mod.is_exam) {
+                    const exData = { 
+                        module: savedMod.id, 
+                        title: mod.title,
+                        total_mark: mod.exam_total_mark || 100
+                    }
+                    if (mod.exam_start_time) exData.start_time = new Date(mod.exam_start_time).toISOString()
+                    if (mod.exam_end_time) exData.end_time = new Date(mod.exam_end_time).toISOString()
+                    if (mod.exam_file instanceof File) exData.file = mod.exam_file
+                    
+                    const exPayload = buildPayload(exData)
+                    let exHdrs = exPayload.isMultipart ? headersMulti : headersJson;
+                    
+                    if (mod.exam_id) {
+                        await fetch(`${API}/api/hq/weeklyexams/${mod.exam_id}/`, { method: 'PUT', headers: exHdrs, body: exPayload.body })
+                    } else {
+                        const exRes = await fetch(`${API}/api/hq/weeklyexams/`, { method: 'POST', headers: exHdrs, body: exPayload.body })
+                        const savedEx = await exRes.json()
+                        mod.exam_id = savedEx.id
+                    }
+                    continue; // Skip lessons logic for exams
+                }
 
                 for (const less of mod.lessons) {
                     const lessData = { ...less, module: savedMod.id }
@@ -517,9 +566,14 @@ export const AdminCourseBuilder = ({ id }) => {
             <div className="hq-form-card" style={{ background: 'transparent', boxShadow: 'none', padding: 0, marginBottom: '30px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
                     <h3 style={{ margin: 0, fontSize: '1.1rem' }}>2. وحدات الكورس (Chapters & Modules)</h3>
-                    <button className="hq-btn-secondary" onClick={addModule} style={{ background: 'var(--hq-primary)', color: 'white', border: 'none', padding: '10px 20px', borderRadius: '10px' }}>
-                        <HiOutlinePlus size={20} /> <span>إدراج فصل دراسي جديد</span>
-                    </button>
+                    <div style={{ display: 'flex', gap: '10px' }}>
+                        <button className="hq-btn-secondary" onClick={() => addModule(true)} style={{ background: '#f59e0b', color: 'white', border: 'none', padding: '10px 20px', borderRadius: '10px', boxShadow: '0 4px 6px rgba(245, 158, 11, 0.3)' }}>
+                            <HiOutlinePlus size={20} /> <span>إدراج امتحان أسبوعي</span>
+                        </button>
+                        <button className="hq-btn-secondary" onClick={() => addModule(false)} style={{ background: 'var(--hq-primary)', color: 'white', border: 'none', padding: '10px 20px', borderRadius: '10px', boxShadow: '0 4px 6px rgba(99, 102, 241, 0.3)' }}>
+                            <HiOutlinePlus size={20} /> <span>إدراج فصل دراسي جديد</span>
+                        </button>
+                    </div>
                 </div>
 
                 {modules.map((mod, mIndex) => {
@@ -547,6 +601,7 @@ export const AdminCourseBuilder = ({ id }) => {
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
                                     {isExpanded && (
                                         <>
+                                            {mod.is_exam && <span style={{ background: '#f59e0b', color: 'white', padding: '2px 8px', borderRadius: '6px', fontSize: '0.8rem', fontWeight: 'bold' }}>وحدة امتحان</span>}
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'white', padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--hq-border)' }} onClick={e => e.stopPropagation()}>
                                                 <span style={{ fontSize: '0.85rem', fontWeight: 'bold', color: mod.is_free ? '#10b981' : 'inherit' }}>مجانية (Preview)</span>
                                                 <div className="hq-toggle-switch">
@@ -561,8 +616,39 @@ export const AdminCourseBuilder = ({ id }) => {
                                 </div>
                             </div>
 
-                            {/* Lessons Body Accordion */}
-                            {isExpanded && (
+                            {/* EXAM OR Lessons Body Accordion */}
+                            {isExpanded && mod.is_exam && (
+                                <div style={{ padding: '24px', background: '#fffbeb', borderTop: '1px solid #fcd34d' }}>
+                                    <h5 style={{ margin: 0, fontSize: '1rem', color: '#b45309', marginBottom: '20px' }}>إعدادات الامتحان الأسبوعي الفرعية</h5>
+                                    
+                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+                                        <div>
+                                            <label style={{ display: 'block', fontSize: '0.85rem', marginBottom: '8px', color: 'var(--hq-text-main)', fontWeight: 'bold' }}>وقت بداية الامتحان (تاريخ ووقت)</label>
+                                            <input type="datetime-local" value={mod.exam_start_time || ''} onChange={e => updateModule(mIndex, 'exam_start_time', e.target.value)} style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #fcd34d', outline: 'none' }} />
+                                        </div>
+                                        <div>
+                                            <label style={{ display: 'block', fontSize: '0.85rem', marginBottom: '8px', color: 'var(--hq-text-main)', fontWeight: 'bold' }}>آخر موعد للتسليم (تاريخ ووقت النهاية)</label>
+                                            <input type="datetime-local" value={mod.exam_end_time || ''} onChange={e => updateModule(mIndex, 'exam_end_time', e.target.value)} style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #fcd34d', outline: 'none' }} />
+                                        </div>
+                                        <div>
+                                            <label style={{ display: 'block', fontSize: '0.85rem', marginBottom: '8px', color: 'var(--hq-text-main)', fontWeight: 'bold' }}>العلامة العظمى للامتحان</label>
+                                            <input type="number" value={mod.exam_total_mark || 100} onChange={e => updateModule(mIndex, 'exam_total_mark', parseInt(e.target.value))} style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #fcd34d', outline: 'none' }} />
+                                        </div>
+                                        <div>
+                                            <label style={{ display: 'block', fontSize: '0.85rem', marginBottom: '8px', color: 'var(--hq-text-main)', fontWeight: 'bold' }}>ملف الإجابة / الأسئلة PDF</label>
+                                            <div style={{ display: 'flex', alignItems: 'center', background: 'white', padding: '5px 12px', borderRadius: '8px', border: '1px solid #fcd34d' }}>
+                                                <input type="file" accept=".pdf" onChange={e => {
+                                                    if (e.target.files && e.target.files[0]) updateModule(mIndex, 'exam_file', e.target.files[0])
+                                                }} style={{ flex: 1, fontSize: '0.85rem' }} />
+                                            </div>
+                                            {typeof mod.exam_file === 'string' && mod.exam_file && <div style={{ fontSize: '0.8rem', color: '#10b981', marginTop: '5px' }}>يوجد ملف محفوظ.</div>}
+                                        </div>
+                                    </div>
+                                    <p style={{ fontSize: '0.8rem', color: '#92400e', marginTop: '15px' }}>ملاحظة: هذه الوحدة هي عبارة عن امتحان أسبوعي فقط، وتختلف عن الفصول الدراسية العادية حيث تظهر للطالب بمؤقت زمني لرفع إجابته ولن تقبل إضافة دروس.</p>
+                                </div>
+                            )}
+
+                            {isExpanded && !mod.is_exam && (
                                 <div style={{ padding: '24px' }}>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
                                         <h5 style={{ margin: 0, fontSize: '1rem', color: 'var(--hq-text-main)' }}>محتوى وملفات الفصل</h5>
