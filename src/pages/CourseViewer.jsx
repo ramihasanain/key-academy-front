@@ -429,9 +429,6 @@ const CourseViewer = () => {
                     </motion.div>
                 )}
             </AnimatePresence>
-
-                )}
-            </AnimatePresence>
         </div>
     )
 }
