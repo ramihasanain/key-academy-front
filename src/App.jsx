@@ -36,6 +36,10 @@ import { TAStudentStats } from './pages/ta/TAStudentStats'
 import { TAStudent360 } from './pages/ta/TAStudent360'
 import { TANotebook } from './pages/ta/TANotebook'
 import { TASpyLogin } from './pages/hq/TASpyLogin'
+import { StudentNotebook } from './pages/student/StudentNotebook'
+import { StudentQA } from './pages/student/StudentQA'
+import { StudentProfile } from './pages/student/StudentProfile'
+import { WeeklyExamPortal } from './pages/student/WeeklyExamPortal'
 import { TeacherLayout } from './pages/teacher/TeacherLayout'
 import { TeacherOverview } from './pages/teacher/TeacherOverview'
 import { TeacherCourses } from './pages/teacher/TeacherCourses'
@@ -80,6 +84,7 @@ function App() {
                     <Route path="/course/:courseId" element={<CourseViewer />} />
                     <Route path="/lesson/:lessonId" element={<LessonViewer />} />
                     <Route path="/virtual-labs" element={<VirtualLabs />} />
+                    <Route path="/student/exam/:examId" element={<WeeklyExamPortal />} />
                     
                     {/* HQ Admin Dashboard Routes */}
                     <Route path="/hq" element={

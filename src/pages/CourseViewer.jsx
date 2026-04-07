@@ -30,9 +30,6 @@ const CourseViewer = () => {
     const [expandedDocModule, setExpandedDocModule] = useState(null)
     const [scrolled, setScrolled] = useState(false)
     const [showLoginPrompt, setShowLoginPrompt] = useState(false)
-    const [examModal, setExamModal] = useState(null)
-    const [examFile, setExamFile] = useState(null)
-    const [submittingExam, setSubmittingExam] = useState(false)
 
     useEffect(() => {
         // Fetch real data from backend
@@ -91,44 +88,6 @@ const CourseViewer = () => {
             window.open(url, '_blank')
         } else {
             alert(`سيتم إضافة ${name} قريباً ⏳`)
-        }
-    }
-
-    const openExamModal = (e, mod) => {
-        if (e) e.stopPropagation();
-        setExamModal(mod.weekly_exam);
-        setExamFile(null);
-    }
-
-    const submitExam = async () => {
-        if (!examFile) return;
-        const token = localStorage.getItem('access_token');
-        if (!token) return;
-
-        setSubmittingExam(true);
-        const formData = new FormData();
-        formData.append('exam_id', examModal.id);
-        formData.append('file', examFile);
-
-        try {
-            const res = await fetch(`${API}/api/interactions/exams/submit/`, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                },
-                body: formData
-            });
-            const data = await res.json();
-            if (res.ok) {
-                alert('تم رفع الإجابة بنجاح!');
-                setExamModal({...examModal, submission: { id: data.submission_id, submitted_at: data.submitted_at }});
-            } else {
-                alert(data.error || 'حدث خطأ أثناء الرفع');
-            }
-        } catch (e) {
-            alert('حدث خطأ بالاتصال');
-        } finally {
-            setSubmittingExam(false);
         }
     }
 
@@ -260,7 +219,7 @@ const CourseViewer = () => {
                                                     </div>
                                                     {mod.weekly_exam && (
                                                         <button 
-                                                            onClick={(e) => openExamModal(e, mod)}
+                                                            onClick={(e) => { e.stopPropagation(); navigate(`/student/exam/${mod.weekly_exam.id}`); }}
                                                             style={{ padding: '8px 16px', background: 'rgba(255, 193, 7, 0.9)', color: '#000', borderRadius: '12px', border: 'none', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', boxShadow: '0 4px 15px rgba(255, 193, 7, 0.3)' }}
                                                         >
                                                             <HiOutlineClipboardDocumentCheck style={{ fontSize: '1.2rem' }} /> الامتحان الأسبوعي
@@ -471,112 +430,6 @@ const CourseViewer = () => {
                 )}
             </AnimatePresence>
 
-            {/* Weekly Exam Modal */}
-            <AnimatePresence>
-                {examModal && (
-                    <motion.div
-                        style={{ position: 'fixed', inset: 0, zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(8px)' }}
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        onClick={() => setExamModal(null)}
-                    >
-                        <motion.div
-                            initial={{ opacity: 0, scale: 0.9, y: 20 }}
-                            animate={{ opacity: 1, scale: 1, y: 0 }}
-                            exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                            onClick={e => e.stopPropagation()}
-                            style={{ width: '90%', maxWidth: '500px', background: '#fff', borderRadius: '24px', overflow: 'hidden', boxShadow: '0 20px 40px rgba(0,0,0,0.2)' }}
-                        >
-                            <div style={{ background: 'linear-gradient(135deg, #f59e0b, #d97706)', padding: '20px', color: 'white', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                <h3 style={{ margin: 0, fontSize: '1.4rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                    <HiOutlineClipboardDocumentCheck /> {examModal.title}
-                                </h3>
-                                <button onClick={() => setExamModal(null)} style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer', fontSize: '1.5rem' }}>
-                                    <HiOutlineXMark />
-                                </button>
-                            </div>
-                            
-                            <div style={{ padding: '20px' }}>
-                                {(() => {
-                                    const now = new Date();
-                                    const start = examModal.start_time ? new Date(examModal.start_time) : null;
-                                    const end = examModal.end_time ? new Date(examModal.end_time) : null;
-
-                                    if (start && now < start) {
-                                        return (
-                                            <div style={{ textAlign: 'center', padding: '30px 0' }}>
-                                                <div style={{ fontSize: '3rem', marginBottom: '10px' }}>⏳</div>
-                                                <h4 style={{ color: '#0f172a' }}>الامتحان لم يبدأ بعد</h4>
-                                                <p style={{ color: '#64748b' }}>سيبدأ في: {start.toLocaleString('ar-EG')}</p>
-                                            </div>
-                                        );
-                                    }
-
-                                    return (
-                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                                            {end && (
-                                                <div style={{ background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', padding: '10px', borderRadius: '12px', textAlign: 'center', fontWeight: 'bold' }}>
-                                                    {now > end ? 'انتهى وقت الامتحان!' : `التسليم متاح حتى: ${end.toLocaleString('ar-EG')}`}
-                                                </div>
-                                            )}
-
-                                            <button 
-                                                className="cv-btn-min-download" 
-                                                style={{ width: '100%', justifyContent: 'center' }}
-                                                onClick={(e) => handleDownload(e, examModal.file, 'ورقة الامتحان')}
-                                            >
-                                                <HiOutlineArrowDownTray /> تحميل ورقة الامتحان
-                                            </button>
-
-                                            <div style={{ borderTop: '1px solid #e2e8f0', margin: '10px 0' }}></div>
-
-                                            {examModal.submission ? (
-                                                <div style={{ textAlign: 'center' }}>
-                                                    <div style={{ color: '#10b981', fontSize: '3rem', marginBottom: '10px' }}><HiOutlineCheckCircle /></div>
-                                                    <h4 style={{ color: '#0f172a', marginBottom: '5px' }}>تم تسليم إجابتك بنجاح</h4>
-                                                    <p style={{ color: '#64748b', fontSize: '0.9rem', marginBottom: '15px' }}>
-                                                        تاريخ التسليم: {new Date(examModal.submission.submitted_at).toLocaleString('ar-EG')}
-                                                    </p>
-                                                    {examModal.submission.grade !== null && (
-                                                        <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', padding: '15px', borderRadius: '12px' }}>
-                                                            <h5 style={{ margin: '0 0 5px 0', color: '#0f172a' }}>النتيجة</h5>
-                                                            <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--purple)' }}>
-                                                                {examModal.submission.grade} / {examModal.total_mark}
-                                                            </div>
-                                                            {examModal.submission.feedback_note && (
-                                                                <p style={{ margin: '10px 0 0 0', fontSize: '0.9rem', color: '#64748b' }}>
-                                                                    ملاحظة: {examModal.submission.feedback_note}
-                                                                </p>
-                                                            )}
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            ) : (
-                                                (!end || now <= end) && (
-                                                    <div>
-                                                        <h4 style={{ margin: '0 0 10px 0', color: '#0f172a' }}>رفع الإجابة</h4>
-                                                        <input 
-                                                            type="file" 
-                                                            onChange={(e) => setExamFile(e.target.files[0])}
-                                                            style={{ border: '1px dashed #cbd5e1', padding: '20px', width: '100%', borderRadius: '12px', textAlign: 'center', cursor: 'pointer', marginBottom: '10px' }}
-                                                        />
-                                                        <button 
-                                                            onClick={submitExam}
-                                                            disabled={!examFile || submittingExam}
-                                                            style={{ width: '100%', padding: '12px', background: examFile ? '#10b981' : '#cbd5e1', color: 'white', border: 'none', borderRadius: '12px', fontWeight: 'bold', cursor: examFile ? 'pointer' : 'not-allowed' }}
-                                                        >
-                                                            {submittingExam ? 'جاري الرفع...' : 'تأكيد التسليم'}
-                                                        </button>
-                                                    </div>
-                                                )
-                                            )}
-                                        </div>
-                                    );
-                                })()}
-                            </div>
-                        </motion.div>
-                    </motion.div>
                 )}
             </AnimatePresence>
         </div>

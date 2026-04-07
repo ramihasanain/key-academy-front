@@ -97,6 +97,7 @@ export const AdminCourseBuilder = ({ id }) => {
                             exam_start_time: examData.start_time ? examData.start_time.slice(0,16) : '',
                             exam_end_time: examData.end_time ? examData.end_time.slice(0,16) : '',
                             exam_total_mark: examData.total_mark,
+                            exam_instructions: examData.instructions || '',
                             exam_file: examData.file,
                             lessons: []
                         }
@@ -142,7 +143,7 @@ export const AdminCourseBuilder = ({ id }) => {
     // --- Module Operations ---
     const addModule = (isExam = false) => {
         if (isExam) {
-            setModules([...modules, { localId: Date.now(), title: '', order: modules.length + 1, is_free: false, is_exam: true, exam_start_time: '', exam_end_time: '', exam_total_mark: 100, exam_file: null, lessons: [] }])
+            setModules([...modules, { localId: Date.now(), title: '', order: modules.length + 1, is_free: false, is_exam: true, exam_start_time: '', exam_end_time: '', exam_total_mark: 100, exam_instructions: '', exam_file: null, lessons: [] }])
         } else {
             setModules([...modules, { localId: Date.now(), title: '', order: modules.length + 1, is_free: false, is_exam: false, lessons: [] }])
         }
@@ -393,7 +394,7 @@ export const AdminCourseBuilder = ({ id }) => {
                 // Clean keys before saving module itself
                 delete modData.lessons; delete modData.localId;
                 delete modData.is_exam; delete modData.exam_id; delete modData.exam_file;
-                delete modData.exam_start_time; delete modData.exam_end_time; delete modData.exam_total_mark;
+                delete modData.exam_start_time; delete modData.exam_end_time; delete modData.exam_total_mark; delete modData.exam_instructions;
 
                 const pLoad = buildPayload(modData)
                 let mHdrs = pLoad.isMultipart ? headersMulti : headersJson;
@@ -410,7 +411,8 @@ export const AdminCourseBuilder = ({ id }) => {
                     const exData = { 
                         module: savedMod.id, 
                         title: mod.title,
-                        total_mark: mod.exam_total_mark || 100
+                        total_mark: mod.exam_total_mark || 100,
+                        instructions: mod.exam_instructions || ''
                     }
                     if (mod.exam_start_time) exData.start_time = new Date(mod.exam_start_time).toISOString()
                     if (mod.exam_end_time) exData.end_time = new Date(mod.exam_end_time).toISOString()
@@ -635,16 +637,21 @@ export const AdminCourseBuilder = ({ id }) => {
                                             <input type="number" value={mod.exam_total_mark || 100} onChange={e => updateModule(mIndex, 'exam_total_mark', parseInt(e.target.value))} style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #fcd34d', outline: 'none' }} />
                                         </div>
                                         <div>
-                                            <label style={{ display: 'block', fontSize: '0.85rem', marginBottom: '8px', color: 'var(--hq-text-main)', fontWeight: 'bold' }}>ملف الإجابة / الأسئلة PDF</label>
+                                            <label style={{ display: 'block', fontSize: '0.85rem', marginBottom: '8px', color: 'var(--hq-text-main)', fontWeight: 'bold' }}>طريقة الاستلام (رفع ملف PDF)</label>
                                             <div style={{ display: 'flex', alignItems: 'center', background: 'white', padding: '5px 12px', borderRadius: '8px', border: '1px solid #fcd34d' }}>
                                                 <input type="file" accept=".pdf" onChange={e => {
                                                     if (e.target.files && e.target.files[0]) updateModule(mIndex, 'exam_file', e.target.files[0])
                                                 }} style={{ flex: 1, fontSize: '0.85rem' }} />
                                             </div>
                                             {typeof mod.exam_file === 'string' && mod.exam_file && <div style={{ fontSize: '0.8rem', color: '#10b981', marginTop: '5px' }}>يوجد ملف محفوظ.</div>}
+                                            <div style={{ fontSize: '0.8rem', color: '#64748b', marginTop: '5px' }}>سيقوم الطالب بتحميل هذا الملف، حله، ثم إعادة رفعه كملف PDF.</div>
                                         </div>
                                     </div>
-                                    <p style={{ fontSize: '0.8rem', color: '#92400e', marginTop: '15px' }}>ملاحظة: هذه الوحدة هي عبارة عن امتحان أسبوعي فقط، وتختلف عن الفصول الدراسية العادية حيث تظهر للطالب بمؤقت زمني لرفع إجابته ولن تقبل إضافة دروس.</p>
+                                    <div style={{ marginTop: '20px' }}>
+                                        <label style={{ display: 'block', fontSize: '0.85rem', marginBottom: '8px', color: 'var(--hq-text-main)', fontWeight: 'bold' }}>تعليمات وإرشادات إضافية للامتحان (تظهر للطالب قبل البدء بالتسليم)</label>
+                                        <textarea value={mod.exam_instructions || ''} onChange={e => updateModule(mIndex, 'exam_instructions', e.target.value)} placeholder="مثال: يرجى كتابة الإجابة بخط واضح، يُمنع استخدام الآلة الحاسبة..." style={{ width: '100%', height: '80px', padding: '12px', borderRadius: '8px', border: '1px solid #fcd34d', outline: 'none', resize: 'vertical' }}></textarea>
+                                    </div>
+                                    <p style={{ fontSize: '0.8rem', color: '#92400e', marginTop: '15px' }}>ملاحظة: هذه الوحدة خاصة بالامتحان فقط، عند ضغط الطالب عليها سيتم توجيهه لصفحة الامتحان المخصصة حيث تظهر له التعليمات والمؤقت.</p>
                                 </div>
                             )}
 
