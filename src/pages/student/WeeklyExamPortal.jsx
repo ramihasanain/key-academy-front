@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { API } from '../../config'
 import { HiOutlineArrowRight, HiOutlineDocumentText, HiOutlineClock, HiOutlineCloudUpload, HiOutlineCheckCircle, HiOutlineExclamationCircle, HiOutlineInformationCircle } from 'react-icons/hi2'
-import './StudentCourses.css'
 
 export const WeeklyExamPortal = () => {
     const { examId } = useParams()
