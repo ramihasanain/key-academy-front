@@ -9,7 +9,7 @@ export const WeeklyExamPortal = () => {
     
     const [exam, setExam] = useState(null)
     const [loading, setLoading] = useState(true)
-    const [fileOptions, setFileOptions] = useState(null)
+    const [fileOptions, setFileOptions] = useState([])
     const [submitting, setSubmitting] = useState(false)
     const [errorMsg, setErrorMsg] = useState('')
     
@@ -83,15 +83,15 @@ export const WeeklyExamPortal = () => {
     }
     
     const handleFileChange = (e) => {
-        if (e.target.files && e.target.files[0]) {
-            setFileOptions(e.target.files[0])
+        if (e.target.files && e.target.files.length > 0) {
+            setFileOptions(Array.from(e.target.files))
             setErrorMsg('')
         }
     }
     
     const submitExam = async () => {
-        if (!fileOptions) {
-            setErrorMsg('يجب إرفاق ملف الإجابة (PDF) قبل التسليم.')
+        if (!fileOptions || fileOptions.length === 0) {
+            setErrorMsg('يجب إرفاق ملف الإجابة (PDF أو مجموعة صور) قبل التسليم.')
             return
         }
         
@@ -100,7 +100,10 @@ export const WeeklyExamPortal = () => {
         const tk = localStorage.getItem('access_token')
         const fd = new FormData()
         fd.append('exam_id', exam.id)
-        fd.append('file', fileOptions)
+        
+        fileOptions.forEach(file => {
+            fd.append('file', file)
+        })
         
         try {
             const res = await fetch(`${API}/api/interactions/exams/submit/`, {
@@ -234,7 +237,7 @@ export const WeeklyExamPortal = () => {
                         {!hasSubmitted && exam.status === 'open' && (
                             <div style={{ background: 'white', borderRadius: '16px', padding: '25px', boxShadow: '0 4px 15px rgba(0,0,0,0.05)', border: '1px solid var(--purple)' }}>
                                 <h3 style={{ margin: 0, fontSize: '1.1rem', color: 'var(--purple)', marginBottom: '15px', textAlign: 'center' }}>تأكيد تسليم الإجابة</h3>
-                                <p style={{ fontSize: '0.85rem', color: '#64748b', textAlign: 'center', marginBottom: '20px' }}>يرجى التأكد من أن حلك واضح وبصيغة PDF. <strong>لا يمكنك استبدال الملف بعد التسليم!</strong></p>
+                                <p style={{ fontSize: '0.85rem', color: '#64748b', textAlign: 'center', marginBottom: '20px' }}>يرجى التأكد من أن حلك واضح. يمكنك إرفاق PDF أو أكثر من صورة. <strong>لا يمكنك استبدال الملف بعد التسليم!</strong></p>
                                 
                                 {errorMsg && (
                                     <div style={{ background: '#fef2f2', border: '1px solid #fca5a5', color: '#b91c1c', padding: '10px', borderRadius: '8px', fontSize: '0.85rem', marginBottom: '15px', display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -242,18 +245,18 @@ export const WeeklyExamPortal = () => {
                                     </div>
                                 )}
                                 
-                                <label style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', border: '2px dashed #cbd5e1', borderRadius: '12px', padding: '30px 20px', background: '#f8fafc', cursor: 'pointer', transition: 'all 0.2s', ...((fileOptions ? { borderColor: '#10b981', background: '#ecfdf5' } : {})) }}>
-                                    <HiOutlineCloudArrowUp size={40} color={fileOptions ? '#10b981' : '#94a3b8'} />
-                                    <span style={{ marginTop: '10px', fontWeight: 'bold', color: fileOptions ? '#10b981' : '#64748b' }}>
-                                        {fileOptions ? 'تم إرفاق: ' + fileOptions.name : 'اضغط لاختيار أوراق الحل'}
+                                <label style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', border: '2px dashed #cbd5e1', borderRadius: '12px', padding: '30px 20px', background: '#f8fafc', cursor: 'pointer', transition: 'all 0.2s', ...((fileOptions && fileOptions.length > 0 ? { borderColor: '#10b981', background: '#ecfdf5' } : {})) }}>
+                                    <HiOutlineCloudArrowUp size={40} color={fileOptions && fileOptions.length > 0 ? '#10b981' : '#94a3b8'} />
+                                    <span style={{ marginTop: '10px', fontWeight: 'bold', color: fileOptions && fileOptions.length > 0 ? '#10b981' : '#64748b' }}>
+                                        {fileOptions && fileOptions.length > 0 ? `تم إرفاق: ${fileOptions.length} ملف/صور` : 'اضغط لاختيار أوراق الحل'}
                                     </span>
-                                    <input type="file" accept=".pdf" onChange={handleFileChange} style={{ display: 'none' }} />
+                                    <input type="file" accept=".pdf, image/*" multiple onChange={handleFileChange} style={{ display: 'none' }} />
                                 </label>
                                 
                                 <button 
                                     onClick={submitExam}
-                                    disabled={submitting || !fileOptions}
-                                    style={{ width: '100%', background: 'var(--purple)', color: 'white', border: 'none', padding: '15px', borderRadius: '10px', fontSize: '1.05rem', fontWeight: 'bold', marginTop: '20px', cursor: (submitting || !fileOptions) ? 'not-allowed' : 'pointer', opacity: (submitting || !fileOptions) ? 0.6 : 1, transition: 'all 0.2s' }}
+                                    disabled={submitting || !fileOptions || fileOptions.length === 0}
+                                    style={{ width: '100%', background: 'var(--purple)', color: 'white', border: 'none', padding: '15px', borderRadius: '10px', fontSize: '1.05rem', fontWeight: 'bold', marginTop: '20px', cursor: (submitting || !fileOptions || fileOptions.length === 0) ? 'not-allowed' : 'pointer', opacity: (submitting || !fileOptions || fileOptions.length === 0) ? 0.6 : 1, transition: 'all 0.2s' }}
                                 >
                                     {submitting ? 'جاري رفع الأوراق...' : 'إرسال وتثبيت التسليم النهايئ'}
                                 </button>
