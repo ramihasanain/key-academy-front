@@ -15,7 +15,8 @@ import {
     HiOutlineClock,
     HiOutlineBeaker,
     HiOutlineClipboardDocumentCheck,
-    HiOutlineXMark
+    HiOutlineXMark,
+    HiOutlineDocumentArrowDown
 } from 'react-icons/hi2'
 import { VirtualLabsData } from '../data/VirtualLabsData'
 import './CourseViewer.css'
