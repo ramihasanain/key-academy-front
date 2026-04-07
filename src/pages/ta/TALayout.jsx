@@ -78,6 +78,7 @@ export const TALayout = () => {
 
     const navItems = [
         { path: '', icon: <HiOutlineAcademicCap />, label: 'إحصائيات وأداء الطلاب' },
+        { path: 'students', icon: <HiOutlineUsers />, label: 'إدارة قوائم الطلاب' },
         { path: 'qa', icon: <HiOutlineChatBubbleLeftRight />, label: 'سؤال وجواب' },
         { path: 'groups', icon: <HiOutlineUsers />, label: 'إدارة مجموعات الدردشة' },
         { path: 'notes', icon: <HiOutlinePencilSquare />, label: 'دفتر المهام والملاحظات' },

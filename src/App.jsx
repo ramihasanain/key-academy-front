@@ -33,6 +33,7 @@ import { TAExams } from './pages/ta/TAExams'
 import { TAMutedStudents } from './pages/ta/TAMutedStudents'
 import { TAModerationHistory } from './pages/ta/TAModerationHistory'
 import { TAStudentStats } from './pages/ta/TAStudentStats'
+import { TAStudentsList } from './pages/ta/TAStudentsList'
 import { TAStudent360 } from './pages/ta/TAStudent360'
 import { TANotebook } from './pages/ta/TANotebook'
 import { TASpyLogin } from './pages/hq/TASpyLogin'
@@ -107,6 +108,7 @@ function App() {
                         </ProtectedRoute>
                     }>
                         <Route index element={<TAStudentStats />} />
+                        <Route path="students" element={<TAStudentsList />} />
                         <Route path="qa" element={<TAQA />} />
                         <Route path="groups" element={<TAGroups />} />
                         <Route path="notes" element={<TANotebook />} />

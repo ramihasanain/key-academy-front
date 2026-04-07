@@ -47,6 +47,7 @@ export const TAStudent360 = () => {
                     <div>
                         <h2 style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px', color: 'var(--hq-primary-text)' }}>
                             الملف الدراسي الشامل - {student.full_name}
+                            <span style={{ fontSize: '1rem', color: 'var(--hq-text-muted)', fontWeight: 'normal' }}>@{student.username}</span>
                             {!student.is_active && <span style={{ fontSize: '0.7rem', background: '#ef4444', color: 'white', padding: '2px 8px', borderRadius: '12px' }}>مجمد ❄️</span>}
                         </h2>
                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', fontSize: '0.8rem', color: 'var(--hq-primary-text)' }}>
