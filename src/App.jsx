@@ -54,7 +54,7 @@ function ScrollToTop() {
 function App() {
     const location = useLocation()
     const path = location.pathname.toLowerCase()
-    const hideNav = ['/login', '/signup', '/dashboard'].includes(path) || path.startsWith('/course') || path.startsWith('/lesson') || path.startsWith('/hq') || path.startsWith('/ta') || path.startsWith('/ta-spy') || path === '/teacher' || path.startsWith('/teacher/')
+    const hideNav = ['/login', '/signup', '/dashboard'].includes(path) || path.startsWith('/course') || path.startsWith('/lesson') || path.startsWith('/student/exam') || path.startsWith('/hq') || path.startsWith('/ta') || path.startsWith('/ta-spy') || path === '/teacher' || path.startsWith('/teacher/')
 
     return (
         <>

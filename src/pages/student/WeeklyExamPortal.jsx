@@ -129,8 +129,8 @@ export const WeeklyExamPortal = () => {
     const hasSubmitted = !!exam?.submission;
     
     return (
-        <div style={{ background: '#f8fafc', minHeight: '100vh', padding: '40px 20px' }}>
-            <div style={{ maxWidth: '900px', margin: '0 auto' }}>
+        <div style={{ minHeight: '100vh', padding: '60px 20px', background: 'radial-gradient(circle at top right, #fbfbfe, #f1f5f9)', fontFamily: "'Tajawal', 'Cairo', sans-serif" }}>
+            <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
                 
                 {/* Header Navbar */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '30px' }}>
@@ -138,8 +138,8 @@ export const WeeklyExamPortal = () => {
                         <HiOutlineArrowRight size={20} color="#334155" />
                     </button>
                     <div>
-                        <h1 style={{ margin: 0, fontSize: '1.6rem', color: '#0f172a' }}>{exam.title}</h1>
-                        <p style={{ margin: 0, color: '#64748b', fontSize: '0.9rem', marginTop: '5px' }}>الوحدة: {exam.module_title}</p>
+                        <h1 style={{ margin: 0, fontSize: '1.8rem', color: '#0f172a', fontWeight: '900' }}>{exam.title}</h1>
+                        <p style={{ margin: 0, color: 'var(--purple)', fontSize: '1rem', marginTop: '5px', fontWeight: 'bold' }}>وحدة: {exam.module_title}</p>
                     </div>
                 </div>
                 
@@ -175,7 +175,7 @@ export const WeeklyExamPortal = () => {
                 )}
                 
                 {/* Main Content Layout */}
-                <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '30px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.8fr) minmax(0, 1fr)', gap: '30px', alignItems: 'start' }}>
                     
                     {/* Right Col: Details & Instructions */}
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '25px' }}>
