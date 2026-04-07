@@ -99,7 +99,28 @@ export const TAExams = () => {
 
             {selectedExam && !loadingSubs && (
                 <div style={{ marginTop: '40px', background: 'white', borderRadius: '16px', padding: '20px', boxShadow: '0 4px 15px rgba(0,0,0,0.05)' }}>
-                    <h3 style={{ marginBottom: '20px' }}>أوراق طلابك - {selectedExam.title}</h3>
+                    <h3 style={{ marginBottom: '20px', color: '#1e293b' }}>تفاصيل وإحصائيات التسليم - {selectedExam.title}</h3>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px', marginBottom: '30px' }}>
+                        <div style={{ background: '#f8fafc', padding: '20px', borderRadius: '12px', border: '1px solid #e2e8f0', textAlign: 'center' }}>
+                            <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#3b82f6' }}>{selectedExam.total_students || 0}</div>
+                            <div style={{ color: '#64748b', fontSize: '0.95rem', marginTop: '5px', fontWeight: 'bold' }}>إجمالي الطلاب المسجلين</div>
+                        </div>
+                        <div style={{ background: '#ecfdf5', padding: '20px', borderRadius: '12px', border: '1px solid #a7f3d0', textAlign: 'center' }}>
+                            <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#10b981' }}>{submissions.length}</div>
+                            <div style={{ color: '#047857', fontSize: '0.95rem', marginTop: '5px', fontWeight: 'bold' }}>طلاب قاموا بالتسليم</div>
+                        </div>
+                        <div style={{ background: '#fff1f2', padding: '20px', borderRadius: '12px', border: '1px solid #fecdd3', textAlign: 'center' }}>
+                            <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#f43f5e' }}>{Math.max(0, (selectedExam.total_students || 0) - submissions.length)}</div>
+                            <div style={{ color: '#be123c', fontSize: '0.95rem', marginTop: '5px', fontWeight: 'bold' }}>طالب متخلف عن التسليم</div>
+                        </div>
+                        <div style={{ background: '#fffbeb', padding: '20px', borderRadius: '12px', border: '1px solid #fde68a', textAlign: 'center' }}>
+                            <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#f59e0b' }}>{submissions.filter(s => s.grade != null).length}</div>
+                            <div style={{ color: '#b45309', fontSize: '0.95rem', marginTop: '5px', fontWeight: 'bold' }}>تم تصحيح أوراقهم</div>
+                        </div>
+                    </div>
+                    
+                    <h3 style={{ marginBottom: '20px', color: '#1e293b', borderTop: '1px dashed #e2e8f0', paddingTop: '20px' }}>أوراق طلابك للتصحيح</h3>
                     
                     {submissions.length > 0 ? (
                         <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'right' }}>
