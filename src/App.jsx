@@ -29,6 +29,7 @@ import { AdminModerationHistory } from './pages/hq/AdminModerationHistory'
 import { TALayout } from './pages/ta/TALayout'
 import { TAQA } from './pages/ta/TAQA'
 import { TAGroups } from './pages/ta/TAGroups'
+import { TAExams } from './pages/ta/TAExams'
 import { TAMutedStudents } from './pages/ta/TAMutedStudents'
 import { TAModerationHistory } from './pages/ta/TAModerationHistory'
 import { TAStudentStats } from './pages/ta/TAStudentStats'
@@ -107,6 +108,7 @@ function App() {
                         <Route path="qa" element={<TAQA />} />
                         <Route path="groups" element={<TAGroups />} />
                         <Route path="notes" element={<TANotebook />} />
+                        <Route path="exams" element={<TAExams />} />
                         <Route path="muted" element={<TAMutedStudents />} />
                         <Route path="moderation-history" element={<TAModerationHistory />} />
                         <Route path="student/:id/360" element={<TAStudent360 />} />

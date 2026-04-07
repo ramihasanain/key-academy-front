@@ -8,7 +8,8 @@ import {
     HiOutlineAcademicCap,
     HiOutlinePencilSquare,
     HiOutlineNoSymbol,
-    HiOutlineClock
+    HiOutlineClock,
+    HiOutlineClipboardDocumentCheck
 } from 'react-icons/hi2'
 import '../hq/Admin.css'
 
@@ -80,6 +81,7 @@ export const TALayout = () => {
         { path: 'qa', icon: <HiOutlineChatBubbleLeftRight />, label: 'سؤال وجواب' },
         { path: 'groups', icon: <HiOutlineUsers />, label: 'إدارة مجموعات الدردشة' },
         { path: 'notes', icon: <HiOutlinePencilSquare />, label: 'دفتر المهام والملاحظات' },
+        { path: 'exams', icon: <HiOutlineClipboardDocumentCheck />, label: 'الامتحانات الأسبوعية' },
         { path: 'muted', icon: <HiOutlineNoSymbol />, label: 'قائمة الطلاب المحظورين' },
         { path: 'moderation-history', icon: <HiOutlineClock />, label: 'سجل الرقابة' },
     ]

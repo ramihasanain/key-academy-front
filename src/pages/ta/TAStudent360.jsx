@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { API } from '../../config'
-import { HiOutlineArrowRight, HiOutlineBookOpen, HiOutlineChartBar, HiOutlineCheckCircle, HiOutlineDocumentText } from 'react-icons/hi2'
+import { HiOutlineArrowRight, HiOutlineBookOpen, HiOutlineChartBar, HiOutlineCheckCircle, HiOutlineDocumentText, HiOutlineClipboardDocumentCheck } from 'react-icons/hi2'
 import '../hq/Admin.css'
 
 export const TAStudent360 = () => {
@@ -141,6 +141,44 @@ export const TAStudent360 = () => {
                                             <td style={{ padding: '10px 0', color: 'var(--hq-primary-text)' }}>{new Date(q.date).toLocaleDateString('ar-EG')}</td>
                                             <td style={{ padding: '10px 0' }}>
                                                 {q.passed ? <span style={{ color: '#10b981', background: 'rgba(16,185,129,0.1)', padding: '2px 8px', borderRadius: '6px', fontSize: '0.8rem' }}>ناجح ✨</span> : <span style={{ color: '#ef4444', background: 'rgba(239,68,68,0.1)', padding: '2px 8px', borderRadius: '6px', fontSize: '0.8rem' }}>راسب</span>}
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        )}
+                    </div>
+
+                    <div className="hq-card" style={{ padding: '20px' }}>
+                        <h3 style={{ marginTop: 0, marginBottom: '15px', color: 'var(--hq-primary-text)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <HiOutlineClipboardDocumentCheck /> الامتحانات الأسبوعية ({data.weekly_exams?.length || 0})
+                        </h3>
+                        {!data.weekly_exams || data.weekly_exams.length === 0 ? <p style={{ color: 'var(--hq-text-muted)' }}>لم يقم الطالب بتسليم أي امتحان أسبوعي.</p> : (
+                            <table style={{ width: '100%', textAlign: 'right', borderCollapse: 'collapse' }}>
+                                <thead>
+                                    <tr style={{ borderBottom: '1px solid var(--hq-border)', color: 'var(--hq-text-muted)', fontSize: '0.85rem' }}>
+                                        <th style={{ paddingBottom: '10px' }}>الامتحان / الوحدة</th>
+                                        <th style={{ paddingBottom: '10px' }}>التسليم</th>
+                                        <th style={{ paddingBottom: '10px' }}>النتيجة</th>
+                                        <th style={{ paddingBottom: '10px' }}>الحالة</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {data.weekly_exams.map((we, i) => (
+                                        <tr key={i} style={{ borderBottom: '1px solid rgba(255,255,255,0.03)' }}>
+                                            <td style={{ padding: '10px 0' }}>
+                                                <div style={{ color: 'var(--hq-primary-text)', fontWeight: 'bold' }}>{we.exam_title}</div>
+                                                <div style={{ fontSize: '0.8rem', color: 'var(--hq-text-muted)' }}>{we.module_title}</div>
+                                            </td>
+                                            <td style={{ padding: '10px 0', color: 'var(--hq-primary-text)' }}>{new Date(we.date).toLocaleDateString('ar-EG')}</td>
+                                            <td style={{ padding: '10px 0', fontWeight: 'bold', color: 'var(--hq-primary-text)' }}>
+                                                {we.is_graded ? `${we.score}/${we.total_mark}` : '---'}
+                                            </td>
+                                            <td style={{ padding: '10px 0' }}>
+                                                {we.is_graded 
+                                                    ? <span style={{ color: '#10b981', background: 'rgba(16,185,129,0.1)', padding: '2px 8px', borderRadius: '6px', fontSize: '0.8rem' }}>تم التقييم</span> 
+                                                    : <span style={{ color: '#fbbf24', background: 'rgba(251,191,36,0.1)', padding: '2px 8px', borderRadius: '6px', fontSize: '0.8rem' }}>بانتظار تصحيحك</span>
+                                                }
                                             </td>
                                         </tr>
                                     ))}

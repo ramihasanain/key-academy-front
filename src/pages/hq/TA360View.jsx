@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { API } from '../../config'
-import { HiOutlineUser, HiOutlinePhone, HiOutlineChartBar, HiOutlineClock, HiOutlineChatBubbleOvalLeftEllipsis, HiOutlineChatBubbleLeftRight } from 'react-icons/hi2'
+import { HiOutlineUser, HiOutlinePhone, HiOutlineChartBar, HiOutlineClock, HiOutlineChatBubbleOvalLeftEllipsis, HiOutlineChatBubbleLeftRight, HiOutlineClipboardDocumentCheck } from 'react-icons/hi2'
 import './Admin.css'
 import { useParams, useNavigate } from 'react-router-dom'
 import { HiOutlineArrowRight } from 'react-icons/hi2'
@@ -142,6 +142,13 @@ export const TA360View = ({ id }) => {
                     <div>
                         <div style={{ fontSize: '13px', color: 'var(--hq-text-muted)' }}>متوسط سرعة الرد</div>
                         <div style={{ fontSize: '24px', fontWeight: 'bold' }}>{stats.avg_response_time_min} دقيقة</div>
+                    </div>
+                </div>
+                <div className="glass-card" style={{ padding: '20px', borderRadius: '12px', display: 'flex', alignItems: 'center', gap: '15px' }}>
+                    <div style={{ width: '50px', height: '50px', borderRadius: '10px', background: 'rgba(16, 185, 129, 0.1)', color: '#10b981', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px' }}><HiOutlineClipboardDocumentCheck /></div>
+                    <div>
+                        <div style={{ fontSize: '13px', color: 'var(--hq-text-muted)' }}>أوراق امتحانات صححها</div>
+                        <div style={{ fontSize: '24px', fontWeight: 'bold' }}>{stats.total_graded || 0}</div>
                     </div>
                 </div>
             </div>
