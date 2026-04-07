@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { API } from '../../config'
-import { HiOutlineArrowRight, HiOutlineDocumentText, HiOutlineClock, HiOutlineCloudUpload, HiOutlineCheckCircle, HiOutlineExclamationCircle, HiOutlineInformationCircle } from 'react-icons/hi2'
+import { HiOutlineArrowRight, HiOutlineDocumentText, HiOutlineClock, HiOutlineCloudArrowUp, HiOutlineCheckCircle, HiOutlineExclamationCircle, HiOutlineInformationCircle } from 'react-icons/hi2'
 
 export const WeeklyExamPortal = () => {
     const { examId } = useParams()
@@ -243,7 +243,7 @@ export const WeeklyExamPortal = () => {
                                 )}
                                 
                                 <label style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', border: '2px dashed #cbd5e1', borderRadius: '12px', padding: '30px 20px', background: '#f8fafc', cursor: 'pointer', transition: 'all 0.2s', ...((fileOptions ? { borderColor: '#10b981', background: '#ecfdf5' } : {})) }}>
-                                    <HiOutlineCloudUpload size={40} color={fileOptions ? '#10b981' : '#94a3b8'} />
+                                    <HiOutlineCloudArrowUp size={40} color={fileOptions ? '#10b981' : '#94a3b8'} />
                                     <span style={{ marginTop: '10px', fontWeight: 'bold', color: fileOptions ? '#10b981' : '#64748b' }}>
                                         {fileOptions ? 'تم إرفاق: ' + fileOptions.name : 'اضغط لاختيار أوراق الحل'}
                                     </span>
