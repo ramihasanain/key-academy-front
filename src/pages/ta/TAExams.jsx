@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { API } from '../../config'
 import { HiOutlineDocumentText, HiOutlineArrowDownTray, HiOutlineCheck, HiOutlinePencilSquare } from 'react-icons/hi2'
-import './TA.css'
 
 export const TAExams = () => {
     const [exams, setExams] = useState([])
