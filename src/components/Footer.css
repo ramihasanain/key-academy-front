@@ -1,8 +1,8 @@
 /* ===== Footer ===== */
 .footer {
-    background: linear-gradient(180deg, var(--bg-primary) 0%, rgba(240, 240, 245, 1) 100%);
+    background: linear-gradient(180deg, var(--bg-primary) 0%, rgba(245, 245, 248, 1) 100%);
     border-top: 1px solid var(--border-glass);
-    padding: 60px 0 0;
+    padding: 40px 0 0;
     position: relative;
     overflow: hidden;
 }
@@ -19,9 +19,9 @@
 
 .footer-grid {
     display: grid;
-    grid-template-columns: 2fr 1fr 1fr 1fr;
-    gap: 40px;
-    margin-bottom: 50px;
+    grid-template-columns: 2fr 1.2fr 1.2fr 1.2fr;
+    gap: 24px;
+    margin-bottom: 30px;
 }
 
 .footer-brand {
@@ -29,14 +29,14 @@
 }
 
 .footer-brand .nav-logo {
-    margin-bottom: 16px;
+    margin-bottom: 12px;
 }
 
 .footer-brand p {
     color: var(--text-secondary);
-    font-size: 0.95rem;
-    line-height: 1.8;
-    margin-bottom: 20px;
+    font-size: 0.85rem;
+    line-height: 1.6;
+    margin-bottom: 16px;
 }
 
 .footer-socials {
@@ -45,8 +45,8 @@
 }
 
 .footer-social-link {
-    width: 42px;
-    height: 42px;
+    width: 36px;
+    height: 36px;
     border-radius: var(--radius-sm);
     background: var(--bg-glass);
     border: 1px solid var(--border-glass);
@@ -54,7 +54,7 @@
     align-items: center;
     justify-content: center;
     color: var(--text-secondary);
-    font-size: 1.2rem;
+    font-size: 1rem;
     transition: all var(--transition-normal);
 }
 
@@ -66,17 +66,17 @@
 }
 
 .footer-col h4 {
-    font-size: 1.1rem;
-    font-weight: 700;
-    margin-bottom: 20px;
+    font-size: 0.95rem;
+    font-weight: 800;
+    margin-bottom: 16px;
     color: var(--text-primary);
 }
 
 .footer-col a {
     display: block;
     color: var(--text-secondary);
-    font-size: 0.95rem;
-    padding: 6px 0;
+    font-size: 0.85rem;
+    padding: 4px 0;
     transition: all var(--transition-normal);
 }
 
@@ -87,12 +87,12 @@
 
 .footer-bottom {
     border-top: 1px solid var(--border-glass);
-    padding: 24px 0;
+    padding: 16px 0;
     display: flex;
     align-items: center;
     justify-content: space-between;
     color: var(--text-muted);
-    font-size: 0.9rem;
+    font-size: 0.8rem;
 }
 
 .footer-bottom-links {

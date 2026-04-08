@@ -7,7 +7,7 @@ import { Autoplay, Pagination, EffectCards } from 'swiper/modules'
 import 'swiper/css'
 import 'swiper/css/pagination'
 import 'swiper/css/effect-cards'
-import { HiOutlineSparkles, HiOutlineLightBulb, HiOutlineAcademicCap, HiOutlineUserGroup, HiOutlineBookOpen, HiOutlineChatBubbleLeftRight, HiOutlineChartBarSquare, HiOutlineCpuChip, HiOutlineRocketLaunch, HiOutlinePlay } from 'react-icons/hi2'
+import { HiOutlineSparkles, HiOutlineLightBulb, HiOutlineAcademicCap, HiOutlineUserGroup, HiOutlineBookOpen, HiOutlineChatBubbleLeftRight, HiOutlineChartBar, HiOutlineChartBarSquare, HiOutlineCpuChip, HiOutlineRocketLaunch, HiOutlinePlay, HiOutlineDocumentText } from 'react-icons/hi2'
 import { FaBrain, FaChalkboardTeacher, FaGraduationCap } from 'react-icons/fa'
 import AnimatedCounter from '../components/AnimatedCounter'
 import SectionTitle from '../components/SectionTitle'
@@ -67,25 +67,7 @@ const Home = () => {
                     <div className="mesh-circle"></div>
                 </div>
 
-                {/* Stars */}
-                <div className="hero-stars">
-                    {stars.map(s => (
-                        <div key={s.id} className="star" style={{ top: s.top, left: s.left, width: s.size, height: s.size, animationDelay: s.delay, animationDuration: s.duration }} />
-                    ))}
-                </div>
 
-                {/* Floating Icons */}
-                {floatingIcons.map((fi, i) => (
-                    <motion.div
-                        key={i}
-                        className="hero-float-icon"
-                        style={{ top: fi.top, left: fi.left, right: fi.right }}
-                        animate={{ y: [0, -20, 0], rotate: [0, 10, -10, 0] }}
-                        transition={{ duration: fi.duration, delay: fi.delay, repeat: Infinity, ease: 'easeInOut' }}
-                    >
-                        {fi.icon}
-                    </motion.div>
-                ))}
 
                 <div className="container">
                     <div className="hero-inner">
@@ -166,9 +148,9 @@ const Home = () => {
                                 }}
                             >
                                 {[
-                                    { icon: <HiOutlineBookOpen />, color: 'orange', value: '📝', label: 'ملاحظات خاصة بك' },
-                                    { icon: <HiOutlineCpuChip />, color: 'pink', value: 'AI', label: 'تقنيات الذكاء الاصطناعي' },
-                                    { icon: <FaChalkboardTeacher />, color: 'purple', value: '📊', label: 'سلايدات مخصصة لكل درس' }
+                                    { icon: <HiOutlineBookOpen />, color: 'orange', value: <HiOutlineDocumentText size={28} className="text-orange" style={{ color: 'var(--orange)' }} />, label: 'ملاحظات خاصة بك' },
+                                    { icon: <HiOutlineCpuChip />, color: 'pink', value: <HiOutlineSparkles size={28} className="text-pink" style={{ color: 'var(--pink)' }} />, label: 'تقنيات الذكاء الاصطناعي' },
+                                    { icon: <FaChalkboardTeacher />, color: 'purple', value: <HiOutlineChartBar size={28} className="text-purple" style={{ color: 'var(--purple)' }} />, label: 'سلايدات مخصصة لكل درس' }
                                 ].map((stat, i) => (
                                     <motion.div
                                         key={i}
@@ -180,9 +162,9 @@ const Home = () => {
                                         whileHover={{ scale: 1.05 }}
                                     >
                                         <div className={`stat-icon ${stat.color}`}>{stat.icon}</div>
-                                        <div className="stat-text">
-                                            <strong>{stat.value}</strong>
-                                            <span>{stat.label}</span>
+                                        <div className="stat-text" style={{ gap: '4px' }}>
+                                            <div className="mb-1">{stat.value}</div>
+                                            <span style={{ fontSize: '0.9rem', fontWeight: 'bold' }}>{stat.label}</span>
                                         </div>
                                     </motion.div>
                                 ))}

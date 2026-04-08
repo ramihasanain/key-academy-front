@@ -1,5 +1,5 @@
 /* ===== KEY ACADEMY - Global Design System ===== */
-@import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Alexandria:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 
 :root {
   /* Brand Colors */
@@ -50,7 +50,7 @@
   --container-padding: 0 24px;
 
   /* Typography */
-  --font-ar: 'Tajawal', sans-serif;
+  --font-ar: 'Alexandria', sans-serif;
   --font-en: 'Inter', sans-serif;
 
   /* Transitions */
