@@ -211,7 +211,8 @@ const StudentDashboard = () => {
     }
 
     const BrowseCourseCard = ({ course, i }) => {
-        const isEnrolled = myCourses.some(c => c.id === course.id) || completedCourses.some(c => c.id === course.id);
+        // Evaluate as enrolled ONLY if it's active in myCourses, or if it's explicitly completed
+        const isEnrolled = myCourses.some(c => c.id === course.id && c.isActive !== false) || completedCourses.some(c => c.id === course.id);
 
         return (
             <motion.div
