@@ -109,6 +109,7 @@ const StudentDashboard = () => {
                     totalLessons: e.total_lessons || 0,
                     completedLessons: e.completed_lessons || 0,
                     color: e.course.color || 'purple',
+                    isActive: e.is_active !== undefined ? e.is_active : true,
                     lastVisit: new Date(e.last_visited).toLocaleDateString('ar-IQ', {
                         year: 'numeric',
                         month: 'numeric',
@@ -438,7 +439,7 @@ const StudentDashboard = () => {
 
                         <div className="dash-courses-grid">
                             {myCourses.map((course, i) => (
-                                <motion.div key={course.id} className="dash-course-card premium-card hover-lift" initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }}>
+                                <motion.div key={course.id} className={`dash-course-card premium-card hover-lift ${!course.isActive ? 'grayscale' : ''}`} initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }} style={!course.isActive ? { filter: 'grayscale(0.6)', opacity: 0.8 } : {}}>
                                     <div className={`dash-course-accent accent-${course.color} glow-accent`}></div>
                                     <div className="dash-course-body">
                                         <div className="dash-teacher-row" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '16px' }}>
@@ -470,9 +471,16 @@ const StudentDashboard = () => {
                                             <span className="dash-progress-lessons"><HiOutlineCheckCircle /> {course.completedLessons} من {course.totalLessons} درس</span>
                                         </div>
 
-                                        <Link to={`/course/${course.id}`} className={`dash-btn-primary exact-btn-${course.color} premium-btn`}>
-                                            <HiOutlineBookOpen /> كمل دراستك
-                                        </Link>
+                                        {course.isActive ? (
+                                            <Link to={`/course/${course.id}`} className={`dash-btn-primary exact-btn-${course.color} premium-btn`}>
+                                                <HiOutlineBookOpen /> كمل دراستك
+                                            </Link>
+                                        ) : (
+                                            <div style={{ background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', border: '1px solid rgba(239, 68, 68, 0.3)', padding: '12px', borderRadius: '12px', textAlign: 'center', fontSize: '0.9rem', fontWeight: 'bold' }}>
+                                                <HiOutlineNoSymbol style={{ display: 'inline', verticalAlign: 'middle', marginLeft: '4px', fontSize: '1.2rem' }} />
+                                                تم إلغاء تفعيل اشتراكك
+                                            </div>
+                                        )}
                                     </div>
                                 </motion.div>
                             ))}
