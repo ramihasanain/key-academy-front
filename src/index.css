@@ -209,13 +209,14 @@ select {
 }
 
 /* Icon colors mapping */
-.glass-card.color-orange [class*="icon"], .glass-card.color-orange [class*="icon"] svg { color: #fd7211 !important; }
-.glass-card.color-pink [class*="icon"], .glass-card.color-pink [class*="icon"] svg { color: #f63190 !important; }
-.glass-card.color-purple [class*="icon"], .glass-card.color-purple [class*="icon"] svg { color: #a642ff !important; }
-.glass-card.color-blue [class*="icon"], .glass-card.color-blue [class*="icon"] svg { color: #3182fe !important; }
-.glass-card.color-green [class*="icon"], .glass-card.color-green [class*="icon"] svg { color: #00c253 !important; }
-.glass-card.color-teal [class*="icon"], .glass-card.color-teal [class*="icon"] svg,
-.glass-card.color-indigo [class*="icon"], .glass-card.color-indigo [class*="icon"] svg { color: #5d5dfe !important; }
+.glass-card.color-purple [class*="icon"], .glass-card.color-purple [class*="icon"] svg { color: #832a96 !important; }
+.glass-card.color-pink [class*="icon"], .glass-card.color-pink [class*="icon"] svg { color: #ec3665 !important; }
+.glass-card.color-orange [class*="icon"], .glass-card.color-orange [class*="icon"] svg { color: #fdba01 !important; }
+.glass-card.color-blue [class*="icon"], .glass-card.color-blue [class*="icon"] svg { color: #00b4d8 !important; }
+.glass-card.color-green [class*="icon"], .glass-card.color-green [class*="icon"] svg { color: #ff8a5b !important; }
+.glass-card.color-indigo [class*="icon"], .glass-card.color-indigo [class*="icon"] svg,
+.glass-card.color-teal [class*="icon"], .glass-card.color-teal [class*="icon"] svg { color: #4a1557 !important; }
+.glass-card.color-red [class*="icon"], .glass-card.color-red [class*="icon"] svg { color: #8f1a38 !important; }
 
 /* Interactive Hover Animation for cards */
 .glass-card {
@@ -232,64 +233,74 @@ select {
 }
 
 /* Specific colored card backgrounds and unique shadows */
-.glass-card.color-orange {
-    background: #fd7211 !important;
-    border-color: transparent !important;
-    box-shadow: 0 10px 30px rgba(253, 114, 17, 0.2) !important;
-    color: white !important;
-}
-.glass-card.color-orange:hover {
-    box-shadow: 0 15px 40px rgba(253, 114, 17, 0.4) !important;
-}
-
-.glass-card.color-pink {
-    background: #f63190 !important;
-    border-color: transparent !important;
-    box-shadow: 0 10px 30px rgba(246, 49, 144, 0.2) !important;
-    color: white !important;
-}
-.glass-card.color-pink:hover {
-    box-shadow: 0 15px 40px rgba(246, 49, 144, 0.4) !important;
-}
-
 .glass-card.color-purple {
-    background: #a642ff !important;
+    background: #832a96 !important;
     border-color: transparent !important;
-    box-shadow: 0 10px 30px rgba(166, 66, 255, 0.2) !important;
+    box-shadow: 0 10px 30px rgba(131, 42, 150, 0.2) !important;
     color: white !important;
 }
 .glass-card.color-purple:hover {
-    box-shadow: 0 15px 40px rgba(166, 66, 255, 0.4) !important;
+    box-shadow: 0 15px 40px rgba(131, 42, 150, 0.4) !important;
+}
+
+.glass-card.color-pink {
+    background: #ec3665 !important;
+    border-color: transparent !important;
+    box-shadow: 0 10px 30px rgba(236, 54, 101, 0.2) !important;
+    color: white !important;
+}
+.glass-card.color-pink:hover {
+    box-shadow: 0 15px 40px rgba(236, 54, 101, 0.4) !important;
+}
+
+.glass-card.color-orange {
+    background: #fdba01 !important;
+    border-color: transparent !important;
+    box-shadow: 0 10px 30px rgba(253, 186, 1, 0.2) !important;
+    color: white !important;
+}
+.glass-card.color-orange:hover {
+    box-shadow: 0 15px 40px rgba(253, 186, 1, 0.4) !important;
 }
 
 .glass-card.color-blue {
-    background: #3182fe !important;
+    background: #00b4d8 !important;
     border-color: transparent !important;
-    box-shadow: 0 10px 30px rgba(49, 130, 254, 0.2) !important;
+    box-shadow: 0 10px 30px rgba(0, 180, 216, 0.2) !important;
     color: white !important;
 }
 .glass-card.color-blue:hover {
-    box-shadow: 0 15px 40px rgba(49, 130, 254, 0.4) !important;
+    box-shadow: 0 15px 40px rgba(0, 180, 216, 0.4) !important;
 }
 
 .glass-card.color-green {
-    background: #00c253 !important;
+    background: #ff8a5b !important;
     border-color: transparent !important;
-    box-shadow: 0 10px 30px rgba(0, 194, 83, 0.2) !important;
+    box-shadow: 0 10px 30px rgba(255, 138, 91, 0.2) !important;
     color: white !important;
 }
 .glass-card.color-green:hover {
-    box-shadow: 0 15px 40px rgba(0, 194, 83, 0.4) !important;
+    box-shadow: 0 15px 40px rgba(255, 138, 91, 0.4) !important;
 }
 
-.glass-card.color-teal, .glass-card.color-indigo {
-    background: #5d5dfe !important;
+.glass-card.color-indigo, .glass-card.color-teal {
+    background: #4a1557 !important;
     border-color: transparent !important;
-    box-shadow: 0 10px 30px rgba(93, 93, 254, 0.2) !important;
+    box-shadow: 0 10px 30px rgba(74, 21, 87, 0.2) !important;
     color: white !important;
 }
-.glass-card.color-teal:hover, .glass-card.color-indigo:hover {
-    box-shadow: 0 15px 40px rgba(93, 93, 254, 0.4) !important;
+.glass-card.color-indigo:hover, .glass-card.color-teal:hover {
+    box-shadow: 0 15px 40px rgba(74, 21, 87, 0.4) !important;
+}
+
+.glass-card.color-red {
+    background: #8f1a38 !important;
+    border-color: transparent !important;
+    box-shadow: 0 10px 30px rgba(143, 26, 56, 0.2) !important;
+    color: white !important;
+}
+.glass-card.color-red:hover {
+    box-shadow: 0 15px 40px rgba(143, 26, 56, 0.4) !important;
 }
 
 .gradient-text {

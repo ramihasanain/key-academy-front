@@ -213,7 +213,7 @@ const Home = () => {
                             { title: 'الصف السادس الإعدادي', desc: 'أهم مرحلة بحياتك التحدد مستقبلك، إحنا وياك خطوة بخطوة', icon: <FaGraduationCap />, link: '/grades/sixth-scientific', hasBranches: true },
                             { title: 'الصف الثالث المتوسط', desc: 'نأسسك صح هسة حتى ترتاح ويانا بالسادس', icon: <HiOutlineAcademicCap />, link: '/grades/third-intermediate', hasBranches: false },
                         ].map((grade, i) => (
-                            <motion.div key={i} className={`glass-card grade-preview-card ${i === 0 ? 'color-blue' : 'color-purple'}`} variants={fadeInUp} initial="hidden" whileInView="visible" viewport={{ once: true }} custom={i}>
+                            <motion.div key={i} className={`glass-card grade-preview-card ${i === 0 ? 'color-pink' : 'color-purple'}`} variants={fadeInUp} initial="hidden" whileInView="visible" viewport={{ once: true }} custom={i}>
                                 <div className="grade-icon">{grade.icon}</div>
                                 <h3>{grade.title}</h3>
                                 <p>{grade.desc}</p>

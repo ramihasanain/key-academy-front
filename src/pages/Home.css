@@ -785,19 +785,21 @@
     box-shadow: 0 4px 15px rgba(0,0,0,0.1);
 }
 
-.feature-card.color-orange { background: #fd7211; }
-.feature-card.color-purple { background: #a642ff; }
-.feature-card.color-blue { background: #3182fe; }
-.feature-card.color-indigo { background: #5d5dfe; }
-.feature-card.color-pink { background: #f63190; }
-.feature-card.color-green { background: #00c253; }
+.feature-card.color-purple { background: #832a96; }
+.feature-card.color-pink { background: #ec3665; }
+.feature-card.color-orange { background: #fdba01; }
+.feature-card.color-blue { background: #00b4d8; }
+.feature-card.color-green { background: #ff8a5b; }
+.feature-card.color-indigo { background: #4a1557; }
+.feature-card.color-red { background: #8f1a38; }
 
-.feature-card.color-orange .feature-icon { color: #fd7211; }
-.feature-card.color-purple .feature-icon { color: #a642ff; }
-.feature-card.color-blue .feature-icon { color: #3182fe; }
-.feature-card.color-indigo .feature-icon { color: #5d5dfe; }
-.feature-card.color-pink .feature-icon { color: #f63190; }
-.feature-card.color-green .feature-icon { color: #00c253; }
+.feature-card.color-purple .feature-icon { color: #832a96; }
+.feature-card.color-pink .feature-icon { color: #ec3665; }
+.feature-card.color-orange .feature-icon { color: #fdba01; }
+.feature-card.color-blue .feature-icon { color: #00b4d8; }
+.feature-card.color-green .feature-icon { color: #ff8a5b; }
+.feature-card.color-indigo .feature-icon { color: #4a1557; }
+.feature-card.color-red .feature-icon { color: #8f1a38; }
 
 .feature-card:hover .feature-icon {
     transform: scale(1.1) rotate(5deg);
