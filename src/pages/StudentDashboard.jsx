@@ -45,6 +45,7 @@ const StudentDashboard = () => {
     const [enrollModal, setEnrollModal] = useState(null)
     const [enrollCode, setEnrollCode] = useState('')
     const [enrollError, setEnrollError] = useState('')
+    const [isEnrolling, setIsEnrolling] = useState(false)
 
     // Real API Data states
     const [allCourses, setAllCourses] = useState([])
@@ -182,7 +183,9 @@ const StudentDashboard = () => {
             setEnrollError('يرجى إدخال كود التفعيل');
             return;
         }
+        if (isEnrolling) return;
         setEnrollError('');
+        setIsEnrolling(true);
 
         try {
             const token = localStorage.getItem('access_token');
@@ -195,6 +198,7 @@ const StudentDashboard = () => {
                 body: JSON.stringify({ code: enrollCode })
             });
             const data = await res.json();
+            setIsEnrolling(false);
 
             if (res.ok) {
                 alert(data.message || `تم التسجيل في الدورة بنجاح! 🎉`);
@@ -206,6 +210,7 @@ const StudentDashboard = () => {
                 setEnrollError(data.error || 'رسالة خطأ غير متوقعة');
             }
         } catch (err) {
+            setIsEnrolling(false);
             setEnrollError('فشل الاتصال بالخادم');
         }
     }

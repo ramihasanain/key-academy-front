@@ -63,6 +63,7 @@ const CoursePreview = () => {
 
     const handleActivate = async (e) => {
         e.preventDefault()
+        if (isActivating) return;
 
         const token = localStorage.getItem('access_token')
         if (!token || token === 'undefined' || token === 'null' || token.trim() === '') {
