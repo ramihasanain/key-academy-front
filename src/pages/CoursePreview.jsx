@@ -105,8 +105,7 @@ const CoursePreview = () => {
             try {
                 data = await res.json();
             } catch (pErr) {
-                // Server returned non-JSON (like 500 HTML)
-                throw new Error("خطأ من السيرفر (500)، ربما تم تفعيل الدورة بنجاح. يرجى تحديث الصفحة.");
+                // Server returned non-JSON (like 500 HTML or empty response)
             }
             setIsActivating(false);
 
@@ -115,7 +114,7 @@ const CoursePreview = () => {
                     show: true,
                     type: 'success',
                     title: 'مبروك الدورة!',
-                    message: data.message || `تفعلت الدورة بنجاح. هسة تكدر تشوف كل الدروس والمحتوى المغلق بكل حرية! 🎉`,
+                    message: (data && data.message) ? data.message : `تفعلت الدورة بنجاح. هسة تكدر تشوف كل الدروس والمحتوى المغلق بكل حرية! 🎉`,
                     actionText: 'يلا نبدي',
                     actionFn: () => navigate('/dashboard')
                 });
@@ -125,7 +124,7 @@ const CoursePreview = () => {
                     show: true,
                     type: 'error',
                     title: 'حدث خطأ',
-                    message: data.error || 'الكود غير صحيح أو مستخدم مسبقاً',
+                    message: (data && data.error) ? data.error : 'حدثت مشكلة أثناء تفعيل الكود، يرجى التأكد من الكود والمحاولة مرة أخرى.',
                     actionText: 'حسناً',
                     actionFn: () => setPopup({ ...popup, show: false })
                 });
@@ -135,8 +134,8 @@ const CoursePreview = () => {
             setPopup({
                 show: true,
                 type: 'error',
-                title: 'خطأ غير متوقع',
-                message: 'حدثت مشكلة أثناء تفعيل الكود، يرجى تحديث الصفحة والمحاولة مرة أخرى. ' + err.message,
+                title: 'خطأ في الاتصال',
+                message: 'حدثت مشكلة أثناء الاتصال بالخادم، يرجى التحقق من اتصالك بالإنترنت والمحاولة مرة أخرى.',
                 actionText: 'حسناً',
                 actionFn: () => setPopup({ ...popup, show: false })
             });
