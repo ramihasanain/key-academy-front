@@ -101,7 +101,13 @@ const CoursePreview = () => {
                 },
                 body: JSON.stringify({ code })
             });
-            const data = await res.json();
+            let data;
+            try {
+                data = await res.json();
+            } catch (pErr) {
+                // Server returned non-JSON (like 500 HTML)
+                throw new Error("خطأ من السيرفر (500)، ربما تم تفعيل الدورة بنجاح. يرجى تحديث الصفحة.");
+            }
             setIsActivating(false);
 
             if (res.ok) {
@@ -129,8 +135,8 @@ const CoursePreview = () => {
             setPopup({
                 show: true,
                 type: 'error',
-                title: 'خطأ بالاتصال',
-                message: 'يرجى التأكد من اتصالك بالإنترنت والمحاولة مجدداً.',
+                title: 'خطأ غير متوقع',
+                message: 'حدثت مشكلة أثناء تفعيل الكود، يرجى تحديث الصفحة والمحاولة مرة أخرى. ' + err.message,
                 actionText: 'حسناً',
                 actionFn: () => setPopup({ ...popup, show: false })
             });
