@@ -65,7 +65,7 @@ const TeacherProfile = () => {
 
                         {/* Sidebar (Right side) */}
                         <aside className="profile-sidebar">
-                            <motion.div className={`glass-card teacher-card color-${teacher.color}`} initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} style={{ padding: 0, height: 'auto' }}>
+                            <motion.div className={`glass-card teacher-card color-${teacher.color}`} initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} style={{ padding: 0, height: 'auto', ...(teacher.color?.startsWith('#') ? { background: teacher.color, borderColor: 'transparent', boxShadow: `0 10px 30px ${teacher.color}33` } : {}) }}>
                                 <div className="tc-image-wrapper" style={{ height: '280px' }}>
                                     {teacher.image ? (
                                         <img src={teacher.image} alt={teacher.name} />
@@ -86,10 +86,10 @@ const TeacherProfile = () => {
                         <main className="profile-main-content">
                             <motion.div className="profile-tabs-wrapper" initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
                                 <div className="profile-tabs">
-                                    <button className={`profile-tab ${activeTab === 'cv' ? `active color-${teacher.color}` : ''}`} onClick={() => setActiveTab('cv')}>
+                                    <button className={`profile-tab ${activeTab === 'cv' ? `active color-${teacher.color}` : ''}`} onClick={() => setActiveTab('cv')} style={activeTab === 'cv' && teacher.color?.startsWith('#') ? { background: teacher.color, color: 'white', borderColor: 'transparent' } : {}}>
                                         <HiOutlineDocumentText style={{ marginLeft: '6px', fontSize: '1.2rem' }} /> <span>الملف الشخصي (CV)</span>
                                     </button>
-                                    <button className={`profile-tab ${activeTab === 'courses' ? `active color-${teacher.color}` : ''}`} onClick={() => setActiveTab('courses')}>
+                                    <button className={`profile-tab ${activeTab === 'courses' ? `active color-${teacher.color}` : ''}`} onClick={() => setActiveTab('courses')} style={activeTab === 'courses' && teacher.color?.startsWith('#') ? { background: teacher.color, color: 'white', borderColor: 'transparent' } : {}}>
                                         <FaChalkboardTeacher style={{ marginLeft: '6px', fontSize: '1.2rem' }} /> <span>الدورات</span>
                                     </button>
                                 </div>
@@ -108,8 +108,8 @@ const TeacherProfile = () => {
                                         <div className="cv-timeline">
                                             {teacher.education.map((item, i) => (
                                                 <div key={i} className="cv-timeline-item">
-                                                    <div className={`cv-timeline-dot color-${teacher.color}`}></div>
-                                                    <div className={`glass-card cv-timeline-content color-${teacher.color}`}>
+                                                    <div className={`cv-timeline-dot color-${teacher.color}`} style={teacher.color?.startsWith('#') ? { borderColor: teacher.color } : {}}></div>
+                                                    <div className={`glass-card cv-timeline-content color-${teacher.color}`} style={teacher.color?.startsWith('#') ? { background: teacher.color, borderColor: 'transparent', color: 'white' } : {}}>
                                                         <p>{item}</p>
                                                     </div>
                                                 </div>
@@ -123,8 +123,8 @@ const TeacherProfile = () => {
                                         <div className="cv-timeline">
                                             {teacher.experience.map((item, i) => (
                                                 <div key={i} className="cv-timeline-item">
-                                                    <div className={`cv-timeline-dot color-${teacher.color}`}></div>
-                                                    <div className={`glass-card cv-timeline-content color-${teacher.color}`}>
+                                                    <div className={`cv-timeline-dot color-${teacher.color}`} style={teacher.color?.startsWith('#') ? { borderColor: teacher.color } : {}}></div>
+                                                    <div className={`glass-card cv-timeline-content color-${teacher.color}`} style={teacher.color?.startsWith('#') ? { background: teacher.color, borderColor: 'transparent', color: 'white' } : {}}>
                                                         <p>{item}</p>
                                                     </div>
                                                 </div>
@@ -138,8 +138,8 @@ const TeacherProfile = () => {
                                         <div className="cv-timeline">
                                             {teacher.achievements.map((item, i) => (
                                                 <div key={i} className="cv-timeline-item">
-                                                    <div className={`cv-timeline-dot color-${teacher.color}`}></div>
-                                                    <div className={`glass-card cv-timeline-content color-${teacher.color}`}>
+                                                    <div className={`cv-timeline-dot color-${teacher.color}`} style={teacher.color?.startsWith('#') ? { borderColor: teacher.color } : {}}></div>
+                                                    <div className={`glass-card cv-timeline-content color-${teacher.color}`} style={teacher.color?.startsWith('#') ? { background: teacher.color, borderColor: 'transparent', color: 'white' } : {}}>
                                                         <p>{item}</p>
                                                     </div>
                                                 </div>
@@ -152,7 +152,7 @@ const TeacherProfile = () => {
                             {activeTab === 'courses' && (
                                 <motion.div className="profile-courses-grid mt-3" variants={staggerContainer} initial="hidden" animate="visible">
                                     {displayedCourses.length > 0 ? displayedCourses.map((course, i) => (
-                                        <motion.div key={i} className={`glass-card profile-course-card color-${teacher.color || 'blue'}`} variants={fadeInUp}>
+                                        <motion.div key={i} className={`glass-card profile-course-card color-${teacher.color || 'blue'}`} variants={fadeInUp} style={teacher.color?.startsWith('#') ? { background: teacher.color, borderColor: 'transparent', boxShadow: `0 10px 30px ${teacher.color}33` } : {}}>
                                             <div className="course-card-img">
                                                 <img src={course.img} alt={course.title} />
                                                 <div className="course-lessons-badge">{course.lessons} درس</div>
