@@ -235,7 +235,7 @@ const StudentDashboard = () => {
                 transition={{ delay: i * 0.08, type: "spring", stiffness: 100 }}
                 style={isEnrolled ? { opacity: 0.85, filter: 'grayscale(60%)', border: '1px solid rgba(16, 185, 129, 0.3)' } : {}}
             >
-                <div className={`dash-course-accent accent-${course.color}`}></div>
+                <div className={`dash-course-accent accent-${course.color}`} style={{ background: course.color?.startsWith('#') ? course.color : undefined }}></div>
 
                 {isEnrolled && (
                     <div style={{ position: 'absolute', top: '15px', right: '15px', background: '#10B981', color: 'white', padding: '4px 12px', borderRadius: '20px', fontSize: '0.85rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '4px', zIndex: 10, boxShadow: '0 4px 10px rgba(16, 185, 129, 0.3)' }}>
@@ -245,7 +245,7 @@ const StudentDashboard = () => {
 
                 <div className="dash-course-body" style={{ position: 'relative' }}>
                     <div className="dash-teacher-row" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '16px' }}>
-                        <div className={`dash-teacher-avatar ta-${course.color} ${course.teacher_image ? 'has-avatar' : ''}`} style={{ marginBottom: '8px' }}>
+                        <div className={`dash-teacher-avatar ta-${course.color} ${course.teacher_image ? 'has-avatar' : ''}`} style={{ marginBottom: '8px', ...(course.color?.startsWith('#') ? { background: course.color, borderColor: course.color, color: 'white' } : {}) }}>
                             {course.teacher_image ? (
                                 <img src={course.teacher_image} alt={course.teacher_name} className="teacher-real-avatar" />
                             ) : (
@@ -269,7 +269,7 @@ const StudentDashboard = () => {
                             <HiOutlineBookOpen /> كمل دراستك
                         </Link>
                     ) : (
-                        <Link to={`/course-preview/${course.id}`} className={`premium-btn exact-btn-${course.color}`} style={{ textDecoration: 'none' }}>
+                        <Link to={`/course-preview/${course.id}`} className={`premium-btn exact-btn-${course.color}`} style={{ textDecoration: 'none', ...(course.color?.startsWith('#') ? { background: course.color, borderColor: course.color } : {}) }}>
                             <HiOutlineArrowRight /> شوف تفاصيل الدورة
                         </Link>
                     )}
@@ -453,10 +453,10 @@ const StudentDashboard = () => {
                         <div className="dash-courses-grid">
                             {myCourses.map((course, i) => (
                                 <motion.div key={course.id} className={`dash-course-card premium-card hover-lift ${!course.isActive ? 'grayscale' : ''}`} initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }} style={!course.isActive ? { filter: 'grayscale(0.6)', opacity: 0.8 } : {}}>
-                                    <div className={`dash-course-accent accent-${course.color} glow-accent`}></div>
+                                    <div className={`dash-course-accent accent-${course.color} glow-accent`} style={{ background: course.color?.startsWith('#') ? course.color : undefined, ...(course.color?.startsWith('#') ? { boxShadow: `0 2px 15px ${course.color}` } : {}) }}></div>
                                     <div className="dash-course-body">
                                         <div className="dash-teacher-row" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '16px' }}>
-                                            <div className={`dash-teacher-avatar ta-${course.color} soft-shadow ${course.teacherAvatar ? 'has-avatar' : ''}`}>
+                                            <div className={`dash-teacher-avatar ta-${course.color} soft-shadow ${course.teacherAvatar ? 'has-avatar' : ''}`} style={course.color?.startsWith('#') ? { background: course.color, borderColor: course.color, color: 'white' } : {}}>
                                                 {course.teacherAvatar ? (
                                                     <img src={course.teacherAvatar} alt={course.teacher} className="teacher-real-avatar" />
                                                 ) : (
@@ -475,16 +475,16 @@ const StudentDashboard = () => {
                                         <div className="dash-progress premium-progress">
                                             <div className="dash-progress-header">
                                                 <span className="dash-progress-label">نسبة اللي مخلصه</span>
-                                                <span className={`dash-progress-pct text-${course.color}`}>{course.progress}%</span>
+                                                <span className={`dash-progress-pct text-${course.color}`} style={course.color?.startsWith('#') ? { color: course.color } : {}}>{course.progress}%</span>
                                             </div>
                                             <div className="dash-progress-track inner-shadow">
-                                                <motion.div className={`dash-progress-fill fill-${course.color} progress-glow`} initial={{ width: 0 }} animate={{ width: `${course.progress}%` }} transition={{ duration: 1.5, delay: 0.5, ease: "easeOut" }}></motion.div>
+                                                <motion.div className={`dash-progress-fill fill-${course.color} progress-glow`} initial={{ width: 0 }} animate={{ width: `${course.progress}%` }} transition={{ duration: 1.5, delay: 0.5, ease: "easeOut" }} style={course.color?.startsWith('#') ? { background: course.color, boxShadow: `0 0 10px ${course.color}` } : {}}></motion.div>
                                             </div>
                                             <span className="dash-progress-lessons"><HiOutlineCheckCircle /> {course.completedLessons} من {course.totalLessons} درس</span>
                                         </div>
 
                                         {course.isActive ? (
-                                            <Link to={`/course/${course.id}`} className={`dash-btn-primary exact-btn-${course.color} premium-btn`}>
+                                            <Link to={`/course/${course.id}`} className={`dash-btn-primary exact-btn-${course.color} premium-btn`} style={course.color?.startsWith('#') ? { background: course.color, borderColor: course.color } : {}}>
                                                 <HiOutlineBookOpen /> كمل دراستك
                                             </Link>
                                         ) : (
@@ -509,10 +509,10 @@ const StudentDashboard = () => {
                         <div className="dash-courses-grid">
                             {completedCourses.map((course, i) => (
                                 <motion.div key={course.id} className="dash-course-card premium-card completed-card hover-lift" initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }}>
-                                    <div className={`dash-course-accent accent-${course.color} glow-accent`}></div>
+                                    <div className={`dash-course-accent accent-${course.color} glow-accent`} style={{ background: course.color?.startsWith('#') ? course.color : undefined, ...(course.color?.startsWith('#') ? { boxShadow: `0 2px 15px ${course.color}` } : {}) }}></div>
                                     <div className="dash-course-body">
                                         <div className="dash-teacher-row">
-                                            <div className={`dash-teacher-avatar ta-${course.color} grayscale ${course.teacherAvatar ? 'has-avatar' : ''}`}>
+                                            <div className={`dash-teacher-avatar ta-${course.color} grayscale ${course.teacherAvatar ? 'has-avatar' : ''}`} style={course.color?.startsWith('#') ? { background: course.color, borderColor: course.color, color: 'white' } : {}}>
                                                 {course.teacherAvatar ? (
                                                     <img src={course.teacherAvatar} alt={course.teacher} className="teacher-real-avatar" />
                                                 ) : course.teacherInitials}
@@ -715,7 +715,7 @@ const StudentDashboard = () => {
                                     {enrollError && <motion.span initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="enroll-error pulse-text">{enrollError}</motion.span>}
                                 </AnimatePresence>
                             </div>
-                            <button className={`dash-btn-primary exact-btn-${enrollModal.color} premium-btn w-full mt-4`} onClick={handleEnroll}>
+                            <button className={`dash-btn-primary exact-btn-${enrollModal.color} premium-btn w-full mt-4`} onClick={handleEnroll} style={enrollModal.color?.startsWith('#') ? { background: enrollModal.color, borderColor: enrollModal.color } : {}}>
                                 <HiOutlineCheckCircle /> فعل الدورة هسة
                             </button>
                         </motion.div>

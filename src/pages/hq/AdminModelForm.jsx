@@ -54,7 +54,7 @@ const SCHEMAS = {
             { key: 'education', label: 'الشهادات وتاريخها (اكتب كل شهادة بسطر جديد)', type: 'textarea' },
             { key: 'experience', label: 'الخبرات العلمية (اكتب كل خبرة بسطر جديد)', type: 'textarea' },
             { key: 'achievements', label: 'الإنجازات (اكتب كل إنجاز بسطر جديد)', type: 'textarea' },
-            { key: 'color', label: 'لون هوية الأستاذ', type: 'select', options: [{ value: 'blue', label: 'أزرق سماوي' }, { value: 'red', label: 'أحمر ملتهب' }, { value: 'orange', label: 'برتقالي' }, { value: 'green', label: 'أخضر زمردي' }, { value: 'purple', label: 'بنفسجي' }] },
+            { key: 'color', label: 'لون بطاقة الأستاذ (HEX أو لون)', type: 'text', placeholder: '#FFFFFF' },
             { key: 'initials', label: 'اسم رمزي (رمز الدورة)', type: 'text' },
             { key: 'rating', label: 'التقييم الظاهري (مثال: 4.8)', type: 'text' },
             { key: 'students_count', label: 'عدد الطلاب الوهمي/البدائي', type: 'number' },
