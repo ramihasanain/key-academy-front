@@ -20,7 +20,8 @@ import {
     HiOutlineChartBar,
     HiOutlineArrowRight,
     HiOutlineBeaker,
-    HiOutlineNoSymbol
+    HiOutlineNoSymbol,
+    HiOutlinePencilSquare
 } from 'react-icons/hi2'
 import ParticleBackground from '../components/ParticleBackground'
 import AnimatedCounter from '../components/AnimatedCounter'
@@ -57,6 +58,7 @@ const StudentDashboard = () => {
     const [myCourses, setMyCourses] = useState([])
     const [completedCourses, setCompletedCourses] = useState([])
     const [certificates, setCertificates] = useState([])
+    const [myNotes, setMyNotes] = useState([])
 
     useEffect(() => {
         const token = localStorage.getItem('access_token');
@@ -145,6 +147,11 @@ const StudentDashboard = () => {
                 })));
             }).catch(console.error);
 
+        fetch(API + '/api/interactions/notes/', { headers })
+            .then(res => res.json())
+            .then(data => setMyNotes(data))
+            .catch(console.error);
+
         // Fetch browse courses and teachers
         fetch(API + '/api/courses/')
             .then(res => res.json())
@@ -167,6 +174,7 @@ const StudentDashboard = () => {
         { id: 'my-courses', label: 'دوراتي الحالية', icon: <HiOutlineBookOpen /> },
         { id: 'completed', label: 'مخلصها بنجاح', icon: <HiOutlineCheckCircle /> },
         { id: 'certificates', label: 'شهاداتي', icon: <HiOutlineAcademicCap /> },
+        { id: 'my-notes', label: 'ملاحظاتي', icon: <HiOutlinePencilSquare /> },
     ]
 
     const getFilteredCourses = () => {
@@ -250,7 +258,6 @@ const StudentDashboard = () => {
                         </div>
                     </div>
                     <h3 style={{ textAlign: 'center' }}>{course.title}</h3>
-                    <p className="dash-course-desc" style={{ textAlign: 'center' }}>{course.grade}</p>
 
                     <div className="dash-course-meta-row">
                         <span className="dash-lessons-count"><HiOutlineBookOpen /> {course.lessons_count || 0} درس</span>
@@ -414,7 +421,7 @@ const StudentDashboard = () => {
 
                 {/* Welcome Banner - Top */}
 
-                {['my-courses', 'completed', 'certificates', 'profile'].includes(activeTab) && (
+                {['my-courses', 'completed', 'certificates', 'my-notes', 'profile'].includes(activeTab) && (
                     <motion.div
                         className="welcome-3d-banner"
                         initial={{ opacity: 0, scale: 0.95, y: -20 }}
@@ -464,7 +471,6 @@ const StudentDashboard = () => {
                                         </div>
 
                                         <h3 className="course-title-glow">{course.title}</h3>
-                                        <p className="dash-course-desc">{course.desc}</p>
 
                                         <div className="dash-progress premium-progress">
                                             <div className="dash-progress-header">
@@ -545,6 +551,38 @@ const StudentDashboard = () => {
                                     <button className="dash-btn-primary premium-btn gold-btn">نزلها واطبعها</button>
                                 </motion.div>
                             ))}
+                        </div>
+                    </motion.div>
+                )}
+
+                {/* ===== MY NOTES ===== */}
+                {activeTab === 'my-notes' && (
+                    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="dash-tab-content">
+                        <div className="section-header-row">
+                            <h2 className="dash-section-title">ملاحظاتي السابقة 📝</h2>
+                        </div>
+                        <div className="dash-courses-grid" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))' }}>
+                            {myNotes.length === 0 ? (
+                                <div className="dash-no-results glass-panel" style={{ gridColumn: '1 / -1' }}>
+                                    <p>ماكو أي ملاحظات مسجلة للحين.</p>
+                                </div>
+                            ) : (
+                                myNotes.map((note, i) => (
+                                    <motion.div key={note.id} className="dash-course-card glass-panel premium-card hover-lift" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }} style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                                        <div style={{ position: 'absolute', top: 0, right: 0, bottom: 0, width: '4px', background: 'var(--primary)', borderRadius: '0 12px 12px 0' }}></div>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                            <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}><HiOutlineClock style={{ display: 'inline', marginBottom: '-2px' }} /> {new Date(note.created_at).toLocaleDateString('ar-IQ')}</span>
+                                            {note.lesson_title && <span style={{ fontSize: '0.8rem', background: 'rgba(131, 42, 150, 0.1)', color: 'var(--primary)', padding: '4px 10px', borderRadius: '12px', fontWeight: 'bold' }}>{note.lesson_title}</span>}
+                                        </div>
+                                        <p style={{ margin: 0, lineHeight: '1.6', color: 'var(--text-main)', fontSize: '1.05rem', whiteSpace: 'pre-wrap' }}>{note.content}</p>
+                                        {note.lesson_id && (
+                                            <Link to={`/lesson/${note.lesson_id}`} className="dash-btn-secondary premium-btn" style={{ marginTop: 'auto', textAlign: 'center', padding: '10px' }}>
+                                                رجوع للدرس
+                                            </Link>
+                                        )}
+                                    </motion.div>
+                                ))
+                            )}
                         </div>
                     </motion.div>
                 )}

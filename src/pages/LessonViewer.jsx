@@ -515,7 +515,7 @@ const TabQA = ({ lessonId, userData }) => {
     )
 }
 
-const TabGroup = ({ courseId, userData }) => {
+const TabGroup = ({ courseId, userData, lessonId }) => {
     const [messages, setMessages] = useState([])
     const [input, setInput] = useState('')
     const [chatType, setChatType] = useState('public') // 'public' | 'private'
@@ -579,7 +579,7 @@ const TabGroup = ({ courseId, userData }) => {
 
     const handleSend = () => {
         if (!input.trim() || !socket) return
-        const payload = { content: input, is_private: chatType === 'private' }
+        const payload = { content: input, is_private: chatType === 'private', lesson_id: lessonId }
         socket.send(JSON.stringify(payload))
         setInput('')
     }
@@ -992,7 +992,7 @@ const LessonViewer = () => {
                     <button className="lv-back-btn" onClick={() => {
                         if (isPreview && courseId) navigate(`/course-preview/${courseId}`)
                         else if (courseId) navigate(`/course/${courseId}`)
-                        else navigate('/student')
+                        else navigate('/dashboard')
                     }}>
                         <span className="lv-back-circle"><HiOutlineArrowRight /></span>
                         ارجع للدورة
@@ -1100,7 +1100,7 @@ const LessonViewer = () => {
                         <div className="lv-tab-body cv-super-glass">
                             {activeTab === 'notes' && <TabNotes lessonId={lessonId} />}
                             {activeTab === 'qa' && <TabQA lessonId={lessonId} userData={userData} />}
-                            {activeTab === 'group' && <TabGroup courseId={courseId} userData={userData} />}
+                            {activeTab === 'group' && <TabGroup courseId={courseId} userData={userData} lessonId={lessonId} />}
                             {activeTab === 'docs' && <TabDocs lessonInfo={lessonInfo} courseId={courseId} />}
                             {activeTab === 'lab' && <TabLab />}
                             {activeTab === 'keyai' && <TabKeyAI />}
