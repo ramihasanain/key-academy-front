@@ -110,6 +110,7 @@ export const AdminCourseBuilder = ({ id }) => {
                             const lessonQuizzes = allQuizzes.filter(q => q.lesson == l.id)
                             return {
                                 ...l, localId: l.id, showAdvanced: false,
+                                json_data: l.json_data || { ad_video_id: '', in_video_quizzes: [] },
                                 quizzes: lessonQuizzes.map(qz => {
                                     const quizQuestions = allQuestions.filter(qs => qs.quiz == qz.id).sort((a, b) => a.order - b.order)
                                     return {
@@ -167,7 +168,7 @@ export const AdminCourseBuilder = ({ id }) => {
         const newMods = [...modules]
         newMods[mIndex].lessons.push({
             localId: Date.now(), title: '', video_url: '', cover_image: '', order: newMods[mIndex].lessons.length + 1, is_locked: true,
-            interactive_html: '', virtual_lab_slug: '', doc_file: null, showAdvanced: true, quizzes: []
+            interactive_html: '', virtual_lab_slug: '', doc_file: null, showAdvanced: true, quizzes: [], json_data: { ad_video_id: '', in_video_quizzes: [] }
         })
         setModules(newMods)
     }
@@ -276,6 +277,43 @@ export const AdminCourseBuilder = ({ id }) => {
         }
     }
 
+    // --- In-Video Logic (JSON Data) ---
+    const addInVideoQuiz = (mIndex, lIndex) => {
+        const newMods = [...modules]; const less = newMods[mIndex].lessons[lIndex];
+        if (!less.json_data) less.json_data = { ad_video_id: '', in_video_quizzes: [] };
+        if (!less.json_data.in_video_quizzes) less.json_data.in_video_quizzes = [];
+        less.json_data.in_video_quizzes.push({ time: 0, question: '', options: ['', ''], correct: 0, explanations: ['', ''] });
+        setModules(newMods)
+    }
+    const removeInVideoQuiz = (mIndex, lIndex, qzIdx) => {
+        const newMods = [...modules]; newMods[mIndex].lessons[lIndex].json_data.in_video_quizzes.splice(qzIdx, 1); setModules(newMods);
+    }
+    const updateInVideoQuiz = (mIndex, lIndex, qzIdx, field, val) => {
+        const newMods = [...modules]; newMods[mIndex].lessons[lIndex].json_data.in_video_quizzes[qzIdx][field] = val; setModules(newMods);
+    }
+    const updateInVideoQuizOption = (mIndex, lIndex, qzIdx, optIdx, val) => {
+        const newMods = [...modules]; newMods[mIndex].lessons[lIndex].json_data.in_video_quizzes[qzIdx].options[optIdx] = val; setModules(newMods);
+    }
+    const updateInVideoQuizExplanation = (mIndex, lIndex, qzIdx, optIdx, val) => {
+        const newMods = [...modules]; newMods[mIndex].lessons[lIndex].json_data.in_video_quizzes[qzIdx].explanations[optIdx] = val; setModules(newMods);
+    }
+    const addInVideoQuizOption = (mIndex, lIndex, qzIdx) => {
+        const newMods = [...modules]; newMods[mIndex].lessons[lIndex].json_data.in_video_quizzes[qzIdx].options.push('');
+        newMods[mIndex].lessons[lIndex].json_data.in_video_quizzes[qzIdx].explanations.push(''); setModules(newMods);
+    }
+    const removeInVideoQuizOption = (mIndex, lIndex, qzIdx, optIdx) => {
+        const newMods = [...modules]; const qz = newMods[mIndex].lessons[lIndex].json_data.in_video_quizzes[qzIdx];
+        qz.options.splice(optIdx, 1); qz.explanations.splice(optIdx, 1);
+        if(qz.correct >= qz.options.length) qz.correct = 0;
+        setModules(newMods);
+    }
+    const updateLessonJsonData = (mIndex, lIndex, field, val) => {
+        const newMods = [...modules]; 
+        if(!newMods[mIndex].lessons[lIndex].json_data) newMods[mIndex].lessons[lIndex].json_data={}; 
+        newMods[mIndex].lessons[lIndex].json_data[field] = val; 
+        setModules(newMods);
+    }
+
     // --- Course Docs Operations (Ministerial Docs) ---
     const addCourseDoc = () => {
         setCourseDocs([...courseDocs, { localId: Date.now(), title: '', file: null, doc_type: 'PDF' }])
@@ -306,7 +344,11 @@ export const AdminCourseBuilder = ({ id }) => {
                             fd.append(k, dataObj[k]);
                         }
                     } else {
-                        fd.append(k, dataObj[k]);
+                        if (typeof dataObj[k] === 'object' && !Array.isArray(dataObj[k]) && !(dataObj[k] instanceof File)) {
+                            fd.append(k, JSON.stringify(dataObj[k]));
+                        } else {
+                            fd.append(k, dataObj[k]);
+                        }
                     }
                 }
             });
@@ -728,6 +770,56 @@ export const AdminCourseBuilder = ({ id }) => {
 
                                                                 <label style={{ display: 'block', fontSize: '0.85rem', margin: '14px 0 8px', color: 'var(--hq-text-main)', fontWeight: 'bold' }}>المدة الزمنية للدرس كاملاً</label>
                                                                 <input type="text" value={less.duration || ''} onChange={e => updateLesson(mIndex, lIndex, 'duration', e.target.value)} placeholder="مثال: 15:30" style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #d1d5db', outline: 'none' }} />
+                                                            </div>
+                                                        </div>
+
+                                                        {/* IN-VIDEO QUIZZES & AD CONFIG (DESKTOP PLAYER ONLY) */}
+                                                        <div style={{ borderTop: '2px dashed #93c5fd', paddingTop: '20px', marginTop: '10px', background: 'rgba(59, 130, 246, 0.03)', borderRadius: '10px', padding: '15px' }}>
+                                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
+                                                                <span style={{ fontWeight: 'bold', color: '#2563eb', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '1.05rem' }}><HiOutlineVideoCamera size={22} /> إعدادات المشغل المكتبي المندمجة</span>
+                                                            </div>
+
+                                                            <div style={{ marginBottom: '20px' }}>
+                                                                <label style={{ display: 'block', fontSize: '0.85rem', marginBottom: '8px', color: 'var(--hq-text-main)', fontWeight: 'bold' }}>YouTube ID لإعلان نهاية الدرس (اختياري)</label>
+                                                                <input type="text" value={less.json_data?.ad_video_id || ''} onChange={e => updateLessonJsonData(mIndex, lIndex, 'ad_video_id', e.target.value)} placeholder="مثال: dQw4w9WgXcQ (سيتم تشغيله تلقائياً بالنهاية)" style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #93c5fd', outline: 'none', direction: 'ltr', background: '#eff6ff' }} />
+                                                            </div>
+
+                                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                                                                <span style={{ fontSize: '0.9rem', fontWeight: 'bold', color: '#1e40af' }}>الأسئلة المفاجئة بمنتصف الفيديو</span>
+                                                                <button className="hq-btn-secondary" style={{ padding: '6px 12px', fontSize: '0.8rem', background: '#dbeafe', color: '#1d4ed8', border: 'none', borderRadius: '6px' }} onClick={() => addInVideoQuiz(mIndex, lIndex)}>+ إدراج سؤال للفيديو</button>
+                                                            </div>
+                                                            
+                                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                                                                {(less.json_data?.in_video_quizzes || []).map((ivq, ivqIdx) => (
+                                                                    <div key={`ivq-${ivqIdx}`} style={{ background: 'white', border: '1px solid #bfdbfe', borderRadius: '10px', padding: '15px', position: 'relative' }}>
+                                                                        <button onClick={() => removeInVideoQuiz(mIndex, lIndex, ivqIdx)} style={{ position: 'absolute', left: '10px', top: '10px', background: '#fee2e2', color: '#ef4444', border: 'none', borderRadius: '4px', padding: '5px', cursor: 'pointer' }}><HiOutlineTrash size={16} /></button>
+                                                                        
+                                                                        <div style={{ display: 'flex', gap: '15px', marginBottom: '15px' }}>
+                                                                            <div style={{ width: '120px' }}>
+                                                                                <label style={{ fontSize: '0.8rem', color: '#475569', fontWeight: 'bold', display: 'block', marginBottom: '5px' }}>وقت الظهور (بالثواني)</label>
+                                                                                <input type="number" value={ivq.time} onChange={e => updateInVideoQuiz(mIndex, lIndex, ivqIdx, 'time', parseInt(e.target.value)||0)} style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid #cbd5e1', outline: 'none' }} />
+                                                                                <small style={{ color: '#94a3b8', fontSize: '0.7rem' }}>مثال: 900 للربع ساعة</small>
+                                                                            </div>
+                                                                            <div style={{ flex: 1 }}>
+                                                                                <label style={{ fontSize: '0.8rem', color: '#475569', fontWeight: 'bold', display: 'block', marginBottom: '5px' }}>نص السؤال</label>
+                                                                                <input type="text" value={ivq.question} onChange={e => updateInVideoQuiz(mIndex, lIndex, ivqIdx, 'question', e.target.value)} style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid #cbd5e1', outline: 'none' }} placeholder="السؤال الذي يوقف الفيديو للمشاهد..." />
+                                                                            </div>
+                                                                        </div>
+
+                                                                        <div>
+                                                                            <label style={{ fontSize: '0.8rem', color: '#475569', fontWeight: 'bold', display: 'block', marginBottom: '5px' }}>الخيارات</label>
+                                                                            {ivq.options.map((opt, optIdx) => (
+                                                                                <div key={`opt-${optIdx}`} style={{ display: 'flex', gap: '8px', marginBottom: '8px', alignItems: 'center' }}>
+                                                                                    <input type="radio" checked={ivq.correct === optIdx} onChange={() => updateInVideoQuiz(mIndex, lIndex, ivqIdx, 'correct', optIdx)} name={`ivq-corr-${lIndex}-${ivqIdx}`} style={{ accentColor: '#3b82f6' }} />
+                                                                                    <input type="text" value={opt} onChange={e => updateInVideoQuizOption(mIndex, lIndex, ivqIdx, optIdx, e.target.value)} placeholder={`خيار ${optIdx+1}`} style={{ flex: 1, padding: '6px', borderRadius: '6px', border: '1px solid #cbd5e1', outline: 'none', fontSize: '0.85rem' }} />
+                                                                                    <input type="text" value={ivq.explanations[optIdx] || ''} onChange={e => updateInVideoQuizExplanation(mIndex, lIndex, ivqIdx, optIdx, e.target.value)} placeholder="التفسير (إن وُجد)" style={{ flex: 1.5, padding: '6px', borderRadius: '6px', border: '1px solid #cbd5e1', background: '#f8fafc', outline: 'none', fontSize: '0.85rem' }} />
+                                                                                    <button onClick={() => removeInVideoQuizOption(mIndex, lIndex, ivqIdx, optIdx)} style={{ background: 'transparent', border: 'none', color: '#ef4444', cursor: 'pointer' }}><HiOutlineTrash /></button>
+                                                                                </div>
+                                                                            ))}
+                                                                            <button style={{ fontSize: '0.75rem', background: '#e2e8f0', border: 'none', padding: '4px 10px', borderRadius: '4px', cursor: 'pointer', marginTop: '5px' }} onClick={() => addInVideoQuizOption(mIndex, lIndex, ivqIdx)}>+ إضافة خيار</button>
+                                                                        </div>
+                                                                    </div>
+                                                                ))}
                                                             </div>
                                                         </div>
 
