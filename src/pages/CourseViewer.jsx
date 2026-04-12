@@ -109,6 +109,13 @@ const CourseViewer = () => {
         return <div className="cv-master-page" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}><h2 style={{ color: 'white' }}>جاري تحضير غرفتك الدراسية...</h2></div>
     }
 
+    const isExamModule = (mod) => mod.title.includes('امتحان') || (mod.weekly_exam && (!mod.lessons || mod.lessons.length === 0));
+    const standardModules = courseData?.modules?.filter(m => !isExamModule(m)) || [];
+    const allExams = courseData?.modules?.filter(m => m.weekly_exam).map(m => m.weekly_exam) || [];
+
+    const computedModuleCount = standardModules.length;
+    const computedLessonCount = standardModules.reduce((acc, mod) => acc + (mod.lessons?.length || 0), 0);
+
     return (
         <div className="cv-master-page">
             {/* Animated Mesh Background */}
@@ -157,14 +164,14 @@ const CourseViewer = () => {
                                 <div className="cv-stat-item">
                                     <HiOutlineDocumentText className="stat-icon" />
                                     <div className="stat-texts">
-                                        <span className="stat-val">{courseData.modules?.length || 0}</span>
+                                        <span className="stat-val">{computedModuleCount}</span>
                                         <span className="stat-lbl">وحدات دراسية</span>
                                     </div>
                                 </div>
                                 <div className="cv-stat-item">
                                     <HiOutlinePlayCircle className="stat-icon text-pink" />
                                     <div className="stat-texts">
-                                        <span className="stat-val">{courseData.lessons_count || 0}</span>
+                                        <span className="stat-val">{computedLessonCount}</span>
                                         <span className="stat-lbl">درس فيديو</span>
                                     </div>
                                 </div>
@@ -185,7 +192,8 @@ const CourseViewer = () => {
                         {[
                             { id: 'lessons', label: 'المنهج والدروس', icon: <HiOutlinePlayCircle /> },
                             { id: 'documents', label: 'ملازم وملخصات', icon: <HiOutlineDocumentText /> },
-                            { id: 'ministerial', label: 'أسئلة وزارية', icon: <HiOutlineDocumentDuplicate /> }
+                            { id: 'ministerial', label: 'أسئلة وزارية', icon: <HiOutlineDocumentDuplicate /> },
+                            { id: 'exams', label: 'امتحانات أسبوعية', icon: <HiOutlineClipboardDocumentCheck /> }
                         ].map(tab => (
                             <button
                                 key={tab.id}
@@ -219,7 +227,7 @@ const CourseViewer = () => {
                                     <p style={{ fontSize: '1.1rem', color: '#64748b', fontWeight: 600 }}>هذي كل الوحدات والمحاضرات اللي راح ناخذها بالدورة.</p>
                                 </div>
 
-                                {courseData.modules?.map((mod, index) => (
+                                {standardModules.map((mod, index) => (
                                     <div key={mod.id} style={{ background: 'white', borderRadius: '24px', boxShadow: '0 4px 20px rgba(0,0,0,0.03)', border: '1px solid rgba(0,0,0,0.04)', overflow: 'hidden', marginBottom: '30px' }}>
                                         {/* Module Header */}
                                         {mod.cover_image ? (
@@ -231,14 +239,6 @@ const CourseViewer = () => {
                                                         <h3 style={{ color: 'white', fontSize: '1.8rem', fontWeight: 900, marginBottom: '8px', textShadow: '0 2px 10px rgba(0,0,0,0.5)' }}>{mod.title}</h3>
                                                         <span style={{ color: 'rgba(255,255,255,0.8)', fontSize: '1.05rem', fontWeight: 700 }}>{mod.lessons?.length || 0} دروس • {mod.duration || 'غير محدد'}</span>
                                                     </div>
-                                                    {mod.weekly_exam && (
-                                                        <button 
-                                                            onClick={(e) => { e.stopPropagation(); navigate(`/student/exam/${mod.weekly_exam.id}`); }}
-                                                            style={{ padding: '8px 16px', background: 'rgba(255, 193, 7, 0.9)', color: '#000', borderRadius: '12px', border: 'none', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', boxShadow: '0 4px 15px rgba(255, 193, 7, 0.3)' }}
-                                                        >
-                                                            <HiOutlineClipboardDocumentCheck style={{ fontSize: '1.2rem' }} /> الامتحان الأسبوعي
-                                                        </button>
-                                                    )}
                                                 </div>
                                             </div>
                                         ) : (
@@ -440,6 +440,87 @@ const CourseViewer = () => {
                                 </button>
                             </div>
                         </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* 4. EXAMS TAB (الامتحانات الأسبوعية) */}
+            <AnimatePresence mode="wait">
+                {activeTab === 'exams' && (
+                    <motion.div
+                        key="exams-tab"
+                        initial={{ opacity: 0, y: 30 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -20 }}
+                        transition={{ duration: 0.4, type: 'spring' }}
+                        className="cv-timeline-container cv-exams-container"
+                        style={{ padding: '20px 0' }}
+                    >
+                        <div style={{ textAlign: 'center', marginBottom: '30px' }}>
+                            <h2 style={{ fontSize: '2.2rem', fontWeight: 900, color: '#0f172a', marginBottom: '10px' }}>الامتحانات الأسبوعية والاختبارات</h2>
+                            <p style={{ fontSize: '1.1rem', color: '#64748b', fontWeight: 600 }}>اختبر مستواك وتأكد من فهمك بعد كل وحدة دراسية.</p>
+                        </div>
+
+                        {allExams.length === 0 ? (
+                            <div style={{ padding: '40px', textAlign: 'center', color: '#94a3b8', fontSize: '1.2rem', background: 'rgba(255,255,255,0.7)', borderRadius: '20px', border: '2px dashed rgba(0,0,0,0.05)' }}>
+                                ماكو امتحانات أسبوعية متوفرة حالياً.
+                            </div>
+                        ) : (
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '20px' }}>
+                                {allExams.map(exam => {
+                                    const isSubmitted = !!exam.submission;
+                                    return (
+                                        <div key={exam.id} style={{ background: 'white', borderRadius: '20px', padding: '24px', boxShadow: '0 8px 30px rgba(0,0,0,0.04)', border: isSubmitted ? '2px solid #10b981' : '1px solid rgba(0,0,0,0.05)', display: 'flex', flexDirection: 'column' }}>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '15px' }}>
+                                                <h3 style={{ fontSize: '1.3rem', fontWeight: 800, color: '#0f172a', margin: 0, lineHeight: 1.4 }}>{exam.title}</h3>
+                                                {isSubmitted ? (
+                                                    <div style={{ background: '#ecfdf5', color: '#10b981', padding: '6px 12px', borderRadius: '12px', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.85rem' }}>
+                                                        <HiOutlineCheckCircle size={18} /> مكتمل
+                                                    </div>
+                                                ) : (
+                                                    <div style={{ background: '#fffbeb', color: '#d97706', padding: '6px 12px', borderRadius: '12px', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.85rem' }}>
+                                                        <HiOutlineDocumentDuplicate size={18} /> اختبار فعّال
+                                                    </div>
+                                                )}
+                                            </div>
+                                            
+                                            {isSubmitted ? (
+                                                <div style={{ background: '#f8fafc', padding: '20px', borderRadius: '16px', marginTop: '10px', textAlign: 'center', border: '1px solid #e2e8f0' }}>
+                                                    <span style={{ display: 'block', color: '#64748b', marginBottom: '5px', fontSize: '0.95rem', fontWeight: 600 }}>الدرجة النهائية</span>
+                                                    <strong style={{ fontSize: '2.2rem', color: '#10b981', fontWeight: 900 }}>{exam.submission?.grade || '--'} <span style={{fontSize: '1.1rem', color: '#94a3b8', fontWeight: 600}}>/ {exam.total_mark}</span></strong>
+                                                </div>
+                                            ) : (
+                                                <div style={{ background: '#f8fafc', padding: '16px', borderRadius: '16px', marginTop: 'auto', fontSize: '0.9rem', color: '#64748b', display: 'flex', flexDirection: 'column', gap: '10px', border: '1px solid #e2e8f0' }}>
+                                                    <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}><span>يبدأ من:</span> <strong style={{color: '#0f172a'}}>{exam.start_time ? new Date(exam.start_time).toLocaleString('ar-IQ') : 'مفتوح دائماً'}</strong></div>
+                                                    <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}><span>ينتهي في:</span> <strong style={{color: '#0f172a'}}>{exam.end_time ? new Date(exam.end_time).toLocaleString('ar-IQ') : 'غير محدد'}</strong></div>
+                                                </div>
+                                            )}
+                                            
+                                            {!isSubmitted && (
+                                                <button 
+                                                    onClick={() => navigate(`/student/exam/${exam.id}`)}
+                                                    style={{ width: '100%', marginTop: '20px', padding: '14px', background: 'linear-gradient(135deg, var(--primary), var(--secondary))', color: 'white', border: 'none', borderRadius: '14px', fontWeight: 'bold', fontSize: '1.05rem', cursor: 'pointer', transition: 'transform 0.2s', boxShadow: '0 4px 15px rgba(99, 102, 241, 0.4)' }}
+                                                    onMouseOver={e => e.currentTarget.style.transform = 'translateY(-2px)'}
+                                                    onMouseOut={e => e.currentTarget.style.transform = 'translateY(0)'}
+                                                >
+                                                    ابدأ الامتحان الآن
+                                                </button>
+                                            )}
+                                            {isSubmitted && (
+                                                <button 
+                                                    onClick={() => navigate(`/student/exam/${exam.id}`)}
+                                                    style={{ width: '100%', marginTop: '20px', padding: '12px', background: 'white', color: '#10b981', border: '2px solid #10b981', borderRadius: '14px', fontWeight: 'bold', fontSize: '1rem', cursor: 'pointer', transition: 'background 0.2s' }}
+                                                    onMouseOver={e => {e.currentTarget.style.background = '#10b981'; e.currentTarget.style.color = 'white'}}
+                                                    onMouseOut={e => {e.currentTarget.style.background = 'white'; e.currentTarget.style.color = '#10b981'}}
+                                                >
+                                                    عرض ورقة الامتحان المقيمة
+                                                </button>
+                                            )}
+                                        </div>
+                                    )
+                                })}
+                            </div>
+                        )}
                     </motion.div>
                 )}
             </AnimatePresence>
