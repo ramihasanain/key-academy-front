@@ -60,28 +60,38 @@ const ViewVideo = ({ videoUrl, lessonId, isCompleted, onComplete }) => {
     };
 
     return (
-        <div className="lv-screen lv-video-screen" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-            <div className="lv-video-lock">
-                <img src="/key-icon-logo.png" alt="Key Academy Logo" style={{ width: '90px', height: '90px', objectFit: 'contain', margin: '0 auto 15px', display: 'block', dropShadow: '0 0 15px rgba(255,255,255,0.2)' }} />
-                <div className="lv-lock-icon-wrap"><HiOutlineLockClosed /></div>
-                <h2>أمان المحتوى مفعل</h2>
-                <p>شغل الفيديو من تطبيق Key Academy للابتوب أو الحاسبة حتى تضمن تفهم الدرس بأعلى جودة وبدون تقطيع.</p>
-                <div style={{ display: 'flex', gap: '15px', justifyContent: 'center', marginTop: '20px', flexWrap: 'wrap' }}>
-                    <button className="premium-btn exact-btn-pink lv-lock-btn" style={{ margin: 0, padding: '12px 25px' }} onClick={handleLaunchApp}>
-                        ▶ افتح الدرس بالتطبيق هسة
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', width: '100%', height: '100%' }}>
+            <div className="lv-secure-box">
+                <img src="/key-icon-logo.png" alt="Key Academy" className="lv-sb-logo" onError={(e) => { e.target.onerror = null; e.target.style.display = 'none'; }} />
+                
+                <div className="lv-sb-lock-ring">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="lv-sb-lock-icon">
+                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                    </svg>
+                </div>
+                
+                <h2 className="lv-sb-title">أمان المحتوى مفعل</h2>
+                <p className="lv-sb-desc">شغل الفيديو من تطبيق Key Academy للابتوب أو الحاسبة حتى تضمن تفهم الدرس بأعلى جودة وبدون تقطيع.</p>
+                
+                <div className="lv-sb-actions">
+                    <button className="lv-sb-btn-primary" onClick={handleLaunchApp}>
+                        <span>افتح الدرس بالتطبيق هسة</span>
+                        <svg viewBox="0 0 24 24" fill="currentColor" className="lv-sb-btn-icon" style={{transform: 'rotate(180deg)', marginLeft: '10px'}}>
+                            <path d="M8 5v14l11-7z" />
+                        </svg>
                     </button>
-                    <a 
-                        href="/KeyAcademy_MediaPlayer.exe" 
-                        download="KeyAcademy_MediaPlayer.exe"
-                        className="premium-btn exact-btn-purple lv-lock-btn" 
-                        style={{ margin: 0, padding: '12px 25px', background: 'transparent', border: '1px solid rgba(139, 92, 246, 0.5)', boxShadow: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none' }}
-                    >
-                        📥 ما محمل التطبيق؟ نزله من هنا
+                    
+                    <a href="/KeyAcademy_MediaPlayer.exe" download="KeyAcademy_MediaPlayer.exe" className="lv-sb-btn-secondary">
+                        <span>ما محمل التطبيق؟ نزله من هنا</span>
+                        <svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="0" className="lv-sb-btn-icon" style={{marginLeft: '10px'}}>
+                            <path fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                        </svg>
                     </a>
                 </div>
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'center' }}>
+            <div style={{ display: 'flex', justifyContent: 'center', marginTop: 'auto', paddingBottom: '20px' }}>
                 <button
                     onClick={onComplete}
                     disabled={isCompleted}
