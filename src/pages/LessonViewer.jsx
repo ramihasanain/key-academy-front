@@ -608,7 +608,10 @@ const TabGroup = ({ courseId, userData, lessonId }) => {
         const t = localStorage.getItem('access_token')
         if (!t) return
 
-        const ws = new WebSocket(`ws://127.0.0.1:8000/ws/chat/${courseId}/?token=${t}`)
+        const wsUrl = API.replace(/^http/, 'ws')
+        const baseUrl = wsUrl.endsWith('/') ? wsUrl.slice(0, -1) : wsUrl
+
+        const ws = new WebSocket(`${baseUrl}/ws/chat/${courseId}/?token=${t}`)
         setSocket(ws)
 
         ws.onmessage = (e) => {
