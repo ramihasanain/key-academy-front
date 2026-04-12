@@ -168,7 +168,7 @@ export const AdminCourseBuilder = ({ id }) => {
         const newMods = [...modules]
         newMods[mIndex].lessons.push({
             localId: Date.now(), title: '', video_url: '', cover_image: '', order: newMods[mIndex].lessons.length + 1, is_locked: true,
-            interactive_html: '', virtual_lab_slug: '', doc_file: null, showAdvanced: true, quizzes: [], json_data: { ad_video_id: '', in_video_quizzes: [] }
+            interactive_html: '', lesson_text: '', virtual_lab_slug: '', doc_file: null, showAdvanced: true, quizzes: [], json_data: { ad_video_id: '', in_video_quizzes: [] }
         })
         setModules(newMods)
     }
@@ -751,6 +751,11 @@ export const AdminCourseBuilder = ({ id }) => {
                                                                     <HiOutlineDocumentText size={16} /> إضافة سلايدات تفاعلية (HTML Iframe)
                                                                 </label>
                                                                 <textarea value={less.interactive_html || ''} onChange={e => updateLesson(mIndex, lIndex, 'interactive_html', e.target.value)} placeholder="كود Iframe للسلايدات إن وجد..." style={{ width: '100%', height: '50px', padding: '10px', borderRadius: '8px', border: '1px solid #d1d5db', resize: 'none', outline: 'none', fontFamily: 'monospace', direction: 'ltr', background: '#f8fafc', fontSize: '0.9rem' }} />
+
+                                                                <label style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.85rem', margin: '15px 0 8px', color: 'var(--hq-text-main)', fontWeight: 'bold' }}>
+                                                                    <HiOutlineDocumentText size={16} /> نص محتوى الدرس بالكامل (اختياري)
+                                                                </label>
+                                                                <textarea value={less.lesson_text || ''} onChange={e => updateLesson(mIndex, lIndex, 'lesson_text', e.target.value)} placeholder="أدخل محتوى نص الدرس بالكامل إن وجد للرجوع إليه لاحقاً..." style={{ width: '100%', height: '80px', padding: '10px', borderRadius: '8px', border: '1px solid #d1d5db', resize: 'vertical', outline: 'none', background: '#f8fafc', fontSize: '0.9rem' }} />
                                                             </div>
                                                             <div>
                                                                 <label style={{ display: 'block', fontSize: '0.85rem', marginBottom: '8px', color: 'var(--hq-text-main)', fontWeight: 'bold' }}>
