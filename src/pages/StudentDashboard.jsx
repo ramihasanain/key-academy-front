@@ -427,11 +427,12 @@ const StudentDashboard = () => {
                         initial={{ opacity: 0, scale: 0.95, y: -20 }}
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         transition={{ duration: 0.5, type: 'spring' }}
+                        style={{ background: 'linear-gradient(135deg, var(--primary), var(--secondary))' }}
                     >
                         <div className="banner-glow-bg"></div>
                         <div className="banner-content">
                             <div className="banner-text">
-                                <h1>هلا بيك {userData.full_name ? userData.full_name.split(' ')[0] : 'نورتنا'}! 🌟</h1>
+                                <h1>هلا بيك {userData.full_name ? userData.full_name.split(' ')[0] : 'نورتنا'}!</h1>
                                 <p>استمر بتركيزك وكمل دراستك حتى تحقق اللي تريده.</p>
                             </div>
                             <div className="banner-3d-element">
