@@ -100,7 +100,7 @@ const CoursePreview = () => {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
-                body: JSON.stringify({ code })
+                body: JSON.stringify({ code, course_id: courseId })
             });
             let data;
             try {
