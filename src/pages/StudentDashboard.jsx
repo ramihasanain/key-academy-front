@@ -360,10 +360,7 @@ const StudentDashboard = () => {
                         {activeTab === 'browse-courses' && <motion.div className="active-indicator" layoutId="active-nav" />}
                     </button>
 
-                    <Link to="/virtual-labs" className="dash-nav-btn neon-hover" style={{ textDecoration: 'none', color: 'inherit' }}>
-                        <div className="nav-icon-wrapper" style={{ color: 'var(--pink)' }}><HiOutlineBeaker /></div>
-                        <span>المختبرات الافتراضية 🧪</span>
-                    </Link>
+
 
                     <button className={`dash-nav-btn neon-hover ${activeTab === 'profile' ? 'active' : ''}`} onClick={() => { setActiveTab('profile'); setSidebarOpen(false) }}>
                         <div className="nav-icon-wrapper"><HiOutlineUser /></div>
