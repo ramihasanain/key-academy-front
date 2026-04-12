@@ -197,30 +197,28 @@ const CoursePreview = () => {
                 {/* Main Content Column */}
                 <div className="preview-main-col">
 
-                    {/* Hero Section */}
-                    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className={`preview-hero theme-${course.color}`}>
-                        <div className="hero-content">
-                            {course.hero_image && (
-                                <div style={{ width: '100%', height: '320px', borderRadius: '20px', overflow: 'hidden', marginBottom: '25px', boxShadow: '0 15px 40px rgba(0,0,0,0.08)', position: 'relative' }}>
-                                    <img src={course.hero_image} alt={course.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                                    <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(to top, rgba(0,0,0,0.4), transparent)` }}></div>
-                                </div>
-                            )}
-                            <h1 className="hero-title">{course.title}</h1>
+                    {/* Immersive Cinematic Hero Section */}
+                    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="preview-hero-immersive" style={{ position: 'relative', borderRadius: '32px', overflow: 'hidden', marginBottom: '40px', minHeight: '450px', display: 'flex', alignItems: 'flex-end', padding: '40px', boxShadow: '0 30px 60px rgba(0,0,0,0.15)' }}>
+                        {course.hero_image ? (
+                            <img src={course.hero_image} alt={course.title} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', zIndex: 0 }} />
+                        ) : (
+                            <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(135deg, var(--${course.color || 'primary'}), #000)`, zIndex: 0 }}></div>
+                        )}
+                        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(15, 23, 42, 0.95) 0%, rgba(15, 23, 42, 0.4) 40%, rgba(15, 23, 42, 0) 100%)', zIndex: 1 }}></div>
 
-                            {/* SMART TEACHER PROFILE INJECTION */}
-                            <div className="smart-teacher-card">
-                                <div className="st-avatar-wrap">
-                                    <img src={course.teacher_image || 'https://via.placeholder.com/150'} alt={course.teacher_name} className="st-avatar" />
-                                    <div className="st-avatar-ring"></div>
+                        <div style={{ position: 'relative', zIndex: 2, display: 'flex', flexDirection: 'column', gap: '25px', width: '100%' }}>
+                            <h1 style={{ color: 'white', fontSize: 'clamp(2rem, 4vw, 3.5rem)', fontWeight: 900, margin: 0, textShadow: '0 4px 25px rgba(0,0,0,0.6)', lineHeight: 1.2 }}>{course.title}</h1>
+                            
+                            {/* Stylish Glassmorphism Teacher Card */}
+                            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '15px', background: 'rgba(255, 255, 255, 0.15)', backdropFilter: 'blur(20px)', padding: '10px 30px 10px 10px', borderRadius: '50px', border: '1px solid rgba(255, 255, 255, 0.3)', alignSelf: 'flex-start', boxShadow: '0 10px 30px rgba(0,0,0,0.2)' }}>
+                                <div style={{ width: '56px', height: '56px', borderRadius: '50%', overflow: 'hidden', border: '3px solid white', boxShadow: '0 5px 15px rgba(0,0,0,0.3)' }}>
+                                    <img src={course.teacher_image || 'https://via.placeholder.com/150'} alt={course.teacher_name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                 </div>
-                                <div className="st-info">
-                                    <h3>{course.teacher_name}</h3>
-                                    <p>{course.teacher_subtitle}</p>
+                                <div style={{ display: 'flex', flexDirection: 'column', paddingRight: '5px' }}>
+                                    <span style={{ color: 'rgba(255,255,255,0.8)', fontSize: '0.9rem' }}>مقدمة بواسطة</span>
+                                    <span style={{ color: 'white', fontWeight: 800, fontSize: '1.2rem', textShadow: '0 2px 10px rgba(0,0,0,0.5)' }}>{course.teacher_name}</span>
                                 </div>
                             </div>
-
-
                         </div>
                     </motion.div>
 
