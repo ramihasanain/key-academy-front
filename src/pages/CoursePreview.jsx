@@ -200,7 +200,12 @@ const CoursePreview = () => {
                     {/* Hero Section */}
                     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className={`preview-hero theme-${course.color}`}>
                         <div className="hero-content">
-                            <span className="hero-badge"><HiOutlineSparkles /> {course.grade}</span>
+                            {course.hero_image && (
+                                <div style={{ width: '100%', height: '320px', borderRadius: '20px', overflow: 'hidden', marginBottom: '25px', boxShadow: '0 15px 40px rgba(0,0,0,0.08)', position: 'relative' }}>
+                                    <img src={course.hero_image} alt={course.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                    <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(to top, rgba(0,0,0,0.4), transparent)` }}></div>
+                                </div>
+                            )}
                             <h1 className="hero-title">{course.title}</h1>
 
                             {/* SMART TEACHER PROFILE INJECTION */}
