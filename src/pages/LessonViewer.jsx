@@ -31,14 +31,41 @@ import './LessonViewer.css'
 
 /* ======== PORTAL SCREENS ======== */
 
-const ViewVideo = ({ isCompleted, onComplete }) => {
+const ViewVideo = ({ videoUrl, lessonId, isCompleted, onComplete }) => {
+    const handleLaunchApp = () => {
+        if (!videoUrl) {
+            alert('لا يوجد فيديو متاح لهذا الدرس حالياً.');
+            return;
+        }
+        
+        let vid = videoUrl;
+        if (videoUrl.includes('v=')) {
+            vid = videoUrl.split('v=')[1].split('&')[0];
+        } else if (videoUrl.includes('youtu.be/')) {
+            vid = videoUrl.split('youtu.be/')[1].split('?')[0];
+        } else if (videoUrl.includes('embed/')) {
+            vid = videoUrl.split('embed/')[1].split('?')[0];
+        }
+        
+        let encodedArr = [];
+        for (let i = 0; i < vid.length; i++) {
+            encodedArr.push((vid.charCodeAt(i) + 7) ^ 0x1A);
+        }
+        const encodedVid = encodedArr.join(',');
+        
+        const token = localStorage.getItem('access_token') || '';
+        const protocolUrl = `mediaplayer://loginyoutube?vid=${encodedVid}&token=${token}&lesson=${lessonId}&api=${encodeURIComponent(API)}`;
+        
+        window.location.href = protocolUrl;
+    };
+
     return (
         <div className="lv-screen lv-video-screen" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
             <div className="lv-video-lock">
                 <div className="lv-lock-icon-wrap"><HiOutlineLockClosed /></div>
                 <h2>أمان المحتوى مفعل</h2>
                 <p>شغل الفيديو من تطبيق Key Academy للابتوب أو الحاسبة حتى تضمن تفهم الدرس بأعلى جودة وبدون تقطيع.</p>
-                <button className="premium-btn exact-btn-pink lv-lock-btn" onClick={() => alert('يرجى فتح التطبيق المكتبي لمشاهدة الفيديو')}>افتح بالتطبيق هسة</button>
+                <button className="premium-btn exact-btn-pink lv-lock-btn" onClick={handleLaunchApp}>افتح بالتطبيق هسة</button>
             </div>
 
             <div style={{ display: 'flex', justifyContent: 'center' }}>
@@ -1054,7 +1081,7 @@ const LessonViewer = () => {
                     {/* Portal */}
                     <div className={`lv-portal cv-super-glass ${activeContent === 'slides' ? 'free-ratio' : ''}`}>
                         <AnimatePresence mode="wait">
-                            {activeContent === 'video' && <motion.div key="v" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="lv-portal-inner"><ViewVideo videoUrl={lessonInfo?.video_url} isCompleted={lessonInfo?.is_completed} onComplete={handleMarkComplete} /></motion.div>}
+                            {activeContent === 'video' && <motion.div key="v" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="lv-portal-inner"><ViewVideo videoUrl={lessonInfo?.video_url} lessonId={lessonId} isCompleted={lessonInfo?.is_completed} onComplete={handleMarkComplete} /></motion.div>}
                             {activeContent === 'slides' && <motion.div key="s" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="lv-portal-inner"><ViewSlides lessonInfo={lessonInfo} /></motion.div>}
                             {activeContent === 'quiz' && <motion.div key="q" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="lv-portal-inner"><ViewQuiz lessonId={lessonId} /></motion.div>}
                         </AnimatePresence>
