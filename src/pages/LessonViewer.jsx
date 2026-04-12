@@ -19,7 +19,8 @@ import {
     HiOutlineArrowPath,
     HiOutlineBeaker,
     HiOutlineCheckCircle,
-    HiOutlineNoSymbol
+    HiOutlineNoSymbol,
+    HiOutlineXMark
 } from 'react-icons/hi2'
 import { HiHeart, HiCheckCircle } from 'react-icons/hi'
 import ParticleBackground from '../components/ParticleBackground'
@@ -167,9 +168,9 @@ const ViewSlides = ({ lessonInfo }) => {
             <div className="lv-sf-bar" style={{ padding: '15px 20px', background: 'rgba(0,0,0,0.2)', borderBottom: '1px solid var(--border-glass)' }}>
                 <span className="lv-sf-bar-title" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><HiOutlineDocumentText /> ملزمة وسلايدات الدرس</span>
             </div>
-            <div className="lv-sf-viewer" style={{ flex: 1, padding: 0, height: '100%' }}>
+            <div className="lv-sf-viewer" style={{ flex: 1, padding: 0, height: '100%', position: 'relative' }} onContextMenu={(e) => e.preventDefault()}>
                 <iframe
-                    src={lessonInfo.doc_file}
+                    src={`${lessonInfo.doc_file}#toolbar=0&navpanes=0&scrollbar=0`}
                     style={{ width: '100%', height: '100%', minHeight: '600px', border: 'none', backgroundColor: '#fff', borderRadius: '0 0 16px 16px' }}
                     title="مستندات الدرس"
                 />
@@ -727,12 +728,18 @@ const TabGroup = ({ courseId, userData, lessonId }) => {
 
 const TabDocs = ({ lessonInfo, courseId }) => {
     const [courseDocs, setCourseDocs] = useState([])
+    const [viewedDoc, setViewedDoc] = useState(null)
+
     useEffect(() => {
-        if (courseId) {
-            const t = localStorage.getItem('access_token')
-            fetch(`${API}/api/courses/${courseId}/`, { headers: { 'Authorization': `Bearer ${t}` } })
-                .then(r => r.json()).then(d => setCourseDocs(d.ministerial_docs || []))
-        }
+        if (!courseId) return
+        fetch(`${API}/api/courses/${courseId}/`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.ministerial_docs) {
+                    setCourseDocs(data.ministerial_docs)
+                }
+            })
+            .catch(console.error)
     }, [courseId])
 
     const getExt = (url) => url ? url.split('?')[0].split('.').pop().toUpperCase() : 'DOC'
@@ -755,10 +762,49 @@ const TabDocs = ({ lessonInfo, courseId }) => {
                             <strong>{doc.name}</strong>
                             <span>{doc.type} • {doc.size}</span>
                         </div>
-                        <button className="lv-doc-dl" style={{ color: doc.color }} onClick={() => window.open(doc.url, '_blank')}>تحميل</button>
+                        <button className="lv-doc-dl" style={{ color: doc.color, border: `1px solid ${doc.color}`, background: 'transparent' }} onClick={() => setViewedDoc(doc)}>عرض الملف</button>
                     </div>
                 ))}
             </div>
+
+            {/* Secure PDF Viewer Modal inside TabDocs */}
+            <AnimatePresence>
+                {viewedDoc && (
+                    <motion.div
+                        style={{ position: 'fixed', inset: 0, zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(10px)' }}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        onClick={() => setViewedDoc(null)}
+                    >
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                            onClick={e => e.stopPropagation()}
+                            style={{ width: '95%', height: '95%', maxWidth: '1200px', background: '#fff', borderRadius: '20px', overflow: 'hidden', position: 'relative', display: 'flex', flexDirection: 'column', boxShadow: '0 20px 60px rgba(0,0,0,0.5)' }}
+                        >
+                            <div style={{ padding: '16px 24px', background: '#0f172a', color: 'white', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexShrink: 0 }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                    <HiOutlineDocumentText size={22} style={{ color: 'var(--purple-light)' }} />
+                                    <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 600 }}>{viewedDoc.name || 'مستند الدورة'}</h3>
+                                </div>
+                                <button onClick={() => setViewedDoc(null)} style={{ background: 'rgba(255,255,255,0.1)', border: 'none', color: 'white', cursor: 'pointer', display: 'flex', padding: '6px', borderRadius: '50%', transition: 'background 0.3s' }} onMouseOver={e => e.currentTarget.style.background = 'rgba(255,255,255,0.2)'} onMouseOut={e => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'}>
+                                    <HiOutlineXMark size={24} />
+                                </button>
+                            </div>
+                            <div style={{ flex: 1, position: 'relative', backgroundColor: '#e2e8f0' }} onContextMenu={(e) => e.preventDefault()}>
+                                <iframe 
+                                    src={`${viewedDoc.url}#toolbar=0&navpanes=0&scrollbar=0`}
+                                    style={{ width: '100%', height: '100%', border: 'none', display: 'block' }}
+                                    title={viewedDoc.name}
+                                />
+                                <div style={{ position: 'absolute', top: 0, right: 0, bottom: 0, left: 0, pointerEvents: 'none', boxShadow: 'inset 0 0 0 1px rgba(0,0,0,0.05)' }}></div>
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div>
     )
 }

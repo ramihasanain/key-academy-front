@@ -31,6 +31,7 @@ const CourseViewer = () => {
     const [expandedDocModule, setExpandedDocModule] = useState(null)
     const [scrolled, setScrolled] = useState(false)
     const [showLoginPrompt, setShowLoginPrompt] = useState(false)
+    const [viewedDoc, setViewedDoc] = useState(null) // State for Secure PDF Viewer
 
     useEffect(() => {
         // Fetch real data from backend
@@ -83,10 +84,10 @@ const CourseViewer = () => {
         }
     }
 
-    const handleDownload = (e, url, name) => {
+    const handleViewDoc = (e, url, name) => {
         if (e) e.stopPropagation()
         if (url) {
-            window.open(url, '_blank')
+            setViewedDoc({ url, name })
         } else {
             alert(`سيتم إضافة ${name} قريباً ⏳`)
         }
@@ -301,11 +302,11 @@ const CourseViewer = () => {
                                 <div className="cv-docs-top-banner">
                                     <div className="cv-docs-banner-text">
                                         <h2>ملازم ومستندات الدورة</h2>
-                                        <p>تكدر تنزل كل الملازم بضغطة وحدة، أو تنزلها وحدة وحدة حسب الدرس.</p>
+                                        <p>تكدر تتصفح وتقرأ كل الملازم والملخصات مباشرة من داخل المنصة وبدون تحميل.</p>
                                     </div>
-                                    <button className="cv-btn-massive-gradient" onClick={(e) => handleDownload(e, null, 'ملازم المادة كاملة')}>
-                                        <HiOutlineArrowDownTray className="massive-icon" />
-                                        <span>نزل كل الملازم</span>
+                                    <button className="cv-btn-massive-gradient" onClick={(e) => handleViewDoc(e, null, 'ملازم المادة كاملة')}>
+                                        <HiOutlineDocumentText className="massive-icon" />
+                                        <span>تصفح كل الملازم</span>
                                     </button>
                                 </div>
 
@@ -320,8 +321,8 @@ const CourseViewer = () => {
                                                         <h3>{mod.title}</h3>
                                                     </div>
                                                     <div className="cv-folder-right">
-                                                        <button className="cv-btn-sleek" onClick={(e) => handleDownload(e, null, `ملزمة ${mod.title}`)}>
-                                                            نزل ملزمة الوحدة
+                                                        <button className="cv-btn-sleek" onClick={(e) => handleViewDoc(e, null, `ملزمة ${mod.title}`)}>
+                                                            عرض ملزمة الوحدة
                                                         </button>
                                                         <HiOutlineChevronDown className={`cv-chev-icon ${isExpanded ? 'rotated' : ''}`} />
                                                     </div>
@@ -339,8 +340,8 @@ const CourseViewer = () => {
                                                                             <span>ملف PDF • الحجم: {lesson.doc_size || '1.5MB'}</span>
                                                                         </div>
                                                                     </div>
-                                                                    <button className="cv-btn-download-circle" onClick={(e) => handleDownload(e, lesson.doc_file, lesson.title)}>
-                                                                        <HiOutlineArrowDownTray />
+                                                                    <button className="cv-btn-download-circle" title="عرض الملف" onClick={(e) => handleViewDoc(e, lesson.doc_file, lesson.title)}>
+                                                                        <HiOutlineDocumentText />
                                                                     </button>
                                                                 </div>
                                                             ))}
@@ -379,8 +380,8 @@ const CourseViewer = () => {
                                             <h3 className="cv-min-title">{doc.title}</h3>
                                             <p className="cv-min-desc">أسئلة وزارية كاملة وية الأجوبة النموذجية مالتها بصيغة {doc.doc_type || 'PDF'}.</p>
 
-                                            <button className="cv-btn-min-download" onClick={(e) => handleDownload(e, doc.file, doc.title)}>
-                                                <HiOutlineArrowDownTray /> نزل الأسئلة
+                                            <button className="cv-btn-min-download" onClick={(e) => handleViewDoc(e, doc.file, doc.title)}>
+                                                <HiOutlineDocumentText /> تصفح الأسئلة
                                             </button>
                                         </motion.div>
                                     ))
@@ -425,6 +426,46 @@ const CourseViewer = () => {
                                 <button onClick={() => setShowLoginPrompt(false)} style={{ padding: '12px 24px', background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.6)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)', cursor: 'pointer', fontSize: '0.9rem' }}>
                                     بعدين
                                 </button>
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* Secure PDF Viewer Modal */}
+            <AnimatePresence>
+                {viewedDoc && (
+                    <motion.div
+                        style={{ position: 'fixed', inset: 0, zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(10px)' }}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        onClick={() => setViewedDoc(null)}
+                    >
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                            onClick={e => e.stopPropagation()}
+                            style={{ width: '95%', height: '95%', maxWidth: '1200px', background: '#fff', borderRadius: '20px', overflow: 'hidden', position: 'relative', display: 'flex', flexDirection: 'column', boxShadow: '0 20px 60px rgba(0,0,0,0.5)' }}
+                        >
+                            <div style={{ padding: '16px 24px', background: '#0f172a', color: 'white', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexShrink: 0 }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                    <HiOutlineDocumentText size={22} style={{ color: 'var(--purple-light)' }} />
+                                    <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 600 }}>{viewedDoc.name || 'مستند الدورة'}</h3>
+                                </div>
+                                <button onClick={() => setViewedDoc(null)} style={{ background: 'rgba(255,255,255,0.1)', border: 'none', color: 'white', cursor: 'pointer', display: 'flex', padding: '6px', borderRadius: '50%', transition: 'background 0.3s' }} onMouseOver={e => e.currentTarget.style.background = 'rgba(255,255,255,0.2)'} onMouseOut={e => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'}>
+                                    <HiOutlineXMark size={24} />
+                                </button>
+                            </div>
+                            <div style={{ flex: 1, position: 'relative', backgroundColor: '#e2e8f0' }} onContextMenu={(e) => e.preventDefault()}>
+                                <iframe 
+                                    src={`${viewedDoc.url}#toolbar=0&navpanes=0&scrollbar=0`}
+                                    style={{ width: '100%', height: '100%', border: 'none', display: 'block' }}
+                                    title={viewedDoc.name}
+                                />
+                                {/* Security Overlay to prevent right-click interactions where possible */}
+                                <div style={{ position: 'absolute', top: 0, right: 0, bottom: 0, left: 0, pointerEvents: 'none', boxShadow: 'inset 0 0 0 1px rgba(0,0,0,0.05)' }}></div>
                             </div>
                         </motion.div>
                     </motion.div>
