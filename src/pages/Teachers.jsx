@@ -25,6 +25,12 @@ const fadeInUp = {
     visible: (i = 0) => ({ opacity: 1, y: 0, transition: { duration: 0.5, delay: i * 0.08 } })
 }
 
+const EiffelTowerIcon = () => (
+    <svg viewBox="0 0 512 512" fill="currentColor" height="1.1em" width="1.1em" style={{ transform: 'translateY(1px)' }} xmlns="http://www.w3.org/2000/svg">
+        <path d="M344.2 384h-44.5c-4.4-23.7-16-46.8-31.2-64h-25c-15.1 17.2-26.7 40.3-31.2 64h-44.5c5.3-35.8 21.6-67.4 46.8-87.1l-14-68.5c-6.8-33.1 3-64.4 20-83.3V44.8c0-15.3 12.4-27.8 27.8-27.8 15.3 0 27.8 12.4 27.8 27.8v100.2c16.9 18.9 26.8 50.2 20 83.3l-14 68.5c25.2 19.7 41.5 51.3 46.8 87.1z M256 182.9c-11.8 0-19.1 16.3-21.7 39.5l10.9 53.6h21.6l10.9-53.6c-2.6-23.2-9.9-39.5-21.7-39.5z M256 22.2c-12.5 0-22.6 10.1-22.6 22.6v94.5c4-3.5 12.6-7.8 22.6-7.8s18.6 4.3 22.6 7.8V44.8c0-12.5-10.1-22.6-22.6-22.6z M381.7 448h-74.8c7.3 20.2 11.2 41.8 11.2 64h44.5c0-43.5 11.1-71.1 19.1-85.5zm-176.6 0h-74.8c7.9 14.4 19.1 42 19.1 85.5h44.5c0-22.2 3.9-43.8 11.2-64zm82.8 0h-63.8c-2.4 21.4-8.8 45.4-29.4 64h122.5c-20.6-18.6-27-42.6-29.3-64z" />
+    </svg>
+)
+
 const Teachers = () => {
     const [allTeachers, setAllTeachers] = useState([])
     const [loading, setLoading] = useState(true)
@@ -68,7 +74,7 @@ const Teachers = () => {
         { id: 'اللغة الانجليزية', name: 'الانجليزية', icon: <HiOutlineLanguage /> },
         { id: 'الأحياء', name: 'الأحياء', icon: <HiOutlineCubeTransparent /> },
         { id: 'اللغة العربية', name: 'العربية', icon: <HiOutlineBookOpen /> },
-        { id: 'اللغة الفرنسية', name: 'الفرنسية', icon: <HiOutlineGlobeAlt /> },
+        { id: 'اللغة الفرنسية', name: 'الفرنسية', icon: <EiffelTowerIcon /> },
     ];
 
     return (
