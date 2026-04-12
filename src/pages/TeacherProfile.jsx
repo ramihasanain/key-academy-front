@@ -102,20 +102,7 @@ const TeacherProfile = () => {
                                         <p>{teacher.bio}</p>
                                     </motion.div>
 
-                                    {/* Education Timeline */}
-                                    <motion.div className="cv-section" variants={fadeInUp}>
-                                        <h3 className="cv-section-title"><FaGraduationCap className="cv-title-icon text-blue" /> شهاداته</h3>
-                                        <div className="cv-timeline">
-                                            {teacher.education.map((item, i) => (
-                                                <div key={i} className="cv-timeline-item">
-                                                    <div className={`cv-timeline-dot color-${teacher.color}`} style={teacher.color?.startsWith('#') ? { borderColor: teacher.color } : {}}></div>
-                                                    <div className={`glass-card cv-timeline-content color-${teacher.color}`} style={teacher.color?.startsWith('#') ? { background: teacher.color, borderColor: 'transparent', color: 'white' } : {}}>
-                                                        <p>{item}</p>
-                                                    </div>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </motion.div>
+
 
                                     {/* Experience Timeline */}
                                     <motion.div className="cv-section" variants={fadeInUp}>

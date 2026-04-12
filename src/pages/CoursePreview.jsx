@@ -215,12 +215,7 @@ const CoursePreview = () => {
                                 </div>
                             </div>
 
-                            <div className="hero-stats-row">
-                                <div className="h-stat">
-                                    <HiOutlineClock className="stat-icn" />
-                                    <span>{course.total_hours} محتوى تفاعلي</span>
-                                </div>
-                            </div>
+
                         </div>
                     </motion.div>
 
