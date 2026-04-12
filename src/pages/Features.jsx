@@ -74,7 +74,7 @@ const Features = () => {
                 <div className="container" style={{ position: 'relative', zIndex: 2 }}>
                     <div className="ai-spatial-header">
                         <SectionTitle 
-                            title="تعرف على Key.. زميلك ومرشدك الذكي!" 
+                            title="تعرف على Key.. زميلك الذكي!" 
                             subtitle="Key هو رفيقك الدراسي بالمنصة، راح يساعدك ويختبرك ويشرحلك ويلخصلك المادة درس درس بناء على طريقة شرح الأستاذ" 
                         />
                     </div>
