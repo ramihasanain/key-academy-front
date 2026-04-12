@@ -735,7 +735,7 @@ const TabDocs = ({ lessonInfo, courseId }) => {
         }
     }, [courseId])
 
-    const getExt = (url) => url ? url.split('.').pop().toUpperCase() : 'DOC'
+    const getExt = (url) => url ? url.split('?')[0].split('.').pop().toUpperCase() : 'DOC'
     let docsList = []
     if (lessonInfo?.doc_file) {
         docsList.push({ name: 'ملزمة الدرس الحالية', url: lessonInfo.doc_file, size: 'ملف PDF', type: getExt(lessonInfo.doc_file), color: '#dc2626', icon: '📄' })
