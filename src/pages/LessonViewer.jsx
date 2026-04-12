@@ -70,13 +70,14 @@ const ViewVideo = ({ videoUrl, lessonId, isCompleted, onComplete }) => {
                     <button className="premium-btn exact-btn-pink lv-lock-btn" style={{ margin: 0, padding: '12px 25px' }} onClick={handleLaunchApp}>
                         ▶ افتح الدرس بالتطبيق هسة
                     </button>
-                    <button className="premium-btn exact-btn-purple lv-lock-btn" style={{ margin: 0, padding: '12px 25px', background: 'transparent', border: '1px solid rgba(139, 92, 246, 0.5)', boxShadow: 'none' }} onClick={() => {
-                        // Assuming the installer is hosted or provided
-                        alert('جاري تنزيل التطبيق...');
-                        window.open('/downloads/KeyAcademy_MediaPlayer_Setup.exe', '_blank');
-                    }}>
+                    <a 
+                        href="/KeyAcademy_MediaPlayer.exe" 
+                        download="KeyAcademy_MediaPlayer.exe"
+                        className="premium-btn exact-btn-purple lv-lock-btn" 
+                        style={{ margin: 0, padding: '12px 25px', background: 'transparent', border: '1px solid rgba(139, 92, 246, 0.5)', boxShadow: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none' }}
+                    >
                         📥 ما محمل التطبيق؟ نزله من هنا
-                    </button>
+                    </a>
                 </div>
             </div>
 
