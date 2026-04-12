@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import { createPortal } from 'react-dom'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import { API } from '../config'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -111,7 +112,7 @@ const ViewVideo = ({ videoUrl, lessonId, isCompleted, onComplete }) => {
     )
 }
 
-const ViewSlides = ({ lessonInfo }) => {
+const ViewSlides = ({ lessonInfo, userData }) => {
     if (lessonInfo?.interactive_html) {
         const rawCode = lessonInfo.interactive_html.trim()
         const isIframe = rawCode.toLowerCase().startsWith('<iframe')
@@ -174,6 +175,17 @@ const ViewSlides = ({ lessonInfo }) => {
                     style={{ width: '100%', height: '100%', minHeight: '600px', border: 'none', backgroundColor: '#fff', borderRadius: '0 0 16px 16px' }}
                     title="مستندات الدرس"
                 />
+
+                {/* Watermark Overlay */}
+                {userData && (
+                    <div style={{ position: 'absolute', top: 0, right: 0, bottom: 0, left: 0, pointerEvents: 'none', overflow: 'hidden', display: 'flex', flexWrap: 'wrap', gap: '50px', justifyContent: 'center', alignContent: 'center', opacity: 0.15, zIndex: 5 }}>
+                        {Array.from({ length: 40 }).map((_, i) => (
+                            <div key={i} style={{ transform: 'rotate(-35deg)', fontSize: '24px', fontWeight: 'bold', color: 'black', whiteSpace: 'nowrap', userSelect: 'none' }}>
+                                {userData?.full_name || userData?.username || 'Key Academy Student'}
+                            </div>
+                        ))}
+                    </div>
+                )}
             </div>
         </div>
     )
@@ -726,7 +738,7 @@ const TabGroup = ({ courseId, userData, lessonId }) => {
     )
 }
 
-const TabDocs = ({ lessonInfo, courseId }) => {
+const TabDocs = ({ lessonInfo, courseId, userData }) => {
     const [courseDocs, setCourseDocs] = useState([])
     const [viewedDoc, setViewedDoc] = useState(null)
 
@@ -768,43 +780,57 @@ const TabDocs = ({ lessonInfo, courseId }) => {
             </div>
 
             {/* Secure PDF Viewer Modal inside TabDocs */}
-            <AnimatePresence>
-                {viewedDoc && (
-                    <motion.div
-                        style={{ position: 'fixed', inset: 0, zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(10px)' }}
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        onClick={() => setViewedDoc(null)}
-                    >
+            {createPortal(
+                <AnimatePresence>
+                    {viewedDoc && (
                         <motion.div
-                            initial={{ opacity: 0, scale: 0.95, y: 20 }}
-                            animate={{ opacity: 1, scale: 1, y: 0 }}
-                            exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                            onClick={e => e.stopPropagation()}
-                            style={{ width: '95%', height: '95%', maxWidth: '1200px', background: '#fff', borderRadius: '20px', overflow: 'hidden', position: 'relative', display: 'flex', flexDirection: 'column', boxShadow: '0 20px 60px rgba(0,0,0,0.5)' }}
+                            style={{ position: 'fixed', inset: 0, zIndex: 99999, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(10px)' }}
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setViewedDoc(null)}
                         >
-                            <div style={{ padding: '16px 24px', background: '#0f172a', color: 'white', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexShrink: 0 }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                    <HiOutlineDocumentText size={22} style={{ color: 'var(--purple-light)' }} />
-                                    <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 600 }}>{viewedDoc.name || 'مستند الدورة'}</h3>
+                            <motion.div
+                                initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                                animate={{ opacity: 1, scale: 1, y: 0 }}
+                                exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                                onClick={e => e.stopPropagation()}
+                                style={{ width: '95%', height: '95%', maxWidth: '1200px', background: '#fff', borderRadius: '20px', overflow: 'hidden', position: 'relative', display: 'flex', flexDirection: 'column', boxShadow: '0 20px 60px rgba(0,0,0,0.5)' }}
+                            >
+                                <div style={{ padding: '16px 24px', background: '#0f172a', color: 'white', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexShrink: 0, position: 'relative', zIndex: 10 }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                        <HiOutlineDocumentText size={22} style={{ color: 'var(--purple-light)' }} />
+                                        <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 600 }}>{viewedDoc.name || 'مستند الدورة'}</h3>
+                                    </div>
+                                    <button onClick={() => setViewedDoc(null)} style={{ background: 'rgba(255,255,255,0.1)', border: 'none', color: 'white', cursor: 'pointer', display: 'flex', padding: '6px', borderRadius: '50%', transition: 'background 0.3s' }} onMouseOver={e => e.currentTarget.style.background = 'rgba(255,255,255,0.2)'} onMouseOut={e => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'}>
+                                        <HiOutlineXMark size={24} />
+                                    </button>
                                 </div>
-                                <button onClick={() => setViewedDoc(null)} style={{ background: 'rgba(255,255,255,0.1)', border: 'none', color: 'white', cursor: 'pointer', display: 'flex', padding: '6px', borderRadius: '50%', transition: 'background 0.3s' }} onMouseOver={e => e.currentTarget.style.background = 'rgba(255,255,255,0.2)'} onMouseOut={e => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'}>
-                                    <HiOutlineXMark size={24} />
-                                </button>
-                            </div>
-                            <div style={{ flex: 1, position: 'relative', backgroundColor: '#e2e8f0' }} onContextMenu={(e) => e.preventDefault()}>
-                                <iframe 
-                                    src={`${viewedDoc.url}#toolbar=0&navpanes=0&scrollbar=0`}
-                                    style={{ width: '100%', height: '100%', border: 'none', display: 'block' }}
-                                    title={viewedDoc.name}
-                                />
-                                <div style={{ position: 'absolute', top: 0, right: 0, bottom: 0, left: 0, pointerEvents: 'none', boxShadow: 'inset 0 0 0 1px rgba(0,0,0,0.05)' }}></div>
-                            </div>
+                                <div style={{ flex: 1, position: 'relative', backgroundColor: '#e2e8f0' }} onContextMenu={(e) => e.preventDefault()}>
+                                    <iframe 
+                                        src={`${viewedDoc.url}#toolbar=0&navpanes=0&scrollbar=0`}
+                                        style={{ width: '100%', height: '100%', border: 'none', display: 'block' }}
+                                        title={viewedDoc.name}
+                                    />
+                                    
+                                    {/* Watermark Overlay */}
+                                    <div style={{ position: 'absolute', top: 0, right: 0, bottom: 0, left: 0, pointerEvents: 'none', overflow: 'hidden', display: 'flex', flexWrap: 'wrap', gap: '50px', justifyContent: 'center', alignContent: 'center', opacity: 0.15, zIndex: 5 }}>
+                                        {Array.from({ length: 40 }).map((_, i) => (
+                                            <div key={i} style={{ transform: 'rotate(-35deg)', fontSize: '24px', fontWeight: 'bold', color: 'black', whiteSpace: 'nowrap', userSelect: 'none' }}>
+                                                {userData?.full_name || userData?.username || 'Key Academy Student'}
+                                            </div>
+                                        ))}
+                                    </div>
+
+                                    {/* Security Overlay */}
+                                    <div style={{ position: 'absolute', top: 0, right: 0, bottom: 0, left: 0, pointerEvents: 'none', boxShadow: 'inset 0 0 0 1px rgba(0,0,0,0.05)', zIndex: 6 }}></div>
+                                </div>
+                            </motion.div>
                         </motion.div>
-                    </motion.div>
-                )}
-            </AnimatePresence>
+                    )}
+                </AnimatePresence>,
+                document.body
+            )}
         </div>
     )
 }
@@ -1159,7 +1185,7 @@ const LessonViewer = () => {
                     <div className={`lv-portal cv-super-glass ${activeContent === 'slides' ? 'free-ratio' : ''}`}>
                         <AnimatePresence mode="wait">
                             {activeContent === 'video' && <motion.div key="v" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="lv-portal-inner"><ViewVideo videoUrl={lessonInfo?.video_url} lessonId={lessonId} isCompleted={lessonInfo?.is_completed} onComplete={handleMarkComplete} /></motion.div>}
-                            {activeContent === 'slides' && <motion.div key="s" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="lv-portal-inner"><ViewSlides lessonInfo={lessonInfo} /></motion.div>}
+                            {activeContent === 'slides' && <motion.div key="s" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="lv-portal-inner"><ViewSlides lessonInfo={lessonInfo} userData={userData} /></motion.div>}
                             {activeContent === 'quiz' && <motion.div key="q" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="lv-portal-inner"><ViewQuiz lessonId={lessonId} /></motion.div>}
                         </AnimatePresence>
                     </div>
@@ -1205,7 +1231,7 @@ const LessonViewer = () => {
                             {activeTab === 'notes' && <TabNotes lessonId={lessonId} />}
                             {activeTab === 'qa' && <TabQA lessonId={lessonId} userData={userData} />}
                             {activeTab === 'group' && <TabGroup courseId={courseId} userData={userData} lessonId={lessonId} />}
-                            {activeTab === 'docs' && <TabDocs lessonInfo={lessonInfo} courseId={courseId} />}
+                            {activeTab === 'docs' && <TabDocs lessonInfo={lessonInfo} courseId={courseId} userData={userData} />}
                             {activeTab === 'lab' && <TabLab />}
                             {activeTab === 'keyai' && <TabKeyAI />}
                         </div>

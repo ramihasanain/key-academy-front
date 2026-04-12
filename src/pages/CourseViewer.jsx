@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import { Link, useParams, useNavigate } from 'react-router-dom'
 import { API } from '../config'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -32,10 +33,21 @@ const CourseViewer = () => {
     const [scrolled, setScrolled] = useState(false)
     const [showLoginPrompt, setShowLoginPrompt] = useState(false)
     const [viewedDoc, setViewedDoc] = useState(null) // State for Secure PDF Viewer
+    const [userData, setUserData] = useState(null)
 
     useEffect(() => {
+        const token = localStorage.getItem('access_token')
+        if (token && token !== 'undefined' && token !== 'null') {
+            fetch(API + '/api/auth/me/', { headers: { 'Authorization': `Bearer ${token}` } })
+                .then(res => res.json())
+                .then(d => setUserData(d))
+                .catch(console.error)
+        }
+
         // Fetch real data from backend
-        fetch(`${API}/api/courses/${courseId || 1}/`)
+        fetch(`${API}/api/courses/${courseId || 1}/`, {
+            headers: token && token !== 'undefined' && token !== 'null' ? { 'Authorization': `Bearer ${token}` } : {}
+        })
             .then(res => res.json())
             .then(data => {
                 setCourseData(data)
@@ -433,44 +445,59 @@ const CourseViewer = () => {
             </AnimatePresence>
 
             {/* Secure PDF Viewer Modal */}
-            <AnimatePresence>
-                {viewedDoc && (
-                    <motion.div
-                        style={{ position: 'fixed', inset: 0, zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(10px)' }}
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        onClick={() => setViewedDoc(null)}
-                    >
+            {createPortal(
+                <AnimatePresence>
+                    {viewedDoc && (
                         <motion.div
-                            initial={{ opacity: 0, scale: 0.95, y: 20 }}
-                            animate={{ opacity: 1, scale: 1, y: 0 }}
-                            exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                            onClick={e => e.stopPropagation()}
-                            style={{ width: '95%', height: '95%', maxWidth: '1200px', background: '#fff', borderRadius: '20px', overflow: 'hidden', position: 'relative', display: 'flex', flexDirection: 'column', boxShadow: '0 20px 60px rgba(0,0,0,0.5)' }}
+                            style={{ position: 'fixed', inset: 0, zIndex: 99999, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(10px)' }}
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setViewedDoc(null)}
                         >
-                            <div style={{ padding: '16px 24px', background: '#0f172a', color: 'white', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexShrink: 0 }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                    <HiOutlineDocumentText size={22} style={{ color: 'var(--purple-light)' }} />
-                                    <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 600 }}>{viewedDoc.name || 'مستند الدورة'}</h3>
+                            <motion.div
+                                initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                                animate={{ opacity: 1, scale: 1, y: 0 }}
+                                exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                                onClick={e => e.stopPropagation()}
+                                style={{ width: '95%', height: '95%', maxWidth: '1200px', background: '#fff', borderRadius: '20px', overflow: 'hidden', position: 'relative', display: 'flex', flexDirection: 'column', boxShadow: '0 20px 60px rgba(0,0,0,0.5)' }}
+                            >
+                                <div style={{ padding: '16px 24px', background: '#0f172a', color: 'white', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexShrink: 0, position: 'relative', zIndex: 10 }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                        <HiOutlineDocumentText size={22} style={{ color: 'var(--purple-light)' }} />
+                                        <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 600 }}>{viewedDoc.name || 'مستند الدورة'}</h3>
+                                    </div>
+                                    <button onClick={() => setViewedDoc(null)} style={{ background: 'rgba(255,255,255,0.1)', border: 'none', color: 'white', cursor: 'pointer', display: 'flex', padding: '6px', borderRadius: '50%', transition: 'background 0.3s' }} onMouseOver={e => e.currentTarget.style.background = 'rgba(255,255,255,0.2)'} onMouseOut={e => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'}>
+                                        <HiOutlineXMark size={24} />
+                                    </button>
                                 </div>
-                                <button onClick={() => setViewedDoc(null)} style={{ background: 'rgba(255,255,255,0.1)', border: 'none', color: 'white', cursor: 'pointer', display: 'flex', padding: '6px', borderRadius: '50%', transition: 'background 0.3s' }} onMouseOver={e => e.currentTarget.style.background = 'rgba(255,255,255,0.2)'} onMouseOut={e => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'}>
-                                    <HiOutlineXMark size={24} />
-                                </button>
-                            </div>
-                            <div style={{ flex: 1, position: 'relative', backgroundColor: '#e2e8f0' }} onContextMenu={(e) => e.preventDefault()}>
-                                <iframe 
-                                    src={`${viewedDoc.url}#toolbar=0&navpanes=0&scrollbar=0`}
-                                    style={{ width: '100%', height: '100%', border: 'none', display: 'block' }}
-                                    title={viewedDoc.name}
-                                />
-                                {/* Security Overlay to prevent right-click interactions where possible */}
-                                <div style={{ position: 'absolute', top: 0, right: 0, bottom: 0, left: 0, pointerEvents: 'none', boxShadow: 'inset 0 0 0 1px rgba(0,0,0,0.05)' }}></div>
-                            </div>
+                                <div style={{ flex: 1, position: 'relative', backgroundColor: '#e2e8f0' }} onContextMenu={(e) => e.preventDefault()}>
+                                    <iframe 
+                                        src={`${viewedDoc.url}#toolbar=0&navpanes=0&scrollbar=0`}
+                                        style={{ width: '100%', height: '100%', border: 'none', display: 'block' }}
+                                        title={viewedDoc.name}
+                                    />
+
+                                    {/* Watermark Overlay */}
+                                    {userData && (
+                                        <div style={{ position: 'absolute', top: 0, right: 0, bottom: 0, left: 0, pointerEvents: 'none', overflow: 'hidden', display: 'flex', flexWrap: 'wrap', gap: '50px', justifyContent: 'center', alignContent: 'center', opacity: 0.15, zIndex: 5 }}>
+                                            {Array.from({ length: 40 }).map((_, i) => (
+                                                <div key={i} style={{ transform: 'rotate(-35deg)', fontSize: '24px', fontWeight: 'bold', color: 'black', whiteSpace: 'nowrap', userSelect: 'none' }}>
+                                                    {userData?.full_name || userData?.username || 'Key Academy Student'}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+
+                                    {/* Security Overlay to prevent right-click interactions where possible */}
+                                    <div style={{ position: 'absolute', top: 0, right: 0, bottom: 0, left: 0, pointerEvents: 'none', boxShadow: 'inset 0 0 0 1px rgba(0,0,0,0.05)', zIndex: 6 }}></div>
+                                </div>
+                            </motion.div>
                         </motion.div>
-                    </motion.div>
-                )}
-            </AnimatePresence>
+                    )}
+                </AnimatePresence>,
+                document.body
+            )}
         </div>
     )
 }
