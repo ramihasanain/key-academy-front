@@ -62,10 +62,22 @@ const ViewVideo = ({ videoUrl, lessonId, isCompleted, onComplete }) => {
     return (
         <div className="lv-screen lv-video-screen" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
             <div className="lv-video-lock">
+                <img src="/key-icon-logo.png" alt="Key Academy Logo" style={{ width: '90px', height: '90px', objectFit: 'contain', margin: '0 auto 15px', display: 'block', dropShadow: '0 0 15px rgba(255,255,255,0.2)' }} />
                 <div className="lv-lock-icon-wrap"><HiOutlineLockClosed /></div>
                 <h2>أمان المحتوى مفعل</h2>
                 <p>شغل الفيديو من تطبيق Key Academy للابتوب أو الحاسبة حتى تضمن تفهم الدرس بأعلى جودة وبدون تقطيع.</p>
-                <button className="premium-btn exact-btn-pink lv-lock-btn" onClick={handleLaunchApp}>افتح بالتطبيق هسة</button>
+                <div style={{ display: 'flex', gap: '15px', justifyContent: 'center', marginTop: '20px', flexWrap: 'wrap' }}>
+                    <button className="premium-btn exact-btn-pink lv-lock-btn" style={{ margin: 0, padding: '12px 25px' }} onClick={handleLaunchApp}>
+                        ▶ افتح الدرس بالتطبيق هسة
+                    </button>
+                    <button className="premium-btn exact-btn-purple lv-lock-btn" style={{ margin: 0, padding: '12px 25px', background: 'transparent', border: '1px solid rgba(139, 92, 246, 0.5)', boxShadow: 'none' }} onClick={() => {
+                        // Assuming the installer is hosted or provided
+                        alert('جاري تنزيل التطبيق...');
+                        window.open('/downloads/KeyAcademy_MediaPlayer_Setup.exe', '_blank');
+                    }}>
+                        📥 ما محمل التطبيق؟ نزله من هنا
+                    </button>
+                </div>
             </div>
 
             <div style={{ display: 'flex', justifyContent: 'center' }}>
