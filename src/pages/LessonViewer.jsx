@@ -56,7 +56,12 @@ const ViewVideo = ({ videoUrl, lessonId, isCompleted, onComplete }) => {
         const token = localStorage.getItem('access_token') || '';
         const protocolUrl = `mediaplayer://loginyoutube?vid=${encodedVid}&token=${token}&lesson=${lessonId}&api=${encodeURIComponent(API)}`;
         
-        window.location.href = protocolUrl;
+        // Use an iframe to try launching without disrupting the current page, and avoid multiple clicks failing
+        const iframe = document.createElement('iframe');
+        iframe.style.display = 'none';
+        iframe.src = protocolUrl;
+        document.body.appendChild(iframe);
+        setTimeout(() => document.body.removeChild(iframe), 1500);
     };
 
     return (
