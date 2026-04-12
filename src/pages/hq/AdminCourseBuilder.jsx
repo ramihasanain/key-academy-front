@@ -168,7 +168,11 @@ export const AdminCourseBuilder = ({ id }) => {
         const newMods = [...modules]
         newMods[mIndex].lessons.push({
             localId: Date.now(), title: '', video_url: '', cover_image: '', order: newMods[mIndex].lessons.length + 1, is_locked: true,
-            interactive_html: '', lesson_text: '', virtual_lab_slug: '', doc_file: null, showAdvanced: true, quizzes: [], json_data: { ad_video_id: '', in_video_quizzes: [] }
+            interactive_html: '', lesson_text: '', virtual_lab_slug: '', doc_file: null, showAdvanced: true, quizzes: [], json_data: { ad_video_id: '', in_video_quizzes: [
+                { time: 0, hint: '', question: '', options: ['', ''], correct: 0, explanations: ['', ''] },
+                { time: 0, hint: '', question: '', options: ['', ''], correct: 0, explanations: ['', ''] },
+                { time: 0, hint: '', question: '', options: ['', ''], correct: 0, explanations: ['', ''] }
+            ] }
         })
         setModules(newMods)
     }
@@ -279,11 +283,7 @@ export const AdminCourseBuilder = ({ id }) => {
 
     // --- In-Video Logic (JSON Data) ---
     const addInVideoQuiz = (mIndex, lIndex) => {
-        const newMods = [...modules]; const less = newMods[mIndex].lessons[lIndex];
-        if (!less.json_data) less.json_data = { ad_video_id: '', in_video_quizzes: [] };
-        if (!less.json_data.in_video_quizzes) less.json_data.in_video_quizzes = [];
-        less.json_data.in_video_quizzes.push({ time: 0, question: '', options: ['', ''], correct: 0, explanations: ['', ''] });
-        setModules(newMods)
+        // Obsolete, we now enforce 3 quizzes.
     }
     const removeInVideoQuiz = (mIndex, lIndex, qzIdx) => {
         const newMods = [...modules]; newMods[mIndex].lessons[lIndex].json_data.in_video_quizzes.splice(qzIdx, 1); setModules(newMods);
@@ -790,41 +790,51 @@ export const AdminCourseBuilder = ({ id }) => {
                                                             </div>
 
                                                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-                                                                <span style={{ fontSize: '0.9rem', fontWeight: 'bold', color: '#1e40af' }}>الأسئلة المفاجئة بمنتصف الفيديو</span>
-                                                                <button className="hq-btn-secondary" style={{ padding: '6px 12px', fontSize: '0.8rem', background: '#dbeafe', color: '#1d4ed8', border: 'none', borderRadius: '6px' }} onClick={() => addInVideoQuiz(mIndex, lIndex)}>+ إدراج سؤال للفيديو</button>
+                                                                <span style={{ fontSize: '0.9rem', fontWeight: 'bold', color: '#1e40af' }}>الأسئلة المفاجئة بمنتصف الفيديو (تظهر تلقائياً بنسب 25%، 50%، 75%)</span>
                                                             </div>
                                                             
                                                             <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-                                                                {(less.json_data?.in_video_quizzes || []).map((ivq, ivqIdx) => (
+                                                                {([0,1,2]).map((ivqIdx) => {
+                                                                    // Ensure we have 3 quizzes
+                                                                    if (!less.json_data) less.json_data = { ad_video_id: '', in_video_quizzes: [] };
+                                                                    if (!less.json_data.in_video_quizzes) less.json_data.in_video_quizzes = [];
+                                                                    while (less.json_data.in_video_quizzes.length < 3) {
+                                                                        less.json_data.in_video_quizzes.push({ time: 0, hint: '', question: '', options: ['', ''], correct: 0, explanations: ['', ''] });
+                                                                    }
+                                                                    const ivq = less.json_data.in_video_quizzes[ivqIdx];
+                                                                    
+                                                                    const quizLabels = ["سؤال الـ 25% (يظهر في الربع الأول)", "سؤال الـ 50% (يظهر في المنتصف)", "سؤال الـ 75% (يظهر في الربع الأخير)"];
+                                                                    
+                                                                    return (
                                                                     <div key={`ivq-${ivqIdx}`} style={{ background: 'white', border: '1px solid #bfdbfe', borderRadius: '10px', padding: '15px', position: 'relative' }}>
-                                                                        <button onClick={() => removeInVideoQuiz(mIndex, lIndex, ivqIdx)} style={{ position: 'absolute', left: '10px', top: '10px', background: '#fee2e2', color: '#ef4444', border: 'none', borderRadius: '4px', padding: '5px', cursor: 'pointer' }}><HiOutlineTrash size={16} /></button>
+                                                                        <div style={{ fontSize: '1rem', fontWeight: 'bold', color: '#2563eb', marginBottom: '10px' }}>{quizLabels[ivqIdx]}</div>
                                                                         
                                                                         <div style={{ display: 'flex', gap: '15px', marginBottom: '15px' }}>
-                                                                            <div style={{ width: '120px' }}>
-                                                                                <label style={{ fontSize: '0.8rem', color: '#475569', fontWeight: 'bold', display: 'block', marginBottom: '5px' }}>وقت الظهور (بالثواني)</label>
-                                                                                <input type="number" value={ivq.time} onChange={e => updateInVideoQuiz(mIndex, lIndex, ivqIdx, 'time', parseInt(e.target.value)||0)} style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid #cbd5e1', outline: 'none' }} />
-                                                                                <small style={{ color: '#94a3b8', fontSize: '0.7rem' }}>مثال: 900 للربع ساعة</small>
+                                                                            <div style={{ flex: 1.5 }}>
+                                                                                <label style={{ fontSize: '0.8rem', color: '#475569', fontWeight: 'bold', display: 'block', marginBottom: '5px' }}>نص السؤال</label>
+                                                                                <input type="text" value={ivq.question || ''} onChange={e => updateInVideoQuiz(mIndex, lIndex, ivqIdx, 'question', e.target.value)} style={{ width: '100%', padding: '8px', borderRadius: '6px', border: ivq.question ? '1px solid #cbd5e1' : '1px solid #ef4444', outline: ivq.question ? 'none' : '2px solid #fee2e2' }} placeholder="السؤال الموجه للطالب..." />
+                                                                                {!ivq.question && <small style={{ color: '#ef4444', fontSize: '0.7rem' }}>يرجى إدخال السؤال حتى يظهر للطالب بشكل صحيح</small>}
                                                                             </div>
                                                                             <div style={{ flex: 1 }}>
-                                                                                <label style={{ fontSize: '0.8rem', color: '#475569', fontWeight: 'bold', display: 'block', marginBottom: '5px' }}>نص السؤال</label>
-                                                                                <input type="text" value={ivq.question} onChange={e => updateInVideoQuiz(mIndex, lIndex, ivqIdx, 'question', e.target.value)} style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid #cbd5e1', outline: 'none' }} placeholder="السؤال الذي يوقف الفيديو للمشاهد..." />
+                                                                                <label style={{ fontSize: '0.8rem', color: '#475569', fontWeight: 'bold', display: 'block', marginBottom: '5px' }}>التلميح (Hint)</label>
+                                                                                <input type="text" value={ivq.hint || ''} onChange={e => updateInVideoQuiz(mIndex, lIndex, ivqIdx, 'hint', e.target.value)} style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid #cbd5e1', outline: 'none' }} placeholder="تلميح: ذكرت هذه المعلومة بالدقيقة كذا..." />
                                                                             </div>
                                                                         </div>
 
                                                                         <div>
                                                                             <label style={{ fontSize: '0.8rem', color: '#475569', fontWeight: 'bold', display: 'block', marginBottom: '5px' }}>الخيارات</label>
-                                                                            {ivq.options.map((opt, optIdx) => (
+                                                                            {(ivq.options || []).map((opt, optIdx) => (
                                                                                 <div key={`opt-${optIdx}`} style={{ display: 'flex', gap: '8px', marginBottom: '8px', alignItems: 'center' }}>
                                                                                     <input type="radio" checked={ivq.correct === optIdx} onChange={() => updateInVideoQuiz(mIndex, lIndex, ivqIdx, 'correct', optIdx)} name={`ivq-corr-${lIndex}-${ivqIdx}`} style={{ accentColor: '#3b82f6' }} />
                                                                                     <input type="text" value={opt} onChange={e => updateInVideoQuizOption(mIndex, lIndex, ivqIdx, optIdx, e.target.value)} placeholder={`خيار ${optIdx+1}`} style={{ flex: 1, padding: '6px', borderRadius: '6px', border: '1px solid #cbd5e1', outline: 'none', fontSize: '0.85rem' }} />
-                                                                                    <input type="text" value={ivq.explanations[optIdx] || ''} onChange={e => updateInVideoQuizExplanation(mIndex, lIndex, ivqIdx, optIdx, e.target.value)} placeholder="التفسير (إن وُجد)" style={{ flex: 1.5, padding: '6px', borderRadius: '6px', border: '1px solid #cbd5e1', background: '#f8fafc', outline: 'none', fontSize: '0.85rem' }} />
+                                                                                    <input type="text" value={(ivq.explanations && ivq.explanations[optIdx]) || ''} onChange={e => updateInVideoQuizExplanation(mIndex, lIndex, ivqIdx, optIdx, e.target.value)} placeholder="التفسير (إن وُجد)" style={{ flex: 1.5, padding: '6px', borderRadius: '6px', border: '1px solid #cbd5e1', background: '#f8fafc', outline: 'none', fontSize: '0.85rem' }} />
                                                                                     <button onClick={() => removeInVideoQuizOption(mIndex, lIndex, ivqIdx, optIdx)} style={{ background: 'transparent', border: 'none', color: '#ef4444', cursor: 'pointer' }}><HiOutlineTrash /></button>
                                                                                 </div>
                                                                             ))}
                                                                             <button style={{ fontSize: '0.75rem', background: '#e2e8f0', border: 'none', padding: '4px 10px', borderRadius: '4px', cursor: 'pointer', marginTop: '5px' }} onClick={() => addInVideoQuizOption(mIndex, lIndex, ivqIdx)}>+ إضافة خيار</button>
                                                                         </div>
                                                                     </div>
-                                                                ))}
+                                                                )})}
                                                             </div>
                                                         </div>
 
