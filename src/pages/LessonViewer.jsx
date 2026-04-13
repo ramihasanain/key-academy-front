@@ -60,12 +60,9 @@ const ViewVideo = ({ videoUrl, lessonId, isCompleted, onComplete }) => {
         const token = localStorage.getItem('access_token') || '';
         const protocolUrl = `mediaplayer://loginyoutube?vid=${encodedVid}&token=${token}&lesson=${lessonId}&api=${encodeURIComponent(API)}`;
         
-        // Use an iframe to try launching without disrupting the current page, and avoid multiple clicks failing
-        const iframe = document.createElement('iframe');
-        iframe.style.display = 'none';
-        iframe.src = protocolUrl;
-        document.body.appendChild(iframe);
-        setTimeout(() => document.body.removeChild(iframe), 1500);
+        // Launch the protocol directly using window.location to prevent Chrome from silently canceling iframe requests.
+        // This ensures the desktop app opens properly with the required authentication params.
+        window.location.href = protocolUrl;
     };
 
     return (
