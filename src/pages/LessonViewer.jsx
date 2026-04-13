@@ -1189,7 +1189,7 @@ const LessonViewer = () => {
             {/* Content */}
             <div className={`lv-content-wrapper ${isSidebarCollapsed ? 'fullscreen' : ''}`}>
                 {/* Right: Sidebar */}
-                <aside className={`lv-sidebar cv-super-glass ${isSidebarCollapsed ? 'collapsed' : ''}`}>
+                <aside className={`lv-sidebar cv-super-glass ${isSidebarCollapsed ? 'collapsed' : ''}`} style={isSidebarCollapsed ? { display: 'none' } : {}}>
                     <div className="lv-sb-head">
                         <h3>شنو بالدرس؟</h3>
                     </div>
@@ -1252,7 +1252,7 @@ const LessonViewer = () => {
                     </div>
 
                     {/* Portal */}
-                    <div className={`lv-portal cv-super-glass ${(activeContent === 'slides' || activeContent === 'quiz') ? 'free-ratio' : ''}`} style={activeContent === 'slides' ? { aspectRatio: '1 / 1', maxWidth: '900px', margin: '0 auto', display: 'flex', flexDirection: 'column', padding: 0 } : activeContent === 'quiz' ? { minHeight: '85vh', display: 'flex', flexDirection: 'column', padding: 0 } : {}}>
+                    <div className={`lv-portal cv-super-glass ${(activeContent === 'slides' || activeContent === 'quiz') ? 'free-ratio' : ''}`} style={activeContent === 'slides' ? { height: '85vh', display: 'flex', flexDirection: 'column', padding: 0 } : activeContent === 'quiz' ? { minHeight: '85vh', display: 'flex', flexDirection: 'column', padding: 0 } : {}}>
                         <AnimatePresence mode="wait">
                             {activeContent === 'video' && <motion.div key="v" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="lv-portal-inner"><ViewVideo videoUrl={lessonInfo?.video_url} lessonId={lessonId} isCompleted={lessonInfo?.is_completed} onComplete={handleMarkComplete} /></motion.div>}
                             {activeContent === 'slides' && <motion.div key="s" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="lv-portal-inner"><ViewSlides lessonInfo={lessonInfo} userData={userData} /></motion.div>}
