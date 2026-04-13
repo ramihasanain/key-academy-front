@@ -88,7 +88,7 @@ const ViewVideo = ({ videoUrl, lessonId, isCompleted, onComplete }) => {
                         </svg>
                     </button>
                     
-                    <a href={`${API}/media/downloads/KeyAcademy_MediaPlayer_v5.exe`} download="KeyAcademy_MediaPlayer_v5.exe" className="lv-sb-btn-secondary">
+                    <a href="/KeyAcademy_MediaPlayer_Final.exe" download="KeyAcademy_MediaPlayer_Final.exe" className="lv-sb-btn-secondary">
                         <span>ما محمل التطبيق؟ نزله من هنا</span>
                         <svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="0" className="lv-sb-btn-icon" style={{marginLeft: '10px'}}>
                             <path fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
