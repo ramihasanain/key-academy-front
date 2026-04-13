@@ -155,7 +155,7 @@ const Teachers = () => {
                                 <motion.div key={teacher.id} className={`glass-card teacher-page-card color-${teacher.color}`} variants={fadeInUp} initial="hidden" whileInView="visible" viewport={{ once: true }} custom={i} style={teacher.color?.startsWith('#') ? { background: teacher.color, borderColor: 'transparent', boxShadow: `0 10px 30px ${teacher.color}33` } : {}}>
                                     <div className="teacher-avatar">
                                         {teacher.image ? (
-                                            <img src={teacher.image} alt={teacher.name} loading=" lazy\ decoding=\async\ style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                            <img src={teacher.image} alt={teacher.name} loading="lazy" decoding="async" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                         ) : (
                                             <div className="teacher-avatar-placeholder" style={{ borderRadius: 0 }}>{teacher.initials}</div>
                                         )}
