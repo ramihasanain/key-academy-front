@@ -1115,3 +1115,102 @@
 
 .lv-sidebar.collapsed { width: 0; padding: 0; border: none; opacity: 0; pointer-events: none; margin: 0; overflow: hidden; }
 .lv-content-wrapper.fullscreen { padding-left: 20px; padding-right: 20px; max-width: 1600px; gap: 0; }
+
+/* ======= PREMIUM AI EXAM OVERRIDES ======= */
+.lv-quiz-screen {
+    background: transparent !important;
+    padding: 20px;
+}
+.lv-quiz-intro {
+    background: rgba(255,255,255,0.6) !important;
+    backdrop-filter: blur(30px) !important;
+    border-radius: var(--radius-xl) !important;
+    border: 1px solid rgba(131,42,150,0.15) !important;
+    box-shadow: 0 25px 60px rgba(131,42,150,0.1) !important;
+    margin: 20px;
+    height: calc(100% - 40px) !important;
+}
+.lv-qi-badge {
+    box-shadow: 0 0 40px rgba(236,54,101,0.3), inset 0 0 20px rgba(255,255,255,0.8) !important;
+    animation: badgeFloat 4s infinite ease-in-out alternate;
+}
+@keyframes badgeFloat {
+    0% { transform: translateY(0px) scale(1); }
+    100% { transform: translateY(-10px) scale(1.05); }
+}
+.lv-quiz-intro h2 {
+    font-size: 2.2rem !important;
+    background: linear-gradient(135deg, var(--purple), var(--pink));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+.lv-qi-stat {
+    background: rgba(255,255,255,0.9) !important;
+    border: 2px solid rgba(131,42,150,0.1) !important;
+    box-shadow: 0 10px 20px rgba(131,42,150,0.08) !important;
+    font-weight: 800 !important;
+    font-size: 1.1rem !important;
+}
+.lv-qe-header {
+    background: rgba(255,255,255,0.7) !important;
+    backdrop-filter: blur(20px);
+    border-radius: var(--radius-xl) var(--radius-xl) 0 0 !important;
+    padding: 30px 40px !important;
+}
+.lv-qe-header h3 {
+    font-size: 1.4rem !important;
+}
+.lv-qe-list {
+    padding: 40px !important;
+    background: rgba(255,255,255,0.3) !important;
+}
+.lv-qe-card {
+    background: rgba(255,255,255,0.9) !important;
+    border-radius: 20px !important;
+    border: 1px solid rgba(131,42,150,0.15) !important;
+    box-shadow: 0 15px 35px rgba(131,42,150,0.06) !important;
+    padding: 35px !important;
+}
+.lv-qe-q {
+    font-size: 1.25rem !important;
+}
+.lv-qe-opt {
+    border-radius: 16px !important;
+    padding: 18px 24px !important;
+    font-size: 1.05rem !important;
+    background: #f8fafc !important;
+    border: 2px solid #e2e8f0 !important;
+}
+.lv-qe-opt:hover {
+    border-color: rgba(131,42,150,0.3) !important;
+    background: rgba(131,42,150,0.02) !important;
+}
+.lv-qe-opt.selected {
+    background: linear-gradient(90deg, rgba(131,42,150,0.1), rgba(236,54,101,0.05)) !important;
+    border: 2px solid var(--purple) !important;
+    transform: scale(1.01);
+}
+.lv-qr-top {
+    background: rgba(255,255,255,0.85) !important;
+    backdrop-filter: blur(30px) !important;
+    padding: 50px 30px !important;
+    border-radius: var(--radius-xl) !important;
+    margin: 30px !important;
+    box-shadow: 0 25px 60px rgba(131,42,150,0.12) !important;
+}
+.lv-qr-circle {
+    width: 220px !important;
+    height: 220px !important;
+    filter: drop-shadow(0 0 20px rgba(236,54,101,0.3));
+}
+.lv-qr-score .n {
+    font-size: 4rem !important;
+    background: linear-gradient(135deg, var(--purple), var(--pink));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+.lv-qrs {
+    font-size: 1.2rem !important;
+    padding: 16px 28px !important;
+    border-radius: 18px !important;
+}

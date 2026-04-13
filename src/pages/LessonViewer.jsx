@@ -1221,7 +1221,7 @@ const LessonViewer = () => {
                     </div>
 
                     {/* Portal */}
-                    <div className={`lv-portal cv-super-glass ${activeContent === 'slides' ? 'free-ratio' : ''}`}>
+                    <div className={`lv-portal cv-super-glass ${(activeContent === 'slides' || activeContent === 'quiz') ? 'free-ratio' : ''}`} style={activeContent === 'quiz' ? { minHeight: '75vh', display: 'flex', flexDirection: 'column' } : {}}>
                         <AnimatePresence mode="wait">
                             {activeContent === 'video' && <motion.div key="v" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="lv-portal-inner"><ViewVideo videoUrl={lessonInfo?.video_url} lessonId={lessonId} isCompleted={lessonInfo?.is_completed} onComplete={handleMarkComplete} /></motion.div>}
                             {activeContent === 'slides' && <motion.div key="s" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="lv-portal-inner"><ViewSlides lessonInfo={lessonInfo} userData={userData} /></motion.div>}
