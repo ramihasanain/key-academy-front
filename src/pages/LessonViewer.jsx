@@ -356,99 +356,96 @@ const ViewQuiz = ({ lessonId }) => {
                     </div>
                 </div>
             )}
-            {phase === 'result' && result && (() => {
-                const pct = result.percentage
-                return (
-                    <div className="lv-quiz-result">
-                        <div className="lv-qr-top">
-                            <h2>نتيجة التقييم</h2>
-                            <div className="lv-qr-circle">
-                                <svg className="lv-svg-ring" viewBox="0 0 36 36">
-                                    <path className="lv-ring-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                                    <path className="lv-ring-fill" strokeDasharray={`${pct}, 100`} d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                                </svg>
-                                <div className="lv-qr-score"><span className="n">{pct}</span><span className="u">%</span></div>
-                            </div>
-                            <h3 className="lv-qr-msg">{getResultMsg(pct)}</h3>
-                            <div className="lv-qr-stats-row">
-                                <div className="lv-qrs correct"><HiCheckCircle /> <strong>{result.score}</strong> إجابة صحيحة</div>
-                                <div className="lv-qrs wrong">✕ <strong>{result.total - result.score}</strong> إجابة خاطئة</div>
-                            </div>
-                            <button className="lv-outline-btn" onClick={() => { setAnswers({}); setResult(null); setPhase('intro') }}><HiOutlineArrowPath /> إعادة المحاولة</button>
+            {phase === 'result' && result && (
+                <div className="lv-quiz-result">
+                    <div className="lv-qr-top">
+                        <h2>نتيجة التقييم</h2>
+                        <div className="lv-qr-circle">
+                            <svg className="lv-svg-ring" viewBox="0 0 36 36">
+                                <path className="lv-ring-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                                <path className="lv-ring-fill" strokeDasharray={`${result.percentage}, 100`} d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                            </svg>
+                            <div className="lv-qr-score"><span className="n">{result.percentage}</span><span className="u">%</span></div>
                         </div>
-
-                        {/* Detailed Answer Review */}
-                        <div className="lv-qr-review">
-                            <h4 className="lv-section-label"><HiOutlineSparkles /> مراجعة الإجابات التفصيلية المدعومة بالذكاء الاصطناعي</h4>
-                            {result.review.map((q, qi) => {
-                                const userAnswer = q.user_answer
-                                const isCorrect = q.is_correct
-                                return (
-                                    <div key={q.question_id} className={`lv-rv-card ${isCorrect ? 'correct' : 'wrong'}`}>
-                                        <div className="lv-rv-head">
-                                            <span className={`lv-rv-badge ${isCorrect ? 'green' : 'red'}`}>
-                                                {isCorrect ? '✓ صحيح' : '✕ خطأ'}
-                                            </span>
-                                            <span className="lv-rv-qnum">السؤال {qi + 1}</span>
-                                        </div>
-                                        <p className="lv-rv-question">{q.question}</p>
-                                        <div className="lv-rv-answers">
-                                            {q.options.map((opt, oi) => {
-                                                let cls = ''
-                                                if (oi === q.correct_index) cls = 'correct-answer'
-                                                else if (oi === userAnswer && !isCorrect) cls = 'wrong-answer'
-                                                return (
-                                                    <div key={oi} className={`lv-rv-opt ${cls}`}>
-                                                        {oi === q.correct_index && <HiCheckCircle className="lv-rv-icon green" />}
-                                                        {oi === userAnswer && !isCorrect && oi !== q.correct_index && <span className="lv-rv-icon red">✕</span>}
-                                                        {oi !== q.correct_index && oi !== userAnswer && <span className="lv-rv-icon neutral">○</span>}
-                                                        <div style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
-                                                            <span>{opt}</span>
-                                                            {q.options_explanations && q.options_explanations[oi] && (
-                                                                <span style={{ fontSize: '0.8rem', color: '#64748b', marginTop: '4px' }}>💡 {q.options_explanations[oi]}</span>
-                                                            )}
-                                                        </div>
-                                                        {oi === userAnswer && <span className="lv-rv-tag user">إجابتك</span>}
-                                                        {oi === q.correct_index && <span className="lv-rv-tag correct">الإجابة الصحيحة</span>}
-                                                    </div>
-                                                )
-                                            })}
-                                        </div>
-                                        {q.explanation && (
-                                            <div className="lv-rv-explain" style={{ background: 'rgba(131, 42, 150, 0.05)', padding: '15px', borderRadius: '12px', marginTop: '15px', borderLeft: '4px solid #832A96' }}>
-                                                <HiOutlineSparkles className="lv-rv-ai-icon" style={{ color: '#832A96' }} />
-                                                <div>
-                                                    <strong>تفسير الذكاء الاصطناعي Key AI:</strong>
-                                                    <p>{q.explanation}</p>
-                                                </div>
-                                            </div>
-                                        )}
-                                    </div>
-                                )
-                            })}
+                        <h3 className="lv-qr-msg">{getResultMsg(result.percentage)}</h3>
+                        <div className="lv-qr-stats-row">
+                            <div className="lv-qrs correct"><HiCheckCircle /> <strong>{result.score}</strong> إجابة صحيحة</div>
+                            <div className="lv-qrs wrong">✕ <strong>{result.total - result.score}</strong> إجابة خاطئة</div>
                         </div>
-
-                        {/* History */}
-                        {history.length > 0 && (
-                            <div className="lv-qr-history">
-                                <h4><HiOutlineClock /> سجل محاولاتك اللي فاتت</h4>
-                                <table className="lv-ht-table">
-                                    <thead><tr><th>تاريخ المحاولة</th><th>النتيجة</th><th>الحالة</th></tr></thead>
-                                    <tbody>
-                                        {history.map((h, i) => (
-                                            <tr key={i}>
-                                                <td>{new Date(h.attempted_at).toLocaleDateString('ar-IQ')} - {new Date(h.attempted_at).toLocaleTimeString('ar-IQ')}</td>
-                                                <td><strong>{h.percentage}%</strong> ({h.score}/{h.total})</td>
-                                                <td><span className={`lv-pill ${h.percentage >= 70 ? 'green' : 'red'}`}>{h.percentage >= 70 ? 'بطل' : 'يحتاج مراجعة'}</span></td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
-                        )}
+                        <button className="lv-outline-btn" onClick={() => { setAnswers({}); setResult(null); setPhase('intro') }}><HiOutlineArrowPath /> إعادة المحاولة</button>
                     </div>
-                )
-            })()}
+
+                    {/* Detailed Answer Review */}
+                    <div className="lv-qr-review">
+                        <h4 className="lv-section-label"><HiOutlineSparkles /> مراجعة الإجابات التفصيلية المدعومة بالذكاء الاصطناعي</h4>
+                        {result.review.map((q, qi) => {
+                            const userAnswer = q.user_answer
+                            const isCorrect = q.is_correct
+                            return (
+                                <div key={q.question_id} className={`lv-rv-card ${isCorrect ? 'correct' : 'wrong'}`}>
+                                    <div className="lv-rv-head">
+                                        <span className={`lv-rv-badge ${isCorrect ? 'green' : 'red'}`}>
+                                            {isCorrect ? '✓ صحيح' : '✕ خطأ'}
+                                        </span>
+                                        <span className="lv-rv-qnum">السؤال {qi + 1}</span>
+                                    </div>
+                                    <p className="lv-rv-question">{q.question}</p>
+                                    <div className="lv-rv-answers">
+                                        {q.options.map((opt, oi) => {
+                                            let cls = ''
+                                            if (oi === q.correct_index) cls = 'correct-answer'
+                                            else if (oi === userAnswer && !isCorrect) cls = 'wrong-answer'
+                                            return (
+                                                <div key={oi} className={`lv-rv-opt ${cls}`}>
+                                                    {oi === q.correct_index && <HiCheckCircle className="lv-rv-icon green" />}
+                                                    {oi === userAnswer && !isCorrect && oi !== q.correct_index && <span className="lv-rv-icon red">✕</span>}
+                                                    {oi !== q.correct_index && oi !== userAnswer && <span className="lv-rv-icon neutral">○</span>}
+                                                    <div style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
+                                                        <span>{opt}</span>
+                                                        {q.options_explanations && q.options_explanations[oi] && (
+                                                            <span style={{ fontSize: '0.8rem', color: '#64748b', marginTop: '4px' }}>💡 {q.options_explanations[oi]}</span>
+                                                        )}
+                                                    </div>
+                                                    {oi === userAnswer && <span className="lv-rv-tag user">إجابتك</span>}
+                                                    {oi === q.correct_index && <span className="lv-rv-tag correct">الإجابة الصحيحة</span>}
+                                                </div>
+                                            )
+                                        })}
+                                    </div>
+                                    {q.explanation && (
+                                        <div className="lv-rv-explain" style={{ background: 'rgba(131, 42, 150, 0.05)', padding: '15px', borderRadius: '12px', marginTop: '15px', borderLeft: '4px solid #832A96' }}>
+                                            <HiOutlineSparkles className="lv-rv-ai-icon" style={{ color: '#832A96' }} />
+                                            <div>
+                                                <strong>تفسير الذكاء الاصطناعي Key AI:</strong>
+                                                <p>{q.explanation}</p>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            )
+                        })}
+                    </div>
+
+                    {/* History */}
+                    {history.length > 0 && (
+                        <div className="lv-qr-history">
+                            <h4><HiOutlineClock /> سجل محاولاتك اللي فاتت</h4>
+                            <table className="lv-ht-table">
+                                <thead><tr><th>تاريخ المحاولة</th><th>النتيجة</th><th>الحالة</th></tr></thead>
+                                <tbody>
+                                    {history.map((h, i) => (
+                                        <tr key={i}>
+                                            <td>{new Date(h.attempted_at).toLocaleDateString('ar-IQ')} - {new Date(h.attempted_at).toLocaleTimeString('ar-IQ')}</td>
+                                            <td><strong>{h.percentage}%</strong> ({h.score}/{h.total})</td>
+                                            <td><span className={`lv-pill ${h.percentage >= 70 ? 'green' : 'red'}`}>{h.percentage >= 70 ? 'بطل' : 'يحتاج مراجعة'}</span></td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    )}
+                </div>
+            )}
         </div>
     )
 }
@@ -1111,6 +1108,10 @@ const LessonViewer = () => {
     const fallbackTitle = lessonInfo?.title || 'درس عام';
     const fallbackUnits = lessonInfo?.course_title ? `${lessonInfo.module_title} - ${lessonInfo.course_title}` : 'محاضرة الدورة';
 
+    const currentIndex = lessonList.findIndex(l => l.id == lessonId);
+    const prevLesson = currentIndex > 0 ? lessonList[currentIndex - 1] : null;
+    const nextLesson = currentIndex !== -1 && currentIndex < lessonList.length - 1 ? lessonList[currentIndex + 1] : null;
+
     const CURRENT_LESSON = {
         id: lessonId,
         title: fallbackTitle,
@@ -1217,22 +1218,14 @@ const LessonViewer = () => {
                         })}
                     </div>
                     <div className="lv-sb-footer">
-                        {(() => {
-                            const currentIndex = lessonList.findIndex(l => l.id == lessonId);
-                            const prevLesson = currentIndex > 0 ? lessonList[currentIndex - 1] : null;
-                            const nextLesson = currentIndex !== -1 && currentIndex < lessonList.length - 1 ? lessonList[currentIndex + 1] : null;
-
-                            return (
-                                <>
-                                    <button className="lv-sb-nav-btn" disabled={!prevLesson} onClick={() => navigate(`/lesson/${prevLesson.id}?course=${courseId}`)}>
-                                        <HiOutlineChevronRight style={{ transform: 'scaleX(-1)' }} /> الدرس القبله
-                                    </button>
-                                    <button className="lv-sb-nav-btn next" disabled={!nextLesson} onClick={() => navigate(`/lesson/${nextLesson.id}?course=${courseId}`)}>
-                                        الدرس الجاي <HiOutlineChevronLeft style={{ transform: 'scaleX(-1)' }} />
-                                    </button>
-                                </>
-                            )
-                        })()}
+                        <>
+                            <button className="lv-sb-nav-btn" disabled={!prevLesson} onClick={() => prevLesson && navigate(`/lesson/${prevLesson.id}?course=${courseId}`)}>
+                                <HiOutlineChevronRight style={{ transform: 'scaleX(-1)' }} /> الدرس القبله
+                            </button>
+                            <button className="lv-sb-nav-btn next" disabled={!nextLesson} onClick={() => nextLesson && navigate(`/lesson/${nextLesson.id}?course=${courseId}`)}>
+                                الدرس الجاي <HiOutlineChevronLeft style={{ transform: 'scaleX(-1)' }} />
+                            </button>
+                        </>
                     </div>
                 </aside>
 
