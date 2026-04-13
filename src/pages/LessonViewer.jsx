@@ -112,16 +112,53 @@ const ViewVideo = ({ videoUrl, lessonId, isCompleted, onComplete }) => {
 }
 
 const ViewSlides = ({ lessonInfo, userData }) => {
+    const containerRef = useRef(null);
+    const [isFullscreen, setIsFullscreen] = useState(false);
+
+    useEffect(() => {
+        const handleFullscreenChange = () => {
+            setIsFullscreen(!!document.fullscreenElement);
+        };
+        document.addEventListener('fullscreenchange', handleFullscreenChange);
+        return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
+    }, []);
+
+    const toggleFullscreen = () => {
+        if (!document.fullscreenElement) {
+            containerRef.current?.requestFullscreen().catch(err => {
+                console.error(`Error attempting to enable fullscreen: ${err.message}`);
+            });
+        } else {
+            document.exitFullscreen();
+        }
+    };
+
+    const WatermarkOverlay = () => {
+        if (!userData) return null;
+        return (
+            <div style={{ position: 'absolute', top: 0, right: 0, bottom: 0, left: 0, pointerEvents: 'none', overflow: 'hidden', display: 'flex', flexWrap: 'wrap', gap: '60px', justifyContent: 'center', alignContent: 'center', opacity: 0.05, zIndex: 10 }}>
+                {Array.from({ length: 50 }).map((_, i) => (
+                    <div key={i} style={{ transform: 'rotate(-35deg)', fontSize: '28px', fontWeight: 'bold', color: 'black', whiteSpace: 'nowrap', userSelect: 'none', letterSpacing: '2px' }}>
+                        {userData?.username || 'KeyAcademy_Student'}
+                    </div>
+                ))}
+            </div>
+        );
+    };
+
     if (lessonInfo?.interactive_html) {
-        const rawCode = lessonInfo.interactive_html.trim()
-        const isIframe = rawCode.toLowerCase().startsWith('<iframe')
+        const rawCode = lessonInfo.interactive_html.trim();
+        const isIframe = rawCode.toLowerCase().startsWith('<iframe');
 
         return (
-            <div className="lv-screen lv-slides-screen" style={{ padding: 0, display: 'flex', flexDirection: 'column', width: '100%', minHeight: '850px' }}>
-                <div className="lv-sf-bar" style={{ padding: '15px 20px', background: 'rgba(0,0,0,0.2)', borderBottom: '1px solid var(--border-glass)', flexShrink: 0 }}>
-                    <span className="lv-sf-bar-title" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><HiOutlineSparkles /> شرائح تفاعلية</span>
+            <div ref={containerRef} className="lv-screen lv-slides-screen" style={{ padding: 0, display: 'flex', flexDirection: 'column', width: '100%', minHeight: isFullscreen ? '100vh' : '75vh', background: '#fff' }}>
+                <div className="lv-sf-bar" style={{ padding: '15px 25px', background: 'rgba(0,0,0,0.8)', borderBottom: '1px solid var(--border-glass)', flexShrink: 0, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span className="lv-sf-bar-title" style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#fff', fontWeight: 'bold' }}><HiOutlineSparkles /> السلايدات التفاعلية</span>
+                    <button onClick={toggleFullscreen} style={{ background: 'rgba(255,255,255,0.15)', border: 'none', color: '#fff', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 'bold', transition: 'all 0.2s' }} onMouseOver={e => e.currentTarget.style.background = 'rgba(255,255,255,0.25)'} onMouseOut={e => e.currentTarget.style.background = 'rgba(255,255,255,0.15)'}>
+                        {isFullscreen ? 'إنهاء التكبير ✖' : 'تكبير الشاشة ⛶'}
+                    </button>
                 </div>
-                <div className="lv-sf-viewer interactive-html-wrap" style={{ width: '100%', height: '850px', padding: 0, background: '#fff', position: 'relative' }}>
+                <div className="lv-sf-viewer interactive-html-wrap" style={{ width: '100%', flex: 1, padding: 0, background: '#fff', position: 'relative' }}>
                     {isIframe ? (
                         <div
                             dangerouslySetInnerHTML={{ __html: rawCode }}
@@ -135,7 +172,7 @@ const ViewSlides = ({ lessonInfo, userData }) => {
                                             iframe.style.height = '100%';
                                             iframe.style.maxHeight = '100%';
                                             iframe.style.border = 'none';
-                                            iframe.style.borderRadius = '0 0 16px 16px';
+                                            iframe.style.borderRadius = isFullscreen ? '0' : '0 0 16px 16px';
                                         }
                                     }, 150);
                                 }
@@ -144,13 +181,14 @@ const ViewSlides = ({ lessonInfo, userData }) => {
                     ) : (
                         <iframe
                             srcDoc={rawCode}
-                            style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none', backgroundColor: '#fff', borderRadius: '0 0 16px 16px' }}
-                            title="شرائح تفاعلية"
+                            style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none', backgroundColor: '#fff', borderRadius: isFullscreen ? '0' : '0 0 16px 16px' }}
+                            title="السلايدات التفاعلية"
                         />
                     )}
+                    <WatermarkOverlay />
                 </div>
             </div>
-        )
+        );
     }
 
     if (!lessonInfo?.doc_file) {
@@ -160,35 +198,28 @@ const ViewSlides = ({ lessonInfo, userData }) => {
                     <h2 style={{ color: '#94a3b8' }}>لا توجد سلايدات أو ملزمة تفاعلية متاحة لهذا الدرس حالياً</h2>
                 </div>
             </div>
-        )
+        );
     }
 
     return (
-        <div className="lv-screen lv-slides-screen" style={{ padding: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column', minHeight: '600px' }}>
-            <div className="lv-sf-bar" style={{ padding: '15px 20px', background: 'rgba(0,0,0,0.2)', borderBottom: '1px solid var(--border-glass)' }}>
-                <span className="lv-sf-bar-title" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><HiOutlineDocumentText /> ملزمة وسلايدات الدرس</span>
+        <div ref={containerRef} className="lv-screen lv-slides-screen" style={{ padding: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column', minHeight: isFullscreen ? '100vh' : '75vh', background: '#fff' }}>
+            <div className="lv-sf-bar" style={{ padding: '15px 25px', background: 'rgba(0,0,0,0.8)', borderBottom: '1px solid var(--border-glass)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span className="lv-sf-bar-title" style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#fff', fontWeight: 'bold' }}><HiOutlineDocumentText /> ملزمة وسلايدات الدرس</span>
+                <button onClick={toggleFullscreen} style={{ background: 'rgba(255,255,255,0.15)', border: 'none', color: '#fff', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 'bold', transition: 'all 0.2s' }} onMouseOver={e => e.currentTarget.style.background = 'rgba(255,255,255,0.25)'} onMouseOut={e => e.currentTarget.style.background = 'rgba(255,255,255,0.15)'}>
+                    {isFullscreen ? 'إنهاء التكبير ✖' : 'تكبير الشاشة ⛶'}
+                </button>
             </div>
             <div className="lv-sf-viewer" style={{ flex: 1, padding: 0, height: '100%', position: 'relative' }} onContextMenu={(e) => e.preventDefault()}>
                 <iframe
                     src={`${lessonInfo.doc_file}#toolbar=0&navpanes=0&scrollbar=0`}
-                    style={{ width: '100%', height: '100%', minHeight: '600px', border: 'none', backgroundColor: '#fff', borderRadius: '0 0 16px 16px' }}
+                    style={{ width: '100%', height: '100%', border: 'none', backgroundColor: '#fff', borderRadius: isFullscreen ? '0' : '0 0 16px 16px' }}
                     title="مستندات الدرس"
                 />
-
-                {/* Watermark Overlay */}
-                {userData && (
-                    <div style={{ position: 'absolute', top: 0, right: 0, bottom: 0, left: 0, pointerEvents: 'none', overflow: 'hidden', display: 'flex', flexWrap: 'wrap', gap: '50px', justifyContent: 'center', alignContent: 'center', opacity: 0.06, zIndex: 5 }}>
-                        {Array.from({ length: 40 }).map((_, i) => (
-                            <div key={i} style={{ transform: 'rotate(-35deg)', fontSize: '24px', fontWeight: 'bold', color: 'black', whiteSpace: 'nowrap', userSelect: 'none' }}>
-                                {userData?.username || 'Student'}
-                            </div>
-                        ))}
-                    </div>
-                )}
+                <WatermarkOverlay />
             </div>
         </div>
-    )
-}
+    );
+};
 
 const ViewQuiz = ({ lessonId }) => {
     const [phase, setPhase] = useState('intro') // intro, exam, result
