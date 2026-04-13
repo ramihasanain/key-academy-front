@@ -133,7 +133,7 @@ const ViewSlides = ({ lessonInfo, lessonContent, userData }) => {
         }
     };
 
-    const WatermarkOverlay = () => {
+    const renderWatermarkOverlay = () => {
         if (!userData) return null;
         return (
             <div style={{ position: 'absolute', top: 0, right: 0, bottom: 0, left: 0, pointerEvents: 'none', overflow: 'hidden', display: 'flex', flexWrap: 'wrap', gap: '60px', justifyContent: 'center', alignContent: 'center', opacity: 0.05, zIndex: 10 }}>
@@ -187,7 +187,7 @@ const ViewSlides = ({ lessonInfo, lessonContent, userData }) => {
                             title="السلايدات التفاعلية"
                         />
                     )}
-                    <WatermarkOverlay />
+                    {renderWatermarkOverlay()}
                 </div>
             </div>
         );
@@ -217,7 +217,7 @@ const ViewSlides = ({ lessonInfo, lessonContent, userData }) => {
                     style={{ width: '100%', height: '100%', border: 'none', backgroundColor: '#fff', borderRadius: isFullscreen ? '0' : '0 0 16px 16px' }}
                     title="مستندات الدرس"
                 />
-                <WatermarkOverlay />
+                {renderWatermarkOverlay()}
             </div>
         </div>
     );
