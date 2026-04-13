@@ -1108,7 +1108,6 @@ const LessonViewer = () => {
     const isPreview = urlParams.get('preview') === 'true'
 
     const [activeContent, setActiveContent] = useState('video')
-    const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
     const [activeTab, setActiveTab] = useState('notes')
     const [previewCode, setPreviewCode] = useState('')
     const [isActivating, setIsActivating] = useState(false)
@@ -1121,13 +1120,6 @@ const LessonViewer = () => {
             return
         }
         setActiveContent(id)
-        
-        // Smart collapse logic: hide sidebar for immersive content
-        if (id === 'slides' || id === 'quiz') {
-            setIsSidebarCollapsed(true)
-        } else {
-            setIsSidebarCollapsed(false)
-        }
     }
 
     const handlePreviewActivate = async (e) => {
@@ -1187,9 +1179,9 @@ const LessonViewer = () => {
             </nav>
 
             {/* Content */}
-            <div className={`lv-content-wrapper ${isSidebarCollapsed ? 'fullscreen' : ''}`}>
+            <div className="lv-content-wrapper">
                 {/* Right: Sidebar */}
-                <aside className={`lv-sidebar cv-super-glass ${isSidebarCollapsed ? 'collapsed' : ''}`} style={isSidebarCollapsed ? { display: 'none' } : {}}>
+                <aside className="lv-sidebar cv-super-glass">
                     <div className="lv-sb-head">
                         <h3>شنو بالدرس؟</h3>
                     </div>
@@ -1229,11 +1221,6 @@ const LessonViewer = () => {
                 <main className="lv-main" style={{ flex: 1, minWidth: 0, transition: 'all 0.3s ease' }}>
                     <div className="lv-lesson-head" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-                            {isSidebarCollapsed && (
-                                <button className="lv-sb-item active" style={{ padding: '10px', minWidth: '45px', display: 'flex', justifyContent: 'center', alignContent: 'center', borderRadius: '12px' }} onClick={() => setIsSidebarCollapsed(false)}>
-                                    <HiOutlineSparkles className="lv-sb-icon active" style={{ margin: 0, fontSize: '1.5rem' }} />
-                                </button>
-                            )}
                             <div>
                                 <span className="lv-lh-sub">{CURRENT_LESSON.title}</span>
                                 <h1 className="lv-lh-title" style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
@@ -1243,11 +1230,6 @@ const LessonViewer = () => {
                         </div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
                             <span className="lv-lh-teacher">شرح وتدريس: {CURRENT_LESSON.teacher}</span>
-                            {!isSidebarCollapsed && (
-                                <button className="lv-back-btn" style={{ padding: '8px 12px', background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', borderRadius: '8px' }} onClick={() => setIsSidebarCollapsed(true)}>
-                                    إخفاء القائمة <HiOutlineChevronLeft />
-                                </button>
-                            )}
                         </div>
                     </div>
 
