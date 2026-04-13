@@ -59,6 +59,7 @@ const StudentDashboard = () => {
     const [completedCourses, setCompletedCourses] = useState([])
     const [certificates, setCertificates] = useState([])
     const [myNotes, setMyNotes] = useState([])
+    const [videoStats, setVideoStats] = useState(null)
 
     useEffect(() => {
         const token = localStorage.getItem('access_token');
@@ -146,6 +147,12 @@ const StudentDashboard = () => {
                     file: c.pdf_file
                 })));
             }).catch(console.error);
+            
+        // Fetch Video Stats
+        fetch(API + '/api/interactions/video-stats/', { headers })
+            .then(res => res.json())
+            .then(data => setVideoStats(data))
+            .catch(console.error);
 
         fetch(API + '/api/interactions/notes/', { headers })
             .then(res => res.json())
@@ -676,6 +683,57 @@ const StudentDashboard = () => {
                                 </form>
                             </div>
                         </div>
+                        
+                        {/* Video Stats Section */}
+                        <div className="section-header-row mt-6 pt-6" style={{borderTop: '1px solid rgba(255,255,255,0.1)'}}>
+                            <h2 className="dash-section-title">إحصائيات تفاعلات وأسئلة الفيديو 📊</h2>
+                        </div>
+                        {videoStats && (
+                            <div className="dash-profile-card glass-panel premium-profile video-stats-card" style={{marginTop: '20px'}}>
+                                <div style={{display: 'flex', gap: '20px', justifyContent: 'center', marginBottom: '30px', flexWrap: 'wrap'}}>
+                                     <div className="glass-panel" style={{padding: '20px', borderRadius: '15px', textAlign: 'center', minWidth: '150px', background: 'rgba(56, 189, 248, 0.1)', border: '1px solid rgba(56, 189, 248, 0.3)'}}>
+                                         <h3 style={{fontSize: '2rem', color: '#38bdf8', margin: '0 0 5px 0'}}>{videoStats.total_lessons_watched}</h3>
+                                         <p style={{margin: 0, fontSize: '0.9rem', color: 'rgba(255,255,255,0.7)'}}>دروس تمت مشاهدتها</p>
+                                     </div>
+                                     <div className="glass-panel" style={{padding: '20px', borderRadius: '15px', textAlign: 'center', minWidth: '150px', background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.3)'}}>
+                                         <h3 style={{fontSize: '2rem', color: '#10b981', margin: '0 0 5px 0'}}>{videoStats.overall_correct_percentage}%</h3>
+                                         <p style={{margin: 0, fontSize: '0.9rem', color: 'rgba(255,255,255,0.7)'}}>دقة الإجابات الكلية</p>
+                                     </div>
+                                </div>
+                                <div style={{display: 'flex', flexDirection: 'column', gap: '15px'}}>
+                                {videoStats.lesson_stats.map((ls, idx) => (
+                                    <div key={idx} className="glass-panel" style={{padding: '15px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)'}}>
+                                        <h4 style={{fontSize: '1.2rem', color: '#fff', marginBottom: '10px'}}>{ls.lesson_title}</h4>
+                                        <div style={{display: 'flex', gap: '15px', fontSize: '0.9rem', color: 'rgba(255,255,255,0.7)', paddingBottom: '10px', borderBottom: '1px solid rgba(255,255,255,0.1)', marginBottom: '15px', flexWrap: 'wrap'}}>
+                                            <span>مرات المشاهدة: <strong style={{color: '#fff'}}>{ls.total_views}</strong></span>
+                                            <span>الإجابات الصحيحة: <strong style={{color: '#fff'}}>{ls.correct_answers} من {ls.total_answers}</strong></span>
+                                            <span style={{color: (ls.total_answers ? (ls.correct_answers/ls.total_answers >= 0.5 ? '#10b981' : '#ef4444') : '#aaa')}}>
+                                                النسبة: {ls.total_answers ? Math.round((ls.correct_answers/ls.total_answers)*100) : 0}%
+                                            </span>
+                                        </div>
+                                        <h5 style={{color: '#fff', fontSize: '0.95rem', marginBottom: '10px'}}>سجل المشاهدات (آخر 5 جلسات):</h5>
+                                        <div style={{display: 'flex', flexDirection: 'column', gap: '8px'}}>
+                                            {ls.sessions.map((sess, sidx) => (
+                                                <div key={sidx} style={{background: 'rgba(0,0,0,0.3)', padding: '10px 15px', borderRadius: '8px', fontSize: '0.85rem', color: 'rgba(255,255,255,0.8)', display: 'flex', flexWrap: 'wrap', gap: '15px', alignItems: 'center'}}>
+                                                    <span>تاريخ: <strong style={{color: '#fff'}}>{new Date(sess.created_at).toLocaleString('ar-IQ')}</strong></span>
+                                                    <div style={{display: 'flex', gap: '8px', alignItems: 'center'}}>
+                                                        <span>الإجابات المرفوعة:</span>
+                                                        {sess.answers.map((ans, aidx) => (
+                                                            <span key={aidx} style={{padding: '2px 8px', borderRadius: '4px', background: ans.is_correct ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.2)', border: `1px solid ${ans.is_correct ? 'rgba(16, 185, 129, 0.4)' : 'rgba(239, 68, 68, 0.4)'}`, color: ans.is_correct ? '#34d399' : '#f87171'}}>
+                                                                السؤال {ans.quiz_index + 1} {ans.is_correct ? '✅' : '❌'}
+                                                            </span>
+                                                        ))}
+                                                        {sess.answers.length === 0 && <span style={{opacity: 0.5}}>لم يُجب على أي سؤال</span>}
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                ))}
+                                {videoStats.lesson_stats.length === 0 && <p style={{textAlign: 'center', color: 'rgba(255,255,255,0.5)', padding: '20px'}}>لم تقم بمشاهدة أي دروس توفر أسئلة ضمن الفيديو حتى الآن.</p>}
+                                </div>
+                            </div>
+                        )}
                     </motion.div>
                 )}
             </main>
