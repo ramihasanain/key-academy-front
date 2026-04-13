@@ -21,7 +21,9 @@ import {
     HiOutlineBeaker,
     HiOutlineCheckCircle,
     HiOutlineNoSymbol,
-    HiOutlineXMark
+    HiOutlineXMark,
+    HiOutlineComputerDesktop,
+    HiOutlineGlobeAlt
 } from 'react-icons/hi2'
 import { HiHeart, HiCheckCircle } from 'react-icons/hi'
 import ParticleBackground from '../components/ParticleBackground'
@@ -439,8 +441,15 @@ const TabNotes = ({ lessonId }) => {
         const t = localStorage.getItem('access_token')
         fetch(`${API}/api/interactions/notes/`, {
             method: 'POST', headers: { 'Authorization': `Bearer ${t}`, 'Content-Type': 'application/json' },
-            body: JSON.stringify({ lesson: lessonId, content: input })
+            body: JSON.stringify({ lesson: lessonId, content: input, source: 'web' })
         }).then(r => r.json()).then(d => { setNotes([d, ...notes]); setInput('') })
+    }
+
+    const fmt = (s) => {
+        if(!s && s !== 0) return '0:00';
+        const m = Math.floor(s/60);
+        const sec = s%60;
+        return `${m}:${sec.toString().padStart(2,'0')}`;
     }
 
     return (
@@ -454,8 +463,17 @@ const TabNotes = ({ lessonId }) => {
             {loading ? <p>جاري التحميل...</p> : notes.length === 0 ? <p style={{ color: '#94a3b8' }}>ماكو أي ملاحظات مسجلة.</p> : notes.map(n => (
                 <div key={n.id} className="lv-note-card">
                     <div className="lv-nc-strip"></div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                        <span className="lv-nc-date" style={{ marginBottom: 0 }}>
+                            {n.source === 'app' ? (
+                                <span style={{display: 'flex', alignItems: 'center', gap: '5px', color: '#8b5cf6', fontWeight: 'bold'}}><HiOutlineComputerDesktop /> كُتب من التطبيق {n.video_time != null && `[${fmt(n.video_time)}]`}</span>
+                            ) : (
+                                <span style={{display: 'flex', alignItems: 'center', gap: '5px', color: '#64748b'}}><HiOutlineGlobeAlt /> كُتب من المنصة</span>
+                            )}
+                        </span>
+                        <span className="lv-nc-date" style={{fontSize: '0.75rem', marginBottom: 0}}>يوم: {new Date(n.created_at).toLocaleDateString('ar-IQ')}</span>
+                    </div>
                     <p>{n.content}</p>
-                    <span className="lv-nc-date">انحفظت بيوم: {new Date(n.created_at).toLocaleDateString('ar-IQ')}</span>
                 </div>
             ))}
         </div>
