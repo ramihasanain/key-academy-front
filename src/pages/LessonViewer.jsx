@@ -111,7 +111,7 @@ const ViewVideo = ({ videoUrl, lessonId, isCompleted, onComplete }) => {
     )
 }
 
-const ViewSlides = ({ lessonInfo, userData }) => {
+const ViewSlides = ({ lessonInfo, lessonContent, userData }) => {
     const containerRef = useRef(null);
     const [isFullscreen, setIsFullscreen] = useState(false);
 
@@ -146,8 +146,10 @@ const ViewSlides = ({ lessonInfo, userData }) => {
         );
     };
 
-    if (lessonInfo?.interactive_html) {
-        const rawCode = lessonInfo.interactive_html.trim();
+    const slidesHtml = lessonContent?.interactive_html || lessonInfo?.interactive_html;
+
+    if (slidesHtml) {
+        const rawCode = slidesHtml.trim();
         const isIframe = rawCode.toLowerCase().startsWith('<iframe');
 
         return (
@@ -1010,8 +1012,10 @@ const LessonViewer = () => {
     const courseId = urlParams.get('course')
 
     const [lessonInfo, setLessonInfo] = useState(null)
+    const [lessonContent, setLessonContent] = useState(null)
     const [lessonList, setLessonList] = useState([])
     const [isLoading, setIsLoading] = useState(true)
+    const [isLoadingContent, setIsLoadingContent] = useState(false)
     const [userData, setUserData] = useState(null)
 
     useEffect(() => {
@@ -1028,45 +1032,60 @@ const LessonViewer = () => {
         }
     }, [navigate])
 
+    // 1. Fetch Lesson Basic Info (Lightweight)
     useEffect(() => {
         if (lessonId) {
+            setIsLoading(true);
+            setLessonContent(null); // Reset content when switching lessons
             fetch(`${API}/api/courses/lessons/${lessonId}/`)
                 .then(res => res.json())
                 .then(data => {
-                    // Update to match backend structure
-                    if (courseId) {
-                        // Check completion status from courses endpoint
-                        const token = localStorage.getItem('access_token');
-                        fetch(`${API}/api/courses/${courseId}/`, {
-                            headers: { 'Authorization': `Bearer ${token}` }
-                        })
-                            .then(r => r.json())
-                            .then(courseData => {
-                                let completed = false;
-                                let allLessons = [];
-                                courseData.modules?.forEach(m => {
-                                    if (m.lessons) allLessons.push(...m.lessons);
-                                    const found = m.lessons?.find(l => l.id == lessonId);
-                                    if (found && found.is_completed) completed = true;
-                                });
-                                setLessonList(allLessons);
-                                setLessonInfo({ ...data, is_completed: completed });
-                                setIsLoading(false);
-                            }).catch(() => {
-                                setLessonInfo(data)
-                                setIsLoading(false)
-                            })
-                    } else {
-                        setLessonInfo(data)
-                        setIsLoading(false)
-                    }
+                    setLessonInfo(data);
+                    setIsLoading(false);
                 })
                 .catch(err => {
-                    console.error('Failed to fetch lesson', err)
-                    setIsLoading(false)
-                })
+                    console.error('Failed to fetch lesson', err);
+                    setIsLoading(false);
+                });
         }
-    }, [lessonId, courseId])
+    }, [lessonId]);
+
+    // 2. Fetch Sidebar/Playlist (Once per courseId)
+    useEffect(() => {
+        if (courseId && lessonList.length === 0) {
+            const token = localStorage.getItem('access_token');
+            const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+            fetch(`${API}/api/courses/${courseId}/`, { headers })
+                .then(res => res.json())
+                .then(courseData => {
+                    let allLessons = [];
+                    courseData.modules?.forEach(m => {
+                        m.lessons?.forEach(l => {
+                            allLessons.push({ ...l, unitTitle: m.title });
+                        });
+                    });
+                    setLessonList(allLessons);
+                })
+                .catch(err => console.error('Failed to fetch playlist', err));
+        }
+    }, [courseId, lessonList.length]);
+
+    // 3. Lazy Load Heavy Content (Slides/Text)
+    useEffect(() => {
+        if (activeContent === 'slides' && lessonId && !lessonContent && !isLoadingContent) {
+            setIsLoadingContent(true);
+            fetch(`${API}/api/courses/lessons/${lessonId}/content/`)
+                .then(res => res.json())
+                .then(data => {
+                    setLessonContent(data);
+                    setIsLoadingContent(false);
+                })
+                .catch(err => {
+                    console.error("Error loading slides content:", err);
+                    setIsLoadingContent(false);
+                });
+        }
+    }, [activeContent, lessonId, lessonContent, isLoadingContent]);
 
     const handleMarkComplete = () => {
         const token = localStorage.getItem('access_token');
@@ -1237,7 +1256,16 @@ const LessonViewer = () => {
                     <div className={`lv-portal cv-super-glass ${(activeContent === 'slides' || activeContent === 'quiz') ? 'free-ratio' : ''}`} style={activeContent === 'slides' ? { height: '85vh', display: 'flex', flexDirection: 'column', padding: 0 } : activeContent === 'quiz' ? { minHeight: '85vh', display: 'flex', flexDirection: 'column', padding: 0 } : {}}>
                         <AnimatePresence mode="wait">
                             {activeContent === 'video' && <motion.div key="v" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="lv-portal-inner"><ViewVideo videoUrl={lessonInfo?.video_url} lessonId={lessonId} isCompleted={lessonInfo?.is_completed} onComplete={handleMarkComplete} /></motion.div>}
-                            {activeContent === 'slides' && <motion.div key="s" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="lv-portal-inner"><ViewSlides lessonInfo={lessonInfo} userData={userData} /></motion.div>}
+                            {activeContent === 'slides' && <motion.div key="s" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="lv-portal-inner">
+                                {isLoadingContent ? (
+                                    <div className="lv-screen" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                                        <div className="lv-qi-badge" style={{ animation: 'aiCharFloat 2s infinite ease-in-out' }}><HiOutlineSparkles /></div>
+                                        <h3 style={{ color: 'var(--purple)', marginTop: '20px' }}>جاري تحميل الملفات التفاعلية...</h3>
+                                    </div>
+                                ) : (
+                                    <ViewSlides lessonInfo={lessonInfo} lessonContent={lessonContent} userData={userData} />
+                                )}
+                            </motion.div>}
                             {activeContent === 'quiz' && <motion.div key="q" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="lv-portal-inner"><ViewQuiz lessonId={lessonId} /></motion.div>}
                         </AnimatePresence>
                     </div>
