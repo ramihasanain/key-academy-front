@@ -35,7 +35,7 @@ export const TAStudent360 = () => {
     if (loading) return <div className="hq-loading" style={{ padding: '50px' }}>جاري سحب بيانات الطالب التفصيلية (360)...</div>
     if (!data) return <div className="hq-loading" style={{ color: 'red' }}>لم يتم العثور على الطالب.</div>
 
-    const { student, courses, history, quizzes, interactions } = data
+    const { student, courses, history, quizzes, interactions, video_stats } = data
 
     return (
         <div className="hq-form-wrap" style={{ maxWidth: '1400px', margin: '0 auto', padding: '20px' }}>
@@ -86,6 +86,13 @@ export const TAStudent360 = () => {
                     <div className="hq-sc-info">
                         <h3 style={{ fontSize: '0.85rem', color: 'var(--hq-text-muted)' }}>رسائل المجموعات</h3>
                         <div className="hq-sc-value" style={{ fontSize: '1.3rem', color: 'var(--hq-primary-text)' }}>{interactions?.group_msgs || 0}</div>
+                    </div>
+                </div>
+                <div className="hq-stat-card" style={{ padding: '15px' }}>
+                    <div className="hq-sc-icon" style={{ background: 'rgba(16, 185, 129, 0.1)', color: '#10b981', width: '40px', height: '40px' }}><HiOutlineClipboardDocumentCheck size={20} /></div>
+                    <div className="hq-sc-info">
+                        <h3 style={{ fontSize: '0.85rem', color: 'var(--hq-text-muted)' }}>تفاعلات الفيديو</h3>
+                        <div className="hq-sc-value" style={{ fontSize: '1.3rem', color: 'var(--hq-primary-text)' }}>{video_stats?.overall_correct_pct || 0}%</div>
                     </div>
                 </div>
             </div>
@@ -205,6 +212,44 @@ export const TAStudent360 = () => {
                                             <span style={{ fontSize: '0.75rem', color: 'var(--hq-text-muted)' }}>
                                                 {h.last_visited ? new Date(h.last_visited).toLocaleDateString('ar-EG') : 'غير محدد'}
                                             </span>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Video Stats Details */}
+                    <div className="hq-card" style={{ padding: '20px' }}>
+                        <h3 style={{ marginTop: 0, marginBottom: '15px', color: 'var(--hq-primary-text)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <HiOutlineChartBar /> إحصائيات أسئلة الفيديو ({video_stats?.total_lessons || 0})
+                        </h3>
+                        {!video_stats || video_stats.lesson_stats.length === 0 ? <p style={{ color: 'var(--hq-text-muted)' }}>لا توجد تفاعلات وتجارب أسئلة مسجلة.</p> : (
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                                {video_stats.lesson_stats.map((ls, idx) => (
+                                    <div key={idx} style={{ background: 'rgba(255,255,255,0.02)', padding: '15px', borderRadius: '10px', border: '1px solid var(--hq-border)' }}>
+                                        <div style={{ fontWeight: 'bold', fontSize: '0.95rem', color: 'var(--hq-primary-text)', marginBottom: '10px' }}>{ls.lesson_title}</div>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: 'var(--hq-text-muted)', marginBottom: '10px', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '8px' }}>
+                                            <span>مرات المشاهدة: <strong style={{color: 'var(--hq-primary-text)'}}>{ls.total_views}</strong></span>
+                                            <span>دقة الإجابات: <strong style={{color: ls.total_answers ? (ls.correct_answers/ls.total_answers >= 0.5 ? '#10b981' : '#ef4444') : 'inherit'}}>{ls.total_answers ? Math.round((ls.correct_answers/ls.total_answers)*100) : 0}%</strong></span>
+                                        </div>
+                                        
+                                        <div style={{ fontSize: '0.8rem', color: 'var(--hq-primary-text)', marginBottom: '5px' }}>سجل المشاهدات:</div>
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                                            {ls.sessions.slice(0,3).map((sess, sidx) => (
+                                                <div key={sidx} style={{ display: 'flex', justifyContent: 'space-between', background: 'rgba(0,0,0,0.2)', padding: '5px 10px', borderRadius: '6px', fontSize: '0.75rem' }}>
+                                                    <span style={{color: 'var(--hq-text-muted)'}}>{new Date(sess.created_at).toLocaleDateString('ar-EG')}</span>
+                                                    <div style={{ display: 'flex', gap: '4px' }}>
+                                                        {sess.answers.length === 0 ? <span style={{opacity: 0.5}}>مكتمل بدون أسئلة</span> : (
+                                                            sess.answers.map((ans, aidx) => (
+                                                                <span key={aidx} style={{ padding: '1px 5px', borderRadius: '4px', background: ans.is_correct ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.2)', border: `1px solid ${ans.is_correct ? 'rgba(16, 185, 129, 0.3)' : 'rgba(239, 68, 68, 0.3)'}`, color: ans.is_correct ? '#34d399' : '#f87171' }}>
+                                                                    Q{ans.quiz_index + 1} {ans.is_correct ? '✅' : '❌'}
+                                                                </span>
+                                                            ))
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            ))}
                                         </div>
                                     </div>
                                 ))}
