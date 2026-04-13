@@ -1112,3 +1112,8 @@
     .lv-tabs-row { overflow-x: auto; }
     .lv-tab-btn { white-space: nowrap; flex-shrink: 0; }
 }
+. l v - s i d e b a r . c o l l a p s e d  
+   w i d t h :   0 ;   p a d d i n g :   0 ;   b o r d e r :   n o n e ;   o p a c i t y :   0 ;   p o i n t e r - e v e n t s :   n o n e ;   m a r g i n :   0 ;    
+ . l v - c o n t e n t - w r a p p e r . f u l l s c r e e n  
+   p a d d i n g - l e f t :   2 0 p x ;   p a d d i n g - r i g h t :   2 0 p x ;   m a x - w i d t h :   1 6 0 0 p x ;   g a p :   0 ;    
+ 
