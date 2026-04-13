@@ -1015,6 +1015,11 @@ const LessonViewer = () => {
     const [isLoadingContent, setIsLoadingContent] = useState(false)
     const [userData, setUserData] = useState(null)
 
+    const [activeContent, setActiveContent] = useState('video')
+    const [activeTab, setActiveTab] = useState('notes')
+    const [previewCode, setPreviewCode] = useState('')
+    const [isActivating, setIsActivating] = useState(false)
+
     useEffect(() => {
         const token = localStorage.getItem('access_token')
         if (!token || token === 'undefined' || token === 'null' || token.trim() === '') {
@@ -1126,11 +1131,6 @@ const LessonViewer = () => {
     }
 
     const isPreview = urlParams.get('preview') === 'true'
-
-    const [activeContent, setActiveContent] = useState('video')
-    const [activeTab, setActiveTab] = useState('notes')
-    const [previewCode, setPreviewCode] = useState('')
-    const [isActivating, setIsActivating] = useState(false)
 
     useEffect(() => { window.scrollTo(0, 0) }, [])
 
