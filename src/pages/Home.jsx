@@ -250,7 +250,7 @@ const Home = () => {
                                 <div className={`glass-card teacher-card color-${teacher.color}`} style={teacher.color?.startsWith('#') ? { background: teacher.color, borderColor: 'transparent', boxShadow: `0 10px 30px ${teacher.color}33` } : {}}>
                                     <div className="tc-image-wrapper">
                                         {teacher.image ? (
-                                            <img src={teacher.image} alt={teacher.name} />
+                                            <img src={teacher.image} alt={teacher.name} loading=" lazy\ decoding=\async\ />
                                         ) : (
                                             <div className="tc-avatar-placeholder">{teacher.initials}</div>
                                         )}
