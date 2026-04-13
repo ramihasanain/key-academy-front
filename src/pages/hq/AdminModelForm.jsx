@@ -380,20 +380,15 @@ export const AdminModelForm = () => {
                                         </select>
                                     ) : f.type === 'multiselect' ? (
                                         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '200px', overflowY: 'auto', background: 'var(--hq-surface)', padding: '10px', border: '1px solid var(--hq-border)', borderRadius: '12px' }}>
-                                            {(() => {
-                                                let optionsToRender = dynamicOptions[f.key] || f.options || [];
-                                                if (model === 'teacherassistants' && f.key === 'courses') {
-                                                    const selectedTeacherId = formData['teacher'];
-                                                    if (!selectedTeacherId) {
-                                                        return <div style={{ color: 'var(--hq-text-muted)', textAlign: 'center', fontSize: '0.9rem' }}>يرجى اختيار الأستاذ أولاً لتظهر دوراته.</div>;
-                                                    }
-                                                    optionsToRender = optionsToRender.filter(opt => opt.raw && opt.raw.teacher == selectedTeacherId);
-                                                    if (optionsToRender.length === 0) {
-                                                        return <div style={{ color: 'var(--hq-text-muted)', textAlign: 'center', fontSize: '0.9rem' }}>الأستاذ المختار لا يملك أي دورات حالياً.</div>;
-                                                    }
-                                                }
-
-                                                return optionsToRender.map(opt => {
+                                            {model === 'teacherassistants' && f.key === 'courses' && !formData['teacher'] ? (
+                                                <div style={{ color: 'var(--hq-text-muted)', textAlign: 'center', fontSize: '0.9rem' }}>يرجى اختيار الأستاذ أولاً لتظهر دوراته.</div>
+                                            ) : model === 'teacherassistants' && f.key === 'courses' && (dynamicOptions[f.key] || f.options || []).filter(opt => opt.raw && opt.raw.teacher == formData['teacher']).length === 0 ? (
+                                                <div style={{ color: 'var(--hq-text-muted)', textAlign: 'center', fontSize: '0.9rem' }}>الأستاذ المختار لا يملك أي دورات حالياً.</div>
+                                            ) : (
+                                                ((model === 'teacherassistants' && f.key === 'courses') 
+                                                    ? (dynamicOptions[f.key] || f.options || []).filter(opt => opt.raw && opt.raw.teacher == formData['teacher'])
+                                                    : (dynamicOptions[f.key] || f.options || [])
+                                                ).map(opt => {
                                                     const currentVals = Array.isArray(formData[f.key]) ? formData[f.key] : [];
                                                     const isChecked = currentVals.includes(opt.value);
                                                     return (
@@ -411,7 +406,7 @@ export const AdminModelForm = () => {
                                                         </label>
                                                     )
                                                 })
-                                            })()}
+                                            )}
                                         </div>
                                     ) : (
                                         <input
