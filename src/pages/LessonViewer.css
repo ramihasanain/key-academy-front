@@ -1214,3 +1214,8 @@
     padding: 16px 28px !important;
     border-radius: 18px !important;
 }
+
+.lv-sidebar { max-height: calc(100vh - 120px); }
+.lv-sb-items { overflow-y: auto; flex: 1; }
+.lv-sb-items::-webkit-scrollbar { width: 4px; }
+.lv-sb-items::-webkit-scrollbar-thumb { background: rgba(131, 42, 150, 0.15); border-radius: 10px; }
