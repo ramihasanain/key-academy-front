@@ -187,12 +187,12 @@ const Home = () => {
                     <SectionTitle title="ليش تختار Key Academy؟" subtitle="نوفرلك تجربة دراسة متكاملة تجمع بين التطور التقني وأقوى الأساتذة بالعراق" />
                     <div className="features-grid">
                         {[
-                            { icon: <HiOutlineCpuChip />, color: 'indigo', title: 'ذكاء اصطناعي يساعدك', desc: 'تقنيات AI تحلل مستواك وتنطيك خطة دراسية مثالية' },
+                            { icon: <HiOutlineCpuChip />, color: 'purple', title: 'ذكاء اصطناعي يساعدك', desc: 'تقنيات AI تحلل مستواك وتنطيك خطة دراسية مثالية' },
                             { icon: <FaChalkboardTeacher />, color: 'purple', title: 'عمالقة التدريس', desc: 'وفرنالك نخبة أساتذة العراق واكثرهم خبرة حتى تضمن الدرجة الكاملة والمعدل العالي' },
-                            { icon: <HiOutlineBookOpen />, color: 'blue', title: 'مناهج شاملة', desc: 'تغطية كاملة لكافة مناهج الثالث المتوسط والسادس الإعدادي بفرعيه العلمي والأدبي' },
-                            { icon: <HiOutlineChatBubbleLeftRight />, color: 'orange', title: 'تواصل مباشر', desc: 'تكدر تسأل وتتواصل ويه أساتذتك ومساعديهم بكل وقت وبدون أي تأخير' },
-                            { icon: <HiOutlineChartBarSquare />, color: 'pink', title: 'متابعة مستواك', desc: 'لوحة ذكية تشوف منها تقدمك بالمواد وتعرف وين نقاط ضعفك حتى تقويها وتسيطر' },
-                            { icon: <HiOutlineAcademicCap />, color: 'green', title: 'شهادات إنجاز', desc: 'احصل على شهادة إتمام الدورة بعد إنجازها' },
+                            { icon: <HiOutlineBookOpen />, color: 'purple', title: 'مناهج شاملة', desc: 'تغطية كاملة لكافة مناهج الثالث المتوسط والسادس الإعدادي بفرعيه العلمي والأدبي' },
+                            { icon: <HiOutlineChatBubbleLeftRight />, color: 'purple', title: 'تواصل مباشر', desc: 'تكدر تسأل وتتواصل ويه أساتذتك ومساعديهم بكل وقت وبدون أي تأخير' },
+                            { icon: <HiOutlineChartBarSquare />, color: 'purple', title: 'متابعة مستواك', desc: 'لوحة ذكية تشوف منها تقدمك بالمواد وتعرف وين نقاط ضعفك حتى تقويها وتسيطر' },
+                            { icon: <HiOutlineAcademicCap />, color: 'purple', title: 'شهادات إنجاز', desc: 'احصل على شهادة إتمام الدورة بعد إنجازها' },
                         ].map((feature, i) => (
                             <motion.div key={i} className={`feature-card color-${feature.color}`} variants={fadeInUp} initial="hidden" whileInView="visible" viewport={{ once: true, margin: '-50px' }} custom={i}>
                                 <div className="feature-icon">{feature.icon}</div>
