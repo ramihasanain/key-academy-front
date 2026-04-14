@@ -8,16 +8,17 @@
 }
 
 .about-hero h1 {
-    font-size: 3rem;
+    font-size: 4rem;
     font-weight: 900;
     margin-bottom: 16px;
 }
 
 .about-hero p {
-    font-size: 1.15rem;
+    font-size: 1.35rem;
     color: var(--text-secondary);
-    max-width: 600px;
+    max-width: 700px;
     margin: 0 auto;
+    line-height: 1.8;
 }
 
 .about-story {
@@ -32,16 +33,16 @@
 }
 
 .about-story-text h3 {
-    font-size: 2rem;
+    font-size: 2.5rem;
     font-weight: 800;
     margin-bottom: 20px;
 }
 
 .about-story-text p {
     color: var(--text-secondary);
-    font-size: 1.05rem;
-    line-height: 1.9;
-    margin-bottom: 16px;
+    font-size: 1.2rem;
+    line-height: 2;
+    margin-bottom: 20px;
 }
 
 .about-vision-graphic {
@@ -105,15 +106,15 @@
 }
 
 .value-card h4 {
-    font-size: 1.15rem;
+    font-size: 1.35rem;
     font-weight: 700;
     margin-bottom: 12px;
 }
 
 .value-card p {
     color: var(--text-secondary);
-    font-size: 0.95rem;
-    line-height: 1.7;
+    font-size: 1.05rem;
+    line-height: 1.8;
 }
 
 /* Goals Section */
@@ -194,7 +195,7 @@
 }
 
 .goal-card h4 {
-    font-size: 1.15rem;
+    font-size: 1.3rem;
     font-weight: 700;
     line-height: 1.6;
     margin: 0;
@@ -216,6 +217,6 @@
     }
 
     .about-hero h1 {
-        font-size: 2.2rem;
+        font-size: 2.6rem;
     }
 }
