@@ -39,21 +39,45 @@ const Grades = () => {
     const [loading, setLoading] = useState(true)
 
     useEffect(() => {
-        setLoading(true)
         if (gradeId) {
+            setLoading(true)
             // جلب تفاصيل صف معين مع المواد
+            const cacheKey = `cached_grade_detail_${gradeId}`
+            const cached = sessionStorage.getItem(cacheKey)
+            if (cached) {
+                try {
+                    setGradeDetail(JSON.parse(cached))
+                    setLoading(false)
+                } catch (e) {}
+            }
+
             fetch(`${API_BASE}/content/grades/${gradeId}/`)
                 .then(res => res.json())
                 .then(data => {
                     setGradeDetail(data)
+                    sessionStorage.setItem(cacheKey, JSON.stringify(data))
                     setLoading(false)
                 })
                 .catch(() => setLoading(false))
         } else {
             // جلب كل الصفوف ثم تفاصيل كل واحد
+            const cacheKey = 'cached_detailed_grades_list'
+            const cached = sessionStorage.getItem(cacheKey)
+            if (cached) {
+                try {
+                    setGrades(JSON.parse(cached))
+                    setLoading(false)
+                } catch (e) {}
+            } else {
+                setLoading(true)
+            }
+
             fetch(`${API_BASE}/content/grades/`)
                 .then(res => res.json())
                 .then(async (gradesList) => {
+                    // Cache the basic list for use in Navbar and Home
+                    sessionStorage.setItem('cached_basic_grades_list', JSON.stringify(gradesList))
+                    
                     // جلب تفاصيل كل صف مع المواد
                     const detailed = await Promise.all(
                         gradesList.map(g =>
@@ -62,9 +86,12 @@ const Grades = () => {
                         )
                     )
                     setGrades(detailed)
+                    sessionStorage.setItem(cacheKey, JSON.stringify(detailed))
                     setLoading(false)
                 })
-                .catch(() => setLoading(false))
+                .catch(() => {
+                    if (!cached) setLoading(false)
+                })
         }
     }, [gradeId])
 
