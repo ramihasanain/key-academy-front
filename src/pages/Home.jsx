@@ -212,11 +212,13 @@ const Home = () => {
                         style={{ paddingBottom: '50px' }}
                     >
                         {teachers.map((teacher, i) => {
-                            const colors = ['blue', 'pink', 'orange', 'purple', 'green', 'teal'];
-                            const assignedColor = colors[i % colors.length];
+                            // Fallback to cyclic colors only if color is completely missing
+                            const fallbackColors = ['blue', 'pink', 'orange', 'purple', 'green', 'teal'];
+                            const colorValue = teacher.color || fallbackColors[i % fallbackColors.length];
+                            
                             return (
                             <SwiperSlide key={teacher.id}>
-                                <div className={`glass-card teacher-card color-${assignedColor}`}>
+                                <div className={`glass-card teacher-card color-${colorValue}`} style={colorValue?.startsWith('#') ? { background: colorValue, borderColor: 'transparent', boxShadow: `0 10px 30px ${colorValue}33` } : {}}>
                                     <div className="tc-image-wrapper">
                                         {teacher.image ? (
                                             <img src={teacher.image} alt={teacher.name} loading="lazy" decoding="async" />
