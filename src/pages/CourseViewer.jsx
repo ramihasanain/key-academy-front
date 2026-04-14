@@ -559,9 +559,9 @@ const CourseViewer = () => {
 
                                     {/* Watermark Overlay */}
                                     {userData && (
-                                        <div style={{ position: 'absolute', top: 0, right: 0, bottom: 0, left: 0, pointerEvents: 'none', overflow: 'hidden', display: 'flex', flexWrap: 'wrap', gap: '50px', justifyContent: 'center', alignContent: 'center', opacity: 0.06, zIndex: 5 }}>
+                                        <div style={{ position: 'absolute', top: 0, right: 0, bottom: 0, left: 0, pointerEvents: 'none', overflow: 'hidden', display: 'flex', flexWrap: 'wrap', gap: '50px', justifyContent: 'center', alignContent: 'center', opacity: 0.08, mixBlendMode: 'difference', zIndex: 5 }}>
                                             {Array.from({ length: 40 }).map((_, i) => (
-                                                <div key={i} style={{ transform: 'rotate(-35deg)', fontSize: '24px', fontWeight: 'bold', color: 'black', whiteSpace: 'nowrap', userSelect: 'none' }}>
+                                                <div key={i} style={{ transform: 'rotate(-35deg)', fontSize: '24px', fontWeight: 'bold', color: '#fff', whiteSpace: 'nowrap', userSelect: 'none' }}>
                                                     {userData?.username || 'Student'}
                                                 </div>
                                             ))}
