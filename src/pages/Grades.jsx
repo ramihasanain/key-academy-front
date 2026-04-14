@@ -126,7 +126,7 @@ const Grades = () => {
                                         <div className={`s-icon ${subject.icon_class}`}>{iconMap[subject.icon_class] || <FaBook />}</div>
                                         <h4>{subject.name}</h4>
                                         <span className="course-count">{subject.courses_count} دورات متاحة</span>
-                                        <Link to="/login" className="btn-primary">سجل بالدورة</Link>
+                                        <Link to={`/teachers?subject=${encodeURIComponent(subject.name)}&grade=${gradeId && gradeId.includes('sixth') ? 'السادس' : (gradeId && gradeId.includes('third') ? 'الثالث' : 'all')}&branch=${gradeId && gradeId.includes('scientific') ? 'علمي' : (gradeId && gradeId.includes('literary') ? 'أدبي' : 'all')}`} className="btn-primary">شوف الأساتذة</Link>
                                     </motion.div>
                                 ))}
                             </div>
@@ -168,7 +168,7 @@ const Grades = () => {
                                         <div className={`s-icon ${subject.icon_class}`}>{iconMap[subject.icon_class] || <FaBook />}</div>
                                         <h4>{subject.name}</h4>
                                         <span className="course-count">{subject.courses_count} دورات متاحة</span>
-                                        <Link to="/login" className="btn-primary">سجل بالدورة</Link>
+                                        <Link to={`/teachers?subject=${encodeURIComponent(subject.name)}&grade=${data.slug && data.slug.includes('sixth') ? 'السادس' : (data.slug && data.slug.includes('third') ? 'الثالث' : 'all')}&branch=${data.slug && data.slug.includes('scientific') ? 'علمي' : (data.slug && data.slug.includes('literary') ? 'أدبي' : 'all')}`} className="btn-primary">شوف الأساتذة</Link>
                                     </motion.div>
                                 ))}
                             </div>

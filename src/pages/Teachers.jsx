@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { API } from '../config'
 import { motion } from 'framer-motion'
 import { FaStar } from 'react-icons/fa'
@@ -32,9 +32,14 @@ const EiffelTowerIcon = () => (
 )
 
 const Teachers = () => {
+    const [searchParams] = useSearchParams()
     const [allTeachers, setAllTeachers] = useState([])
     const [loading, setLoading] = useState(true)
-    const [filter, setFilter] = useState({ grade: 'all', branch: 'all', subject: 'all' })
+    const [filter, setFilter] = useState({ 
+        grade: searchParams.get('grade') || 'all', 
+        branch: searchParams.get('branch') || 'all', 
+        subject: searchParams.get('subject') || 'all' 
+    })
 
     useEffect(() => {
         const cachedTeachers = sessionStorage.getItem('cached_teachers_list');
