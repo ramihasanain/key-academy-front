@@ -20,6 +20,7 @@ import { FaRobot } from 'react-icons/fa'
 import SectionTitle from '../components/SectionTitle'
 import ParticleBackground from '../components/ParticleBackground'
 import KeyAiMascots from '../components/KeyAiMascots'
+import robotVideo from '../assets/robot_website.webm'
 import './Features.css'
 
 const fadeInUp = {
@@ -101,7 +102,14 @@ const Features = () => {
                                 <div style={{ position: 'absolute', top: '-40px', right: '50%', transform: 'translateX(50%)', background: 'var(--bg-glass)', border: '1px solid var(--pink)', padding: '5px 20px', borderRadius: '20px', color: 'var(--pink)', fontWeight: '900', boxShadow: '0 5px 20px rgba(236, 54, 101, 0.4)', zIndex: 10, letterSpacing: '1px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                                     <HiOutlineSparkles /> Key AI
                                 </div>
-                                <KeyAiMascots />
+                                <video 
+                                    src={robotVideo} 
+                                    autoPlay 
+                                    loop 
+                                    muted 
+                                    playsInline 
+                                    style={{ width: '100%', maxWidth: '450px', height: 'auto', objectFit: 'contain', filter: 'drop-shadow(0 20px 40px rgba(0,0,0,0.2))' }}
+                                />
                             </div>
                         </motion.div>
                     </div>

@@ -7,13 +7,14 @@ import { Autoplay, Pagination, EffectCards } from 'swiper/modules'
 import 'swiper/css'
 import 'swiper/css/pagination'
 import 'swiper/css/effect-cards'
-import { HiOutlineSparkles, HiOutlineLightBulb, HiOutlineAcademicCap, HiOutlineUserGroup, HiOutlineBookOpen, HiOutlineChatBubbleLeftRight, HiOutlineChartBar, HiOutlineChartBarSquare, HiOutlineCpuChip, HiOutlineRocketLaunch, HiOutlinePlay, HiOutlineDocumentText } from 'react-icons/hi2'
-import { FaBrain, FaChalkboardTeacher, FaGraduationCap } from 'react-icons/fa'
+import { HiOutlineSparkles, HiOutlineLightBulb, HiOutlineAcademicCap, HiOutlineUserGroup, HiOutlineBookOpen, HiOutlineChatBubbleLeftRight, HiOutlineChartBar, HiOutlineChartBarSquare, HiOutlineCpuChip, HiOutlineDocumentText } from 'react-icons/hi2'
+import { FaBrain, FaChalkboardTeacher, FaGraduationCap, FaPlay, FaRocket } from 'react-icons/fa'
 import AnimatedCounter from '../components/AnimatedCounter'
 import SectionTitle from '../components/SectionTitle'
 import Contact from './Contact'
 import './Home.css'
-
+import robotVideo from '../assets/robot_website.webm'
+import iconSlides from '../assets/icon-slides.png'
 const fadeInUp = {
     hidden: { opacity: 0, y: 40 },
     visible: (i = 0) => ({
@@ -59,125 +60,77 @@ const Home = () => {
         <div className="page-transition">
             {/* ===== HERO ===== */}
             <section className="hero">
-                {/* Mesh Background */}
-                <div className="hero-mesh">
-                    <div className="mesh-circle"></div>
-                    <div className="mesh-circle"></div>
-                    <div className="mesh-circle"></div>
-                    <div className="mesh-circle"></div>
-                </div>
-
-
-
-                <div className="container">
-                    <div className="hero-inner">
+                <div className="hero-container">
+                    <div className="hero-banner">
+                        
                         {/* Right Content (Text) */}
-                        <div className="hero-content-right">
-                            {/* Badge */}
+                        <div className="hero-banner-content">
                             <motion.div
-                                className="hero-badge"
-                                initial={{ opacity: 0, y: 20, scale: 0.9 }}
-                                animate={{ opacity: 1, y: 0, scale: 1 }}
-                                transition={{ duration: 0.5, type: 'spring' }}
+                                className="hero-banner-badge"
+                                initial={{ opacity: 0, y: -20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.5 }}
                             >
-                                <div className="hero-badge-dot"></div>
-                                مدعوم بالذكاء الاصطناعي
-                                <HiOutlineSparkles />
+                                <span className="hero-banner-badge-dot"></span>
+                                مدعوم بالذكاء الاصطناعي <HiOutlineSparkles />
                             </motion.div>
 
-                            {/* Title */}
                             <motion.h1
-                                className="hero-title"
-                                initial={{ opacity: 0, y: 30 }}
+                                className="hero-banner-title"
+                                initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
-                                transition={{ duration: 0.7, delay: 0.15 }}
+                                transition={{ duration: 0.6, delay: 0.1 }}
                             >
-                                <span className="hero-title-line1">
-                                    <span className="hero-title-gradient">العلم</span> مفتاح كل حلم
-                                </span>
+                                العلم مفتاح كل حلم
                             </motion.h1>
 
-                            {/* Subtitle */}
                             <motion.p
-                                className="hero-desc"
+                                className="hero-banner-desc"
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.6, delay: 0.2 }}
+                            >
+                                أول منصة عراقية تجمع عمالقة التدريس ويه الذكاء
+                                <br />
+                                الاصطناعي حتى تنطيك تجربة دراسة متطورة
+                            </motion.p>
+
+                            <motion.div
+                                className="hero-banner-actions"
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ duration: 0.6, delay: 0.3 }}
                             >
-                                أول منصة عراقية تجمع عمالقة التدريس ويه الذكاء الاصطناعي حتى تنطيك تجربة دراسة متطورة
-                            </motion.p>
-
-                            {/* CTA */}
-                            <motion.div
-                                className="hero-actions"
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ duration: 0.6, delay: 0.4 }}
-                            >
-                                <Link to="/signup" className="btn-primary">
-                                    <HiOutlineRocketLaunch />
-                                    يلا نبدي
+                                <Link to="/signup" className="hero-action-link">
+                                    <FaRocket className="hero-action-icon rocket-icon" />
+                                    <span className="hero-action-text">يلا نبدي</span>
                                 </Link>
-                                <Link to="/features" className="btn-secondary">
-                                    <HiOutlinePlay />
-                                    شوف المنصة شلون تشتغل
+                                <Link to="/features" className="hero-action-link">
+                                    <FaPlay className="hero-action-icon play-icon" />
+                                    <span className="hero-action-text">شوف المنصة شلون تشتغل</span>
                                 </Link>
                             </motion.div>
                         </div>
 
                         {/* Left Content (Visuals) */}
-                        <div className="hero-content-left">
-                            {/* ===== Key Logo ===== */}
-                            <motion.div
-                                className="hero-key-logo"
-                                initial={{ opacity: 0, scale: 0.8 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                transition={{ duration: 0.7, delay: 0.3, type: 'spring' }}
-                            >
-                                <img src="/key-icon-logo.png" alt="Key Academy Logo" />
-                            </motion.div>
+                        <div className="hero-banner-visuals">
+                            {/* Giant Robot Video */}
+                            <div className="hero-robot-wrapper">
+                                <video 
+                                    src={robotVideo} 
+                                    autoPlay 
+                                    loop 
+                                    muted 
+                                    playsInline 
+                                    className="hero-robot-video"
+                                />
+                            </div>
 
-                            {/* Feature Stat Cards (Now integrated into left column) */}
-                            <motion.div
-                                className="hero-stats-row"
-                                initial="hidden"
-                                animate="visible"
-                                variants={{
-                                    hidden: {},
-                                    visible: { transition: { staggerChildren: 0.1, delayChildren: 1.0 } }
-                                }}
-                            >
-                                {[
-                                    { icon: <HiOutlineBookOpen />, color: 'orange', value: <HiOutlineDocumentText size={28} className="text-orange" style={{ color: 'var(--orange)' }} />, label: 'ملاحظات خاصة بك' },
-                                    { icon: <HiOutlineCpuChip />, color: 'pink', value: <HiOutlineSparkles size={28} className="text-pink" style={{ color: 'var(--pink)' }} />, label: 'تقنيات الذكاء الاصطناعي' },
-                                    { icon: <FaChalkboardTeacher />, color: 'purple', value: <HiOutlineChartBar size={28} className="text-purple" style={{ color: 'var(--purple)' }} />, label: 'سلايدات مخصصة لكل درس' }
-                                ].map((stat, i) => (
-                                    <motion.div
-                                        key={i}
-                                        className="hero-stat-pill"
-                                        variants={{
-                                            hidden: { opacity: 0, y: 20 },
-                                            visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: 'easeOut' } }
-                                        }}
-                                        whileHover={{ scale: 1.05 }}
-                                    >
-                                        <div className={`stat-icon ${stat.color}`}>{stat.icon}</div>
-                                        <div className="stat-text" style={{ gap: '4px' }}>
-                                            <div className="mb-1">{stat.value}</div>
-                                            <span style={{ fontSize: '0.9rem', fontWeight: 'bold' }}>{stat.label}</span>
-                                        </div>
-                                    </motion.div>
-                                ))}
-                            </motion.div>
+                            {/* Floating Glass Cards PNG */}
+                            <img src={iconSlides} alt="ميزات المنصة" className="hero-floating-cards-img" />
                         </div>
-                    </div>
-                </div>
 
-                {/* Wave */}
-                <div className="hero-wave">
-                    <svg viewBox="0 0 1440 80" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
-                        <path d="M0 40C240 80 480 0 720 40C960 80 1200 0 1440 40V80H0V40Z" fill="var(--bg-secondary)" />
-                    </svg>
+                    </div>
                 </div>
             </section>
 

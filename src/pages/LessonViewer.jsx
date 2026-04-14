@@ -28,6 +28,7 @@ import {
 import { HiHeart, HiCheckCircle } from 'react-icons/hi'
 import ParticleBackground from '../components/ParticleBackground'
 import { Mascots } from '../components/KeyAiMascots'
+import robotVideo from '../assets/robot_website.webm'
 import { VirtualLabsData } from '../data/VirtualLabsData'
 import './LessonViewer.css'
 
@@ -929,9 +930,7 @@ const TabKeyAI = () => {
         }, 1200)
     }
 
-    const activeMascot = Mascots[activeMascotIndex];
-    const ActiveMain = activeMascot.Main;
-    const ActiveMini = activeMascot.Mini;
+    // Mascots logic removed in favor of the unified WebM robot
 
     const { lessonId } = useParams()
     const labContext = VirtualLabsData.find(l => l.id === lessonId) || VirtualLabsData[0]
@@ -939,26 +938,16 @@ const TabKeyAI = () => {
     return (
         <div className="lv-tab-pane lv-fade" style={{ minHeight: '500px', display: 'flex', gap: '30px' }}>
             {/* The Robot Mascot Area (First in RTL = Right side) */}
-            <div className="lv-ai-robot-side" style={{ flex: '0 0 280px', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', minHeight: '100%' }}>
+            <div className="lv-ai-robot-side" style={{ flex: '0 0 280px', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', minHeight: '100%', position: 'relative' }}>
                 <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%' }}>
-                    <ActiveMain />
-                </div>
-                {/* Switcher UI */}
-                <div className="mascot-switcher-ui">
-                    <button className="mascot-sw-btn" onClick={() => setActiveMascotIndex(prev => prev === 0 ? Mascots.length - 1 : prev - 1)}>
-                        <HiOutlineChevronRight />
-                    </button>
-                    <div className="mascot-sw-info">
-                        <span className="mascot-sw-name">{activeMascot.name}</span>
-                        <div className="mascot-sw-dots">
-                            {Mascots.map((_, idx) => (
-                                <span key={idx} className={`mascot-sw-dot ${idx === activeMascotIndex ? 'active' : ''}`} />
-                            ))}
-                        </div>
-                    </div>
-                    <button className="mascot-sw-btn" onClick={() => setActiveMascotIndex(prev => (prev + 1) % Mascots.length)}>
-                        <HiOutlineChevronLeft />
-                    </button>
+                    <video 
+                        src={robotVideo} 
+                        autoPlay 
+                        loop 
+                        muted 
+                        playsInline 
+                        style={{ width: '100%', maxWidth: '350px', height: 'auto', objectFit: 'contain', filter: 'drop-shadow(0 15px 30px rgba(0,0,0,0.15))' }}
+                    />
                 </div>
             </div>
 
@@ -976,7 +965,9 @@ const TabKeyAI = () => {
                     {messages.map((msg, i) => (
                         <motion.div key={i} className={`lv-ai-msg ${msg.role}`} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
                             {msg.role === 'ai' && <div className="lv-ai-msg-avatar" style={{ background: 'transparent', padding: 0, border: 'none' }}>
-                                <ActiveMini />
+                                <div style={{ width: '35px', height: '35px', borderRadius: '50%', background: 'var(--purple)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white' }}>
+                                    <HiOutlineSparkles size={18} />
+                                </div>
                             </div>}
                             <div className="lv-ai-msg-bubble">
                                 {msg.text}
