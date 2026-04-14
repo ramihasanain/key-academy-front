@@ -211,14 +211,17 @@ const Home = () => {
                         breakpoints={{ 480: { slidesPerView: 2 }, 768: { slidesPerView: 3 }, 1024: { slidesPerView: 4 } }}
                         style={{ paddingBottom: '50px' }}
                     >
-                        {teachers.map((teacher, i) => (
+                        {teachers.map((teacher, i) => {
+                            const colors = ['blue', 'pink', 'orange', 'purple', 'green', 'teal'];
+                            const assignedColor = colors[i % colors.length];
+                            return (
                             <SwiperSlide key={teacher.id}>
-                                <div className={`glass-card teacher-card color-${teacher.color}`} style={teacher.color?.startsWith('#') ? { background: teacher.color, borderColor: 'transparent', boxShadow: `0 10px 30px ${teacher.color}33` } : {}}>
+                                <div className={`glass-card teacher-card color-${assignedColor}`}>
                                     <div className="tc-image-wrapper">
                                         {teacher.image ? (
-<img src={teacher.image} alt={teacher.name} loading="lazy" decoding="async" />
+                                            <img src={teacher.image} alt={teacher.name} loading="lazy" decoding="async" />
                                         ) : (
-                                            <div className="tc-avatar-placeholder">{teacher.initials}</div>
+                                            <div className="tc-avatar-placeholder">{teacher.initials || 'أ'}</div>
                                         )}
                                     </div>
                                     <div className="tc-info-wrapper">
@@ -229,7 +232,7 @@ const Home = () => {
                                     </div>
                                 </div>
                             </SwiperSlide>
-                        ))}
+                        )})}
                     </Swiper>
                     <div className="view-all-teachers">
                         <Link to="/teachers" className="btn-secondary"><HiOutlineUserGroup /> كل الأساتذة</Link>
