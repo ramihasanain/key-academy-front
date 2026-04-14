@@ -52,7 +52,45 @@
     font-weight: 800;
 }
 
+/* Branch Tabs */
+.branch-tabs {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 32px;
+    flex-wrap: wrap;
+}
+
+.branch-tab-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 22px;
+    border-radius: 40px;
+    border: 1.5px solid rgba(255,255,255,0.12);
+    background: rgba(255,255,255,0.04);
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    font-family: inherit;
+}
+
+.branch-tab-btn:hover {
+    background: rgba(255,255,255,0.08);
+    color: var(--text-primary);
+    border-color: rgba(255,255,255,0.2);
+}
+
+.branch-tab-btn.active {
+    background: var(--gradient-button);
+    border-color: transparent;
+    color: white;
+    box-shadow: 0 4px 20px rgba(255, 77, 141, 0.3);
+}
+
 .branch-title {
+
     font-size: 1.3rem;
     font-weight: 700;
     margin-bottom: 20px;

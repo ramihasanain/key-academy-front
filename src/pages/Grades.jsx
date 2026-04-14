@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react'
-import { useParams, Link } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { API } from '../config'
-import { motion } from 'framer-motion'
-import { HiOutlineAcademicCap } from 'react-icons/hi2'
+import { motion, AnimatePresence } from 'framer-motion'
+import { HiOutlineAcademicCap, HiOutlineBeaker, HiOutlineSparkles } from 'react-icons/hi2'
 import { FaFlask, FaCalculator, FaBook, FaGlobeAmericas, FaMosque, FaAtom, FaLeaf, FaBalanceScale, FaLandmark, FaMoneyBill } from 'react-icons/fa'
 import SectionTitle from '../components/SectionTitle'
 import ParticleBackground from '../components/ParticleBackground'
@@ -15,7 +15,6 @@ const fadeInUp = {
     visible: (i = 0) => ({ opacity: 1, y: 0, transition: { duration: 0.5, delay: i * 0.08 } })
 }
 
-// ربط أيقونة لكل مادة بناءً على icon_class
 const iconMap = {
     'math': <FaCalculator />,
     'phys': <FaAtom />,
@@ -32,112 +31,84 @@ const iconMap = {
 
 const colorClasses = ['color-blue', 'color-pink', 'color-orange', 'color-purple', 'color-green', 'color-teal']
 
+// Detect branch from a grade's subjects or branch field
+const getBranches = (data) => {
+    const branches = new Set()
+    if (data.branch) {
+        // if a grade itself has a branch label
+        branches.add(data.branch)
+    }
+    if (Array.isArray(data.subjects)) {
+        data.subjects.forEach(s => {
+            if (s.branch) branches.add(s.branch)
+        })
+    }
+    return [...branches]
+}
+
 const Grades = () => {
-    const { gradeId } = useParams()
     const [grades, setGrades] = useState([])
-    const [gradeDetail, setGradeDetail] = useState(null)
     const [loading, setLoading] = useState(true)
+    const [selectedBranch, setSelectedBranch] = useState({}) // { [gradeSlug]: 'علمي' | 'أدبي' | 'all' }
 
     useEffect(() => {
-        if (gradeId) {
-            setLoading(true)
-            // جلب تفاصيل صف معين مع المواد
-            const cacheKey = `cached_grade_detail_${gradeId}`
-            const cached = sessionStorage.getItem(cacheKey)
-            if (cached) {
-                try {
-                    setGradeDetail(JSON.parse(cached))
-                    setLoading(false)
-                } catch (e) {}
-            }
-
-            fetch(`${API_BASE}/content/grades/${gradeId}/`)
-                .then(res => res.json())
-                .then(data => {
-                    setGradeDetail(data)
-                    sessionStorage.setItem(cacheKey, JSON.stringify(data))
-                    setLoading(false)
-                })
-                .catch(() => setLoading(false))
-        } else {
-            // جلب كل الصفوف ثم تفاصيل كل واحد
-            const cacheKey = 'cached_detailed_grades_list'
-            const cached = sessionStorage.getItem(cacheKey)
-            if (cached) {
-                try {
-                    setGrades(JSON.parse(cached))
-                    setLoading(false)
-                } catch (e) {}
-            } else {
-                setLoading(true)
-            }
-
-            fetch(`${API_BASE}/content/grades/`)
-                .then(res => res.json())
-                .then(async (gradesList) => {
-                    // Cache the basic list for use in Navbar and Home
-                    sessionStorage.setItem('cached_basic_grades_list', JSON.stringify(gradesList))
-                    
-                    // جلب تفاصيل كل صف مع المواد
-                    const detailed = await Promise.all(
-                        gradesList.map(g =>
-                            fetch(`${API_BASE}/content/grades/${g.slug}/`)
-                                .then(r => r.json())
-                        )
-                    )
-                    setGrades(detailed)
-                    sessionStorage.setItem(cacheKey, JSON.stringify(detailed))
-                    setLoading(false)
-                })
-                .catch(() => {
-                    if (!cached) setLoading(false)
-                })
+        const cacheKey = 'cached_detailed_grades_list'
+        const cached = sessionStorage.getItem(cacheKey)
+        if (cached) {
+            try {
+                const parsed = JSON.parse(cached)
+                setGrades(parsed)
+                setLoading(false)
+            } catch (e) {}
         }
-    }, [gradeId])
 
-    // عرض صف واحد مع المواد
-    if (gradeId && gradeDetail) {
-        return (
-            <div className="page-transition">
-                <section className="grades-hero">
-                    <ParticleBackground />
-                    <div className="container" style={{ position: 'relative', zIndex: 2 }}>
-                        <motion.h1 initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
-                            <span className="gradient-text">{gradeDetail.grade_name}</span>
-                        </motion.h1>
-                        <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.2 }}>
-                            {gradeDetail.branch} - اختار المادة وابدي ويانا درب التفوق
-                        </motion.p>
-                    </div>
-                </section>
+        fetch(`${API_BASE}/content/grades/`)
+            .then(res => res.json())
+            .then(async (gradesList) => {
+                if (!Array.isArray(gradesList)) return
+                sessionStorage.setItem('cached_basic_grades_list', JSON.stringify(gradesList))
+                const detailed = await Promise.all(
+                    gradesList.map(g =>
+                        fetch(`${API_BASE}/content/grades/${g.slug}/`)
+                            .then(r => r.json())
+                            .catch(() => null)
+                    )
+                )
+                const valid = detailed.filter(d => d && !d.error)
+                setGrades(valid)
+                sessionStorage.setItem(cacheKey, JSON.stringify(valid))
+                setLoading(false)
+            })
+            .catch(() => {
+                if (!sessionStorage.getItem('cached_detailed_grades_list')) setLoading(false)
+            })
+    }, [])
 
-                <section className="section grade-section">
-                    <div className="container">
-                        <div className="grade-header">
-                            <div className="grade-header-icon"><HiOutlineAcademicCap /></div>
-                            <h2>{gradeDetail.title}</h2>
-                        </div>
-                        {loading ? (
-                            <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--text-muted)' }}>جاري التحميل...</div>
-                        ) : (
-                            <div className="subjects-grid">
-                                {(gradeDetail.subjects || []).map((subject, i) => (
-                                    <motion.div key={subject.id || i} className={`glass-card subject-card ${colorClasses[i % 6]}`} variants={fadeInUp} initial="hidden" whileInView="visible" viewport={{ once: true }} custom={i}>
-                                        <div className={`s-icon ${subject.icon_class}`}>{iconMap[subject.icon_class] || <FaBook />}</div>
-                                        <h4>{subject.name}</h4>
-                                        <span className="course-count">{subject.courses_count} دورات متاحة</span>
-                                        <Link to={`/teachers?subject=${encodeURIComponent(subject.name)}&grade=${gradeId && gradeId.includes('sixth') ? 'السادس' : (gradeId && gradeId.includes('third') ? 'الثالث' : 'all')}&branch=${gradeId && gradeId.includes('scientific') ? 'علمي' : (gradeId && gradeId.includes('literary') ? 'أدبي' : 'all')}`} className="btn-primary">شوف الأساتذة</Link>
-                                    </motion.div>
-                                ))}
-                            </div>
-                        )}
-                    </div>
-                </section>
-            </div>
-        )
+    const toggleBranch = (slug, branch) => {
+        setSelectedBranch(prev => ({ ...prev, [slug]: branch }))
     }
 
-    // عرض كل الصفوف
+    // Filter subjects by branch if grade has branches
+    const getFilteredSubjects = (data) => {
+        const branch = selectedBranch[data.slug] || 'all'
+        if (!data.subjects) return []
+        if (branch === 'all') return data.subjects
+        return data.subjects.filter(s => !s.branch || s.branch === branch || s.branch.includes(branch))
+    }
+
+    const hasBranches = (data) => {
+        if (!data.subjects) return false
+        return data.subjects.some(s => s.branch && (s.branch.includes('علمي') || s.branch.includes('أدبي')))
+    }
+
+    const buildTeachersLink = (subject, data) => {
+        const branch = selectedBranch[data.slug] || 'all'
+        const gradeName = data.slug?.includes('sixth') || data.grade_name?.includes('سادس') ? 'السادس'
+            : data.slug?.includes('third') || data.grade_name?.includes('ثالث') ? 'الثالث'
+            : 'all'
+        return `/teachers?subject=${encodeURIComponent(subject.name)}&grade=${gradeName}&branch=${branch}`
+    }
+
     return (
         <div className="page-transition">
             <section className="grades-hero">
@@ -153,28 +124,92 @@ const Grades = () => {
             </section>
 
             {loading ? (
-                <div style={{ textAlign: 'center', padding: '80px 0', color: 'var(--text-muted)', fontSize: '1.1rem' }}>جاري تحميل الصفوف...</div>
+                <div style={{ textAlign: 'center', padding: '80px 0', color: 'var(--text-muted)', fontSize: '1.1rem' }}>
+                    جاري تحميل الصفوف...
+                </div>
+            ) : grades.length === 0 ? (
+                <div style={{ textAlign: 'center', padding: '80px 0', color: 'var(--text-muted)', fontSize: '1.1rem' }}>
+                    لا تتوفر صفوف حالياً.
+                </div>
             ) : (
-                grades.map((data) => (
-                    <section key={data.slug} className="section grade-section">
-                        <div className="container">
-                            <div className="grade-header">
-                                <div className="grade-header-icon"><HiOutlineAcademicCap /></div>
-                                <h2>{data.title}</h2>
-                            </div>
-                            <div className="subjects-grid">
-                                {(data.subjects || []).map((subject, i) => (
-                                    <motion.div key={subject.id || i} className={`glass-card subject-card ${colorClasses[i % 6]}`} variants={fadeInUp} initial="hidden" whileInView="visible" viewport={{ once: true }} custom={i}>
-                                        <div className={`s-icon ${subject.icon_class}`}>{iconMap[subject.icon_class] || <FaBook />}</div>
-                                        <h4>{subject.name}</h4>
-                                        <span className="course-count">{subject.courses_count} دورات متاحة</span>
-                                        <Link to={`/teachers?subject=${encodeURIComponent(subject.name)}&grade=${data.slug && data.slug.includes('sixth') ? 'السادس' : (data.slug && data.slug.includes('third') ? 'الثالث' : 'all')}&branch=${data.slug && data.slug.includes('scientific') ? 'علمي' : (data.slug && data.slug.includes('literary') ? 'أدبي' : 'all')}`} className="btn-primary">شوف الأساتذة</Link>
+                grades.map((data) => {
+                    const withBranches = hasBranches(data)
+                    const currentBranch = selectedBranch[data.slug] || 'all'
+                    const filteredSubjects = getFilteredSubjects(data)
+
+                    return (
+                        <section key={data.slug} className="section grade-section">
+                            <div className="container">
+                                <div className="grade-header">
+                                    <div className="grade-header-icon"><HiOutlineAcademicCap /></div>
+                                    <h2>{data.grade_name || data.title}</h2>
+                                </div>
+
+                                {/* Branch Tabs */}
+                                {withBranches && (
+                                    <div className="branch-tabs">
+                                        {['all', 'علمي', 'أدبي'].map(b => (
+                                            <motion.button
+                                                key={b}
+                                                className={`branch-tab-btn ${currentBranch === b ? 'active' : ''}`}
+                                                onClick={() => toggleBranch(data.slug, b)}
+                                                whileHover={{ scale: 1.04 }}
+                                                whileTap={{ scale: 0.97 }}
+                                            >
+                                                {b === 'all' ? (
+                                                    <><HiOutlineSparkles /> الكل</>
+                                                ) : b === 'علمي' ? (
+                                                    <><HiOutlineBeaker /> الفرع العلمي</>
+                                                ) : (
+                                                    <><FaBook /> الفرع الأدبي</>
+                                                )}
+                                            </motion.button>
+                                        ))}
+                                    </div>
+                                )}
+
+                                <AnimatePresence mode="wait">
+                                    <motion.div
+                                        key={`${data.slug}-${currentBranch}`}
+                                        className="subjects-grid"
+                                        initial={{ opacity: 0, y: 10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0, y: -10 }}
+                                        transition={{ duration: 0.3 }}
+                                    >
+                                        {filteredSubjects.length > 0 ? filteredSubjects.map((subject, i) => (
+                                            <motion.div
+                                                key={subject.id || i}
+                                                className={`glass-card subject-card ${colorClasses[i % 6]}`}
+                                                variants={fadeInUp}
+                                                initial="hidden"
+                                                whileInView="visible"
+                                                viewport={{ once: true }}
+                                                custom={i}
+                                            >
+                                                <div className={`s-icon ${subject.icon_class}`}>
+                                                    {iconMap[subject.icon_class] || <FaBook />}
+                                                </div>
+                                                <h4>{subject.name}</h4>
+                                                <span className="course-count">{subject.courses_count || 0} دورات متاحة</span>
+                                                <Link
+                                                    to={buildTeachersLink(subject, data)}
+                                                    className="btn-primary"
+                                                >
+                                                    شوف الأساتذة
+                                                </Link>
+                                            </motion.div>
+                                        )) : (
+                                            <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '40px 0', color: 'var(--text-muted)' }}>
+                                                لا توجد مواد لهذا الفرع حالياً.
+                                            </div>
+                                        )}
                                     </motion.div>
-                                ))}
+                                </AnimatePresence>
                             </div>
-                        </div>
-                    </section>
-                ))
+                        </section>
+                    )
+                })
             )}
         </div>
     )
