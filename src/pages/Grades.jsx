@@ -49,6 +49,7 @@ const getBranches = (data) => {
 const Grades = () => {
     const [grades, setGrades] = useState([])
     const [loading, setLoading] = useState(true)
+    const [apiError, setApiError] = useState(false)
     const [selectedBranch, setSelectedBranch] = useState({}) // { [gradeSlug]: 'علمي' | 'أدبي' | 'all' }
 
     useEffect(() => {
@@ -57,32 +58,50 @@ const Grades = () => {
         if (cached) {
             try {
                 const parsed = JSON.parse(cached)
-                setGrades(parsed)
-                setLoading(false)
+                if (Array.isArray(parsed) && parsed.length > 0) {
+                    setGrades(parsed)
+                    setLoading(false)
+                }
             } catch (e) {}
         }
 
-        fetch(`${API_BASE}/content/grades/`)
-            .then(res => res.json())
+        const safeFetchJson = (url) =>
+            fetch(url)
+                .then(res => {
+                    if (!res.ok) throw new Error(`HTTP ${res.status}`)
+                    const ct = res.headers.get('content-type') || ''
+                    if (!ct.includes('application/json')) throw new Error('Not JSON')
+                    return res.json()
+                })
+
+        safeFetchJson(`${API_BASE}/content/grades/`)
             .then(async (gradesList) => {
-                if (!Array.isArray(gradesList)) return
+                if (!Array.isArray(gradesList)) {
+                    setLoading(false)
+                    return
+                }
                 sessionStorage.setItem('cached_basic_grades_list', JSON.stringify(gradesList))
                 const detailed = await Promise.all(
                     gradesList.map(g =>
-                        fetch(`${API_BASE}/content/grades/${g.slug}/`)
-                            .then(r => r.json())
+                        safeFetchJson(`${API_BASE}/content/grades/${g.slug}/`)
                             .catch(() => null)
                     )
                 )
                 const valid = detailed.filter(d => d && !d.error)
-                setGrades(valid)
-                sessionStorage.setItem(cacheKey, JSON.stringify(valid))
+                if (valid.length > 0) {
+                    setGrades(valid)
+                    sessionStorage.setItem(cacheKey, JSON.stringify(valid))
+                }
                 setLoading(false)
             })
             .catch(() => {
-                if (!sessionStorage.getItem('cached_detailed_grades_list')) setLoading(false)
+                if (!sessionStorage.getItem('cached_detailed_grades_list')) {
+                    setApiError(true)
+                }
+                setLoading(false)
             })
     }, [])
+
 
     const toggleBranch = (slug, branch) => {
         setSelectedBranch(prev => ({ ...prev, [slug]: branch }))
@@ -126,6 +145,11 @@ const Grades = () => {
             {loading ? (
                 <div style={{ textAlign: 'center', padding: '80px 0', color: 'var(--text-muted)', fontSize: '1.1rem' }}>
                     جاري تحميل الصفوف...
+                </div>
+            ) : apiError && grades.length === 0 ? (
+                <div style={{ textAlign: 'center', padding: '80px 0', color: 'var(--text-muted)', fontSize: '1.1rem' }}>
+                    <div style={{ fontSize: '3rem', marginBottom: '16px' }}>⚠️</div>
+                    <p>تعذّر الاتصال بالخادم، يرجى المحاولة مجدداً لاحقاً.</p>
                 </div>
             ) : grades.length === 0 ? (
                 <div style={{ textAlign: 'center', padding: '80px 0', color: 'var(--text-muted)', fontSize: '1.1rem' }}>
