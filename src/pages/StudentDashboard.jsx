@@ -643,46 +643,60 @@ const StudentDashboard = () => {
                                 {userData.full_name ? userData.full_name[0] : 'س'}
                                 <div className="cam-btn"><HiOutlineUser /></div>
                             </div>
-                            <div className="dash-profile-form">
-                                <form onSubmit={e => {
-                                    e.preventDefault();
-                                    const formData = new FormData(e.target);
-                                    const body = Object.fromEntries(formData.entries());
 
-                                    fetch(API + '/api/auth/me/', {
-                                        method: 'PUT',
-                                        headers: {
-                                            'Content-Type': 'application/json',
-                                            'Authorization': `Bearer ${localStorage.getItem('access_token')}`
-                                        },
-                                        body: JSON.stringify(body)
-                                    }).then(res => res.json()).then(data => {
-                                        setUserData(data);
-                                        alert('تم تحديث البيانات بنجاح!');
-                                    }).catch(console.error);
-                                }}>
-                                    <div className="input-row-half">
-                                        <div className="dash-input-group glass-input flex-1">
-                                            <label>الاسم الكامل</label>
-                                            <input type="text" name="full_name" defaultValue={userData.full_name} required />
-                                        </div>
-                                        <div className="dash-input-group glass-input flex-1">
-                                            <label>اليوزرنيم (المعرف)</label>
-                                            <input type="text" name="username" defaultValue={userData.username} dir="ltr" disabled className="disabled-glass" title="لا يمكن تغيير المعرف حالياً" />
-                                        </div>
+                            {/* Read-only notice */}
+                            <div style={{
+                                background: 'rgba(251, 191, 36, 0.08)',
+                                border: '1.5px solid rgba(251, 191, 36, 0.3)',
+                                borderRadius: '16px',
+                                padding: '16px 20px',
+                                marginBottom: '24px',
+                                display: 'flex',
+                                alignItems: 'flex-start',
+                                gap: '14px',
+                                color: '#fbbf24'
+                            }}>
+                                <span style={{ fontSize: '1.6rem', flexShrink: 0 }}>🔒</span>
+                                <div>
+                                    <p style={{ margin: 0, fontWeight: 800, fontSize: '1rem', marginBottom: '6px' }}>
+                                        لا يمكنك تعديل بياناتك بشكل مباشر
+                                    </p>
+                                    <p style={{ margin: 0, fontSize: '0.9rem', color: 'rgba(251, 191, 36, 0.85)', lineHeight: 1.7 }}>
+                                        لتعديل أي معلومة في حسابك، يرجى التواصل مع إدارة المنصة عبر صفحة التواصل أو التلغرام.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className="dash-profile-form">
+                                <div className="input-row-half">
+                                    <div className="dash-input-group glass-input flex-1">
+                                        <label>الاسم الكامل</label>
+                                        <input type="text" value={userData.full_name || ''} disabled className="disabled-glass" readOnly />
                                     </div>
-                                    <div className="dash-input-group glass-input">
-                                        <label>رقم التليفون الأساسي</label>
-                                        <input type="tel" name="phone" defaultValue={userData.phone} dir="ltr" required />
+                                    <div className="dash-input-group glass-input flex-1">
+                                        <label>اليوزرنيم (المعرف)</label>
+                                        <input type="text" value={userData.username || ''} dir="ltr" disabled className="disabled-glass" readOnly />
                                     </div>
-                                    <div className="dash-input-group glass-input">
-                                        <label>المسار الدراسي</label>
-                                        <input type="text" name="grade" defaultValue={userData.grade} disabled className="disabled-glass" />
-                                    </div>
-                                    <button type="submit" className="dash-btn-primary premium-btn mt-2">احفظ التعديلات</button>
-                                </form>
+                                </div>
+                                <div className="dash-input-group glass-input">
+                                    <label>رقم التليفون الأساسي</label>
+                                    <input type="tel" value={userData.phone || ''} dir="ltr" disabled className="disabled-glass" readOnly />
+                                </div>
+                                <div className="dash-input-group glass-input">
+                                    <label>المسار الدراسي</label>
+                                    <input type="text" value={userData.grade || ''} disabled className="disabled-glass" readOnly />
+                                </div>
+
+                                <a
+                                    href="/contact"
+                                    className="dash-btn-primary premium-btn mt-2"
+                                    style={{ display: 'flex', justifyContent: 'center', textDecoration: 'none', gap: '8px' }}
+                                >
+                                    <HiOutlineUserGroup /> تواصل مع إدارة المنصة
+                                </a>
                             </div>
                         </div>
+
                         
                         {/* Video Stats Section */}
                         <div className="section-header-row mt-6 pt-6" style={{borderTop: '1px solid rgba(255,255,255,0.1)'}}>
