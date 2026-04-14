@@ -36,29 +36,7 @@ const Grades = () => {
     const { gradeId } = useParams()
     const [grades, setGrades] = useState([])
     const [gradeDetail, setGradeDetail] = useState(null)
-    const [branchTeachers, setBranchTeachers] = useState([])
     const [loading, setLoading] = useState(true)
-
-    // Load Teachers based on Grade
-    useEffect(() => {
-        if (gradeDetail && gradeDetail.title) {
-            const cachedT = sessionStorage.getItem('cached_teachers_list')
-            const doFilter = (allT) => {
-                const filtered = allT.filter(t => t.grade && t.grade.includes(gradeDetail.title))
-                setBranchTeachers(filtered)
-            }
-            if (cachedT) {
-                try { doFilter(JSON.parse(cachedT)) } catch(e) {}
-            } else {
-                fetch(`${API}/api/teachers/`)
-                    .then(r => r.json())
-                    .then(data => {
-                        doFilter(data)
-                        sessionStorage.setItem('cached_teachers_list', JSON.stringify(data))
-                    }).catch(e => console.error('Teachers load error:', e))
-            }
-        }
-    }, [gradeDetail])
 
     useEffect(() => {
         setLoading(true)
@@ -142,36 +120,10 @@ const Grades = () => {
                                         <div className={`s-icon ${subject.icon_class}`}>{iconMap[subject.icon_class] || <FaBook />}</div>
                                         <h4>{subject.name}</h4>
                                         <span className="course-count">{subject.courses_count} دورات متاحة</span>
-                                        <Link to="/login" className="btn-primary">سجل بالدورة</Link>
+                                        <Link to={`/grades/${gradeId || gradeDetail.slug}/subject/${subject.name}`} className="btn-primary">تصفح الأساتذة</Link>
                                     </motion.div>
                                 ))}
                             </div>
-                        )}
-
-                        {/* Teachers for this Branch */}
-                        {!loading && branchTeachers.length > 0 && (
-                            <motion.div initial="hidden" whileInView="visible" variants={fadeInUp} viewport={{ once: true }} style={{ marginTop: '60px' }}>
-                                <div className="grade-header">
-                                    <div className="grade-header-icon" style={{ background: 'var(--purple)', color: 'white', borderColor: 'var(--purple)' }}><HiOutlineUserGroup /></div>
-                                    <h2>أساتذة {gradeDetail.title}</h2>
-                                </div>
-                                <div className="subjects-grid" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))' }}>
-                                    {branchTeachers.map((teacher, i) => (
-                                        <motion.div key={teacher.id} className={`glass-card subject-card color-${teacher.color || 'blue'}`} variants={fadeInUp} initial="hidden" whileInView="visible" viewport={{ once: true }} custom={i} style={teacher.color?.startsWith('#') ? { background: teacher.color, borderColor: 'transparent', boxShadow: `0 10px 30px ${teacher.color}33`, display: 'flex', flexDirection: 'column', alignItems: 'center' } : { display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                                            <div style={{ width: '90px', height: '90px', borderRadius: '50%', overflow: 'hidden', marginBottom: '15px', border: '3px solid rgba(255,255,255,0.2)', flexShrink: 0 }}>
-                                                {teacher.image ? (
-                                                    <img src={teacher.image} alt={teacher.name} loading="lazy" decoding="async" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                                                ) : (
-                                                    <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--primary)', color: 'white', fontSize: '1.8rem', fontWeight: 'bold' }}>{teacher.initials}</div>
-                                                )}
-                                            </div>
-                                            <h4 style={{ margin: '0 0 5px', fontSize: '1.3rem' }}>{teacher.name}</h4>
-                                            <span style={{ color: 'var(--text-muted)', marginBottom: '20px' }}>{teacher.subject}</span>
-                                            <Link to={`/teachers/${teacher.id}`} className="btn-primary" style={{ width: '100%' }}>شوف ملف الأستاذ</Link>
-                                        </motion.div>
-                                    ))}
-                                </div>
-                            </motion.div>
                         )}
                     </div>
                 </section>
@@ -210,7 +162,7 @@ const Grades = () => {
                                         <div className={`s-icon ${subject.icon_class}`}>{iconMap[subject.icon_class] || <FaBook />}</div>
                                         <h4>{subject.name}</h4>
                                         <span className="course-count">{subject.courses_count} دورات متاحة</span>
-                                        <Link to="/login" className="btn-primary">سجل بالدورة</Link>
+                                        <Link to={`/grades/${data.slug}/subject/${subject.name}`} className="btn-primary">تصفح الأساتذة</Link>
                                     </motion.div>
                                 ))}
                             </div>

@@ -6,6 +6,7 @@ import Home from './pages/Home'
 import About from './pages/About'
 import Features from './pages/Features'
 import Grades from './pages/Grades'
+import SubjectTeachers from './pages/SubjectTeachers'
 import Teachers from './pages/Teachers'
 import TeacherProfile from './pages/TeacherProfile'
 import FAQ from './pages/FAQ'
@@ -68,6 +69,7 @@ function App() {
                     <Route path="/features" element={<Features />} />
                     <Route path="/grades" element={<Grades />} />
                     <Route path="/grades/:gradeId" element={<Grades />} />
+                    <Route path="/grades/:gradeId/subject/:subjectName" element={<SubjectTeachers />} />
                     <Route path="/teachers" element={<Teachers />} />
                     <Route path="/teachers/:id" element={<TeacherProfile />} />
                     <Route path="/faq" element={<FAQ />} />
