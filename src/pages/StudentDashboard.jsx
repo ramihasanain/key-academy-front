@@ -687,13 +687,7 @@ const StudentDashboard = () => {
                                     <input type="text" value={userData.grade || ''} disabled className="disabled-glass" readOnly />
                                 </div>
 
-                                <a
-                                    href="/contact"
-                                    className="dash-btn-primary premium-btn mt-2"
-                                    style={{ display: 'flex', justifyContent: 'center', textDecoration: 'none', gap: '8px' }}
-                                >
-                                    <HiOutlineUserGroup /> تواصل مع إدارة المنصة
-                                </a>
+
                             </div>
                         </div>
 
