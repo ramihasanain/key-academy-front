@@ -50,10 +50,23 @@ const Home = () => {
     const [teachers, setTeachers] = useState([])
 
     useEffect(() => {
+        const cachedTeachers = sessionStorage.getItem('cached_teachers_list')
+        if (cachedTeachers) {
+            try { setTeachers(JSON.parse(cachedTeachers)) } catch(e) {}
+        }
+        
         fetch(API + '/api/teachers/')
-            .then(res => res.json())
-            .then(data => setTeachers(data))
-            .catch(err => console.error(err))
+            .then(res => {
+                if (!res.ok) throw new Error('Failed to fetch')
+                return res.json()
+            })
+            .then(data => {
+                if (Array.isArray(data)) {
+                    setTeachers(data)
+                    sessionStorage.setItem('cached_teachers_list', JSON.stringify(data))
+                }
+            })
+            .catch(err => console.error('Error fetching teachers:', err))
     }, [])
 
     return (

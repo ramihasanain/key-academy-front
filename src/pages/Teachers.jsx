@@ -37,15 +37,29 @@ const Teachers = () => {
     const [filter, setFilter] = useState({ grade: 'all', branch: 'all', subject: 'all' })
 
     useEffect(() => {
+        const cachedTeachers = sessionStorage.getItem('cached_teachers_list');
+        if (cachedTeachers) {
+            try { 
+                setAllTeachers(JSON.parse(cachedTeachers));
+                setLoading(false); // Instant load!
+            } catch(e) {}
+        }
+
         fetch(API + '/api/teachers/')
-            .then(res => res.json())
+            .then(res => {
+                if (!res.ok) throw new Error('Failed to fetch')
+                return res.json()
+            })
             .then(data => {
-                setAllTeachers(data)
-                setLoading(false)
+                if (Array.isArray(data)) {
+                    setAllTeachers(data);
+                    setLoading(false);
+                    sessionStorage.setItem('cached_teachers_list', JSON.stringify(data));
+                }
             })
             .catch(err => {
-                console.error(err)
-                setLoading(false)
+                console.error('Error fetching teachers:', err);
+                if (!sessionStorage.getItem('cached_teachers_list')) setLoading(false);
             })
     }, [])
 
