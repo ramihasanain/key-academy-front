@@ -168,8 +168,7 @@
     max-width: 500px; /* Big precise size for the robot */
     height: auto;
     aspect-ratio: 1 / 1;
-    margin: 0; 
-    margin-left: -100px; /* Shifted slightly back to the right */
+    margin: 0 auto; /* Centered */
     z-index: 2;
 }
 
@@ -185,7 +184,8 @@
 .hero-floating-cards-img {
     position: absolute;
     bottom: 20px; /* Sits naturally on the inner edge */
-    left: 20px; 
+    left: 50%; 
+    transform: translateX(-50%); /* Center horizontally */
     width: 80%; 
     max-width: 380px; /* Highly proportional dimensions matching the reference */
     height: auto;
