@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import { API } from '../config'
 import { motion, AnimatePresence } from 'framer-motion'
+import ReactMarkdown from 'react-markdown'
 import {
     HiOutlineArrowRight,
     HiOutlineCheckBadge,
@@ -996,12 +997,22 @@ const TabKeyAI = ({ lessonInfo }) => {
                     {messages.map((msg, i) => (
                         <motion.div key={i} className={`lv-ai-msg ${msg.role}`} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
                             {msg.role === 'ai' && <div className="lv-ai-msg-avatar" style={{ background: 'transparent', padding: 0, border: 'none' }}>
-                                <div style={{ width: '35px', height: '35px', borderRadius: '50%', background: 'var(--purple)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white' }}>
+                                <div style={{ width: '35px', height: '35px', borderRadius: '50%', background: 'var(--purple)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', flexShrink: 0 }}>
                                     <HiOutlineSparkles size={18} />
                                 </div>
                             </div>}
-                            <div className="lv-ai-msg-bubble">
-                                {msg.text}
+                            <div className="lv-ai-msg-bubble markdown-chat">
+                                <ReactMarkdown
+                                    components={{
+                                        p: ({node, ...props}) => <p style={{margin: '0 0 8px 0', lineHeight: 1.6}} {...props} />,
+                                        ul: ({node, ...props}) => <ul style={{margin: '0 20px 8px 0', padding: 0, listStyleType: 'disc'}} {...props} />,
+                                        ol: ({node, ...props}) => <ol style={{margin: '0 20px 8px 0', padding: 0, listStyleType: 'decimal'}} {...props} />,
+                                        li: ({node, ...props}) => <li style={{margin: '4px 0'}} {...props} />,
+                                        strong: ({node, ...props}) => <strong style={{color: 'var(--purple)'}} {...props} />
+                                    }}
+                                >
+                                    {msg.text}
+                                </ReactMarkdown>
                             </div>
                         </motion.div>
                     ))}
