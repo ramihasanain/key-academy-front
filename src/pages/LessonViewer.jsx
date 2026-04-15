@@ -913,27 +913,58 @@ const TabLab = () => {
     )
 }
 
-const TabKeyAI = () => {
+const TabKeyAI = ({ lessonInfo }) => {
+    const { lessonId } = useParams()
+    const subjectName = lessonInfo?.course_title || 'المادة'
+    
     const [messages, setMessages] = useState([
-        { role: 'ai', text: 'هلا بيك! اني Key AI 🔑 مساعدك الذكي. اسألني أي شي عن درس المتجهات وراح أجاوبك! 💡' }
+        { role: 'ai', text: `هلا بيك! اني Key AI 🔑 مساعدك الذكي. اسألني أي شي عن درس ${subjectName} وراح أجاوبك! 💡` }
     ])
     const [input, setInput] = useState('')
-    const [activeMascotIndex, setActiveMascotIndex] = useState(0)
+    const [isLoading, setIsLoading] = useState(false)
 
-    const sendMsg = () => {
-        if (!input.trim()) return
+    const sendMsg = async () => {
+        if (!input.trim() || isLoading) return
         const userMsg = input
+        
+        const chatHistory = messages.slice(1).map(m => ({
+            role: m.role === 'ai' ? 'assistant' : 'user',
+            content: m.text
+        }))
+
         setMessages(prev => [...prev, { role: 'user', text: userMsg }])
         setInput('')
-        setTimeout(() => {
-            setMessages(prev => [...prev, { role: 'ai', text: 'خوش سؤال! 🤔 المتجه هو كمية فيزيائية بيها مقدار واتجاه. مثلاً لو كلنا "5 متر شمالاً" هذا متجه. بينما "5 متر" بدون اتجاه = كمية قياسية. تريد أمثلة بعد؟' }])
-        }, 1200)
+        setIsLoading(true)
+
+        try {
+            const token = localStorage.getItem('access_token')
+            const response = await fetch(`${API}/api/courses/lessons/${lessonId}/analyze/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    question: userMsg,
+                    chat_history: chatHistory
+                })
+            })
+
+            const data = await response.json()
+            if (data.success && data.data) {
+                setMessages(prev => [...prev, { role: 'ai', text: data.data.answer }])
+            } else {
+                setMessages(prev => [...prev, { role: 'ai', text: data.error || 'عذراً، صار خطأ بالاتصال. حاول مرة ثانية.' }])
+            }
+        } catch (error) {
+            console.error('AI Error:', error)
+            setMessages(prev => [...prev, { role: 'ai', text: 'عذراً، صار مشكلة بالشبكة، ما گدرت أجاوبك هسه.' }])
+        } finally {
+            setIsLoading(false)
+        }
     }
 
     // Mascots logic removed in favor of the unified WebM robot
-
-    const { lessonId } = useParams()
-    const labContext = VirtualLabsData.find(l => l.id === lessonId) || VirtualLabsData[0]
 
     return (
         <div className="lv-tab-pane lv-fade" style={{ minHeight: '500px', display: 'flex', gap: '30px' }}>
@@ -956,7 +987,7 @@ const TabKeyAI = () => {
                 <div className="lv-ai-header" style={{ borderBottom: '1px solid rgba(0,0,0,0.05)', paddingBottom: '16px', marginBottom: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <div className="lv-ai-info">
                         <h4 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '10px' }}>Key AI <span className="lv-ai-badge">ذكاء اصطناعي</span></h4>
-                        <p style={{ margin: 0, marginTop: '4px' }}>مساعدك الشخصي لفهم درس {labContext.subject} بشكل أعمق</p>
+                        <p style={{ margin: 0, marginTop: '4px' }}>مساعدك الشخصي لفهم الدرس بشكل أعمق</p>
                     </div>
                     <div className="lv-ai-status"><span className="lv-gc-dot"></span> متصل</div>
                 </div>
@@ -982,8 +1013,11 @@ const TabKeyAI = () => {
                         placeholder="اسأل Key AI عن أي شي بالدرس..."
                         value={input} onChange={e => setInput(e.target.value)}
                         onKeyDown={e => e.key === 'Enter' && sendMsg()}
+                        disabled={isLoading}
                     />
-                    <button className="lv-ai-send-btn" onClick={sendMsg}><HiOutlinePaperAirplane style={{ transform: 'scaleX(-1)' }} /></button>
+                    <button className="lv-ai-send-btn" onClick={sendMsg} disabled={isLoading} style={{ opacity: isLoading ? 0.7 : 1 }}>
+                        {isLoading ? <span style={{ fontSize: '18px', animation: 'spin 1s linear infinite', display: 'inline-block' }}>⏳</span> : <HiOutlinePaperAirplane style={{ transform: 'scaleX(-1)' }} />}
+                    </button>
                 </div>
             </div>
         </div>
@@ -1297,7 +1331,7 @@ const LessonViewer = () => {
                             {activeTab === 'group' && <TabGroup courseId={courseId} userData={userData} lessonId={lessonId} />}
                             {activeTab === 'docs' && <TabDocs lessonInfo={lessonInfo} courseId={courseId} userData={userData} />}
                             {activeTab === 'lab' && <TabLab />}
-                            {activeTab === 'keyai' && <TabKeyAI />}
+                            {activeTab === 'keyai' && <TabKeyAI lessonInfo={lessonInfo} />}
                         </div>
                     </div>
                 </main>
