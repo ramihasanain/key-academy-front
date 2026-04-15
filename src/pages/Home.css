@@ -20,7 +20,7 @@
 .hero-banner {
     background: linear-gradient(to left, #9b277b, #e93466, #f88c22);
     border-radius: 40px;
-    padding: 20px 50px; /* Greatly reduced top and bottom space inside the box */
+    padding: 20px 120px 20px 20px; /* Shifted left: increased right padding, decreased left padding */
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -160,6 +160,7 @@
     min-height: 420px; 
     justify-content: center; /* Centered nicely */
     align-items: center; /* No longer forced to the bottom */
+    transform: translateY(-35px); /* Shifting the robot and cards up to center them visually */
 }
 
 .hero-robot-wrapper {
@@ -200,6 +201,10 @@
         flex-direction: column;
         padding: 40px;
         text-align: center;
+    }
+    
+    .hero-banner-visuals {
+        transform: none; /* Reset transform for mobile */
     }
     
     .hero-banner-content {
