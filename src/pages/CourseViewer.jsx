@@ -18,76 +18,92 @@ import {
     HiOutlineClipboardDocumentCheck,
     HiOutlineXMark,
     HiOutlineDocumentArrowDown,
-    HiOutlineChatBubbleLeftRight
+    HiOutlineChatBubbleLeftRight,
+    HiOutlineUserGroup,
+    HiOutlinePaperAirplane
 } from 'react-icons/hi2'
 import { VirtualLabsData } from '../data/VirtualLabsData'
 import './CourseViewer.css'
+import './LessonViewer.css' // Import styling to make Chat fully identical
 
 /* ======== COURSE WEBSOCKET CHAT ======== */
 const CourseChatDrawer = ({ courseId, userData, onClose }) => {
-    const [messages, setMessages] = useState([]);
-    const [input, setInput] = useState('');
-    const [chatType, setChatType] = useState('public');
-    const [socket, setSocket] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const messagesEndRef = useRef(null);
+    const [messages, setMessages] = useState([])
+    const [input, setInput] = useState('')
+    const [chatType, setChatType] = useState('public') // 'public' | 'private'
+    const [socket, setSocket] = useState(null)
+    const [loading, setLoading] = useState(true)
 
     const isMuted = userData?.muted_until && new Date(userData.muted_until) > new Date();
+    const messagesEndRef = useRef(null)
+    const [privateUnread, setPrivateUnread] = useState(0)
+    const [publicUnread, setPublicUnread] = useState(0)
+    const chatTypeRef = useRef(chatType)
 
     const scrollToBottom = () => {
-        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
     }
 
     useEffect(() => {
-        scrollToBottom();
-    }, [messages]);
+        scrollToBottom()
+    }, [messages])
 
+    // Load initial history when chatType changes
     useEffect(() => {
-        setLoading(true);
-        const t = localStorage.getItem('access_token');
-        if (!t) return;
+        setLoading(true)
+        const t = localStorage.getItem('access_token')
+        if (!t) return
         fetch(`${API}/api/interactions/group-chat/?course=${courseId}&type=${chatType}`, { headers: { 'Authorization': `Bearer ${t}` } })
             .then(r => r.json()).then(d => {
-                setMessages(d);
-                setLoading(false);
+                setMessages(d)
+                setLoading(false)
             })
-    }, [courseId, chatType]);
+    }, [courseId, chatType])
 
+    // WebSocket Setup
     useEffect(() => {
-        const t = localStorage.getItem('access_token');
-        if (!t) return;
+        const t = localStorage.getItem('access_token')
+        if (!t) return
 
-        const wsUrl = API.replace(/^http/, 'ws');
-        const baseUrl = wsUrl.endsWith('/') ? wsUrl.slice(0, -1) : wsUrl;
+        const wsUrl = API.replace(/^http/, 'ws')
+        const baseUrl = wsUrl.endsWith('/') ? wsUrl.slice(0, -1) : wsUrl
 
-        const ws = new WebSocket(`${baseUrl}/ws/chat/${courseId}/?token=${t}`);
-        setSocket(ws);
+        const ws = new WebSocket(`${baseUrl}/ws/chat/${courseId}/?token=${t}`)
+        setSocket(ws)
 
         ws.onmessage = (e) => {
-            const data = JSON.parse(e.data);
+            const data = JSON.parse(e.data)
             if (data.message) {
                 setMessages(prev => {
-                    return [...prev.filter(m => m.id !== data.message.id), data.message];
-                });
+                    return [...prev.filter(m => m.id !== data.message.id), data.message]
+                })
+                // Track unread notifications for the tab that's NOT active
+                const isMsgPrivate = data.message.is_private === true
+                if (isMsgPrivate && chatTypeRef.current !== 'private') {
+                    setPrivateUnread(prev => prev + 1)
+                } else if (!isMsgPrivate && chatTypeRef.current !== 'public') {
+                    setPublicUnread(prev => prev + 1)
+                }
             }
-        };
+        }
 
-        ws.onclose = () => console.log('Chat socket closed');
+        ws.onclose = () => console.log('Chat socket closed')
 
-        return () => ws.close();
-    }, [courseId]);
+        return () => ws.close()
+    }, [courseId])
 
     const handleSend = () => {
-        if (!input.trim() || !socket) return;
-        const payload = { content: input, is_private: chatType === 'private', lesson_id: null };
-        socket.send(JSON.stringify(payload));
-        setInput('');
-    };
+        if (!input.trim() || !socket) return
+        const payload = { content: input, is_private: chatType === 'private', lesson_id: null }
+        socket.send(JSON.stringify(payload))
+        setInput('')
+    }
 
+    // Filter messages to strictly enforce what we see
     const displayedMessages = messages.filter(m => {
-        const isMsgPrivate = m.is_private === true;
-        return chatType === 'private' ? isMsgPrivate : !isMsgPrivate;
-    });
+        const isMsgPrivate = m.is_private === true
+        return chatType === 'private' ? isMsgPrivate : !isMsgPrivate
+    })
 
     return (
         <motion.div
@@ -105,90 +121,86 @@ const CourseChatDrawer = ({ courseId, userData, onClose }) => {
                 onClick={e => e.stopPropagation()}
                 style={{ width: '100%', maxWidth: '450px', background: 'white', height: '100%', display: 'flex', flexDirection: 'column', boxShadow: '-10px 0 40px rgba(0,0,0,0.2)' }}
             >
-                <div style={{ padding: '20px', background: 'linear-gradient(135deg, var(--purple), var(--pink))', color: 'white', display: 'flex', justifyItems: 'center', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div style={{ padding: '20px', background: 'linear-gradient(135deg, var(--purple), var(--pink))', color: 'white', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <div>
-                        <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 800 }}>دردشة الدورة</h3>
-                        <p style={{ margin: 0, opacity: 0.8, fontSize: '0.9rem', marginTop: '4px' }}>تواصل مع الأستاذ والمساعدين والطلبة</p>
+                        <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 800 }}>دردشة المجموعة</h3>
                     </div>
                     <button onClick={onClose} style={{ background: 'rgba(255,255,255,0.2)', border: 'none', color: 'white', padding: '8px', borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                         <HiOutlineXMark size={20} />
                     </button>
                 </div>
 
-                <div style={{ display: 'flex', padding: '15px', gap: '10px', background: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
-                    <button onClick={() => setChatType('public')} style={{ flex: 1, padding: '10px', borderRadius: '10px', border: '1px solid #cbd5e1', background: chatType === 'public' ? 'var(--purple)' : 'white', color: chatType === 'public' ? 'white' : '#64748b', fontWeight: 'bold', cursor: 'pointer', transition: 'all 0.2s' }}>
-                        🌐 مجموعة الدورة
-                    </button>
-                    <button onClick={() => setChatType('private')} style={{ flex: 1, padding: '10px', borderRadius: '10px', border: '1px solid #cbd5e1', background: chatType === 'private' ? 'var(--purple)' : 'white', color: chatType === 'private' ? 'white' : '#64748b', fontWeight: 'bold', cursor: 'pointer', transition: 'all 0.2s' }}>
-                        💬 المساعد الخاص
-                    </button>
-                </div>
+                <div className="lv-tab-pane lv-fade" style={{ flex: 1, display: 'flex', flexDirection: 'column', background: 'white', overflow: 'hidden' }}>
+                    
+                    <div className="lv-chat-tabs" style={{ display: 'flex', gap: '10px', marginBottom: '10px', padding: '15px 15px 0 15px' }}>
+                        <button className={`lv-chat-tab ${chatType === 'public' ? 'active' : ''}`} onClick={() => { setChatType('public'); chatTypeRef.current = 'public'; setPublicUnread(0); }} style={{ flex: 1, padding: '10px', borderRadius: '10px', border: '1px solid var(--border-glass)', background: chatType === 'public' ? 'var(--primary-dark)' : 'transparent', color: chatType === 'public' ? '#fff' : 'var(--text-muted)', position: 'relative' }}>
+                            🌐 الدردشة العامة المشتركة
+                            {publicUnread > 0 && <span style={{ position: 'absolute', top: '-6px', left: '10px', background: '#ef4444', color: 'white', borderRadius: '50%', width: '22px', height: '22px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', fontWeight: 'bold', boxShadow: '0 2px 6px rgba(239,68,68,0.5)' }}>{publicUnread}</span>}
+                        </button>
+                        <button className={`lv-chat-tab ${chatType === 'private' ? 'active' : ''}`} onClick={() => { setChatType('private'); chatTypeRef.current = 'private'; setPrivateUnread(0); }} style={{ flex: 1, padding: '10px', borderRadius: '10px', border: '1px solid var(--border-glass)', background: chatType === 'private' ? 'var(--primary-dark)' : 'transparent', color: chatType === 'private' ? '#fff' : 'var(--text-muted)', position: 'relative' }}>
+                            💬 دردشة الدعم والمساعد
+                            {privateUnread > 0 && <span style={{ position: 'absolute', top: '-6px', left: '10px', background: '#ef4444', color: 'white', borderRadius: '50%', width: '22px', height: '22px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', fontWeight: 'bold', boxShadow: '0 2px 6px rgba(239,68,68,0.5)', animation: 'pulse 1.5s infinite' }}>{privateUnread}</span>}
+                        </button>
+                    </div>
 
-                <div style={{ flex: 1, overflowY: 'auto', padding: '20px', background: 'linear-gradient(180deg, #f8f0ff, #fff5f7)', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                    {loading ? <p style={{ textAlign: 'center', color: '#94a3b8', marginTop: '20px' }}>جاري التحميل...</p> :
-                        displayedMessages.length === 0 ? <p style={{ textAlign: 'center', color: '#94a3b8', marginTop: '20px' }}>ماكو رسائل سابقة. كن أول من يراسل!</p> :
-                            displayedMessages.map(m => {
-                                const isTeacher = m.sender_role === 'teacher' || m.sender?.role === 'teacher';
-                                const isAssist = !isTeacher && (m.sender_role === 'assistant' || m.sender?.role === 'assistant' || m.is_ta || m.sender?.is_ta);
-                                
-                                return (
-                                    <div key={m.id} style={{
-                                        alignSelf: 'flex-start',
-                                        maxWidth: '85%',
-                                        padding: '12px 16px',
-                                        borderRadius: '16px',
-                                        background: isTeacher ? 'rgba(245, 158, 11, 0.1)' : (isAssist ? 'rgba(16, 185, 129, 0.1)' : 'white'),
-                                        border: `1px solid ${isTeacher ? 'rgba(245, 158, 11, 0.3)' : (isAssist ? 'rgba(16, 185, 129, 0.3)' : 'rgba(0,0,0,0.05)')}`,
-                                        boxShadow: '0 4px 10px rgba(0,0,0,0.02)'
-                                    }}>
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-                                            <strong style={{ fontSize: '0.9rem', color: isTeacher ? '#b45309' : (isAssist ? '#047857' : '#0f172a'), display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                                {(isTeacher || isAssist) ? (m.sender?.full_name || m.sender?.first_name || m.sender_name || 'مساعد') : (m.sender?.username || m.sender_username || 'طالب')}
-                                                {isTeacher && <span style={{ background: 'linear-gradient(90deg, #f59e0b, #d97706)', color: 'white', padding: '2px 6px', borderRadius: '8px', fontSize: '10px' }}>أستاذ المادة</span>}
-                                                {isAssist && <span style={{ background: '#10b981', color: 'white', padding: '2px 6px', borderRadius: '8px', fontSize: '10px' }}>مساعد</span>}
-                                            </strong>
-                                            <span style={{ fontSize: '0.75rem', color: '#94a3b8', marginRight: '10px' }}>{new Date(m.created_at).toLocaleTimeString('ar-IQ', { hour: '2-digit', minute: '2-digit' })}</span>
-                                        </div>
-                                        <div style={{ fontSize: '0.95rem', color: '#334155', lineHeight: 1.5, wordBreak: 'break-word' }}>{m.content}</div>
-                                        {m.attachment && (
-                                            <div style={{ marginTop: '10px' }}>
-                                                {m.attachment.match(/\.(jpeg|jpg|gif|png|webp)(\?|$)/i) ? (
-                                                    <img src={m.attachment} alt="مرفق" style={{ maxWidth: '100%', borderRadius: '8px', border: '1px solid #e2e8f0' }} />
-                                                ) : <a href={m.attachment} target="_blank" rel="noreferrer" style={{ color: 'var(--purple)', fontSize: '0.9rem' }}>📄 عرض المرفق</a>}
+                    <div className="lv-gc-header" style={{ margin: '0 15px' }}>
+                        <div className="lv-gc-info"><div className="lv-gc-icon"><HiOutlineUserGroup /></div>
+                            <div>
+                                <h4>{chatType === 'public' ? 'مجموعة المادة العامة' : 'تواصل مع المساعد المباشر'}</h4>
+                                <p style={{ marginTop: '4px' }}>{chatType === 'public' ? 'شوف رسائل المدرس وباقي الطلاب واسأل بمجموعة الدورة' : 'رسائلك هنا يشوفها الأستاذ والمساعد فقط ويجاوبك بشكل خاص'}</p>
+                            </div></div>
+                        <div className="lv-gc-live"><span className="lv-gc-dot"></span> Socket متصل</div>
+                    </div>
+
+                    <div className="lv-gc-msgs" style={{ flex: 1, overflowY: 'auto', padding: '10px 15px' }}>
+                        {loading ? <p style={{ textAlign: 'center', color: '#94a3b8' }}>جاري التحميل...</p> :
+                            displayedMessages.length === 0 ? <p style={{ color: '#94a3b8', textAlign: 'center', marginTop: '20px' }}>لا توجد رسائل سابقة. كن أول من يرسل!</p> :
+                                displayedMessages.map(m => {
+                                    const isTeacher = m.sender_role === 'teacher' || m.sender?.role === 'teacher';
+                                    const isAssist = !isTeacher && (m.sender_role === 'assistant' || m.sender?.role === 'assistant' || m.is_ta || m.sender?.is_ta);
+                                    return (
+                                        <div key={m.id || Math.random()} className={`lv-gc-msg ${isTeacher ? 'prof' : (isAssist ? 'assist' : '')}`} style={{
+                                            display: 'flex', flexDirection: 'column',
+                                            background: isTeacher ? 'rgba(245, 158, 11, 0.08)' : undefined,
+                                            borderColor: isTeacher ? 'rgba(245, 158, 11, 0.3)' : undefined
+                                        }}>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                                                <strong style={{ display: 'flex', alignItems: 'center', gap: '6px', color: isTeacher ? '#b45309' : undefined }}>
+                                                    {(isTeacher || isAssist) ? (m.sender?.full_name || m.sender?.first_name || m.sender_name || 'مساعد') : (m.sender?.username || m.sender_username || 'طالب')}
+                                                    {isTeacher && <span style={{ background: 'linear-gradient(90deg, #f59e0b, #d97706)', color: 'white', padding: '2px 8px', borderRadius: '12px', fontSize: '11px', fontWeight: 'bold' }}>أستاذ المادة</span>}
+                                                    {isAssist && <span style={{ background: '#10b981', color: 'white', padding: '2px 8px', borderRadius: '12px', fontSize: '11px', fontWeight: 'bold' }}>مساعد</span>}
+                                                </strong>
+                                                <span style={{ fontSize: '0.75rem', color: (isAssist || isTeacher) ? 'var(--text-muted)' : '#64748b', opacity: 0.8 }}>{new Date(m.created_at).toLocaleTimeString('ar-IQ', { hour: '2-digit', minute: '2-digit' })}</span>
                                             </div>
-                                        )}
-                                    </div>
-                                )
-                            })
-                    }
-                    <div ref={messagesEndRef} />
-                </div>
-
-                <div style={{ padding: '15px 20px', background: 'white', borderTop: '1px solid #e2e8f0' }}>
+                                            <span>{m.content}</span>
+                                            {m.attachment && (
+                                                <div style={{ marginTop: '10px' }}>
+                                                    {m.attachment.match(/\.(jpeg|jpg|gif|png|webp)(\?|$)/i) ? (
+                                                        <img src={m.attachment} alt="مرفق" style={{ maxWidth: '100%', borderRadius: '8px', maxHeight: '250px', border: '1px solid var(--border-glass)' }} />
+                                                    ) : m.attachment.match(/\.(webm|mp3|ogg|wav|mp4)(\?|$)/i) || m.attachment.includes('voice-message') ? (
+                                                        <audio controls src={m.attachment} style={{ height: '40px', width: '100%', maxWidth: '250px' }} />
+                                                    ) : (
+                                                        <a href={m.attachment} target="_blank" rel="noreferrer" style={{ color: 'var(--primary)', textDecoration: 'underline', display: 'flex', alignItems: 'center', gap: '5px' }}>📄 عرض المُرفق</a>
+                                                    )}
+                                                </div>
+                                            )}
+                                        </div>
+                                    )
+                                })}
+                        <div ref={messagesEndRef} />
+                    </div>
                     {isMuted ? (
-                        <div style={{ padding: '10px', background: '#fef2f2', color: '#ef4444', borderRadius: '10px', textAlign: 'center', fontSize: '0.9rem', fontWeight: 'bold' }}>
-                            عذراً، الخـاص والعـام محظور حتى {new Date(userData.muted_until).toLocaleString('ar-IQ')}
+                        <div style={{ background: 'rgba(239, 68, 68, 0.08)', borderTop: '1px solid rgba(239, 68, 68, 0.2)', padding: '15px', color: '#ef4444', textAlign: 'center', fontSize: '13px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
+                            <HiOutlineXMark /> عذراً، أنت محظور من الدردشة حالياً حتى {new Date(userData.muted_until).toLocaleString('ar-IQ')}
                         </div>
                     ) : (
-                        <div style={{ display: 'flex', gap: '10px' }}>
-                            <input
-                                type="text"
-                                placeholder={chatType === 'public' ? "اكتب رسالتك للمجموعة..." : "تواصل مع المساعد الخاص..."}
-                                value={input}
-                                onChange={e => setInput(e.target.value)}
-                                onKeyDown={e => { if (e.key === 'Enter') handleSend() }}
-                                style={{ flex: 1, padding: '12px 20px', borderRadius: '25px', border: '1px solid #cbd5e1', outline: 'none', background: '#f8fafc', fontSize: '0.95rem', color: '#0f172a' }}
-                            />
-                            <button
-                                onClick={handleSend}
-                                disabled={!input.trim() || !socket}
-                                style={{ width: '48px', height: '48px', borderRadius: '50%', flexShrink: 0, background: 'linear-gradient(135deg, var(--purple), var(--pink))', color: 'white', border: 'none', cursor: (!input.trim() || !socket) ? 'not-allowed' : 'pointer', opacity: (!input.trim() || !socket) ? 0.6 : 1, display: 'flex', justifyContent: 'center', alignItems: 'center', boxShadow: '0 4px 15px rgba(131, 42, 150, 0.3)' }}
-                            >
-                                <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ transform: 'scaleX(-1)' }}><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
-                            </button>
+                        <div className="lv-gc-input-row" style={{ marginTop: 'auto', padding: '15px', borderTop: '1px solid #e2e8f0', background: '#f8fafc' }}>
+                            <input type="text" className="lv-gc-input" placeholder={chatType === 'public' ? "اكتب رسالتك للمجموعة العـامة..." : "اكتب رسالتك للمساعد الخـاص..."} value={input} onChange={e => setInput(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') handleSend() }} />
+                            <button className="lv-gc-send-btn" onClick={handleSend}><HiOutlinePaperAirplane style={{ transform: 'scaleX(-1)' }} /></button>
                         </div>
                     )}
                 </div>
+
             </motion.div>
         </motion.div>
     );
@@ -757,19 +769,19 @@ const CourseViewer = () => {
                 onClick={() => setIsChatOpen(true)}
             >
                 <div className="cv-fc-pulse"></div>
-                <HiOutlineChatBubbleLeftRight className="cv-fc-icon" />
-                <span className="cv-fc-tooltip">دردشة وتقييم</span>
+                <HiOutlineUserGroup className="cv-fc-icon" />
+                <span className="cv-fc-tooltip">المجموعة</span>
             </button>
 
             {/* 🌟 CHAT DRAWER PORTAL 🌟 */}
-            <AnimatePresence>
-                {isChatOpen && (
-                    createPortal(
-                        <CourseChatDrawer courseId={courseId} userData={userData} onClose={() => setIsChatOpen(false)} />,
-                        document.body
-                    )
-                )}
-            </AnimatePresence>
+            {createPortal(
+                <AnimatePresence>
+                    {isChatOpen && (
+                        <CourseChatDrawer courseId={courseId} userData={userData} onClose={() => setIsChatOpen(false)} />
+                    )}
+                </AnimatePresence>,
+                document.body
+            )}
         </div>
     )
 }
