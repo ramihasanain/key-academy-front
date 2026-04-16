@@ -344,7 +344,9 @@ export const AdminCourseBuilder = ({ id }) => {
                             fd.append(k, dataObj[k]);
                         }
                     } else {
-                        if (typeof dataObj[k] === 'object' && !Array.isArray(dataObj[k]) && !(dataObj[k] instanceof File)) {
+                        if (Array.isArray(dataObj[k])) {
+                            dataObj[k].forEach(val => fd.append(k, val));
+                        } else if (typeof dataObj[k] === 'object' && !(dataObj[k] instanceof File)) {
                             fd.append(k, JSON.stringify(dataObj[k]));
                         } else {
                             if (dataObj[k] === '' && (k === 'grade' || k === 'subject' || k === 'teacher')) {
