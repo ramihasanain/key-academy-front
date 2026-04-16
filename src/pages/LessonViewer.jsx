@@ -1347,6 +1347,24 @@ const LessonViewer = () => {
                     </div>
                 </main>
             </div>
+
+            {/* Floating Chat Icon */}
+            <button 
+                className="lv-floating-chat-btn"
+                onClick={() => {
+                    setActiveTab('group');
+                    setTimeout(() => {
+                        const tabsSection = document.querySelector('.lv-bottom-section');
+                        if (tabsSection) {
+                            tabsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        }
+                    }, 100);
+                }}
+            >
+                <div className="lv-fc-pulse"></div>
+                <HiOutlineChatBubbleLeftRight className="lv-fc-icon" />
+                <span className="lv-fc-tooltip">دردشة المجموعة</span>
+            </button>
         </div>
     )
 }

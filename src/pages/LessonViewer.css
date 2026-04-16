@@ -1219,3 +1219,102 @@
 .lv-sb-items { overflow-y: auto; flex: 1; }
 .lv-sb-items::-webkit-scrollbar { width: 4px; }
 .lv-sb-items::-webkit-scrollbar-thumb { background: rgba(131, 42, 150, 0.15); border-radius: 10px; }
+
+/* ===== FLOATING CHAT BUTTON ===== */
+.lv-floating-chat-btn {
+    position: fixed;
+    bottom: 30px;
+    left: 30px; /* Left side because direction is RTL */
+    width: 65px;
+    height: 65px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--purple), var(--pink));
+    border: none;
+    color: white;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 10px 30px rgba(131, 42, 150, 0.4);
+    z-index: 9999;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.lv-floating-chat-btn:hover {
+    transform: scale(1.1) translateY(-5px);
+    box-shadow: 0 15px 40px rgba(236, 54, 101, 0.5);
+}
+
+.lv-fc-icon {
+    font-size: 2rem;
+    position: relative;
+    z-index: 2;
+}
+
+.lv-fc-pulse {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: inherit;
+    border-radius: inherit;
+    z-index: 1;
+    animation: lvChatPulse 2s infinite cubic-bezier(0.66, 0, 0, 1);
+}
+
+@keyframes lvChatPulse {
+    0% { transform: scale(1); opacity: 0.6; }
+    100% { transform: scale(1.6); opacity: 0; }
+}
+
+.lv-fc-tooltip {
+    position: absolute;
+    left: calc(100% + 15px); /* on the right side of the floating button in RTL */
+    top: 50%;
+    transform: translateY(-50%) translateX(-10px);
+    background: rgba(0,0,0,0.85);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 12px;
+    font-family: var(--font-ar);
+    font-size: 1rem;
+    font-weight: 700;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.1);
+}
+
+.lv-fc-tooltip::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    right: 100%; /* Arrow pointing to the left from the tooltip to the button */
+    transform: translateY(-50%);
+    border-width: 6px;
+    border-style: solid;
+    border-color: transparent rgba(0,0,0,0.85) transparent transparent;
+}
+
+.lv-floating-chat-btn:hover .lv-fc-tooltip {
+    opacity: 1;
+    transform: translateY(-50%) translateX(0);
+}
+
+@media (max-width: 768px) {
+    .lv-floating-chat-btn {
+        bottom: 20px;
+        left: 20px;
+        width: 55px;
+        height: 55px;
+    }
+    .lv-fc-icon {
+        font-size: 1.6rem;
+    }
+    .lv-fc-tooltip {
+        display: none; /* Hide tooltip on mobile to prevent overflow */
+    }
+}
