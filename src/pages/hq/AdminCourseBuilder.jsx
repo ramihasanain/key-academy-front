@@ -67,12 +67,12 @@ export const AdminCourseBuilder = ({ id }) => {
                 if (crsRes.ok) setCourse(await crsRes.json())
 
                 const [modRes, lessRes, quizRes, questRes, docsRes, examRes] = await Promise.all([
-                    fetch(`${API}/api/hq/modules/?page_size=5000`, { headers }),
-                    fetch(`${API}/api/hq/lessons/?page_size=5000`, { headers }),
-                    fetch(`${API}/api/hq/quizzes/?page_size=5000`, { headers }),
-                    fetch(`${API}/api/hq/questions/?page_size=10000`, { headers }),
-                    fetch(`${API}/api/hq/ministerialdocs/?page_size=1000`, { headers }),
-                    fetch(`${API}/api/hq/weeklyexams/?page_size=5000`, { headers })
+                    fetch(`${API}/api/hq/modules/?page_size=5000&course=${id}`, { headers }),
+                    fetch(`${API}/api/hq/lessons/?page_size=5000&module__course=${id}`, { headers }),
+                    fetch(`${API}/api/hq/quizzes/?page_size=5000&lesson__module__course=${id}`, { headers }),
+                    fetch(`${API}/api/hq/questions/?page_size=10000&quiz__lesson__module__course=${id}`, { headers }),
+                    fetch(`${API}/api/hq/ministerialdocs/?page_size=1000&course=${id}`, { headers }),
+                    fetch(`${API}/api/hq/weeklyexams/?page_size=5000&module__course=${id}`, { headers })
                 ])
 
                 const allModules = modRes.ok ? await modRes.json().then(d => d.results || d) : []
@@ -347,7 +347,11 @@ export const AdminCourseBuilder = ({ id }) => {
                         if (typeof dataObj[k] === 'object' && !Array.isArray(dataObj[k]) && !(dataObj[k] instanceof File)) {
                             fd.append(k, JSON.stringify(dataObj[k]));
                         } else {
-                            fd.append(k, dataObj[k]);
+                            if (dataObj[k] === '' && (k === 'grade' || k === 'subject' || k === 'teacher')) {
+                                // Do not append empty string for foreign keys
+                            } else {
+                                fd.append(k, dataObj[k]);
+                            }
                         }
                     }
                 }
@@ -358,6 +362,11 @@ export const AdminCourseBuilder = ({ id }) => {
             fileFields.forEach(k => {
                 if (typeof jsonObj[k] === 'string') delete jsonObj[k];
             });
+            
+            if (jsonObj.grade === '') jsonObj.grade = null;
+            if (jsonObj.subject === '') jsonObj.subject = null;
+            if (jsonObj.teacher === '') jsonObj.teacher = null;
+            
             return { body: JSON.stringify(jsonObj), isMultipart: false };
         }
     }
