@@ -317,6 +317,13 @@ const ViewQuiz = ({ lessonId, userData }) => {
                     total: data.total,
                     attempted_at: new Date().toISOString()
                 }, ...prev])
+
+                // Scroll to top to see results
+                window.scrollTo({ top: 0, behavior: 'smooth' })
+                setTimeout(() => {
+                    const quizContainer = document.querySelector('.lv-quiz-screen')
+                    if(quizContainer) quizContainer.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                }, 100)
             })
             .catch(err => {
                 console.error(err)
