@@ -18,7 +18,7 @@ import {
     HiOutlineHeart,
     HiOutlineCommandLine,
 } from 'react-icons/hi2'
-import { FaMosque } from 'react-icons/fa'
+import { FaMosque, FaDna, FaPenNib, FaGlobeEurope } from 'react-icons/fa'
 import SectionTitle from '../components/SectionTitle'
 import ParticleBackground from '../components/ParticleBackground'
 import './Grades.css'
@@ -30,27 +30,22 @@ const fadeInUp = {
     visible: (i = 0) => ({ opacity: 1, y: 0, transition: { duration: 0.5, delay: i * 0.08 } })
 }
 
-// Eiffel Tower icon (same as Teachers.jsx)
-const EiffelTowerIcon = () => (
-    <svg viewBox="0 0 512 512" fill="currentColor" height="1.2em" width="1.2em" xmlns="http://www.w3.org/2000/svg">
-        <path d="M344.2 384h-44.5c-4.4-23.7-16-46.8-31.2-64h-25c-15.1 17.2-26.7 40.3-31.2 64h-44.5c5.3-35.8 21.6-67.4 46.8-87.1l-14-68.5c-6.8-33.1 3-64.4 20-83.3V44.8c0-15.3 12.4-27.8 27.8-27.8 15.3 0 27.8 12.4 27.8 27.8v100.2c16.9 18.9 26.8 50.2 20 83.3l-14 68.5c25.2 19.7 41.5 51.3 46.8 87.1z M256 182.9c-11.8 0-19.1 16.3-21.7 39.5l10.9 53.6h21.6l10.9-53.6c-2.6-23.2-9.9-39.5-21.7-39.5z" />
-    </svg>
-)
+
 
 // Map by icon_class OR subject name (name takes priority if icon_class empty)
 const iconByClass = {
     'math':  <HiOutlineCalculator />,
     'phys':  <HiOutlineBolt />,
     'chem':  <HiOutlineBeaker />,
-    'bio':   <HiOutlineCubeTransparent />,
+    'bio':   <FaDna />,
     'eng':   <HiOutlineLanguage />,
-    'arab':  <HiOutlineBookOpen />,
+    'arab':  <FaPenNib />,
     'islam': <FaMosque />,
     'hist':  <HiOutlineMapPin />,
     'geo':   <HiOutlineGlobeAlt />,
     'econ':  <HiOutlineBanknotes />,
     'phil':  <HiOutlineScale />,
-    'french': <EiffelTowerIcon />,
+    'french': <FaGlobeEurope />,
     'socio': <HiOutlineHeart />,
     'comp':  <HiOutlineCommandLine />,
 }
@@ -59,19 +54,19 @@ const iconByName = {
     'الرياضيات':          <HiOutlineCalculator />,
     'الفيزياء':           <HiOutlineBolt />,
     'الكيمياء':           <HiOutlineBeaker />,
-    'الأحياء':            <HiOutlineCubeTransparent />,
-    'علم الأحياء':        <HiOutlineCubeTransparent />,
+    'الأحياء':            <FaDna />,
+    'علم الأحياء':        <FaDna />,
     'اللغة الانجليزية':   <HiOutlineLanguage />,
     'اللغة الإنجليزية':   <HiOutlineLanguage />,
-    'اللغة العربية':      <HiOutlineBookOpen />,
+    'اللغة العربية':      <FaPenNib />,
     'التربية الإسلامية':  <FaMosque />,
     'الإسلامية':          <FaMosque />,
     'التاريخ':            <HiOutlineMapPin />,
     'الجغرافية':          <HiOutlineGlobeAlt />,
     'الاقتصاد':           <HiOutlineBanknotes />,
     'الفلسفة':            <HiOutlineScale />,
-    'اللغة الفرنسية':     <EiffelTowerIcon />,
-    'الفرنسية':           <EiffelTowerIcon />,
+    'اللغة الفرنسية':     <FaGlobeEurope />,
+    'الفرنسية':           <FaGlobeEurope />,
     'علم الاجتماع':       <HiOutlineHeart />,
     'الحاسوب':            <HiOutlineCommandLine />,
 }
