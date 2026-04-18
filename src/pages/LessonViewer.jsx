@@ -318,12 +318,17 @@ const ViewQuiz = ({ lessonId, userData }) => {
                     attempted_at: new Date().toISOString()
                 }, ...prev])
 
-                // Scroll to top to see results
-                window.scrollTo({ top: 0, behavior: 'smooth' })
+                // Smoothly scroll to the results section, accounting for fixed headers
                 setTimeout(() => {
-                    const quizContainer = document.querySelector('.lv-quiz-screen')
-                    if(quizContainer) quizContainer.scrollIntoView({ behavior: 'smooth', block: 'start' })
-                }, 100)
+                    const resultEl = document.querySelector('.lv-quiz-result') || document.querySelector('.lv-quiz-screen');
+                    if (resultEl) {
+                        const yOffset = -120; // Extra offset to account for navbar and padding
+                        const y = resultEl.getBoundingClientRect().top + window.scrollY + yOffset;
+                        window.scrollTo({ top: y, behavior: 'smooth' });
+                    } else {
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }
+                }, 150);
             })
             .catch(err => {
                 console.error(err)
