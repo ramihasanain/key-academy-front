@@ -926,7 +926,7 @@ const TabLab = () => {
     )
 }
 
-const TabKeyAI = ({ lessonInfo }) => {
+const TabKeyAI = ({ lessonInfo, userData }) => {
     const { lessonId } = useParams()
     const subjectName = lessonInfo?.course_title || 'المادة'
     
@@ -996,8 +996,20 @@ const TabKeyAI = ({ lessonInfo }) => {
             </div>
 
             {/* Chat Area (Second in RTL = Left side) */}
-            <div className="lv-ai-chat-side" style={{ flex: 1, display: 'flex', flexDirection: 'column', background: 'var(--bg-glass)', borderRadius: '16px', padding: '24px', boxShadow: '0 8px 30px rgba(0,0,0,0.05)', border: '1px solid rgba(131, 42, 150, 0.1)' }}>
-                <div className="lv-ai-header" style={{ borderBottom: '1px solid rgba(0,0,0,0.05)', paddingBottom: '16px', marginBottom: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div className="lv-ai-chat-side" style={{ flex: 1, display: 'flex', flexDirection: 'column', background: 'var(--bg-glass)', borderRadius: '16px', padding: '24px', boxShadow: '0 8px 30px rgba(0,0,0,0.05)', border: '1px solid rgba(131, 42, 150, 0.1)', position: 'relative', userSelect: 'none' }} onContextMenu={(e) => e.preventDefault()}>
+                
+                {/* Watermark Overlay */}
+                {userData && (
+                    <div style={{ position: 'absolute', top: 0, right: 0, bottom: 0, left: 0, pointerEvents: 'none', overflow: 'hidden', display: 'flex', flexWrap: 'wrap', gap: '50px', justifyContent: 'center', alignContent: 'center', opacity: 0.06, mixBlendMode: 'difference', zIndex: 0 }}>
+                        {Array.from({ length: 40 }).map((_, i) => (
+                            <div key={i} style={{ transform: 'rotate(-35deg)', fontSize: '20px', fontWeight: 'bold', color: '#000', whiteSpace: 'nowrap', userSelect: 'none' }}>
+                                {userData?.username || 'Key Academy'}
+                            </div>
+                        ))}
+                    </div>
+                )}
+
+                <div className="lv-ai-header" style={{ borderBottom: '1px solid rgba(0,0,0,0.05)', paddingBottom: '16px', marginBottom: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'relative', zIndex: 1 }}>
                     <div className="lv-ai-info">
                         <h4 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '10px' }}>Key AI <span className="lv-ai-badge">ذكاء اصطناعي</span></h4>
                         <p style={{ margin: 0, marginTop: '4px' }}>مساعدك الشخصي لفهم الدرس بشكل أعمق</p>
@@ -1005,7 +1017,7 @@ const TabKeyAI = ({ lessonInfo }) => {
                     <div className="lv-ai-status"><span className="lv-gc-dot"></span> متصل</div>
                 </div>
 
-                <div className="lv-ai-msgs">
+                <div className="lv-ai-msgs" style={{ position: 'relative', zIndex: 1 }}>
                     {messages.map((msg, i) => (
                         <motion.div key={i} className={`lv-ai-msg ${msg.role}`} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
                             {msg.role === 'ai' && <div className="lv-ai-msg-avatar" style={{ background: 'transparent', padding: 0, border: 'none' }}>
@@ -1354,7 +1366,7 @@ const LessonViewer = () => {
                             {activeTab === 'group' && <TabGroup courseId={courseId} userData={userData} lessonId={lessonId} />}
                             {activeTab === 'docs' && <TabDocs lessonInfo={lessonInfo} courseId={courseId} userData={userData} />}
                             {activeTab === 'lab' && <TabLab />}
-                            {activeTab === 'keyai' && <TabKeyAI lessonInfo={lessonInfo} />}
+                            {activeTab === 'keyai' && <TabKeyAI lessonInfo={lessonInfo} userData={userData} />}
                         </div>
                     </div>
                 </main>
