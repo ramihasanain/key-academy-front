@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { API } from '../config'
 import { motion } from 'framer-motion'
-import { FaStar, FaDna, FaPenNib, FaGlobeEurope } from 'react-icons/fa'
+import { FaStar, FaDna, FaPenNib } from 'react-icons/fa'
 import {
     HiOutlineSquares2X2,
     HiOutlineCalculator,
@@ -25,7 +25,21 @@ const fadeInUp = {
     visible: (i = 0) => ({ opacity: 1, y: 0, transition: { duration: 0.5, delay: i * 0.08 } })
 }
 
-
+const ClearEiffelTowerIcon = () => (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" height="1.2em" width="1.2em" style={{ transform: 'translateY(2px)' }}>
+        <path d="M12 2v2" />
+        <path d="M10 4h4" />
+        <path d="M11 4L10 10" />
+        <path d="M13 4L14 10" />
+        <path d="M9 10h6" />
+        <path d="M10 10L8 16" />
+        <path d="M14 10L16 16" />
+        <path d="M7 16h10" />
+        <path d="M8 16L5 22" />
+        <path d="M16 16L19 22" />
+        <path d="M8 22c0-3.5 1.5-5 4-5s4 1.5 4 5" />
+    </svg>
+)
 
 const Teachers = () => {
     const [searchParams] = useSearchParams()
@@ -89,7 +103,7 @@ const Teachers = () => {
         { id: 'اللغة الانجليزية', name: 'الانجليزية', icon: <HiOutlineLanguage /> },
         { id: 'الأحياء', name: 'الأحياء', icon: <FaDna /> },
         { id: 'اللغة العربية', name: 'العربية', icon: <FaPenNib /> },
-        { id: 'اللغة الفرنسية', name: 'الفرنسية', icon: <FaGlobeEurope /> },
+        { id: 'اللغة الفرنسية', name: 'الفرنسية', icon: <ClearEiffelTowerIcon /> },
     ];
 
     return (
