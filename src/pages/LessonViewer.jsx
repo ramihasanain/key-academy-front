@@ -165,7 +165,11 @@ const ViewSlides = ({ lessonInfo, lessonContent, userData }) => {
 </style>
 <script>
     document.addEventListener('contextmenu', e => e.preventDefault());
-    document.addEventListener('dragstart', e => e.preventDefault());
+    document.addEventListener('dragstart', e => {
+        if (e.target.tagName === 'IMG') {
+            e.preventDefault();
+        }
+    });
     document.addEventListener('copy', e => e.preventDefault());
     document.addEventListener('keydown', e => {
         if((e.ctrlKey || e.metaKey) && ['c','v','x','a','p','s','u'].includes(e.key.toLowerCase())) {
@@ -175,7 +179,7 @@ const ViewSlides = ({ lessonInfo, lessonContent, userData }) => {
 </script>`;
 
         return (
-            <div ref={containerRef} className="lv-screen lv-slides-screen" style={{ padding: 0, display: 'flex', flexDirection: 'column', width: '100%', minHeight: isFullscreen ? '100vh' : '75vh', background: '#fff', userSelect: 'none' }} onContextMenu={e => e.preventDefault()} onCopy={e => { e.preventDefault(); return false; }} onDragStart={e => e.preventDefault()}>
+            <div ref={containerRef} className="lv-screen lv-slides-screen" style={{ padding: 0, display: 'flex', flexDirection: 'column', width: '100%', minHeight: isFullscreen ? '100vh' : '75vh', background: '#fff', userSelect: 'none' }} onContextMenu={e => e.preventDefault()} onCopy={e => { e.preventDefault(); return false; }}>
                 <div className="lv-sf-bar" style={{ padding: '15px 25px', background: 'rgba(0,0,0,0.8)', borderBottom: '1px solid var(--border-glass)', flexShrink: 0, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <span className="lv-sf-bar-title" style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#fff', fontWeight: 'bold' }}><HiOutlineSparkles /> السلايدات التفاعلية</span>
                     <button onClick={toggleFullscreen} style={{ background: 'rgba(255,255,255,0.15)', border: 'none', color: '#fff', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 'bold', transition: 'all 0.2s' }} onMouseOver={e => e.currentTarget.style.background = 'rgba(255,255,255,0.25)'} onMouseOut={e => e.currentTarget.style.background = 'rgba(255,255,255,0.15)'}>
