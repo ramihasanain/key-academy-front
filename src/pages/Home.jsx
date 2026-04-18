@@ -48,8 +48,17 @@ const floatingIcons = [
 
 const Home = () => {
     const [teachers, setTeachers] = useState([])
+    const [isAppleWebKit, setIsAppleWebKit] = useState(false)
 
     useEffect(() => {
+        // Detect Apple WebKit browsers where WebM alpha is not supported and renders as black
+        const ua = navigator.userAgent;
+        const isWebKit = /iPad|iPhone|iPod/.test(ua) || 
+                         (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1) ||
+                         /^((?!chrome|android).)*safari/i.test(ua) ||
+                         /CriOS|FxiOS|EdgiOS/.test(ua);
+        setIsAppleWebKit(isWebKit);
+
         const cachedTeachers = sessionStorage.getItem('cached_teachers_list')
         if (cachedTeachers) {
             try { setTeachers(JSON.parse(cachedTeachers)) } catch(e) {}
@@ -136,6 +145,7 @@ const Home = () => {
                                     muted 
                                     playsInline 
                                     className="hero-robot-video"
+                                    style={isAppleWebKit ? { mixBlendMode: 'screen', filter: 'brightness(1.1) contrast(1.1)' } : {}}
                                 />
                             </div>
 
