@@ -245,7 +245,7 @@ const ViewSlides = ({ lessonInfo, lessonContent, userData }) => {
     );
 };
 
-const ViewQuiz = ({ lessonId }) => {
+const ViewQuiz = ({ lessonId, userData }) => {
     const [phase, setPhase] = useState('intro') // intro, exam, result
     const [quizData, setQuizData] = useState(null)
     const [answers, setAnswers] = useState({})
@@ -333,10 +333,23 @@ const ViewQuiz = ({ lessonId }) => {
     </div>
 
     return (
-        <div className="lv-screen lv-quiz-screen">
-            {phase === 'intro' && (
-                <div className="lv-quiz-intro">
-                    <div className="lv-qi-badge"><HiOutlineCheckBadge /></div>
+        <div className="lv-screen lv-quiz-screen" style={{ position: 'relative', userSelect: 'none' }} onContextMenu={e => e.preventDefault()}>
+            
+            {/* Watermark Overlay */}
+            {userData && (
+                <div style={{ position: 'absolute', top: 0, right: 0, bottom: 0, left: 0, pointerEvents: 'none', overflow: 'hidden', display: 'flex', flexWrap: 'wrap', gap: '50px', justifyContent: 'center', alignContent: 'center', opacity: 0.05, mixBlendMode: 'difference', zIndex: 0 }}>
+                    {Array.from({ length: 40 }).map((_, i) => (
+                        <div key={i} style={{ transform: 'rotate(-35deg)', fontSize: '20px', fontWeight: 'bold', color: '#000', whiteSpace: 'nowrap', userSelect: 'none' }}>
+                            {userData?.username || 'Key Academy'}
+                        </div>
+                    ))}
+                </div>
+            )}
+
+            <div style={{ position: 'relative', zIndex: 1, width: '100%', display: 'flex', flexDirection: 'column' }}>
+                {phase === 'intro' && (
+                    <div className="lv-quiz-intro">
+                        <div className="lv-qi-badge"><HiOutlineCheckBadge /></div>
                     <h2>{quizData.title}</h2>
                     <p>هذا الاختبار يقيم فهمك للدرس بالكامل مدعوم بالذكاء الاصطناعي الخاص بالمنصة.</p>
                     <div className="lv-qi-stats">
@@ -468,6 +481,7 @@ const ViewQuiz = ({ lessonId }) => {
                     )}
                 </div>
             )}
+            </div>
         </div>
     )
 }
@@ -1323,7 +1337,7 @@ const LessonViewer = () => {
                                     <ViewSlides lessonInfo={lessonInfo} lessonContent={lessonContent} userData={userData} />
                                 )}
                             </motion.div>}
-                            {activeContent === 'quiz' && <motion.div key="q" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="lv-portal-inner"><ViewQuiz lessonId={lessonId} /></motion.div>}
+                            {activeContent === 'quiz' && <motion.div key="q" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="lv-portal-inner"><ViewQuiz lessonId={lessonId} userData={userData} /></motion.div>}
                         </AnimatePresence>
                     </div>
 
