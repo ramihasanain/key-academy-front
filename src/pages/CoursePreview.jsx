@@ -36,6 +36,28 @@ const CoursePreview = () => {
     // Generic Custom Popup State
     const [popup, setPopup] = useState({ show: false, type: 'error', title: '', message: '', actionText: 'حسناً', actionFn: null })
 
+    // Teacher Profile Modal State
+    const [showTeacherModal, setShowTeacherModal] = useState(false)
+    const [teacherData, setTeacherData] = useState(null)
+    const [loadingTeacher, setLoadingTeacher] = useState(false)
+
+    const handleTeacherClick = async () => {
+        if (!course || !course.teacher) return;
+        setShowTeacherModal(true);
+        if (teacherData && teacherData.id === course.teacher) return;
+        
+        setLoadingTeacher(true);
+        try {
+            const res = await fetch(`${API}/api/teachers/${course.teacher}/`);
+            const data = await res.json();
+            setTeacherData(data);
+        } catch (err) {
+            console.error('Failed to load teacher data', err);
+        } finally {
+            setLoadingTeacher(false);
+        }
+    }
+
     useEffect(() => {
         const handleScroll = () => setScrolled(window.scrollY > 80)
         window.addEventListener('scroll', handleScroll)
@@ -210,7 +232,12 @@ const CoursePreview = () => {
                             <h1 style={{ color: 'white', fontSize: 'clamp(2rem, 4vw, 3.5rem)', fontWeight: 900, margin: 0, textShadow: '0 4px 25px rgba(0,0,0,0.6)', lineHeight: 1.2 }}>{course.title}</h1>
                             
                             {/* Stylish Glassmorphism Teacher Card */}
-                            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '15px', background: 'rgba(255, 255, 255, 0.15)', backdropFilter: 'blur(20px)', padding: '10px 30px 10px 10px', borderRadius: '50px', border: '1px solid rgba(255, 255, 255, 0.3)', alignSelf: 'flex-start', boxShadow: '0 10px 30px rgba(0,0,0,0.2)' }}>
+                            <div 
+                                onClick={handleTeacherClick}
+                                style={{ display: 'inline-flex', alignItems: 'center', gap: '15px', background: 'rgba(255, 255, 255, 0.15)', backdropFilter: 'blur(20px)', padding: '10px 30px 10px 10px', borderRadius: '50px', border: '1px solid rgba(255, 255, 255, 0.3)', alignSelf: 'flex-start', boxShadow: '0 10px 30px rgba(0,0,0,0.2)', cursor: 'pointer', transition: 'all 0.3s' }}
+                                onMouseOver={e => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.25)'}
+                                onMouseOut={e => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.15)'}
+                            >
                                 <div style={{ width: '56px', height: '56px', borderRadius: '50%', overflow: 'hidden', border: '3px solid white', boxShadow: '0 5px 15px rgba(0,0,0,0.3)' }}>
                                     <img src={course.teacher_image || 'https://via.placeholder.com/150'} alt={course.teacher_name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                 </div>
@@ -428,6 +455,113 @@ const CoursePreview = () => {
                                     </button>
                                 )}
                             </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* Teacher Profile Modal */}
+            <AnimatePresence>
+                {showTeacherModal && (
+                    <motion.div
+                        className="enroll-modal-overlay"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        onClick={() => setShowTeacherModal(false)}
+                        style={{ position: 'fixed', inset: 0, zIndex: 99999, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0, 0, 0, 0.7)', backdropFilter: 'blur(12px)', padding: '20px' }}
+                    >
+                        <motion.div
+                            className="enroll-modal premium-modal"
+                            initial={{ opacity: 0, scale: 0.9, y: 30 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.9, y: 30 }}
+                            onClick={e => e.stopPropagation()}
+                            style={{ 
+                                maxWidth: '700px', 
+                                width: '100%', 
+                                maxHeight: '90vh', 
+                                overflowY: 'auto', 
+                                padding: 0, 
+                                background: '#ffffff', 
+                                borderRadius: '24px', 
+                                boxShadow: '0 25px 50px rgba(0,0,0,0.15)', 
+                                border: '1px solid rgba(0,0,0,0.05)', 
+                                position: 'relative' 
+                            }}
+                        >
+                            {/* Close Button */}
+                            <button onClick={() => setShowTeacherModal(false)} style={{ position: 'absolute', top: '15px', right: '15px', background: 'rgba(0,0,0,0.2)', border: 'none', width: '36px', height: '36px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', cursor: 'pointer', zIndex: 10, transition: 'background 0.3s' }} onMouseOver={e => e.currentTarget.style.background = 'rgba(0,0,0,0.4)'} onMouseOut={e => e.currentTarget.style.background = 'rgba(0,0,0,0.2)'}>✖</button>
+
+                            {loadingTeacher || !teacherData ? (
+                                <div style={{ minHeight: '300px', display: 'flex', justifyContent: 'center', alignItems: 'center', color: '#94a3b8' }}>
+                                    جاري تحميل معلومات الأستاذ...
+                                </div>
+                            ) : (
+                                <div>
+                                    <div style={{ background: teacherData.color?.startsWith('#') ? teacherData.color : 'var(--gradient-brand)', padding: '40px 30px', color: 'white', display: 'flex', alignItems: 'center', gap: '20px', borderBottom: '5px solid rgba(0,0,0,0.1)' }}>
+                                        <div style={{ width: '90px', height: '90px', borderRadius: '50%', border: '4px solid white', overflow: 'hidden', flexShrink: 0, background: 'rgba(255,255,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                            {teacherData.image ? (
+                                                <img src={teacherData.image} alt={teacherData.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                            ) : (
+                                                <span style={{ fontSize: '2rem', fontWeight: 'bold' }}>{teacherData.initials}</span>
+                                            )}
+                                        </div>
+                                        <div>
+                                            <h2 style={{ margin: '0 0 5px 0', fontSize: '1.8rem', fontWeight: 900 }}>{teacherData.name}</h2>
+                                            <div style={{ fontSize: '1.1rem', opacity: 0.9 }}>{teacherData.subject} • {teacherData.grade}</div>
+                                        </div>
+                                    </div>
+
+                                    <div style={{ padding: '30px' }}>
+                                        {teacherData.bio && (
+                                            <div style={{ background: '#f8fafc', padding: '20px', borderRadius: '16px', marginBottom: '25px', boxShadow: 'inset 0 2px 10px rgba(0,0,0,0.02)' }}>
+                                                <h3 style={{ fontSize: '1.2rem', color: 'var(--text-primary)', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                    <HiOutlineUserGroup style={{ color: teacherData.color?.startsWith('#') ? teacherData.color : 'var(--primary)' }} />
+                                                    منو الأستاذ؟
+                                                </h3>
+                                                <p style={{ color: 'var(--text-secondary)', lineHeight: 1.6, margin: 0, whiteSpace: 'pre-wrap' }}>{teacherData.bio}</p>
+                                            </div>
+                                        )}
+
+                                        {teacherData.experience && teacherData.experience.length > 0 && (
+                                            <div style={{ marginBottom: '25px' }}>
+                                                <h3 style={{ fontSize: '1.2rem', color: 'var(--text-primary)', marginBottom: '15px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                    <HiOutlineSparkles style={{ color: '#f59e0b' }} /> خبرته
+                                                </h3>
+                                                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                                    {teacherData.experience.map((exp, i) => (
+                                                        <div key={i} style={{ background: '#ffffff', border: '1px solid #e2e8f0', padding: '15px 20px', borderRadius: '12px', display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
+                                                            <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: teacherData.color?.startsWith('#') ? teacherData.color : 'var(--primary)', marginTop: '8px', flexShrink: 0 }}></div>
+                                                            <p style={{ margin: 0, color: 'var(--text-primary)', lineHeight: 1.5 }}>{exp}</p>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {teacherData.achievements && teacherData.achievements.length > 0 && (
+                                            <div style={{ marginBottom: '10px' }}>
+                                                <h3 style={{ fontSize: '1.2rem', color: 'var(--text-primary)', marginBottom: '15px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                    🏆 إنجازاته
+                                                </h3>
+                                                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                                    {teacherData.achievements.map((ach, i) => (
+                                                        <div key={i} style={{ background: 'linear-gradient(to right, #fcf6ee, #ffffff)', border: '1px solid #fde68a', padding: '15px 20px', borderRadius: '12px', display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
+                                                            <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#f59e0b', marginTop: '8px', flexShrink: 0 }}></div>
+                                                            <p style={{ margin: 0, color: 'var(--text-primary)', lineHeight: 1.5 }}>{ach}</p>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
+                                        
+                                        {!teacherData.bio && (!teacherData.experience || teacherData.experience.length === 0) && (!teacherData.achievements || teacherData.achievements.length === 0) && (
+                                            <div style={{ textAlign: 'center', padding: '20px', color: '#94a3b8' }}>لا توجد معلومات إضافية منشورة حالياً لهذا الأستاذ.</div>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
                         </motion.div>
                     </motion.div>
                 )}
