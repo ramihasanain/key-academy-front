@@ -611,7 +611,7 @@ const StudentDashboard = () => {
                                     <label>تفلتر حسب الأستاذ</label>
                                     <select className="glass-select" value={filterTeacher} onChange={e => setFilterTeacher(e.target.value)}>
                                         <option value="الكل">كل الأساتذة</option>
-                                        {allTeachers.map(t => <option key={t.id} value={t.name}>{t.name} - {t.subject}</option>)}
+                                        {allTeachers.map(t => <option key={t.id} value={t.name}>{t.name}</option>)}
                                     </select>
                                 </div>
                                 <div className="dash-filter-group">
