@@ -34,7 +34,11 @@ const grades = ['الكل', 'السادس العلمي', 'السادس الأد�
 
 const StudentDashboard = () => {
     const navigate = useNavigate()
-    const [activeTab, setActiveTab] = useState('my-courses')
+    const [activeTab, setActiveTabState] = useState(() => localStorage.getItem('dashboard_tab') || 'my-courses')
+    const setActiveTab = (tab) => {
+        setActiveTabState(tab);
+        localStorage.setItem('dashboard_tab', tab);
+    }
     const [sidebarOpen, setSidebarOpen] = useState(false)
 
     // Browse filters

@@ -23,6 +23,7 @@ import {
     HiOutlinePaperAirplane
 } from 'react-icons/hi2'
 import { VirtualLabsData } from '../data/VirtualLabsData'
+import SecurePDFViewer from '../components/SecurePDFViewer'
 import './CourseViewer.css'
 import './LessonViewer.css' // Import styling to make Chat fully identical
 
@@ -739,12 +740,8 @@ const CourseViewer = () => {
                                         <HiOutlineXMark size={24} />
                                     </button>
                                 </div>
-                                <div style={{ flex: 1, position: 'relative', backgroundColor: '#e2e8f0' }} onContextMenu={(e) => e.preventDefault()}>
-                                    <iframe 
-                                        src={`${viewedDoc.url}#toolbar=0&navpanes=0&scrollbar=0`}
-                                        style={{ width: '100%', height: '100%', border: 'none', display: 'block' }}
-                                        title={viewedDoc.name}
-                                    />
+                                <div style={{ flex: 1, position: 'relative', backgroundColor: '#e2e8f0', overflow: 'hidden' }} onContextMenu={(e) => e.preventDefault()}>
+                                    <SecurePDFViewer url={viewedDoc.url} isFullscreen={false} />
 
                                     {/* Watermark Overlay */}
                                     {userData && (
