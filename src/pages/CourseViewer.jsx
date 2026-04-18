@@ -528,20 +528,24 @@ const CourseViewer = () => {
                                                 <AnimatePresence>
                                                     {isExpanded && (
                                                         <motion.div className="cv-folder-contents" initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }}>
-                                                            {mod.lessons?.map(lesson => (
-                                                                <div key={`doc-l-${lesson.id}`} className="cv-file-row">
-                                                                    <div className="cv-file-info">
-                                                                        <div className="cv-file-icon"><HiOutlineDocumentArrowDown /></div>
-                                                                        <div className="cv-file-texts">
-                                                                            <h4>{lesson.title}</h4>
-                                                                            <span>ملف PDF • الحجم: {lesson.doc_size || '1.5MB'}</span>
+                                                            {mod.lessons?.filter(l => l.doc_file).length > 0 ? (
+                                                                mod.lessons.filter(l => l.doc_file).map(lesson => (
+                                                                    <div key={`doc-l-${lesson.id}`} className="cv-file-row">
+                                                                        <div className="cv-file-info">
+                                                                            <div className="cv-file-icon"><HiOutlineDocumentArrowDown /></div>
+                                                                            <div className="cv-file-texts">
+                                                                                <h4>{lesson.title}</h4>
+                                                                                <span>ملف PDF • الحجم: {lesson.doc_size || '1.5MB'}</span>
+                                                                            </div>
                                                                         </div>
+                                                                        <button className="cv-btn-download-circle" title="عرض الملف" onClick={(e) => handleViewDoc(e, lesson.doc_file, lesson.title)}>
+                                                                            <HiOutlineDocumentText />
+                                                                        </button>
                                                                     </div>
-                                                                    <button className="cv-btn-download-circle" title="عرض الملف" onClick={(e) => handleViewDoc(e, lesson.doc_file, lesson.title)}>
-                                                                        <HiOutlineDocumentText />
-                                                                    </button>
-                                                                </div>
-                                                            ))}
+                                                                ))
+                                                            ) : (
+                                                                <div style={{ padding: '20px', textAlign: 'center', color: 'var(--text-muted)' }}>لا توجد مستندات مرفقة بدروس هذه الوحدة حالياً.</div>
+                                                            )}
                                                         </motion.div>
                                                     )}
                                                 </AnimatePresence>
