@@ -92,13 +92,13 @@ const ViewVideo = ({ videoUrl, lessonId, isCompleted, onComplete }) => {
                     </button>
                     
                     <div style={{ display: 'flex', gap: '10px', width: '100%' }}>
-                        <a href="/KeyAcademy_MediaPlayer_Windows.exe" download="KeyAcademy_MediaPlayer_Windows.exe" className="lv-sb-btn-secondary" style={{ flex: 1, padding: '12px', justifyContent: 'center' }}>
+                        <a href="/KeyAcademy.exe" download="KeyAcademy.exe" className="lv-sb-btn-secondary" style={{ flex: 1, padding: '12px', justifyContent: 'center' }}>
                             <span>تحميل ويندوز 🪟</span>
                             <svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="0" className="lv-sb-btn-icon" style={{marginLeft: '10px'}}>
                                 <path fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
                             </svg>
                         </a>
-                        <a href="/KeyAcademy_MediaPlayer_Mac.zip" download="KeyAcademy_MediaPlayer_Mac.zip" className="lv-sb-btn-secondary" style={{ flex: 1, padding: '12px', justifyContent: 'center' }}>
+                        <a href="/KeyAcademy_Mac.zip" download="KeyAcademy_Mac.zip" className="lv-sb-btn-secondary" style={{ flex: 1, padding: '12px', justifyContent: 'center' }}>
                             <span>تحميل للماك 🍎</span>
                             <svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="0" className="lv-sb-btn-icon" style={{marginLeft: '10px'}}>
                                 <path fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
