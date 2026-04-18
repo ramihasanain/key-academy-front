@@ -261,6 +261,31 @@ const ViewQuiz = ({ lessonId, userData }) => {
     const [history, setHistory] = useState([])
     const [isLoading, setIsLoading] = useState(true)
     const [isSubmitting, setIsSubmitting] = useState(false)
+    const [timeLeft, setTimeLeft] = useState(null)
+
+    useEffect(() => {
+        let interval = null;
+        if (phase === 'exam' && timeLeft !== null && timeLeft > 0) {
+            interval = setInterval(() => {
+                setTimeLeft(prev => {
+                    if (prev <= 1) {
+                        clearInterval(interval);
+                        window.location.reload();
+                        return 0;
+                    }
+                    return prev - 1;
+                });
+            }, 1000);
+        }
+        return () => clearInterval(interval);
+    }, [phase, timeLeft]);
+
+    const formatTime = (seconds) => {
+        if (seconds === null) return `${quizData?.duration_minutes || 0}:00`;
+        const m = Math.floor(seconds / 60);
+        const s = seconds % 60;
+        return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+    };
 
     useEffect(() => {
         const token = localStorage.getItem('access_token')
@@ -377,7 +402,7 @@ const ViewQuiz = ({ lessonId, userData }) => {
                         <div className="lv-qi-stat"><strong>{quizData.questions.length}</strong> أسئلة</div>
                         <div className="lv-qi-stat"><strong>AI</strong> ذكاء اصطناعي</div>
                     </div>
-                    <button className="premium-btn exact-btn-orange lv-qi-start" onClick={() => setPhase('exam')}>ابدأ التحدي الآن</button>
+                    <button className="premium-btn exact-btn-orange lv-qi-start" onClick={() => { setPhase('exam'); setTimeLeft(quizData.duration_minutes * 60); }}>ابدأ التحدي الآن</button>
                     {history.length > 0 && <button className="lv-txt-link" onClick={() => {
                         alert(`عندك ${history.length} محاولات سابقة، أفضلها ${Math.max(...history.map(h => h.percentage))}%`)
                     }}><HiOutlineClock /> عرض محاولاتي السابقة ({history.length})</button>}
@@ -387,7 +412,7 @@ const ViewQuiz = ({ lessonId, userData }) => {
                 <div className="lv-quiz-exam">
                     <div className="lv-qe-header">
                         <h3>{quizData.title}</h3>
-                        <div className="lv-qe-timer"><span className="lv-timer-dot"></span> {quizData.duration_minutes}:00 دقيقة</div>
+                        <div className="lv-qe-timer"><span className="lv-timer-dot" style={{ animation: timeLeft <= 60 ? 'pulse 0.5s infinite' : 'pulse 1.5s infinite', backgroundColor: timeLeft <= 60 ? '#ef4444' : '#f59e0b' }}></span> <span style={{ color: timeLeft <= 60 ? '#ef4444' : 'inherit' }}>{formatTime(timeLeft)} دقيقة</span></div>
                     </div>
                     <div className="lv-qe-list">
                         {quizData.questions.map((q, qi) => (
