@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 import { API } from '../config'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
@@ -102,6 +102,7 @@ const getBranches = (data) => {
 }
 
 const Grades = () => {
+    const { gradeId } = useParams()
     const [grades, setGrades] = useState([])
     const [loading, setLoading] = useState(true)
     const [apiError, setApiError] = useState(false)
@@ -162,25 +163,9 @@ const Grades = () => {
         setSelectedBranch(prev => ({ ...prev, [slug]: branch }))
     }
 
-    // Filter subjects by branch if grade has branches
-    const getFilteredSubjects = (data) => {
-        const branch = selectedBranch[data.slug] || 'all'
-        if (!data.subjects) return []
-        if (branch === 'all') return data.subjects
-        return data.subjects.filter(s => !s.branch || s.branch === branch || s.branch.includes(branch))
-    }
-
     const hasBranches = (data) => {
         if (!data.subjects) return false
         return data.subjects.some(s => s.branch && (s.branch.includes('علمي') || s.branch.includes('أدبي')))
-    }
-
-    const buildTeachersLink = (subject, data) => {
-        const branch = selectedBranch[data.slug] || 'all'
-        const gradeName = data.slug?.includes('sixth') || data.grade_name?.includes('سادس') ? 'السادس'
-            : data.slug?.includes('third') || data.grade_name?.includes('ثالث') ? 'الثالث'
-            : 'all'
-        return `/teachers?subject=${encodeURIComponent(subject.name)}&grade=${gradeName}&branch=${branch}`
     }
 
     return (
@@ -211,13 +196,41 @@ const Grades = () => {
                     لا تتوفر صفوف حالياً.
                 </div>
             ) : (
-                grades.map((data) => {
-                    const withBranches = hasBranches(data)
-                    const currentBranch = selectedBranch[data.slug] || 'all'
-                    const filteredSubjects = getFilteredSubjects(data)
+                (() => {
+                    const gradesToRender = grades.filter(data => {
+                        if (!gradeId) return true;
+                        const lowercaseGradeId = gradeId.toLowerCase();
+                        if (lowercaseGradeId.includes('sixth') && (data.slug?.includes('sixth') || data.grade_name?.includes('سادس'))) return true;
+                        if (lowercaseGradeId.includes('third') && (data.slug?.includes('third') || data.grade_name?.includes('ثالث'))) return true;
+                        return data.slug === gradeId;
+                    });
 
-                    return (
-                        <section key={data.slug} className="section grade-section">
+                    if (gradesToRender.length === 0) {
+                        return (
+                            <div style={{ textAlign: 'center', padding: '80px 0', color: 'var(--text-muted)', fontSize: '1.1rem' }}>
+                                لا يتوفر صف يطابق الرابط.
+                            </div>
+                        );
+                    }
+
+                    return gradesToRender.map((data) => {
+                        const withBranches = hasBranches(data)
+                        const routeBranch = gradeId?.includes('scientific') ? 'علمي' : gradeId?.includes('literary') ? 'أدبي' : null;
+                        const currentBranch = selectedBranch[data.slug] || routeBranch || 'all'
+                        const filteredSubjects = data.subjects ? data.subjects.filter(s => {
+                            if (currentBranch === 'all') return true;
+                            return !s.branch || s.branch === currentBranch || s.branch.includes(currentBranch);
+                        }) : [];
+
+                        const getTeachersLink = (subject) => {
+                            const gradeName = data.slug?.includes('sixth') || data.grade_name?.includes('سادس') ? 'السادس'
+                                : data.slug?.includes('third') || data.grade_name?.includes('ثالث') ? 'الثالث'
+                                : 'all'
+                            return `/teachers?subject=${encodeURIComponent(subject.name)}&grade=${gradeName}&branch=${currentBranch}`
+                        };
+
+                        return (
+                            <section key={data.slug} className="section grade-section">
                             <div className="container">
                                 <div className="grade-header">
                                     <div className="grade-header-icon"><HiOutlineAcademicCap /></div>
@@ -272,7 +285,7 @@ const Grades = () => {
                                                 <h4>{subject.name}</h4>
                                                 <span className="course-count">{subject.courses_count || 0} دورات متاحة</span>
                                                 <Link
-                                                    to={buildTeachersLink(subject, data)}
+                                                    to={getTeachersLink(subject)}
                                                     className="btn-primary"
                                                 >
                                                     شوف الأساتذة
@@ -289,6 +302,7 @@ const Grades = () => {
                         </section>
                     )
                 })
+            })()
             )}
         </div>
     )
