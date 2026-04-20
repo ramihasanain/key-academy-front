@@ -613,11 +613,16 @@ const LessonViewer = () => {
 
     // 3. Lazy Load Heavy Content (Slides/Text)
     useEffect(() => {
-        if (activeContent === 'slides' && lessonId && !lessonContent && !isLoadingContent) {
+        if (activeContent === 'slides' && lessonId && !lessonContent) {
             const controller = new AbortController();
             setIsLoadingContent(true);
-            fetch(`${API}/api/courses/lessons/${lessonId}/content/`, { signal: controller.signal })
-                .then(res => res.json())
+            const token = localStorage.getItem('access_token');
+            const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+            fetch(`${API}/api/courses/lessons/${lessonId}/content/`, { headers, signal: controller.signal })
+                .then(res => {
+                    if (!res.ok) throw new Error('Failed to fetch content');
+                    return res.json();
+                })
                 .then(data => {
                     setLessonContent(data);
                     setIsLoadingContent(false);
@@ -629,7 +634,7 @@ const LessonViewer = () => {
                 });
             return () => controller.abort();
         }
-    }, [activeContent, lessonId, lessonContent, isLoadingContent]);
+    }, [activeContent, lessonId, lessonContent]);
 
     const handleMarkComplete = () => {
         const token = localStorage.getItem('access_token');
