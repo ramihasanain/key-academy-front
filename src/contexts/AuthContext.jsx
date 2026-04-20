@@ -11,7 +11,15 @@ export const AuthProvider = ({ children }) => {
         const stored = localStorage.getItem('user');
         return stored && stored !== 'undefined' ? JSON.parse(stored) : null;
     });
-    const [loading, setLoading] = useState(true);
+    // Start as NOT loading if we already have cached user data — renders the UI instantly.
+    // If no cache, stay true so we wait for the API before showing anything.
+    const [loading, setLoading] = useState(() => {
+        const stored = localStorage.getItem('user');
+        const token = localStorage.getItem('access_token');
+        const hasCachedUser = stored && stored !== 'undefined' && stored !== 'null';
+        const hasToken = token && token !== 'undefined' && token !== 'null';
+        return !(hasCachedUser && hasToken);
+    });
 
     useEffect(() => {
         const token = localStorage.getItem('access_token');
