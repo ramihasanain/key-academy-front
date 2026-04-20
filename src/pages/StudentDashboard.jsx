@@ -57,10 +57,21 @@ const StudentDashboard = () => {
     const [allCourses, setAllCourses] = useState([])
     const [allTeachers, setAllTeachers] = useState([])
     const [loadingCourses, setLoadingCourses] = useState(true)
+    const [stats, setStats] = useState({ active_courses: 0, completed_lessons: 0, overall_progress: 0, certificates_count: 0 })
+    const [myCourses, setMyCourses] = useState([])
+    const [completedCourses, setCompletedCourses] = useState([])
+    const [certificates, setCertificates] = useState([])
+    const [myNotes, setMyNotes] = useState([])
+    const [videoStats, setVideoStats] = useState(null)
+    const [fetchedTabs, setFetchedTabs] = useState({})
 
-    const { userData, loading: authLoading } = useAuth()
+    const { userData: authUserData } = useAuth()
+    // Use AuthContext data, or fall back to localStorage cache instantly — never block on loading
+    const userData = authUserData || (() => {
+        try { const s = localStorage.getItem('user'); return s && s !== 'undefined' ? JSON.parse(s) : null; } catch { return null; }
+    })()
 
-    if (authLoading && !userData) {
+    if (!userData) {
         return (
             <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', background: '#0f172a', color: 'white', flexDirection: 'column', gap: '20px' }}>
                 <div className="spinner" style={{ width: '50px', height: '50px', border: '4px solid rgba(255,255,255,0.1)', borderTopColor: '#ec3665', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div>
@@ -69,13 +80,6 @@ const StudentDashboard = () => {
             </div>
         )
     }
-    const [stats, setStats] = useState({ active_courses: 0, completed_lessons: 0, overall_progress: 0, certificates_count: 0 })
-    const [myCourses, setMyCourses] = useState([])
-    const [completedCourses, setCompletedCourses] = useState([])
-    const [certificates, setCertificates] = useState([])
-    const [myNotes, setMyNotes] = useState([])
-    const [videoStats, setVideoStats] = useState(null)
-    const [fetchedTabs, setFetchedTabs] = useState({})
 
     // 1. Tab Data Lazy Loading (Only hits APIs when user actually opens the tab)
     useEffect(() => {
