@@ -352,7 +352,7 @@ export const AdminModelForm = () => {
                                         <div style={{ display: 'flex', gap: '10px', alignItems: 'center', background: '#f8fafc', padding: '8px', borderRadius: '8px', border: '1px solid var(--hq-border)' }}>
                                             <input
                                                 type="file"
-                                                accept="image/*"
+                                                accept="image/*, image/webp, .webp"
                                                 onChange={e => {
                                                     if (e.target.files && e.target.files[0]) {
                                                         handleChange(f.key, e.target.files[0])

@@ -609,7 +609,7 @@ export const AdminCourseBuilder = ({ id }) => {
                     <div className="hq-df-group">
                         <label>صورة الغلاف الاحترافية للكورس (Hero Image) <HiOutlineSparkles style={{ color: '#10b981' }} /></label>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', background: '#f8fafc', padding: '10px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-                            <input type="file" accept="image/*" onChange={e => {
+                            <input type="file" accept="image/*, image/webp, .webp" onChange={e => {
                                 if (e.target.files && e.target.files[0]) { setCourse({ ...course, hero_image: e.target.files[0] }) }
                             }} style={{ flex: 1, fontSize: '0.9rem' }} />
                             <SmartImagePreview fileOrUrl={course.hero_image} />
@@ -645,7 +645,7 @@ export const AdminCourseBuilder = ({ id }) => {
                                         <div style={{ display: 'flex', width: '100%', gap: '10px' }}>
                                             <input type="text" value={mod.title} onChange={e => updateModule(mIndex, 'title', e.target.value)} onClick={e => e.stopPropagation()} placeholder="أدخل اسم الفصل (مثال: الفصل الأول الأعداد المركبة)..." style={{ fontSize: '1.2rem', padding: '5px 15px', flex: 1, border: '2px solid rgba(99, 102, 241, 0.3)', borderRadius: '8px', outline: 'none', background: 'white' }} />
                                             <div style={{ width: '250px', background: 'white', borderRadius: '8px', border: '1px solid #cbd5e1', padding: '5px', display: 'flex', alignItems: 'center' }} onClick={e => e.stopPropagation()}>
-                                                <input type="file" accept="image/*" onChange={e => { if (e.target.files && e.target.files[0]) updateModule(mIndex, 'cover_image', e.target.files[0]) }} style={{ flex: 1, width: '1px', fontSize: '0.75rem' }} />
+                                                <input type="file" accept="image/*, image/webp, .webp" onChange={e => { if (e.target.files && e.target.files[0]) updateModule(mIndex, 'cover_image', e.target.files[0]) }} style={{ flex: 1, width: '1px', fontSize: '0.75rem' }} />
                                                 <SmartImagePreview fileOrUrl={mod.cover_image} />
                                             </div>
                                         </div>
@@ -773,7 +773,7 @@ export const AdminCourseBuilder = ({ id }) => {
                                                                     <HiOutlineCog /> صورة الغلاف للدرس (Upload Image)
                                                                 </label>
                                                                 <div style={{ background: '#white', padding: '8px', borderRadius: '8px', border: '1px solid #d1d5db', display: 'flex', alignItems: 'center' }}>
-                                                                    <input type="file" accept="image/*" onChange={e => {
+                                                                    <input type="file" accept="image/*, image/webp, .webp" onChange={e => {
                                                                         if (e.target.files && e.target.files[0]) updateLesson(mIndex, lIndex, 'cover_image', e.target.files[0])
                                                                     }} style={{ flex: 1, width: '1px', fontSize: '0.85rem' }} />
                                                                     <SmartImagePreview fileOrUrl={less.cover_image} />
