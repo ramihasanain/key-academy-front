@@ -9,6 +9,16 @@ if (typeof Promise.withResolvers !== 'function') {
   };
 }
 
+if (typeof URL.parse !== 'function') {
+  URL.parse = function (url, base) {
+    try {
+      return new URL(url, base);
+    } catch (e) {
+      return null;
+    }
+  };
+}
+
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
