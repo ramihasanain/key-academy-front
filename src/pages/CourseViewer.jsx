@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, lazy, Suspense } from 'react'
 import { createPortal } from 'react-dom'
 import { Link, useParams, useNavigate } from 'react-router-dom'
 import { API } from '../config'
@@ -25,7 +25,7 @@ import {
     HiOutlinePaperAirplane
 } from 'react-icons/hi2'
 import { VirtualLabsData } from '../data/VirtualLabsData'
-import SecurePDFViewer from '../components/SecurePDFViewer'
+const SecurePDFViewer = lazy(() => import('../components/SecurePDFViewer'))
 import LiveChat from '../components/LiveChat'
 import './CourseViewer.css'
 import './LessonViewer.css' // Import styling to make Chat fully identical
@@ -592,7 +592,9 @@ const CourseViewer = () => {
                                     </button>
                                 </div>
                                 <div style={{ flex: 1, position: 'relative', backgroundColor: '#e2e8f0', overflow: 'hidden' }} onContextMenu={(e) => e.preventDefault()}>
-                                    <SecurePDFViewer url={viewedDoc.url} isFullscreen={false} />
+                                    <Suspense fallback={<div style={{display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', color: '#333'}}>جاري تحميل معالج عرض الملفات...</div>}>
+                                        <SecurePDFViewer url={viewedDoc.url} isFullscreen={false} />
+                                    </Suspense>
 
                                     {/* Watermark Overlay */}
                                     {userData && (
