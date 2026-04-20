@@ -145,7 +145,7 @@ const Home = () => {
                                     muted 
                                     playsInline 
                                     className="hero-robot-video"
-                                    style={isAppleWebKit ? { mixBlendMode: 'screen', filter: 'brightness(1.1) contrast(1.1)' } : {}}
+                                    style={isAppleWebKit ? { mixBlendMode: 'screen', filter: 'contrast(1.3) brightness(0.9)' } : {}}
                                 />
                             </div>
 

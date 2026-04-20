@@ -180,6 +180,14 @@
     background: transparent;
 }
 
+/* Hide iOS Safari Native Video Play Buttons and Controls */
+.hero-robot-video::-webkit-media-controls,
+.hero-robot-video::-webkit-media-controls-start-playback-button,
+.hero-robot-video::-webkit-media-controls-play-button {
+    display: none !important;
+    -webkit-appearance: none !important;
+}
+
 .hero-floating-cards-img {
     position: absolute;
     bottom: 20px; /* Sits naturally on the inner edge */
