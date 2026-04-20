@@ -2,7 +2,7 @@ import { useState, useEffect, Suspense, lazy } from 'react'
 import { createPortal } from 'react-dom'
 import { API } from '../../config'
 import { motion, AnimatePresence } from 'framer-motion'
-import { HiOutlineDocumentText, HiOutlineXMark } from 'react-icons/hi2'
+import { HiOutlineDocumentText, HiOutlineXMark, HiOutlineBookOpen, HiOutlineEye } from 'react-icons/hi2'
 import '../../pages/LessonViewer.css'
 
 const SecurePDFViewer = lazy(() => import('../SecurePDFViewer'))
@@ -26,10 +26,26 @@ const TabDocs = ({ lessonInfo, courseId, userData }) => {
     const getExt = (url) => url ? url.split('?')[0].split('.').pop().toUpperCase() : 'DOC'
     let docsList = []
     if (lessonInfo?.doc_file) {
-        docsList.push({ name: 'ملزمة الدرس الحالية', url: lessonInfo.doc_file, size: 'ملف PDF', type: getExt(lessonInfo.doc_file), color: '#dc2626', icon: '📄' })
+        docsList.push({ 
+            name: 'ملزمة الدرس الحالية', 
+            url: lessonInfo.doc_file, 
+            size: 'ملزمة المادة', 
+            type: getExt(lessonInfo.doc_file), 
+            color: '#db3672', 
+            bg: 'linear-gradient(135deg, rgba(219, 54, 114, 0.2), rgba(131, 42, 150, 0.1))',
+            icon: <HiOutlineBookOpen /> 
+        })
     }
     courseDocs.forEach(d => {
-        docsList.push({ name: d.title, url: d.file, size: 'مرفق وزاري', type: d.doc_type || 'PDF', color: '#2563eb', icon: '📘' })
+        docsList.push({ 
+            name: d.title, 
+            url: d.file, 
+            size: 'مرفق وزاري', 
+            type: d.doc_type || 'PDF', 
+            color: '#832a96', 
+            bg: 'linear-gradient(135deg, rgba(131, 42, 150, 0.2), rgba(219, 54, 114, 0.1))',
+            icon: <HiOutlineDocumentText /> 
+        })
     })
 
     return (
@@ -38,18 +54,66 @@ const TabDocs = ({ lessonInfo, courseId, userData }) => {
             {docsList.length === 0 ? (
                 <p style={{ color: '#94a3b8' }}>لا توجد ملفات مرفقة بهذا الدرس حالياً.</p>
             ) : (
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '24px' }}>
                     {docsList.map((doc, index) => (
-                        <div key={index} className="lv-doc-card">
-                            <span className="lv-doc-icon" style={{ background: doc.color + '1A', color: doc.color }}>{doc.icon}</span>
-                            <div className="lv-doc-info">
-                                <strong>{doc.name}</strong>
-                                <span>{doc.type} • {doc.size}</span>
+                        <motion.div 
+                            key={index} 
+                            style={{
+                                background: 'rgba(255,255,255,0.7)',
+                                backdropFilter: 'blur(20px)',
+                                borderRadius: '16px',
+                                border: '1px solid rgba(131, 42, 150, 0.12)',
+                                padding: '24px',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                gap: '20px',
+                                boxShadow: '0 10px 30px rgba(131, 42, 150, 0.05)',
+                                position: 'relative',
+                                overflow: 'hidden'
+                            }}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: index * 0.1, type: "spring" }}
+                            whileHover={{ y: -5, boxShadow: '0 15px 40px rgba(131, 42, 150, 0.1)', borderColor: 'rgba(131, 42, 150, 0.3)' }}
+                        >
+                            <div style={{
+                                position: 'absolute', top: 0, right: 0, width: '120px', height: '120px',
+                                background: doc.bg, borderRadius: '50%', filter: 'blur(30px)', zIndex: 0, transform: 'translate(30%, -30%)'
+                            }}></div>
+                            
+                            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '16px', zIndex: 1 }}>
+                                <div style={{ 
+                                    width: '56px', height: '56px', borderRadius: '14px', 
+                                    background: doc.bg, color: doc.color, 
+                                    display: 'flex', justifyContent: 'center', alignItems: 'center',
+                                    fontSize: '1.8rem', flexShrink: 0, border: `1px solid ${doc.color}22`
+                                }}>
+                                    {doc.icon}
+                                </div>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                                    <strong style={{ fontSize: '1.15rem', color: '#1e293b', fontWeight: 800 }}>{doc.name}</strong>
+                                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                                        <span style={{ fontSize: '0.8rem', fontWeight: 700, padding: '2px 8px', borderRadius: '6px', background: 'rgba(0,0,0,0.05)', color: '#475569' }}>{doc.type}</span>
+                                        <span style={{ fontSize: '0.8rem', fontWeight: 600, color: '#94a3b8' }}>{doc.size}</span>
+                                    </div>
+                                </div>
                             </div>
-                            <div style={{ display: 'flex', gap: '10px' }}>
-                                <button className="lv-doc-btn" onClick={() => setViewedDoc(doc)}>استعراض ومذاكرة</button>
-                            </div>
-                        </div>
+                            
+                            <button 
+                                onClick={() => setViewedDoc(doc)}
+                                style={{
+                                    zIndex: 1, width: '100%', padding: '12px', borderRadius: '12px',
+                                    background: 'linear-gradient(90deg, #db3672, #832a96)', color: 'white',
+                                    border: 'none', fontFamily: 'var(--font-ar)', fontWeight: 700, fontSize: '1rem',
+                                    display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px',
+                                    cursor: 'pointer', boxShadow: '0 4px 15px rgba(219, 54, 114, 0.3)', transition: 'all 0.3s'
+                                }}
+                                onMouseOver={e => e.currentTarget.style.transform = 'scale(1.02)'}
+                                onMouseOut={e => e.currentTarget.style.transform = 'scale(1)'}
+                            >
+                                <HiOutlineEye size={20} /> استعراض المذكرة والمذاكرة
+                            </button>
+                        </motion.div>
                     ))}
                 </div>
             )}
