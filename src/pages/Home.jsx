@@ -162,7 +162,7 @@ const Home = () => {
                                     disablePictureInPicture
                                     className="hero-robot-video"
                                 >
-                                    <source src={robotVideoMov} type='video/quicktime; codecs="hvc1"' />
+                                    <source src={robotVideoMov} type='video/mp4; codecs="hvc1"' />
                                     <source src={robotVideoWebm} type="video/webm" />
                                 </video>
                             </div>
