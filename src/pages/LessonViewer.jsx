@@ -1,9 +1,9 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, Suspense, lazy } from 'react'
 import { createPortal } from 'react-dom'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import { API } from '../config'
 import { motion, AnimatePresence } from 'framer-motion'
-import ReactMarkdown from 'react-markdown'
+const ReactMarkdown = lazy(() => import('react-markdown'))
 import {
     HiOutlineArrowRight,
     HiOutlineCheckBadge,
@@ -31,10 +31,8 @@ import ParticleBackground from '../components/ParticleBackground'
 import { Mascots } from '../components/KeyAiMascots'
 import robotVideo from '../assets/robot_website.webm'
 import { VirtualLabsData } from '../data/VirtualLabsData'
-import SecurePDFViewer from '../components/SecurePDFViewer'
+const SecurePDFViewer = lazy(() => import('../components/SecurePDFViewer'))
 import './LessonViewer.css'
-
-
 
 /* ======== PORTAL SCREENS ======== */
 
@@ -240,7 +238,9 @@ const ViewSlides = ({ lessonInfo, lessonContent, userData }) => {
                 </button>
             </div>
             <div className="lv-sf-viewer" style={{ flex: 1, padding: 0, height: '100%', position: 'relative', overflow: 'hidden' }} onContextMenu={(e) => e.preventDefault()}>
-                <SecurePDFViewer url={lessonInfo.doc_file} isFullscreen={isFullscreen} />
+                <Suspense fallback={<div style={{padding:'40px', textAlign:'center', color:'#94a3b8'}}>جاري تهيئة قارئ المستندات الآمن 🛡️...</div>}>
+                    <SecurePDFViewer url={lessonInfo.doc_file} isFullscreen={isFullscreen} />
+                </Suspense>
                 {renderWatermarkOverlay()}
             </div>
         </div>
@@ -927,7 +927,9 @@ const TabDocs = ({ lessonInfo, courseId, userData }) => {
                                     </button>
                                 </div>
                                 <div style={{ flex: 1, position: 'relative', backgroundColor: '#e2e8f0', overflow: 'hidden' }} onContextMenu={(e) => e.preventDefault()}>
-                                    <SecurePDFViewer url={viewedDoc.url} isFullscreen={false} />
+                                    <Suspense fallback={<div style={{padding:'40px', textAlign:'center', color:'#94a3b8'}}>جاري جلب وعرض المستند...</div>}>
+                                        <SecurePDFViewer url={viewedDoc.url} isFullscreen={false} />
+                                    </Suspense>
                                     
                                     {/* Watermark Overlay */}
                                     <div style={{ position: 'absolute', top: 0, right: 0, bottom: 0, left: 0, pointerEvents: 'none', overflow: 'hidden', display: 'flex', flexWrap: 'wrap', gap: '50px', justifyContent: 'center', alignContent: 'center', opacity: 0.08, mixBlendMode: 'difference', zIndex: 5 }}>
@@ -1083,17 +1085,19 @@ const TabKeyAI = ({ lessonInfo, userData }) => {
                                 </div>
                             </div>}
                             <div className="lv-ai-msg-bubble markdown-chat">
-                                <ReactMarkdown
-                                    components={{
-                                        p: ({node, ...props}) => <p style={{margin: '0 0 8px 0', lineHeight: 1.6}} {...props} />,
-                                        ul: ({node, ...props}) => <ul style={{margin: '0 20px 8px 0', padding: 0, listStyleType: 'disc'}} {...props} />,
-                                        ol: ({node, ...props}) => <ol style={{margin: '0 20px 8px 0', padding: 0, listStyleType: 'decimal'}} {...props} />,
-                                        li: ({node, ...props}) => <li style={{margin: '4px 0'}} {...props} />,
-                                        strong: ({node, ...props}) => <strong style={{color: 'var(--purple)'}} {...props} />
-                                    }}
-                                >
-                                    {msg.text}
-                                </ReactMarkdown>
+                                <Suspense fallback={<span style={{color: 'var(--text-muted)'}}>جاري كتابة التحليل...</span>}>
+                                    <ReactMarkdown
+                                        components={{
+                                            p: ({node, ...props}) => <p style={{margin: '0 0 8px 0', lineHeight: 1.6}} {...props} />,
+                                            ul: ({node, ...props}) => <ul style={{margin: '0 20px 8px 0', padding: 0, listStyleType: 'disc'}} {...props} />,
+                                            ol: ({node, ...props}) => <ol style={{margin: '0 20px 8px 0', padding: 0, listStyleType: 'decimal'}} {...props} />,
+                                            li: ({node, ...props}) => <li style={{margin: '4px 0'}} {...props} />,
+                                            strong: ({node, ...props}) => <strong style={{color: 'var(--purple)'}} {...props} />
+                                        }}
+                                    >
+                                        {msg.text}
+                                    </ReactMarkdown>
+                                </Suspense>
                             </div>
                         </motion.div>
                     ))}
@@ -1418,12 +1422,26 @@ const LessonViewer = () => {
                             ))}
                         </div>
                         <div className="lv-tab-body cv-super-glass">
-                            {activeTab === 'notes' && <TabNotes lessonId={lessonId} />}
-                            {activeTab === 'qa' && <TabQA lessonId={lessonId} userData={userData} />}
-                            {activeTab === 'group' && <TabGroup courseId={courseId} userData={userData} lessonId={lessonId} />}
-                            {activeTab === 'docs' && <TabDocs lessonInfo={lessonInfo} courseId={courseId} userData={userData} />}
-                            {activeTab === 'lab' && <TabLab />}
-                            {activeTab === 'keyai' && <TabKeyAI lessonInfo={lessonInfo} userData={userData} />}
+                            <div style={{ display: activeTab === 'notes' ? 'block' : 'none' }}>
+                                <TabNotes lessonId={lessonId} />
+                            </div>
+                            <div style={{ display: activeTab === 'qa' ? 'block' : 'none' }}>
+                                <TabQA lessonId={lessonId} userData={userData} />
+                            </div>
+                            <div style={{ display: activeTab === 'group' ? 'block' : 'none' }}>
+                                <TabGroup courseId={courseId} userData={userData} lessonId={lessonId} />
+                            </div>
+                            <div style={{ display: activeTab === 'docs' ? 'block' : 'none' }}>
+                                <TabDocs lessonInfo={lessonInfo} courseId={courseId} userData={userData} />
+                            </div>
+                            {CURRENT_LESSON.hasLab && (
+                                <div style={{ display: activeTab === 'lab' ? 'block' : 'none' }}>
+                                    <TabLab />
+                                </div>
+                            )}
+                            <div style={{ display: activeTab === 'keyai' ? 'block' : 'none' }}>
+                                <TabKeyAI lessonInfo={lessonInfo} userData={userData} />
+                            </div>
                         </div>
                     </div>
                 </main>
