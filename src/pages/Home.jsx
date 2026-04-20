@@ -7,15 +7,15 @@ import { Autoplay, Pagination, EffectCards } from 'swiper/modules'
 import 'swiper/css'
 import 'swiper/css/pagination'
 import 'swiper/css/effect-cards'
-import { HiOutlineSparkles, HiOutlineLightBulb, HiOutlineAcademicCap, HiOutlineUserGroup, HiOutlineBookOpen, HiOutlineChatBubbleLeftRight, HiOutlineChartBar, HiOutlineChartBarSquare, HiOutlineCpuChip, HiOutlineDocumentText } from 'react-icons/hi2'
+import { HiOutlineSparkles, HiOutlineLightBulb, HiOutlineAcademicCap, HiOutlineUserGroup, HiOutlineBookOpen, HiOutlineChatBubbleLeftRight, HiOutlineChartBarSquare, HiOutlineCpuChip } from 'react-icons/hi2'
 import { FaBrain, FaChalkboardTeacher, FaGraduationCap, FaPlay, FaRocket } from 'react-icons/fa'
-import AnimatedCounter from '../components/AnimatedCounter'
 import SectionTitle from '../components/SectionTitle'
 import Contact from './Contact'
 import './Home.css'
 import robotVideoWebm from '../assets/robot_website.webm'
 import robotVideoMov from '../assets/robot_website.mov'
 import iconSlides from '../assets/icon-slides.png'
+
 const fadeInUp = {
     hidden: { opacity: 0, y: 40 },
     visible: (i = 0) => ({
@@ -25,26 +25,27 @@ const fadeInUp = {
     })
 }
 
-// Generate stars
-const stars = Array.from({ length: 80 }, (_, i) => ({
-    id: i,
-    top: `${Math.random() * 100}%`,
-    left: `${Math.random() * 100}%`,
-    size: `${Math.random() * 2 + 1}px`,
-    delay: `${Math.random() * 5}s`,
-    duration: `${Math.random() * 3 + 2}s`,
-}))
+const featuresData = [
+    { icon: <HiOutlineCpuChip />, color: 'purple', title: 'ذكاء اصطناعي يساعدك', desc: 'تقنيات AI تحلل مستواك وتنطيك خطة دراسية مثالية' },
+    { icon: <FaChalkboardTeacher />, color: 'purple', title: 'عمالقة التدريس', desc: 'وفرنالك نخبة أساتذة العراق واكثرهم خبرة حتى تضمن الدرجة الكاملة والمعدل العالي' },
+    { icon: <HiOutlineBookOpen />, color: 'purple', title: 'مناهج شاملة', desc: 'تغطية كاملة لكافة مناهج الثالث المتوسط والسادس الإعدادي بفرعيه العلمي والأدبي' },
+    { icon: <HiOutlineChatBubbleLeftRight />, color: 'purple', title: 'تواصل مباشر', desc: 'تكدر تسأل وتتواصل ويه أساتذتك ومساعديهم بكل وقت وبدون أي تأخير' },
+    { icon: <HiOutlineChartBarSquare />, color: 'purple', title: 'متابعة مستواك', desc: 'لوحة ذكية تشوف منها تقدمك بالمواد وتعرف وين نقاط ضعفك حتى تقويها وتسيطر' },
+    { icon: <HiOutlineAcademicCap />, color: 'purple', title: 'شهادات إنجاز', desc: 'احصل على شهادة إتمام الدورة بعد إنجازها' },
+]
 
-// Floating icons for background decoration
-const floatingIcons = [
-    { icon: '📚', top: '15%', left: '5%', delay: 0, duration: 8 },
-    { icon: '🎓', top: '70%', left: '8%', delay: 1, duration: 10 },
-    { icon: '💡', top: '20%', right: '7%', delay: 2, duration: 7 },
-    { icon: '🔬', top: '75%', right: '5%', delay: 0.5, duration: 9 },
-    { icon: '🧪', top: '45%', left: '3%', delay: 1.5, duration: 11 },
-    { icon: '📐', top: '50%', right: '4%', delay: 3, duration: 8 },
-    { icon: '🏆', top: '85%', left: '15%', delay: 2.5, duration: 9 },
-    { icon: '✨', top: '10%', left: '25%', delay: 0.8, duration: 6 },
+const gradesData = [
+    { title: 'الصف السادس الإعدادي', desc: 'أهم مرحلة بحياتك التحدد مستقبلك، إحنا وياك خطوة بخطوة', icon: <FaGraduationCap />, link: '/grades/sixth-scientific', hasBranches: true },
+    { title: 'الصف الثالث المتوسط', desc: 'نأسسك صح هسة حتى ترتاح ويانا بالسادس', icon: <HiOutlineAcademicCap />, link: '/grades/third-intermediate', hasBranches: false },
+]
+
+const aiFeaturesData = [
+    'نظام ملاحظات الك لكل درس تنحفظ يمك وتكدر ترجعلها اي وقت',
+    'كروبات محادثة ويه الأستاذ والمساعدين داخل المنصة تغنيك عن التشتت الرقمي',
+    'أسئلة وزارية لجميع الدروس لكل المواد .',
+    'توقف مفاجئ (أسئلة) حتى يخليك مركز وتختبر فهمك',
+    'Key المساعد الذكي، رفيقك الي يجاوب على كل استفساراتك بأي وقت',
+    'نظام سلايدات مرتب يلخص إلك كل درس حتى تراجعه بسهولة',
 ]
 
 const Home = () => {
@@ -53,44 +54,26 @@ const Home = () => {
 
 
     useEffect(() => {
-
-        const cachedTeachers = sessionStorage.getItem('cached_teachers_list')
-        if (cachedTeachers) {
-            try { setTeachers(JSON.parse(cachedTeachers)) } catch(e) {}
-        }
-        
-        fetch(API + '/api/teachers/')
-            .then(res => {
-                if (!res.ok) throw new Error('Failed to fetch')
-                return res.json()
-            })
-            .then(data => {
-                if (Array.isArray(data)) {
-                    // Prevent image double-fetching due to new AWS S3 signatures
-                    const cachedTeachers = sessionStorage.getItem('cached_teachers_list');
-                    if (cachedTeachers) {
-                        try {
-                            const cachedObj = JSON.parse(cachedTeachers);
-                            const cachedMap = {};
-                            cachedObj.forEach(t => cachedMap[t.id] = t);
-                            
-                            data = data.map(newT => {
-                                const oldT = cachedMap[newT.id];
-                                if (oldT && oldT.image && newT.image) {
-                                    if (oldT.image.split('?')[0] === newT.image.split('?')[0]) {
-                                        newT.image = oldT.image; 
-                                    }
-                                }
-                                return newT;
-                            });
-                        } catch(e) {}
-                    }
-                    
-                    setTeachers(data)
-                    sessionStorage.setItem('cached_teachers_list', JSON.stringify(data))
+        const fetchTeachers = async () => {
+            try {
+                const cached = sessionStorage.getItem('cached_teachers_list')
+                if (cached) {
+                    setTeachers(JSON.parse(cached))
                 }
-            })
-            .catch(err => console.error('Error fetching teachers:', err))
+                
+                const res = await fetch(API + '/api/teachers/')
+                if (!res.ok) return
+                const data = await res.json()
+                
+                if (Array.isArray(data)) {
+                    sessionStorage.setItem('cached_teachers_list', JSON.stringify(data))
+                    if (!cached) setTeachers(data) // Prevent visual jump if cache exists
+                }
+            } catch (err) {
+                console.error('Error fetching teachers:', err)
+            }
+        }
+        fetchTeachers()
     }, [])
 
     return (
@@ -180,14 +163,7 @@ const Home = () => {
                 <div className="container">
                     <SectionTitle title="ليش تختار Key Academy؟" subtitle="نوفرلك تجربة دراسة متكاملة تجمع بين التطور التقني وأقوى الأساتذة بالعراق" />
                     <div className="features-grid">
-                        {[
-                            { icon: <HiOutlineCpuChip />, color: 'purple', title: 'ذكاء اصطناعي يساعدك', desc: 'تقنيات AI تحلل مستواك وتنطيك خطة دراسية مثالية' },
-                            { icon: <FaChalkboardTeacher />, color: 'purple', title: 'عمالقة التدريس', desc: 'وفرنالك نخبة أساتذة العراق واكثرهم خبرة حتى تضمن الدرجة الكاملة والمعدل العالي' },
-                            { icon: <HiOutlineBookOpen />, color: 'purple', title: 'مناهج شاملة', desc: 'تغطية كاملة لكافة مناهج الثالث المتوسط والسادس الإعدادي بفرعيه العلمي والأدبي' },
-                            { icon: <HiOutlineChatBubbleLeftRight />, color: 'purple', title: 'تواصل مباشر', desc: 'تكدر تسأل وتتواصل ويه أساتذتك ومساعديهم بكل وقت وبدون أي تأخير' },
-                            { icon: <HiOutlineChartBarSquare />, color: 'purple', title: 'متابعة مستواك', desc: 'لوحة ذكية تشوف منها تقدمك بالمواد وتعرف وين نقاط ضعفك حتى تقويها وتسيطر' },
-                            { icon: <HiOutlineAcademicCap />, color: 'purple', title: 'شهادات إنجاز', desc: 'احصل على شهادة إتمام الدورة بعد إنجازها' },
-                        ].map((feature, i) => (
+                        {featuresData.map((feature, i) => (
                             <motion.div key={i} className={`feature-card color-${feature.color}`} variants={fadeInUp} initial="hidden" whileInView="visible" viewport={{ once: true, margin: '-50px' }} custom={i}>
                                 <div className="feature-icon">{feature.icon}</div>
                                 <h3>{feature.title}</h3>
@@ -203,10 +179,7 @@ const Home = () => {
                 <div className="container">
                     <SectionTitle title="الصفوف الدراسية" subtitle="اختار صفك هسه وابدي ويانا درب التفوق ويه أحسن الأساتذة" />
                     <div className="grades-cards">
-                        {[
-                            { title: 'الصف السادس الإعدادي', desc: 'أهم مرحلة بحياتك التحدد مستقبلك، إحنا وياك خطوة بخطوة', icon: <FaGraduationCap />, link: '/grades/sixth-scientific', hasBranches: true },
-                            { title: 'الصف الثالث المتوسط', desc: 'نأسسك صح هسة حتى ترتاح ويانا بالسادس', icon: <HiOutlineAcademicCap />, link: '/grades/third-intermediate', hasBranches: false },
-                        ].map((grade, i) => (
+                        {gradesData.map((grade, i) => (
                             <motion.div key={i} className={`glass-card grade-preview-card ${i === 0 ? 'color-pink' : 'color-purple'}`} variants={fadeInUp} initial="hidden" whileInView="visible" viewport={{ once: true }} custom={i}>
                                 <div className="grade-icon">{grade.icon}</div>
                                 <h3>{grade.title}</h3>
@@ -278,14 +251,7 @@ const Home = () => {
                             <h3><span className="gradient-text">الذكاء الاصطناعي</span><br />بين ايدك</h3>
                             <p>نستعمل أحدث تقنيات الذكاء الاصطناعي حتى نحلل مستواك وننطيك تجربة دراسة مصممة إلك</p>
                             <div className="ai-features-list">
-                                {[
-                                    'نظام ملاحظات الك لكل درس تنحفظ يمك وتكدر ترجعلها اي وقت',
-                                    'كروبات محادثة ويه الأستاذ والمساعدين داخل المنصة تغنيك عن التشتت الرقمي',
-                                    'أسئلة وزارية لجميع الدروس لكل المواد .',
-                                    'توقف مفاجئ (أسئلة) حتى يخليك مركز وتختبر فهمك',
-                                    'Key المساعد الذكي، رفيقك الي يجاوب على كل استفساراتك بأي وقت',
-                                    'نظام سلايدات مرتب يلخص إلك كل درس حتى تراجعه بسهولة',
-                                ].map((item, i) => (
+                                {aiFeaturesData.map((item, i) => (
                                     <motion.div key={i} className="ai-feature-item" initial={{ opacity: 0, x: 30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: i * 0.1 }}>
                                         <HiOutlineSparkles />
                                         <span>{item}</span>
