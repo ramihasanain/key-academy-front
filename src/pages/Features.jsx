@@ -19,7 +19,7 @@ import {
 import { FaRobot } from 'react-icons/fa'
 import SectionTitle from '../components/SectionTitle'
 import ParticleBackground from '../components/ParticleBackground'
-import KeyAiMascots from '../components/KeyAiMascots'
+
 import robotVideo from '../assets/robot_website.webm'
 import './Features.css'
 

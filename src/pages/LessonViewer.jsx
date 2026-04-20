@@ -29,7 +29,7 @@ import {
 } from 'react-icons/hi2'
 import { HiHeart, HiCheckCircle } from 'react-icons/hi'
 import ParticleBackground from '../components/ParticleBackground'
-import { Mascots } from '../components/KeyAiMascots'
+
 import robotVideo from '../assets/robot_website.webm'
 import { VirtualLabsData } from '../data/VirtualLabsData'
 import LiveChat from '../components/LiveChat'
