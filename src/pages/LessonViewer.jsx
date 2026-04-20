@@ -550,7 +550,10 @@ const LessonViewer = () => {
     const [isLoading, setIsLoading] = useState(true)
     const [isLoadingContent, setIsLoadingContent] = useState(false)
     
-    const { userData } = useAuth()
+    const { userData: authUserData } = useAuth()
+    const userData = authUserData || (() => {
+        try { const s = localStorage.getItem('user'); return s && s !== 'undefined' ? JSON.parse(s) : null; } catch { return null; }
+    })()
 
     const [activeContent, setActiveContent] = useState('video')
     const [activeTab, setActiveTab] = useState('notes')

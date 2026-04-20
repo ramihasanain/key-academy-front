@@ -74,7 +74,10 @@ const CourseViewer = () => {
     const [scrolled, setScrolled] = useState(false)
     const [showLoginPrompt, setShowLoginPrompt] = useState(false)
     const [viewedDoc, setViewedDoc] = useState(null) // State for Secure PDF Viewer
-    const { userData } = useAuth()
+    const { userData: authUserData } = useAuth()
+    const userData = authUserData || (() => {
+        try { const s = localStorage.getItem('user'); return s && s !== 'undefined' ? JSON.parse(s) : null; } catch { return null; }
+    })()
     const [isChatOpen, setIsChatOpen] = useState(false)
 
     useEffect(() => {

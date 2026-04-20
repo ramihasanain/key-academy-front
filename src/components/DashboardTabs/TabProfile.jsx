@@ -3,7 +3,10 @@ import { HiOutlineUser } from 'react-icons/hi2'
 import { useAuth } from '../../contexts/AuthContext'
 
 const TabProfile = ({ videoStats }) => {
-    const { userData } = useAuth()
+    const { userData: authUserData } = useAuth()
+    const userData = authUserData || (() => {
+        try { const s = localStorage.getItem('user'); return s && s !== 'undefined' ? JSON.parse(s) : null; } catch { return null; }
+    })()
 
     if (!userData) return null;
 
