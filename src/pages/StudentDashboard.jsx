@@ -60,7 +60,7 @@ const StudentDashboard = () => {
 
     const { userData, loading: authLoading } = useAuth()
 
-    if (authLoading || !userData) {
+    if (authLoading && !userData) {
         return (
             <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', background: '#0f172a', color: 'white', flexDirection: 'column', gap: '20px' }}>
                 <div className="spinner" style={{ width: '50px', height: '50px', border: '4px solid rgba(255,255,255,0.1)', borderTopColor: '#ec3665', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div>
