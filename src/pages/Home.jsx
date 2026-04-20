@@ -49,13 +49,7 @@ const floatingIcons = [
 const Home = () => {
     const [teachers, setTeachers] = useState([])
     
-    // Detect Apple WebKit synchronously so the video never renders without blend-mode initially
-    const isAppleWebKit = typeof navigator !== 'undefined' && (
-        /iPad|iPhone|iPod/.test(navigator.userAgent) || 
-        (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1) ||
-        /^((?!chrome|android).)*safari/i.test(navigator.userAgent) ||
-        /CriOS|FxiOS|EdgiOS/.test(navigator.userAgent)
-    );
+
 
     useEffect(() => {
 
@@ -167,7 +161,6 @@ const Home = () => {
                                     controls={false}
                                     disablePictureInPicture
                                     className="hero-robot-video"
-                                    style={isAppleWebKit ? { mixBlendMode: 'screen', filter: 'contrast(1.5) brightness(0.9)', transform: 'translateZ(0)' } : {}}
                                 />
                             </div>
 
