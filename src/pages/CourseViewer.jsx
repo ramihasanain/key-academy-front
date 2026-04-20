@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { Link, useParams, useNavigate } from 'react-router-dom'
 import { API } from '../config'
+import { useAuth } from '../contexts/AuthContext'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
     HiOutlineArrowRight,
@@ -73,17 +74,11 @@ const CourseViewer = () => {
     const [scrolled, setScrolled] = useState(false)
     const [showLoginPrompt, setShowLoginPrompt] = useState(false)
     const [viewedDoc, setViewedDoc] = useState(null) // State for Secure PDF Viewer
-    const [userData, setUserData] = useState(null)
+    const { userData } = useAuth()
     const [isChatOpen, setIsChatOpen] = useState(false)
 
     useEffect(() => {
         const token = localStorage.getItem('access_token')
-        if (token && token !== 'undefined' && token !== 'null') {
-            fetch(API + '/api/auth/me/', { headers: { 'Authorization': `Bearer ${token}` } })
-                .then(res => res.json())
-                .then(d => setUserData(d))
-                .catch(console.error)
-        }
 
         // Fetch real data from backend
         fetch(`${API}/api/courses/${courseId || 1}/`, {

@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, Suspense, lazy } from 'react'
 import { createPortal } from 'react-dom'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import { API } from '../config'
+import { useAuth } from '../contexts/AuthContext'
 import { motion, AnimatePresence } from 'framer-motion'
 const ReactMarkdown = lazy(() => import('react-markdown'))
 import {
@@ -548,7 +549,8 @@ const LessonViewer = () => {
     const [lessonList, setLessonList] = useState([])
     const [isLoading, setIsLoading] = useState(true)
     const [isLoadingContent, setIsLoadingContent] = useState(false)
-    const [userData, setUserData] = useState(null)
+    
+    const { userData } = useAuth()
 
     const [activeContent, setActiveContent] = useState('video')
     const [activeTab, setActiveTab] = useState('notes')
@@ -559,13 +561,6 @@ const LessonViewer = () => {
         const token = localStorage.getItem('access_token')
         if (!token || token === 'undefined' || token === 'null' || token.trim() === '') {
             navigate('/login')
-        } else {
-            fetch(API + '/api/auth/me/', {
-                headers: { 'Authorization': `Bearer ${token}` }
-            })
-                .then(res => res.json())
-                .then(d => setUserData(d))
-                .catch(console.error)
         }
     }, [navigate])
 

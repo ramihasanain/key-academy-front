@@ -1,30 +1,25 @@
 import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { API } from '../config'
+import { useAuth } from '../contexts/AuthContext'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
     HiOutlineBookOpen,
     HiOutlineCheckCircle,
     HiOutlineAcademicCap,
-    HiOutlineUser,
-    HiOutlineUserGroup,
     HiOutlineArrowLeftOnRectangle,
-    HiOutlineSquares2X2,
-    HiOutlineChevronDown,
     HiOutlineBars3,
-    HiOutlineXMark,
+    HiOutlineChartBar,
     HiOutlineClock,
     HiOutlineCurrencyDollar,
-    HiOutlineKey,
     HiOutlineFire,
-    HiOutlineChartBar,
-    HiOutlineArrowRight,
-    HiOutlineBeaker,
     HiOutlineNoSymbol,
-    HiOutlinePencilSquare
+    HiOutlinePencilSquare,
+    HiOutlineArrowRight
 } from 'react-icons/hi2'
 import ParticleBackground from '../components/ParticleBackground'
 import AnimatedCounter from '../components/AnimatedCounter'
+import TabMyCourses from '../components/DashboardTabs/TabMyCourses'
 import './StudentDashboard.css'
 
 
@@ -57,7 +52,7 @@ const StudentDashboard = () => {
     const [allTeachers, setAllTeachers] = useState([])
     const [loadingCourses, setLoadingCourses] = useState(true)
 
-    const [userData, setUserData] = useState({ full_name: '', username: '', phone: '', grade: '' })
+    const { userData } = useAuth()
     const [stats, setStats] = useState({ active_courses: 0, completed_lessons: 0, overall_progress: 0, certificates_count: 0 })
     const [myCourses, setMyCourses] = useState([])
     const [completedCourses, setCompletedCourses] = useState([])
@@ -66,39 +61,7 @@ const StudentDashboard = () => {
     const [videoStats, setVideoStats] = useState(null)
     const [fetchedTabs, setFetchedTabs] = useState({})
 
-    // 1. Initial Load & Auth Check (Always fetch user profile for sidebar)
-    useEffect(() => {
-        const token = localStorage.getItem('access_token');
-        if (!token || token === 'undefined' || token === 'null') {
-            navigate('/login');
-            return;
-        }
-
-        const headers = {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-        };
-
-        fetch(API + '/api/auth/me/', { headers })
-            .then(res => {
-                if (res.status === 401) throw new Error('Unauthorized');
-                return res.json();
-            })
-            .then(data => {
-                if (data.role && data.role !== 'student') {
-                    if (data.role === 'admin') navigate('/hq');
-                    else if (data.role === 'assistant') navigate('/ta');
-                } else {
-                    setUserData(data);
-                }
-            })
-            .catch(() => {
-                localStorage.removeItem('access_token');
-                navigate('/login');
-            });
-    }, [navigate]);
-
-    // 2. Tab Data Lazy Loading (Only hits APIs when user actually opens the tab)
+    // 1. Tab Data Lazy Loading (Only hits APIs when user actually opens the tab)
     useEffect(() => {
         const token = localStorage.getItem('access_token');
         if (!token || token === 'undefined' || token === 'null') return;
@@ -386,10 +349,10 @@ const StudentDashboard = () => {
                 </div>
 
                 <div className="dash-user-card premium-user-card">
-                    <div className="dash-user-avatar pulse-glow">{userData.full_name ? userData.full_name[0] : 'س'}</div>
+                    <div className="dash-user-avatar pulse-glow">{userData?.full_name ? userData.full_name[0] : 'س'}</div>
                     <div className="dash-user-info">
-                        <h4>{userData.full_name || 'ساري العمل...'}</h4>
-                        <span className="premium-grade">{userData.grade || 'مرحلة غير محددة'} <HiOutlineCheckCircle /></span>
+                        <h4>{userData?.full_name || 'جاري التحميل...'}</h4>
+                        <span className="premium-grade">{userData?.grade || 'مرحلة غير محددة'} <HiOutlineCheckCircle /></span>
                     </div>
                 </div>
 
@@ -489,61 +452,7 @@ const StudentDashboard = () => {
 
                 {/* ===== MY COURSES ===== */}
                 {activeTab === 'my-courses' && (
-                    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="dash-tab-content">
-                        <StatsRow />
-
-                        <div className="section-header-row">
-                            <h2 className="dash-section-title">دورات أدرسها هسة <span className="title-badge">مباشر</span></h2>
-                        </div>
-
-                        <div className="dash-courses-grid">
-                            {myCourses.map((course, i) => (
-                                <motion.div key={course.id} className={`dash-course-card premium-card hover-lift ${!course.isActive ? 'grayscale' : ''}`} initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }} style={!course.isActive ? { filter: 'grayscale(0.6)', opacity: 0.8 } : {}}>
-                                    <div className={`dash-course-accent accent-${course.color} glow-accent`} style={{ background: course.color?.startsWith('#') ? course.color : undefined, ...(course.color?.startsWith('#') ? { boxShadow: `0 2px 15px ${course.color}` } : {}) }}></div>
-                                    <div className="dash-course-body">
-                                        <div className="dash-teacher-row" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '16px' }}>
-                                            <div className={`dash-teacher-avatar ta-${course.color} soft-shadow ${course.teacherAvatar ? 'has-avatar' : ''}`} style={course.color?.startsWith('#') ? { background: course.color, borderColor: course.color, color: 'white' } : {}}>
-                                                {course.teacherAvatar ? (
-                                                    <img src={course.teacherAvatar} alt={course.teacher} className="teacher-real-avatar" />
-                                                ) : (
-                                                    course.teacherInitials
-                                                )}
-                                                <div className="avatar-anim-ring"></div>
-                                            </div>
-                                            <div className="dash-teacher-meta">
-                                                <span className="dash-teacher-name">{course.teacher}</span>
-                                                <span className="dash-last-visit"><HiOutlineClock /> آخر زيارة: {course.lastVisit}</span>
-                                            </div>
-                                        </div>
-
-                                        <h3 className="course-title-glow">{course.title}</h3>
-
-                                        <div className="dash-progress premium-progress">
-                                            <div className="dash-progress-header">
-                                                <span className="dash-progress-label">نسبة اللي مخلصه</span>
-                                                <span className={`dash-progress-pct text-${course.color}`} style={course.color?.startsWith('#') ? { color: course.color } : {}}>{course.progress}%</span>
-                                            </div>
-                                            <div className="dash-progress-track inner-shadow">
-                                                <motion.div className={`dash-progress-fill fill-${course.color} progress-glow`} initial={{ width: 0 }} animate={{ width: `${course.progress}%` }} transition={{ duration: 1.5, delay: 0.5, ease: "easeOut" }} style={course.color?.startsWith('#') ? { background: course.color, boxShadow: `0 0 10px ${course.color}` } : {}}></motion.div>
-                                            </div>
-                                            <span className="dash-progress-lessons"><HiOutlineCheckCircle /> {course.completedLessons} من {course.totalLessons} درس</span>
-                                        </div>
-
-                                        {course.isActive ? (
-                                            <Link to={`/course/${course.id}`} className={`dash-btn-primary exact-btn-${course.color} premium-btn`} style={course.color?.startsWith('#') ? { background: course.color, borderColor: course.color } : {}}>
-                                                <HiOutlineBookOpen /> كمل دراستك
-                                            </Link>
-                                        ) : (
-                                            <div style={{ background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', border: '1px solid rgba(239, 68, 68, 0.3)', padding: '12px', borderRadius: '12px', textAlign: 'center', fontSize: '0.9rem', fontWeight: 'bold' }}>
-                                                <HiOutlineNoSymbol style={{ display: 'inline', verticalAlign: 'middle', marginLeft: '4px', fontSize: '1.2rem' }} />
-                                                تم إلغاء تفعيل اشتراكك
-                                            </div>
-                                        )}
-                                    </div>
-                                </motion.div>
-                            ))}
-                        </div>
-                    </motion.div>
+                    <TabMyCourses myCourses={myCourses} stats={stats} StatsRow={StatsRow} />
                 )}
 
                 {/* ===== COMPLETED ===== */}
