@@ -71,6 +71,26 @@ const Home = () => {
             })
             .then(data => {
                 if (Array.isArray(data)) {
+                    // Prevent image double-fetching due to new AWS S3 signatures
+                    const cachedTeachers = sessionStorage.getItem('cached_teachers_list');
+                    if (cachedTeachers) {
+                        try {
+                            const cachedObj = JSON.parse(cachedTeachers);
+                            const cachedMap = {};
+                            cachedObj.forEach(t => cachedMap[t.id] = t);
+                            
+                            data = data.map(newT => {
+                                const oldT = cachedMap[newT.id];
+                                if (oldT && oldT.image && newT.image) {
+                                    if (oldT.image.split('?')[0] === newT.image.split('?')[0]) {
+                                        newT.image = oldT.image; 
+                                    }
+                                }
+                                return newT;
+                            });
+                        } catch(e) {}
+                    }
+                    
                     setTeachers(data)
                     sessionStorage.setItem('cached_teachers_list', JSON.stringify(data))
                 }
