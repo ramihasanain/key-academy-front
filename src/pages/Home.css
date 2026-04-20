@@ -155,12 +155,11 @@
     flex: 1;
     display: flex;
     position: relative;
-    z-index: 2;
     background: transparent;
     min-height: 420px; 
     justify-content: center; /* Centered nicely */
     align-items: center; /* No longer forced to the bottom */
-    transform: translateY(-35px); /* Shifting the robot and cards up to center them visually */
+    margin-top: -35px; /* Shifting the robot and cards up to center them visually without creating a stacking context */
 }
 
 .hero-robot-wrapper {
@@ -170,7 +169,6 @@
     height: auto;
     aspect-ratio: 1 / 1;
     margin: 0 auto; /* Centered */
-    z-index: 2;
 }
 
 .hero-robot-video {
@@ -204,7 +202,7 @@
     }
     
     .hero-banner-visuals {
-        transform: none; /* Reset transform for mobile */
+        margin-top: 0; /* Reset transform for mobile */
     }
     
     .hero-banner-content {
