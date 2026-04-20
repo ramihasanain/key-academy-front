@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { API } from '../config';
 
 const AuthContext = createContext();
@@ -20,6 +20,36 @@ export const AuthProvider = ({ children }) => {
         const hasToken = token && token !== 'undefined' && token !== 'null';
         return !(hasCachedUser && hasToken);
     });
+
+    const refreshIntervalRef = useRef(null);
+
+    // ─── Silent token refresh ─────────────────────────────────────────────────
+    const silentRefresh = async () => {
+        const refreshToken = localStorage.getItem('refresh_token');
+        if (!refreshToken || refreshToken === 'undefined' || refreshToken === 'null') return;
+
+        try {
+            const res = await fetch(`${API}/api/auth/refresh/`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ refresh: refreshToken })
+            });
+            if (!res.ok) throw new Error('Refresh failed');
+            const data = await res.json();
+            if (data.access) {
+                localStorage.setItem('access_token', data.access);
+                // If server rotates refresh token, update it too
+                if (data.refresh) localStorage.setItem('refresh_token', data.refresh);
+            }
+        } catch {
+            // Refresh token expired → logout silently
+            localStorage.removeItem('access_token');
+            localStorage.removeItem('refresh_token');
+            localStorage.removeItem('user');
+            setUserData(null);
+            if (refreshIntervalRef.current) clearInterval(refreshIntervalRef.current);
+        }
+    };
 
     useEffect(() => {
         const token = localStorage.getItem('access_token');
@@ -45,15 +75,19 @@ export const AuthProvider = ({ children }) => {
                 localStorage.setItem('user', JSON.stringify(data));
             })
             .catch(() => {
-                // If token is dead
-                localStorage.removeItem('access_token');
-                localStorage.removeItem('refresh_token');
-                localStorage.removeItem('user');
-                setUserData(null);
+                // Token is dead — try silent refresh first
+                silentRefresh();
             })
             .finally(() => {
                 setLoading(false);
             });
+
+        // Auto-refresh every 13 minutes (access token expires in 15)
+        refreshIntervalRef.current = setInterval(silentRefresh, 13 * 60 * 1000);
+
+        return () => {
+            if (refreshIntervalRef.current) clearInterval(refreshIntervalRef.current);
+        };
     }, []);
 
     // A helper to let components manually trigger user refresh (e.g. after uploading profile picture)
