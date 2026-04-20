@@ -58,7 +58,17 @@ const StudentDashboard = () => {
     const [allTeachers, setAllTeachers] = useState([])
     const [loadingCourses, setLoadingCourses] = useState(true)
 
-    const { userData } = useAuth()
+    const { userData, loading: authLoading } = useAuth()
+
+    if (authLoading || !userData) {
+        return (
+            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', background: '#0f172a', color: 'white', flexDirection: 'column', gap: '20px' }}>
+                <div className="spinner" style={{ width: '50px', height: '50px', border: '4px solid rgba(255,255,255,0.1)', borderTopColor: '#ec3665', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div>
+                <h3 style={{ fontFamily: 'var(--font-ar)', margin: 0 }}>جاري تجهيز لوحتك...</h3>
+                <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
+            </div>
+        )
+    }
     const [stats, setStats] = useState({ active_courses: 0, completed_lessons: 0, overall_progress: 0, certificates_count: 0 })
     const [myCourses, setMyCourses] = useState([])
     const [completedCourses, setCompletedCourses] = useState([])
@@ -405,7 +415,7 @@ const StudentDashboard = () => {
             {/* Main Content */}
             <main className="dash-main">
                 {/* Mute Notification Banner */}
-                {userData.muted_until && new Date(userData.muted_until) > new Date() && (
+                {userData?.muted_until && new Date(userData.muted_until) > new Date() && (
                     <motion.div
                         initial={{ opacity: 0, scale: 0.95 }}
                         animate={{ opacity: 1, scale: 1 }}
@@ -446,7 +456,7 @@ const StudentDashboard = () => {
                         <div className="banner-glow-bg"></div>
                         <div className="banner-content">
                             <div className="banner-text">
-                                <h1>هلا بيك {userData.full_name ? userData.full_name.split(' ')[0] : 'نورتنا'}!</h1>
+                                <h1>هلا بيك {userData?.full_name ? userData.full_name.split(' ')[0] : 'يا بطل'}! <span className="wave-emoji">👋</span></h1>
                                 <p>استمر بتركيزك وكمل دراستك حتى تحقق اللي تريده.</p>
                             </div>
                             <div className="banner-3d-element">
