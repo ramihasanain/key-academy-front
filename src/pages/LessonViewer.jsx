@@ -141,9 +141,9 @@ const ViewSlides = ({ lessonInfo, lessonContent, userData }) => {
     const renderWatermarkOverlay = () => {
         if (!userData) return null;
         return (
-            <div style={{ position: 'absolute', top: 0, right: 0, bottom: 0, left: 0, pointerEvents: 'none', overflow: 'hidden', display: 'flex', flexWrap: 'wrap', gap: '60px', justifyContent: 'center', alignContent: 'center', opacity: 0.08, mixBlendMode: 'difference', zIndex: 10 }}>
+            <div style={{ position: 'absolute', top: 0, right: 0, bottom: 0, left: 0, pointerEvents: 'none', overflow: 'hidden', display: 'flex', flexWrap: 'wrap', gap: '60px', justifyContent: 'center', alignContent: 'center', zIndex: 10 }}>
                 {Array.from({ length: 50 }).map((_, i) => (
-                    <div key={i} style={{ transform: 'rotate(-35deg)', fontSize: '28px', fontWeight: 'bold', color: '#fff', whiteSpace: 'nowrap', userSelect: 'none', letterSpacing: '2px' }}>
+                    <div key={i} style={{ transform: 'rotate(-35deg)', fontSize: '28px', fontWeight: 'bold', color: 'rgba(0, 0, 0, 0.15)', textShadow: '1px 1px 0 rgba(255, 255, 255, 0.2)', whiteSpace: 'nowrap', userSelect: 'none', letterSpacing: '2px' }}>
                         {userData?.username || 'KeyAcademy_Student'}
                     </div>
                 ))}
@@ -376,9 +376,9 @@ const ViewQuiz = ({ lessonId, userData }) => {
             
             {/* Watermark Overlay */}
             {userData && (
-                <div style={{ position: 'absolute', top: 0, right: 0, bottom: 0, left: 0, pointerEvents: 'none', overflow: 'hidden', display: 'flex', flexWrap: 'wrap', gap: '50px', justifyContent: 'center', alignContent: 'center', opacity: 0.05, mixBlendMode: 'difference', zIndex: 0 }}>
+                <div style={{ position: 'absolute', top: 0, right: 0, bottom: 0, left: 0, pointerEvents: 'none', overflow: 'hidden', display: 'flex', flexWrap: 'wrap', gap: '50px', justifyContent: 'center', alignContent: 'center', zIndex: 0 }}>
                     {Array.from({ length: 40 }).map((_, i) => (
-                        <div key={i} style={{ transform: 'rotate(-35deg)', fontSize: '20px', fontWeight: 'bold', color: '#000', whiteSpace: 'nowrap', userSelect: 'none' }}>
+                        <div key={i} style={{ transform: 'rotate(-35deg)', fontSize: '20px', fontWeight: 'bold', color: 'rgba(0, 0, 0, 0.1)', textShadow: '1px 1px 0 rgba(255, 255, 255, 0.1)', whiteSpace: 'nowrap', userSelect: 'none' }}>
                             {userData?.username || 'Key Academy'}
                         </div>
                     ))}
