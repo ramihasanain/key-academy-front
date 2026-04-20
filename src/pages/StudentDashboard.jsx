@@ -15,7 +15,9 @@ import {
     HiOutlineFire,
     HiOutlineNoSymbol,
     HiOutlinePencilSquare,
-    HiOutlineArrowRight
+    HiOutlineArrowRight,
+    HiOutlineSquares2X2,
+    HiOutlineUser
 } from 'react-icons/hi2'
 import ParticleBackground from '../components/ParticleBackground'
 import AnimatedCounter from '../components/AnimatedCounter'
