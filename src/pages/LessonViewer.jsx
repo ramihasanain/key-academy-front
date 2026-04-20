@@ -568,27 +568,31 @@ const LessonViewer = () => {
     // 1. Fetch Lesson Basic Info (Lightweight)
     useEffect(() => {
         if (lessonId) {
+            const controller = new AbortController();
             setIsLoading(true);
             setLessonContent(null); // Reset content when switching lessons
-            fetch(`${API}/api/courses/lessons/${lessonId}/`)
+            fetch(`${API}/api/courses/lessons/${lessonId}/`, { signal: controller.signal })
                 .then(res => res.json())
                 .then(data => {
                     setLessonInfo(data);
                     setIsLoading(false);
                 })
                 .catch(err => {
+                    if (err.name === 'AbortError') return;
                     console.error('Failed to fetch lesson', err);
                     setIsLoading(false);
                 });
+            return () => controller.abort();
         }
     }, [lessonId]);
 
     // 2. Fetch Sidebar/Playlist (Once per courseId)
     useEffect(() => {
         if (courseId && lessonList.length === 0) {
+            const controller = new AbortController();
             const token = localStorage.getItem('access_token');
             const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
-            fetch(`${API}/api/courses/${courseId}/`, { headers })
+            fetch(`${API}/api/courses/${courseId}/`, { headers, signal: controller.signal })
                 .then(res => res.json())
                 .then(courseData => {
                     let allLessons = [];
@@ -599,24 +603,31 @@ const LessonViewer = () => {
                     });
                     setLessonList(allLessons);
                 })
-                .catch(err => console.error('Failed to fetch playlist', err));
+                .catch(err => {
+                    if (err.name === 'AbortError') return;
+                    console.error('Failed to fetch playlist', err);
+                });
+            return () => controller.abort();
         }
     }, [courseId, lessonList.length]);
 
     // 3. Lazy Load Heavy Content (Slides/Text)
     useEffect(() => {
         if (activeContent === 'slides' && lessonId && !lessonContent && !isLoadingContent) {
+            const controller = new AbortController();
             setIsLoadingContent(true);
-            fetch(`${API}/api/courses/lessons/${lessonId}/content/`)
+            fetch(`${API}/api/courses/lessons/${lessonId}/content/`, { signal: controller.signal })
                 .then(res => res.json())
                 .then(data => {
                     setLessonContent(data);
                     setIsLoadingContent(false);
                 })
                 .catch(err => {
+                    if (err.name === 'AbortError') return;
                     console.error("Error loading slides content:", err);
                     setIsLoadingContent(false);
                 });
+            return () => controller.abort();
         }
     }, [activeContent, lessonId, lessonContent, isLoadingContent]);
 
