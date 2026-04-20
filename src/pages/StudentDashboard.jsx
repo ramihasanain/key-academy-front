@@ -196,17 +196,6 @@ const StudentDashboard = () => {
         }
 
         else if (activeTab === 'browse-courses') {
-            fetch(API + '/api/courses/')
-                .then(res => res.json())
-                .then(data => {
-                    setAllCourses(data)
-                    setLoadingCourses(false)
-                })
-                .catch(err => {
-                    console.error(err)
-                    setLoadingCourses(false)
-                })
-
             fetch(API + '/api/teachers/')
                 .then(res => res.json())
                 .then(data => setAllTeachers(data))
@@ -217,21 +206,33 @@ const StudentDashboard = () => {
 
     }, [activeTab, fetchedTabs]);
 
+    useEffect(() => {
+        if (activeTab === 'browse-courses') {
+            setLoadingCourses(true);
+            let url = API + '/api/courses/?limit=20'; // Fetch 20 max to avoid explosion
+            if (filterTeacher !== 'الكل') url += `&teacher=${filterTeacher}`;
+            if (filterSubject !== 'الكل') url += `&subject=${encodeURIComponent(filterSubject)}`;
+            if (filterGrade !== 'الكل') url += `&grade=${encodeURIComponent(filterGrade)}`;
+            
+            fetch(url)
+                .then(res => res.json())
+                .then(data => {
+                    setAllCourses(data);
+                    setLoadingCourses(false);
+                })
+                .catch(err => {
+                    console.error(err);
+                    setLoadingCourses(false);
+                });
+        }
+    }, [activeTab, filterTeacher, filterSubject, filterGrade]);
+
     const navItems = [
         { id: 'my-courses', label: 'دوراتي الحالية', icon: <HiOutlineBookOpen /> },
         { id: 'completed', label: 'مخلصها بنجاح', icon: <HiOutlineCheckCircle /> },
         { id: 'certificates', label: 'شهاداتي', icon: <HiOutlineAcademicCap /> },
         { id: 'my-notes', label: 'ملاحظاتي', icon: <HiOutlinePencilSquare /> },
     ]
-
-    const getFilteredCourses = () => {
-        return allCourses.filter(c => {
-            if (filterTeacher !== 'الكل' && c.teacher_name !== filterTeacher) return false
-            if (filterGrade !== 'الكل' && c.grade !== filterGrade && c.grade !== undefined && !c.grade.includes(filterGrade)) return false
-            if (filterSubject !== 'الكل' && c.subject !== filterSubject) return false
-            return true
-        })
-    }
 
     const handleEnroll = async () => {
         if (!enrollCode.trim()) {
@@ -653,7 +654,7 @@ const StudentDashboard = () => {
                                     <label>تفلتر حسب الأستاذ</label>
                                     <select className="glass-select" value={filterTeacher} onChange={e => setFilterTeacher(e.target.value)}>
                                         <option value="الكل">كل الأساتذة</option>
-                                        {allTeachers.map(t => <option key={t.id} value={t.name}>{t.name}</option>)}
+                                        {allTeachers.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
                                     </select>
                                 </div>
                                 <div className="dash-filter-group">
@@ -666,11 +667,11 @@ const StudentDashboard = () => {
                         </div>
 
                         <div className="dash-courses-grid mt-4">
-                            {getFilteredCourses().map((course, i) => (
+                            {allCourses.map((course, i) => (
                                 <BrowseCourseCard key={course.id} course={course} i={i} />
                             ))}
                         </div>
-                        {getFilteredCourses().length === 0 && (
+                        {allCourses.length === 0 && !loadingCourses && (
                             <div className="dash-no-results glass-panel">
                                 <span className="no-res-icon">🔍</span>
                                 <p>ما داحصل أي دورة بهذي المواصفات</p>
