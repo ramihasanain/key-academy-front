@@ -64,7 +64,9 @@ const StudentDashboard = () => {
     const [certificates, setCertificates] = useState([])
     const [myNotes, setMyNotes] = useState([])
     const [videoStats, setVideoStats] = useState(null)
+    const [fetchedTabs, setFetchedTabs] = useState({})
 
+    // 1. Initial Load & Auth Check (Always fetch user profile for sidebar)
     useEffect(() => {
         const token = localStorage.getItem('access_token');
         if (!token || token === 'undefined' || token === 'null') {
@@ -77,7 +79,6 @@ const StudentDashboard = () => {
             'Content-Type': 'application/json'
         };
 
-        // Fetch User Profile
         fetch(API + '/api/auth/me/', { headers })
             .then(res => {
                 if (res.status === 401) throw new Error('Unauthorized');
@@ -95,91 +96,126 @@ const StudentDashboard = () => {
                 localStorage.removeItem('access_token');
                 navigate('/login');
             });
+    }, [navigate]);
 
-        // Fetch Dashboard Stats
-        fetch(API + '/api/enrollments/stats/', { headers })
-            .then(res => res.json())
-            .then(data => setStats(data))
-            .catch(console.error);
+    // 2. Tab Data Lazy Loading (Only hits APIs when user actually opens the tab)
+    useEffect(() => {
+        const token = localStorage.getItem('access_token');
+        if (!token || token === 'undefined' || token === 'null') return;
+        
+        // Skip if this tab has already been fetched
+        if (fetchedTabs[activeTab]) return;
 
-        // Fetch Enrollments Data
-        fetch(API + '/api/enrollments/my-courses/', { headers })
-            .then(res => res.json())
-            .then(data => {
-                setMyCourses(data.map(e => ({
-                    id: e.course.id,
-                    title: e.course.title,
-                    desc: e.course.grade,
-                    teacher: e.course.teacher_name,
-                    teacherInitials: e.course.teacher_initials,
-                    teacherAvatar: e.course.teacher_image,
-                    progress: e.progress || 0,
-                    totalLessons: e.total_lessons || 0,
-                    completedLessons: e.completed_lessons || 0,
-                    color: e.course.color || 'purple',
-                    isActive: e.is_active !== undefined ? e.is_active : true,
-                    lastVisit: new Date(e.last_visited).toLocaleDateString('ar-IQ', {
-                        year: 'numeric',
-                        month: 'numeric',
-                        day: 'numeric'
-                    })
-                })));
-            }).catch(console.error);
+        const headers = {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        };
 
-        fetch(API + '/api/enrollments/completed/', { headers })
-            .then(res => res.json())
-            .then(data => {
-                setCompletedCourses(data.map(e => ({
-                    id: e.course.id,
-                    title: e.course.title,
-                    teacher: e.course.teacher_name,
-                    teacherInitials: e.course.teacher_initials,
-                    teacherAvatar: e.course.teacher_image,
-                    color: e.course.color || 'purple',
-                    date: new Date(e.completed_at || e.enrolled_at).toLocaleDateString('ar-IQ'),
-                    lastVisit: 'مكتملة'
-                })));
-            }).catch(console.error);
+        if (activeTab === 'my-courses') {
+            fetch(API + '/api/enrollments/stats/', { headers })
+                .then(res => res.json())
+                .then(data => setStats(data))
+                .catch(console.error);
 
-        fetch(API + '/api/enrollments/certificates/', { headers })
-            .then(res => res.json())
-            .then(data => {
-                setCertificates(data.map(c => ({
-                    id: c.id,
-                    title: c.title,
-                    issueDate: new Date(c.issue_date).toLocaleDateString('ar-IQ'),
-                    file: c.pdf_file
-                })));
-            }).catch(console.error);
-            
-        // Fetch Video Stats
-        fetch(API + '/api/interactions/video-stats/', { headers })
-            .then(res => res.json())
-            .then(data => setVideoStats(data))
-            .catch(console.error);
+            fetch(API + '/api/enrollments/my-courses/', { headers })
+                .then(res => res.json())
+                .then(data => {
+                    setMyCourses(data.map(e => ({
+                        id: e.course.id,
+                        title: e.course.title,
+                        desc: e.course.grade,
+                        teacher: e.course.teacher_name,
+                        teacherInitials: e.course.teacher_initials,
+                        teacherAvatar: e.course.teacher_image,
+                        progress: e.progress || 0,
+                        totalLessons: e.total_lessons || 0,
+                        completedLessons: e.completed_lessons || 0,
+                        color: e.course.color || 'purple',
+                        isActive: e.is_active !== undefined ? e.is_active : true,
+                        lastVisit: new Date(e.last_visited).toLocaleDateString('ar-IQ', {
+                            year: 'numeric',
+                            month: 'numeric',
+                            day: 'numeric'
+                        })
+                    })));
+                }).catch(console.error);
+                
+            setFetchedTabs(prev => ({ ...prev, [activeTab]: true }));
+        }
 
-        fetch(API + '/api/interactions/notes/', { headers })
-            .then(res => res.json())
-            .then(data => setMyNotes(data))
-            .catch(console.error);
+        else if (activeTab === 'completed') {
+            fetch(API + '/api/enrollments/completed/', { headers })
+                .then(res => res.json())
+                .then(data => {
+                    setCompletedCourses(data.map(e => ({
+                        id: e.course.id,
+                        title: e.course.title,
+                        teacher: e.course.teacher_name,
+                        teacherInitials: e.course.teacher_initials,
+                        teacherAvatar: e.course.teacher_image,
+                        color: e.course.color || 'purple',
+                        date: new Date(e.completed_at || e.enrolled_at).toLocaleDateString('ar-IQ'),
+                        lastVisit: 'مكتملة'
+                    })));
+                }).catch(console.error);
+                
+            setFetchedTabs(prev => ({ ...prev, [activeTab]: true }));
+        }
 
-        // Fetch browse courses and teachers
-        fetch(API + '/api/courses/')
-            .then(res => res.json())
-            .then(data => {
-                setAllCourses(data)
-                setLoadingCourses(false)
-            })
-            .catch(err => {
-                console.error(err)
-                setLoadingCourses(false)
-            })
+        else if (activeTab === 'certificates') {
+            fetch(API + '/api/enrollments/certificates/', { headers })
+                .then(res => res.json())
+                .then(data => {
+                    setCertificates(data.map(c => ({
+                        id: c.id,
+                        title: c.title,
+                        issueDate: new Date(c.issue_date).toLocaleDateString('ar-IQ'),
+                        file: c.pdf_file
+                    })));
+                }).catch(console.error);
+                
+            setFetchedTabs(prev => ({ ...prev, [activeTab]: true }));
+        }
 
-        fetch(API + '/api/teachers/')
-            .then(res => res.json())
-            .then(data => setAllTeachers(data))
-            .catch(console.error)
-    }, [navigate])
+        else if (activeTab === 'my-notes') {
+            fetch(API + '/api/interactions/notes/', { headers })
+                .then(res => res.json())
+                .then(data => setMyNotes(data))
+                .catch(console.error);
+                
+            setFetchedTabs(prev => ({ ...prev, [activeTab]: true }));
+        }
+
+        else if (activeTab === 'profile') {
+            fetch(API + '/api/interactions/video-stats/', { headers })
+                .then(res => res.json())
+                .then(data => setVideoStats(data))
+                .catch(console.error);
+                
+            setFetchedTabs(prev => ({ ...prev, [activeTab]: true }));
+        }
+
+        else if (activeTab === 'browse-courses') {
+            fetch(API + '/api/courses/')
+                .then(res => res.json())
+                .then(data => {
+                    setAllCourses(data)
+                    setLoadingCourses(false)
+                })
+                .catch(err => {
+                    console.error(err)
+                    setLoadingCourses(false)
+                })
+
+            fetch(API + '/api/teachers/')
+                .then(res => res.json())
+                .then(data => setAllTeachers(data))
+                .catch(console.error)
+                
+            setFetchedTabs(prev => ({ ...prev, [activeTab]: true }));
+        }
+
+    }, [activeTab, fetchedTabs]);
 
     const navItems = [
         { id: 'my-courses', label: 'دوراتي الحالية', icon: <HiOutlineBookOpen /> },
