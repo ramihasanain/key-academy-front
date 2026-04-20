@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { API } from '../config'
-import { useAuth } from '../contexts/AuthContext'
+import { useUser } from '../hooks/useUser'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
     HiOutlineBookOpen,
@@ -65,11 +65,7 @@ const StudentDashboard = () => {
     const [videoStats, setVideoStats] = useState(null)
     const [fetchedTabs, setFetchedTabs] = useState({})
 
-    const { userData: authUserData } = useAuth()
-    // Use AuthContext data, or fall back to localStorage cache instantly — never block on loading
-    const userData = authUserData || (() => {
-        try { const s = localStorage.getItem('user'); return s && s !== 'undefined' ? JSON.parse(s) : null; } catch { return null; }
-    })()
+    const { userData } = useUser()
 
     if (!userData) {
         return (

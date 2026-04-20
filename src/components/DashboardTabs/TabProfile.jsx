@@ -1,12 +1,9 @@
 import { motion } from 'framer-motion'
 import { HiOutlineUser } from 'react-icons/hi2'
-import { useAuth } from '../../contexts/AuthContext'
+import { useUser } from '../../hooks/useUser'
 
 const TabProfile = ({ videoStats }) => {
-    const { userData: authUserData } = useAuth()
-    const userData = authUserData || (() => {
-        try { const s = localStorage.getItem('user'); return s && s !== 'undefined' ? JSON.parse(s) : null; } catch { return null; }
-    })()
+    const { userData } = useUser()
 
     if (!userData) return null;
 
