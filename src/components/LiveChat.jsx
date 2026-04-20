@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
-import { API } from '../../config'
+import { API } from '../config'
 import { HiOutlineUserGroup, HiOutlineXMark, HiOutlinePaperAirplane } from 'react-icons/hi2'
-import '../../pages/LessonViewer.css' // Reuse the same CSS
+import '../pages/LessonViewer.css' // Reuse the same CSS
 
 const LiveChat = ({ courseId, userData, lessonId = null }) => {
     const [messages, setMessages] = useState([])
