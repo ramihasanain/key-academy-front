@@ -48,16 +48,16 @@ const floatingIcons = [
 
 const Home = () => {
     const [teachers, setTeachers] = useState([])
-    const [isAppleWebKit, setIsAppleWebKit] = useState(false)
+    
+    // Detect Apple WebKit synchronously so the video never renders without blend-mode initially
+    const isAppleWebKit = typeof navigator !== 'undefined' && (
+        /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+        (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1) ||
+        /^((?!chrome|android).)*safari/i.test(navigator.userAgent) ||
+        /CriOS|FxiOS|EdgiOS/.test(navigator.userAgent)
+    );
 
     useEffect(() => {
-        // Detect Apple WebKit browsers where WebM alpha is not supported and renders as black
-        const ua = navigator.userAgent;
-        const isWebKit = /iPad|iPhone|iPod/.test(ua) || 
-                         (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1) ||
-                         /^((?!chrome|android).)*safari/i.test(ua) ||
-                         /CriOS|FxiOS|EdgiOS/.test(ua);
-        setIsAppleWebKit(isWebKit);
 
         const cachedTeachers = sessionStorage.getItem('cached_teachers_list')
         if (cachedTeachers) {
@@ -144,8 +144,10 @@ const Home = () => {
                                     loop 
                                     muted 
                                     playsInline 
+                                    controls={false}
+                                    disablePictureInPicture
                                     className="hero-robot-video"
-                                    style={isAppleWebKit ? { mixBlendMode: 'screen', filter: 'contrast(1.3) brightness(0.9)' } : {}}
+                                    style={isAppleWebKit ? { mixBlendMode: 'screen', filter: 'contrast(1.5) brightness(0.9)', transform: 'translateZ(0)' } : {}}
                                 />
                             </div>
 
