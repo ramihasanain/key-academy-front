@@ -61,7 +61,7 @@ const Home = () => {
                     setTeachers(JSON.parse(cached))
                 }
                 
-                const res = await fetch(API + '/api/teachers/')
+                const res = await fetch(API + '/api/teachers/?limit=10')
                 if (!res.ok) return
                 const data = await res.json()
                 
