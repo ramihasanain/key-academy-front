@@ -13,7 +13,8 @@ import AnimatedCounter from '../components/AnimatedCounter'
 import SectionTitle from '../components/SectionTitle'
 import Contact from './Contact'
 import './Home.css'
-import robotVideo from '../assets/robot_website.webm'
+import robotVideoWebm from '../assets/robot_website.webm'
+import robotVideoMov from '../assets/robot_website.mov'
 import iconSlides from '../assets/icon-slides.png'
 const fadeInUp = {
     hidden: { opacity: 0, y: 40 },
@@ -49,13 +50,7 @@ const floatingIcons = [
 const Home = () => {
     const [teachers, setTeachers] = useState([])
     
-    // Detect Apple WebKit synchronously so the video never renders without blend-mode initially
-    const isAppleWebKit = typeof navigator !== 'undefined' && (
-        /iPad|iPhone|iPod/.test(navigator.userAgent) || 
-        (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1) ||
-        /^((?!chrome|android).)*safari/i.test(navigator.userAgent) ||
-        /CriOS|FxiOS|EdgiOS/.test(navigator.userAgent)
-    );
+
 
     useEffect(() => {
 
@@ -159,7 +154,6 @@ const Home = () => {
                             {/* Giant Robot Video */}
                             <div className="hero-robot-wrapper">
                                 <video 
-                                    src={robotVideo} 
                                     autoPlay 
                                     loop 
                                     muted 
@@ -167,8 +161,10 @@ const Home = () => {
                                     controls={false}
                                     disablePictureInPicture
                                     className="hero-robot-video"
-                                    style={isAppleWebKit ? { mixBlendMode: 'screen', filter: 'contrast(1.5) brightness(0.9)', transform: 'translateZ(0)' } : {}}
-                                />
+                                >
+                                    <source src={robotVideoMov} type='video/quicktime; codecs="hvc1"' />
+                                    <source src={robotVideoWebm} type="video/webm" />
+                                </video>
                             </div>
 
                             {/* Floating Glass Cards PNG */}
