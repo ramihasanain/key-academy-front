@@ -366,10 +366,12 @@ const ViewQuiz = ({ lessonId, userData }) => {
     }
 
     const getResultMsg = (pct) => {
-        if (pct === 100) return 'عاشت ايدك يا بطل! 🔥 مبدع ومفول تركيز!'
-        if (pct >= 70) return 'شغل حلو بس لازم تركز أكثر يبطل! 💪'
-        if (pct >= 40) return 'شكلك ما ذاكرت مزبوط.. يلا عيد الدرس! 📖'
-        return 'هاي شنو هالنتيجة؟! 😂 روح ذاكر وارجع!'
+        if (pct >= 90) return <span style={{ color: '#10b981', display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'center' }}>🏆 شنو هالابداع؟ قافل المادة تفوييل، عاشت ايدك ، الـ 100 تلوگلگ!</span>
+        if (pct >= 80) return <span style={{ color: '#3b82f6', display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'center' }}>🚀 خوش شغل ومرتب! بقى لك كم درجة وتصير الأول، لا توگف هسه!</span>
+        if (pct >= 70) return <span style={{ color: '#f59e0b', display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'center' }}>⚡ زين.. بس مو طموحنا! ادري بيك تگدر تجيب اعلى، صفي ذهنك وارجعلها بقوة.</span>
+        if (pct >= 60) return <span style={{ color: '#f97316', display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'center' }}>😅 عبرنا.. بس النتيجة ما تبرد الگلب! ، ركز شوية وعيد الامتحان، أدري بيك گدها.</span>
+        if (pct >= 50) return <span style={{ color: '#ef4444', display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'center' }}>🥱 عيني بطلنا.. شكلك فاتح الملزمة وصافن عالحايط! گوم ريح راسك شوية وارجع ركز.</span>
+        return <span style={{ color: '#b91c1c', display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'center' }}>☕ شنو السالفة يمعود؟ دايخ لو نعسان؟ گوم طگلك استكان چاي مهيل، صفي راسك وارجع عيد الدرس!</span>
     }
 
     if (isLoading) return <div className="lv-screen">جاري تحميل الاختبار...</div>
