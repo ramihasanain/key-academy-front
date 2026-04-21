@@ -127,14 +127,25 @@ const TabKeyAI = ({ lessonInfo, userData }) => {
                 </div>
 
                 <div className="lv-ai-input-row" style={{ marginTop: 'auto', flexShrink: 0 }}>
-                    <input
-                        type="text" className="lv-ai-input"
+                    <textarea
+                        className="lv-ai-input"
+                        rows={1}
                         placeholder="اسأل Key AI عن أي شي بالدرس..."
-                        value={input} onChange={e => setInput(e.target.value)}
-                        onKeyDown={e => e.key === 'Enter' && sendMsg()}
+                        value={input} 
+                        onChange={e => {
+                            setInput(e.target.value)
+                            e.target.style.height = 'auto'
+                            e.target.style.height = `${Math.min(e.target.scrollHeight, 150)}px`
+                        }}
+                        onKeyDown={e => {
+                            if (e.key === 'Enter' && !e.shiftKey) {
+                                e.preventDefault()
+                                sendMsg()
+                            }
+                        }}
                         disabled={isLoading}
                     />
-                    <button className="lv-ai-send-btn" onClick={sendMsg} disabled={isLoading} style={{ opacity: isLoading ? 0.7 : 1 }}>
+                    <button className="lv-ai-send-btn" onClick={sendMsg} disabled={isLoading} style={{ opacity: isLoading ? 0.7 : 1, alignSelf: 'flex-end' }}>
                         {isLoading ? <span style={{ fontSize: '18px', animation: 'spin 1s linear infinite', display: 'inline-block' }}>⏳</span> : <HiOutlinePaperAirplane style={{ transform: 'scaleX(-1)' }} />}
                     </button>
                 </div>

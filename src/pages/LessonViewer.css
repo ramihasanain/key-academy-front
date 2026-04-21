@@ -1022,13 +1022,15 @@
 }
 
 /* AI Input */
-.lv-ai-input-row { display: flex; gap: 10px; margin-top: 16px; padding-top: 16px; border-top: 1px solid rgba(131, 42, 150, 0.06); }
+.lv-ai-input-row { display: flex; gap: 10px; margin-top: 16px; padding-top: 16px; border-top: 1px solid rgba(131, 42, 150, 0.06); align-items: flex-end; }
 .lv-ai-input {
-    flex: 1; height: 52px; background: rgba(255,255,255,0.8); backdrop-filter: blur(10px);
-    border: 1px solid rgba(131, 42, 150, 0.10); border-radius: 26px;
-    padding: 0 24px; font-family: var(--font-ar); font-weight: 600; font-size: 1rem;
-    color: var(--text-primary); transition: all 0.3s;
+    flex: 1; min-height: 52px; height: 52px; resize: none; overflow-y: auto; background: rgba(255,255,255,0.8); backdrop-filter: blur(10px);
+    border: 1px solid rgba(131, 42, 150, 0.10); border-radius: 20px;
+    padding: 14px 24px; font-family: var(--font-ar); font-weight: 600; font-size: 1rem; line-height: 1.5;
+    color: var(--text-primary); transition: all 0.1s;
 }
+.lv-ai-input::-webkit-scrollbar { width: 5px; }
+.lv-ai-input::-webkit-scrollbar-thumb { background: rgba(131, 42, 150, 0.15); border-radius: 10px; }
 .lv-ai-input:focus { outline: none; border-color: var(--purple); box-shadow: 0 0 0 4px rgba(131, 42, 150, 0.08); }
 .lv-ai-send-btn {
     width: 52px; height: 52px; border-radius: 50%;
