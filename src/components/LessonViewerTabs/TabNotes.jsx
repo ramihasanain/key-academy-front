@@ -44,7 +44,7 @@ const TabNotes = ({ lessonId }) => {
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
                         <span className="lv-nc-date" style={{ marginBottom: 0 }}>
                             {n.source === 'app' ? (
-                                <span style={{display: 'flex', alignItems: 'center', gap: '5px', color: '#8b5cf6', fontWeight: 'bold'}}><HiOutlineComputerDesktop /> كُتب من التطبيق {n.video_time != null && `[${fmt(n.video_time)}]`}</span>
+                                <span style={{display: 'flex', alignItems: 'center', gap: '5px', color: '#8b5cf6', fontWeight: 'bold'}}><HiOutlineComputerDesktop /> كُتبت في الفيديو {n.video_time != null && `[${fmt(n.video_time)}]`}</span>
                             ) : (
                                 <span style={{display: 'flex', alignItems: 'center', gap: '5px', color: '#64748b'}}><HiOutlineGlobeAlt /> كُتب من المنصة</span>
                             )}
