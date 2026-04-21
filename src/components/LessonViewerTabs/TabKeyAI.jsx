@@ -1,7 +1,8 @@
 import { useState, Suspense } from 'react'
 import { useParams } from 'react-router-dom'
 import { API } from '../../config'
-import robotVideo from '../../assets/robot_website.webm'
+import robotVideoWebm from '../../assets/robot_website.webm'
+import robotVideoMov from '../../assets/native_hevc_alpha.mov'
 import { motion } from 'framer-motion'
 import { HiOutlineSparkles, HiOutlinePaperAirplane } from 'react-icons/hi2'
 import ReactMarkdown from 'react-markdown'
@@ -64,13 +65,15 @@ const TabKeyAI = ({ lessonInfo, userData }) => {
             <div className="lv-ai-robot-side" style={{ flex: '0 0 280px', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', minHeight: '100%', position: 'relative' }}>
                 <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%' }}>
                     <video 
-                        src={robotVideo} 
                         autoPlay 
                         loop 
                         muted 
                         playsInline 
                         style={{ width: '100%', maxWidth: '350px', height: 'auto', objectFit: 'contain', filter: 'drop-shadow(0 15px 30px rgba(0,0,0,0.15))' }}
-                    />
+                    >
+                        <source src={robotVideoMov} type='video/mp4; codecs="hvc1"' />
+                        <source src={robotVideoWebm} type="video/webm" />
+                    </video>
                 </div>
             </div>
 

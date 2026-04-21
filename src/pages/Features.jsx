@@ -20,7 +20,8 @@ import { FaRobot } from 'react-icons/fa'
 import SectionTitle from '../components/SectionTitle'
 import ParticleBackground from '../components/ParticleBackground'
 
-import robotVideo from '../assets/robot_website.webm'
+import robotVideoWebm from '../assets/robot_website.webm'
+import robotVideoMov from '../assets/native_hevc_alpha.mov'
 import './Features.css'
 
 const fadeInUp = {
@@ -103,13 +104,15 @@ const Features = () => {
                                     <HiOutlineSparkles /> Key AI
                                 </div>
                                 <video 
-                                    src={robotVideo} 
                                     autoPlay 
                                     loop 
                                     muted 
                                     playsInline 
                                     style={{ width: '100%', maxWidth: '450px', height: 'auto', objectFit: 'contain', filter: 'drop-shadow(0 20px 40px rgba(0,0,0,0.2))' }}
-                                />
+                                >
+                                    <source src={robotVideoMov} type='video/mp4; codecs="hvc1"' />
+                                    <source src={robotVideoWebm} type="video/webm" />
+                                </video>
                             </div>
                         </motion.div>
                     </div>

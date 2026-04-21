@@ -13,7 +13,7 @@ import SectionTitle from '../components/SectionTitle'
 import Contact from './Contact'
 import './Home.css'
 import robotVideoWebm from '../assets/robot_website.webm'
-import robotVideoMov from '../assets/robot_website.mov'
+import robotVideoMov from '../assets/native_hevc_alpha.mov'
 import iconSlides from '../assets/icon-slides.png'
 
 const fadeInUp = {

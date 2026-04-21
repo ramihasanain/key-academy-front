@@ -31,7 +31,8 @@ import {
 import { HiHeart, HiCheckCircle } from 'react-icons/hi'
 import ParticleBackground from '../components/ParticleBackground'
 
-import robotVideo from '../assets/robot_website.webm'
+import robotVideoWebm from '../assets/robot_website.webm'
+import robotVideoMov from '../assets/native_hevc_alpha.mov'
 import { VirtualLabsData } from '../data/VirtualLabsData'
 import LiveChat from '../components/LiveChat'
 import TabNotes from '../components/LessonViewerTabs/TabNotes'
