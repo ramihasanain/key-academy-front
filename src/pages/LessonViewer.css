@@ -527,6 +527,32 @@
     padding: 24px 32px; background: rgba(255,255,255,0.7); backdrop-filter: blur(10px);
     border-top: 1px solid rgba(131, 42, 150, 0.08); display: flex; justify-content: flex-end;
 }
+/* Reusable Premium Buttons */
+.premium-btn {
+    width: 100%;
+    padding: 16px;
+    border-radius: var(--radius-md);
+    font-size: 1.05rem;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    color: white;
+}
+.exact-btn-orange { background: var(--gradient-button); }
+.exact-btn-pink { background: linear-gradient(135deg, var(--pink), var(--purple)); }
+.exact-btn-purple { background: linear-gradient(135deg, var(--purple), #2a0845); }
+.exact-btn-green { background: linear-gradient(135deg, #4CAF50, #2E7D32); }
+.premium-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    filter: brightness(1.1);
+}
+
 .lv-qe-footer .premium-btn:disabled { background: #cbd5e1; cursor: not-allowed; box-shadow: none; }
 .lv-qe-footer .premium-btn:disabled:hover { transform: none; filter: none; }
 
