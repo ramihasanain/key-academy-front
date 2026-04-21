@@ -366,12 +366,18 @@ const ViewQuiz = ({ lessonId, userData }) => {
     }
 
     const getResultMsg = (pct) => {
-        if (pct >= 90) return <span style={{ color: '#10b981' }}>🏆 شنو هالابداع؟ قافل المادة تفوييل، عاشت ايدك ، الـ 100 تلوگلگ!</span>
-        if (pct >= 80) return <span style={{ color: '#3b82f6' }}>🚀 خوش شغل ومرتب! بقى لك كم درجة وتصير الأول، لا توگف هسه!</span>
-        if (pct >= 70) return <span style={{ color: '#f59e0b' }}>⚡ زين.. بس مو طموحنا! ادري بيك تگدر تجيب اعلى، صفي ذهنك وارجعلها بقوة.</span>
-        if (pct >= 60) return <span style={{ color: '#f97316' }}>😅 عبرنا.. بس النتيجة ما تبرد الگلب! ، ركز شوية وعيد الامتحان، أدري بيك گدها.</span>
-        if (pct >= 50) return <span style={{ color: '#ef4444' }}>🥱 عيني بطلنا.. شكلك فاتح الملزمة وصافن عالحايط! گوم ريح راسك شوية وارجع ركز.</span>
-        return <span style={{ color: '#b91c1c' }}>☕ شنو السالفة يمعود؟ دايخ لو نعسان؟ گوم طگلك استكان چاي مهيل، صفي راسك وارجع عيد الدرس!</span>
+        const renderMsg = (icon, color, text) => (
+            <span style={{ display: 'block', textAlign: 'center', color: color }}>
+                <span style={{ display: 'block', fontSize: '3.5rem', marginBottom: '8px', lineHeight: 1 }}>{icon}</span>
+                <span>{text}</span>
+            </span>
+        )
+        if (pct >= 90) return renderMsg('🏆', '#10b981', 'عاشت ايدك ، الـ 100 تلوگلگ!')
+        if (pct >= 80) return renderMsg('🚀', '#3b82f6', 'خوش شغل ومرتب! بقى لك كم درجة وتصير الأول، لا توگف هسه!')
+        if (pct >= 70) return renderMsg('⚡', '#f59e0b', 'زين.. بس مو طموحنا! ادري بيك تگدر تجيب اعلى، صفي ذهنك وارجعلها بقوة.')
+        if (pct >= 60) return renderMsg('😅', '#f97316', 'عبرنا.. بس النتيجة ما تبرد الگلب! ، ركز شوية وعيد الامتحان، أدري بيك گدها.')
+        if (pct >= 50) return renderMsg('🥱', '#ef4444', 'عيني بطلنا.. شكلك فاتح الدرس وصافن عالحايط! گوم ريح راسك شوية وارجع ركز.')
+        return renderMsg('☕', '#b91c1c', 'شنو السالفة يمعود؟ دايخ لو نعسان؟ گوم اشرب استكان چاي ، صفي راسك وارجع عيد الدرس!')
     }
 
     if (isLoading) return <div className="lv-screen">جاري تحميل الاختبار...</div>
