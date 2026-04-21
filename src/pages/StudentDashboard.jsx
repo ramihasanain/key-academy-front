@@ -17,7 +17,9 @@ import {
     HiOutlinePencilSquare,
     HiOutlineArrowRight,
     HiOutlineSquares2X2,
-    HiOutlineUser
+    HiOutlineUser,
+    HiOutlineKey,
+    HiOutlineXMark
 } from 'react-icons/hi2'
 import ParticleBackground from '../components/ParticleBackground'
 import AnimatedCounter from '../components/AnimatedCounter'
