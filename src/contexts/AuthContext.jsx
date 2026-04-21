@@ -11,8 +11,7 @@ export const AuthProvider = ({ children }) => {
         const stored = localStorage.getItem('user');
         return stored && stored !== 'undefined' ? JSON.parse(stored) : null;
     });
-    // Start as NOT loading if we already have cached user data — renders the UI instantly.
-    // If no cache, stay true so we wait for the API before showing anything.
+
     const [loading, setLoading] = useState(() => {
         const stored = localStorage.getItem('user');
         const token = localStorage.getItem('access_token');
@@ -21,76 +20,56 @@ export const AuthProvider = ({ children }) => {
         return !(hasCachedUser && hasToken);
     });
 
-    const refreshIntervalRef = useRef(null);
-
-    // ─── Silent token refresh ─────────────────────────────────────────────────
-    const silentRefresh = async () => {
-        const refreshToken = localStorage.getItem('refresh_token');
-        if (!refreshToken || refreshToken === 'undefined' || refreshToken === 'null') return;
-
-        try {
-            const res = await fetch(`${API}/api/auth/refresh/`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ refresh: refreshToken })
-            });
-            if (!res.ok) throw new Error('Refresh failed');
-            const data = await res.json();
-            if (data.access) {
-                localStorage.setItem('access_token', data.access);
-                // If server rotates refresh token, update it too
-                if (data.refresh) localStorage.setItem('refresh_token', data.refresh);
-            }
-        } catch {
-            // Refresh token expired → logout silently
+    useEffect(() => {
+        // Listen to global logout event triggered by interceptor
+        const handleLogout = () => {
             localStorage.removeItem('access_token');
             localStorage.removeItem('refresh_token');
             localStorage.removeItem('user');
             setUserData(null);
-            if (refreshIntervalRef.current) clearInterval(refreshIntervalRef.current);
-        }
-    };
+        };
+        window.addEventListener('auth:logout', handleLogout);
 
-    useEffect(() => {
-        const token = localStorage.getItem('access_token');
-        if (!token || token === 'undefined' || token === 'null') {
-            setLoading(false);
-            setUserData(null);
-            return;
-        }
-
-        fetch(`${API}/api/auth/me/`, {
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
-            }
-        })
-            .then(res => {
-                if (res.status === 401) throw new Error('Unauthorized');
-                return res.json();
-            })
-            .then(data => {
-                setUserData(data);
-                // Also update localStorage so next boot is faster and accurate
-                localStorage.setItem('user', JSON.stringify(data));
-            })
-            .catch(() => {
-                // Token is dead — try silent refresh first
-                silentRefresh();
-            })
-            .finally(() => {
+        const checkAuth = async () => {
+            const token = localStorage.getItem('access_token');
+            if (!token || token === 'undefined' || token === 'null') {
+                handleLogout();
                 setLoading(false);
-            });
+                return;
+            }
 
-        // Auto-refresh every 13 minutes (access token expires in 15)
-        refreshIntervalRef.current = setInterval(silentRefresh, 13 * 60 * 1000);
+            try {
+                // The global fetch interceptor automatically handles expired tokens and retries
+                const res = await fetch(`${API}/api/auth/me/`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (res.ok) {
+                    const data = await res.json();
+                    setUserData(data);
+                    localStorage.setItem('user', JSON.stringify(data));
+                } else {
+                    // If we get here, it means the interceptor tried refreshing and failed
+                    handleLogout();
+                }
+            } catch (err) {
+                // Network error or unexpected error
+                console.error('Auth verification failed', err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        checkAuth();
 
         return () => {
-            if (refreshIntervalRef.current) clearInterval(refreshIntervalRef.current);
+            window.removeEventListener('auth:logout', handleLogout);
         };
     }, []);
 
-    // A helper to let components manually trigger user refresh (e.g. after uploading profile picture)
     const refreshUser = async () => {
         const token = localStorage.getItem('access_token');
         if (!token) return;
