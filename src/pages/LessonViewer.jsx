@@ -45,30 +45,12 @@ import './LessonViewer.css'
 
 /* ======== PORTAL SCREENS ======== */
 
-const ViewVideo = ({ videoUrl, lessonId, isCompleted, onComplete }) => {
+const ViewVideo = ({ lessonId, isCompleted, onComplete }) => {
     const handleLaunchApp = () => {
-        if (!videoUrl) {
-            alert('لا يوجد فيديو متاح لهذا الدرس حالياً.');
-            return;
-        }
-        
-        let vid = videoUrl;
-        if (videoUrl.includes('v=')) {
-            vid = videoUrl.split('v=')[1].split('&')[0];
-        } else if (videoUrl.includes('youtu.be/')) {
-            vid = videoUrl.split('youtu.be/')[1].split('?')[0];
-        } else if (videoUrl.includes('embed/')) {
-            vid = videoUrl.split('embed/')[1].split('?')[0];
-        }
-        
-        let encodedArr = [];
-        for (let i = 0; i < vid.length; i++) {
-            encodedArr.push((vid.charCodeAt(i) + 7) ^ 0x1A);
-        }
-        const encodedVid = encodedArr.join(',');
-        
         const token = localStorage.getItem('access_token') || '';
-        const protocolUrl = `mediaplayer://loginyoutube?vid=${encodedVid}&token=${token}&lesson=${lessonId}&api=${encodeURIComponent(API)}`;
+        
+        // التطبيق المكتبي سيعتمد على الـ ID فقط لجلب معلومات الدرس بشكل آمن
+        const protocolUrl = `mediaplayer://loginyoutube?lesson=${lessonId}&token=${token}&api=${encodeURIComponent(API)}`;
         
         // Launch the protocol directly using window.location to prevent Chrome from silently canceling iframe requests.
         // This ensures the desktop app opens properly with the required authentication params.
@@ -804,7 +786,7 @@ const LessonViewer = () => {
                     {/* Portal */}
                     <div className={`lv-portal cv-super-glass ${(activeContent === 'slides' || activeContent === 'quiz') ? 'free-ratio' : ''}`} style={activeContent === 'slides' ? { height: '85vh', display: 'flex', flexDirection: 'column', padding: 0 } : activeContent === 'quiz' ? { minHeight: '85vh', display: 'flex', flexDirection: 'column', padding: 0 } : {}}>
                         <AnimatePresence mode="wait">
-                            {activeContent === 'video' && <motion.div key="v" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="lv-portal-inner"><ViewVideo videoUrl={lessonInfo?.video_url} lessonId={lessonId} isCompleted={lessonInfo?.is_completed} onComplete={handleMarkComplete} /></motion.div>}
+                            {activeContent === 'video' && <motion.div key="v" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="lv-portal-inner"><ViewVideo lessonId={lessonId} isCompleted={lessonInfo?.is_completed} onComplete={handleMarkComplete} /></motion.div>}
                             {activeContent === 'slides' && <motion.div key="s" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="lv-portal-inner">
                                 {isLoadingContent ? (
                                     <div className="lv-screen" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
