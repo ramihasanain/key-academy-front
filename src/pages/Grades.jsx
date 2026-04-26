@@ -24,6 +24,7 @@ import ParticleBackground from '../components/ParticleBackground'
 import './Grades.css'
 
 const API_BASE = API + '/api'
+const pendingGradeRequests = new Map()
 
 const fadeInUp = {
     hidden: { opacity: 0, y: 30 },
@@ -95,6 +96,45 @@ const getSubjectIcon = (subject) => {
 const colorClasses = ['color-blue', 'color-pink', 'color-orange', 'color-purple', 'color-green', 'color-teal']
 
 
+const safeFetchJson = (url) =>
+    pendingGradeRequests.get(url) ||
+    (() => {
+        const request = fetch(url)
+            .then(res => {
+                if (!res.ok) throw new Error(`HTTP ${res.status}`)
+                const ct = res.headers.get('content-type') || ''
+                if (!ct.includes('application/json')) throw new Error('Not JSON')
+                return res.json()
+            })
+            .finally(() => {
+                pendingGradeRequests.delete(url)
+            })
+        pendingGradeRequests.set(url, request)
+        return request
+    })()
+
+const getSlugFromRoute = (routeGradeId) => {
+    if (!routeGradeId) return null
+    const lowered = routeGradeId.toLowerCase()
+    if (lowered === 'grade-6' || lowered.includes('sixth')) return 'grade-6'
+    if (lowered === 'grade-3' || lowered.includes('third')) return 'grade-3'
+    return lowered.startsWith('grade-') ? lowered : null
+}
+
+const subjectInBranch = (subject, branchName) => {
+    if (!branchName || branchName === 'all') return true
+
+    if (subject.branch) {
+        return subject.branch === branchName || subject.branch.includes(branchName)
+    }
+
+    if (Array.isArray(subject.branches)) {
+        return subject.branches.some(b => b?.name === branchName || b?.name?.includes(branchName))
+    }
+
+    return true
+}
+
 // Detect branch from a grade's subjects or branch field
 const getBranches = (data) => {
     const branches = new Set()
@@ -118,54 +158,39 @@ const Grades = () => {
     const [selectedBranch, setSelectedBranch] = useState({}) // { [gradeSlug]: 'علمي' | 'أدبي' | 'all' }
 
     useEffect(() => {
-        const cacheKey = 'cached_detailed_grades_list'
-        const cached = sessionStorage.getItem(cacheKey)
-        if (cached) {
-            try {
-                const parsed = JSON.parse(cached)
-                if (Array.isArray(parsed) && parsed.length > 0) {
-                    setGrades(parsed)
-                    setLoading(false)
-                }
-            } catch (e) {}
-        }
+        const selectedSlug = getSlugFromRoute(gradeId)
 
-        const safeFetchJson = (url) =>
-            fetch(url)
-                .then(res => {
-                    if (!res.ok) throw new Error(`HTTP ${res.status}`)
-                    const ct = res.headers.get('content-type') || ''
-                    if (!ct.includes('application/json')) throw new Error('Not JSON')
-                    return res.json()
+        setLoading(true)
+        setApiError(false)
+
+        const fetchData = selectedSlug
+            ? safeFetchJson(`${API_BASE}/content/grades/${selectedSlug}/`)
+                .then((gradeData) => [gradeData])
+            : safeFetchJson(`${API_BASE}/content/grades/`)
+                .then(async (gradesList) => {
+                    if (!Array.isArray(gradesList)) return []
+                    const detailed = await Promise.all(
+                        gradesList.map(g =>
+                            safeFetchJson(`${API_BASE}/content/grades/${g.slug}/`).catch(() => null)
+                        )
+                    )
+                    return detailed.filter(d => d && !d.error)
                 })
 
-        safeFetchJson(`${API_BASE}/content/grades/`)
-            .then(async (gradesList) => {
-                if (!Array.isArray(gradesList)) {
-                    setLoading(false)
-                    return
-                }
-                sessionStorage.setItem('cached_basic_grades_list', JSON.stringify(gradesList))
-                const detailed = await Promise.all(
-                    gradesList.map(g =>
-                        safeFetchJson(`${API_BASE}/content/grades/${g.slug}/`)
-                            .catch(() => null)
-                    )
-                )
-                const valid = detailed.filter(d => d && !d.error)
+        fetchData
+            .then((valid) => {
                 if (valid.length > 0) {
                     setGrades(valid)
-                    sessionStorage.setItem(cacheKey, JSON.stringify(valid))
+                } else {
+                    setGrades([])
                 }
                 setLoading(false)
             })
             .catch(() => {
-                if (!sessionStorage.getItem('cached_detailed_grades_list')) {
-                    setApiError(true)
-                }
+                setApiError(true)
                 setLoading(false)
             })
-    }, [])
+    }, [gradeId])
 
 
     const toggleBranch = (slug, branch) => {
@@ -173,8 +198,13 @@ const Grades = () => {
     }
 
     const hasBranches = (data) => {
-        if (!data.subjects) return false
-        return data.subjects.some(s => s.branch && (s.branch.includes('علمي') || s.branch.includes('أدبي')))
+        if (!Array.isArray(data.subjects)) return false
+        return data.subjects.some((s) => {
+            if (s.branch) {
+                return s.branch.includes('علمي') || s.branch.includes('أدبي')
+            }
+            return Array.isArray(s.branches) && s.branches.some(b => b?.name?.includes('علمي') || b?.name?.includes('أدبي'))
+        })
     }
 
     return (
@@ -207,11 +237,9 @@ const Grades = () => {
             ) : (
                 (() => {
                     const gradesToRender = grades.filter(data => {
-                        if (!gradeId) return true;
-                        const lowercaseGradeId = gradeId.toLowerCase();
-                        if (lowercaseGradeId.includes('sixth') && (data.slug?.includes('sixth') || data.grade_name?.includes('سادس'))) return true;
-                        if (lowercaseGradeId.includes('third') && (data.slug?.includes('third') || data.grade_name?.includes('ثالث'))) return true;
-                        return data.slug === gradeId;
+                        if (!gradeId) return true
+                        const expectedSlug = getSlugFromRoute(gradeId)
+                        return expectedSlug ? data.slug === expectedSlug : data.slug === gradeId
                     });
 
                     if (gradesToRender.length === 0) {
@@ -227,8 +255,7 @@ const Grades = () => {
                         const routeBranch = gradeId?.includes('scientific') ? 'علمي' : gradeId?.includes('literary') ? 'أدبي' : null;
                         const currentBranch = selectedBranch[data.slug] || routeBranch || 'all'
                         const filteredSubjects = data.subjects ? data.subjects.filter(s => {
-                            if (currentBranch === 'all') return true;
-                            return !s.branch || s.branch === currentBranch || s.branch.includes(currentBranch);
+                            return subjectInBranch(s, currentBranch)
                         }) : [];
 
                         const getTeachersLink = (subject) => {

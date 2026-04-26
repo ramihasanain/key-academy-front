@@ -16,6 +16,23 @@ import robotVideoWebm from '../assets/robot_website.webm'
 import robotVideoMov from '../assets/native_hevc_alpha.mov'
 import iconSlides from '../assets/icon-slides.png'
 
+const pendingHomeRequests = new Map()
+
+const fetchJsonOnceWhilePending = (url) =>
+    pendingHomeRequests.get(url) ||
+    (() => {
+        const request = fetch(url)
+            .then((res) => {
+                if (!res.ok) throw new Error(`HTTP ${res.status}`)
+                return res.json()
+            })
+            .finally(() => {
+                pendingHomeRequests.delete(url)
+            })
+        pendingHomeRequests.set(url, request)
+        return request
+    })()
+
 const fadeInUp = {
     hidden: { opacity: 0, y: 40 },
     visible: (i = 0) => ({
@@ -56,18 +73,9 @@ const Home = () => {
     useEffect(() => {
         const fetchTeachers = async () => {
             try {
-                const cached = sessionStorage.getItem('cached_teachers_list')
-                if (cached) {
-                    setTeachers(JSON.parse(cached))
-                }
-                
-                const res = await fetch(API + '/api/teachers/?limit=10')
-                if (!res.ok) return
-                const data = await res.json()
-                
+                const data = await fetchJsonOnceWhilePending(API + '/api/teachers/?limit=10')
                 if (Array.isArray(data)) {
-                    sessionStorage.setItem('cached_teachers_list', JSON.stringify(data))
-                    if (!cached) setTeachers(data) // Prevent visual jump if cache exists
+                    setTeachers(data)
                 }
             } catch (err) {
                 console.error('Error fetching teachers:', err)

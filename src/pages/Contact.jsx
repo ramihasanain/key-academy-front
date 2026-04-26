@@ -39,7 +39,28 @@ const Contact = () => {
                 // تحديث سريع لعداد الرسائل في واجهة المشرفين إذا كانت مفتوحة
                 window.dispatchEvent(new Event('focus'));
             } else {
-                alert('حدث خطأ أثناء الإرسال، الرجاء المحاولة مجدداً.');
+                let errorMessage = 'حدث خطأ أثناء الإرسال، الرجاء المحاولة مجدداً.';
+
+                try {
+                    const errorData = await res.json();
+
+                    if (errorData && typeof errorData === 'object') {
+                        const messages = Object.values(errorData)
+                            .flatMap((value) => Array.isArray(value) ? value : [value])
+                            .filter(Boolean)
+                            .join('\n');
+
+                        if (messages) {
+                            errorMessage = messages;
+                        }
+                    } else if (typeof errorData === 'string' && errorData.trim()) {
+                        errorMessage = errorData;
+                    }
+                } catch {
+                    // Ignore parse errors and keep fallback message
+                }
+
+                alert(errorMessage);
             }
         } catch (err) {
             console.error(err);

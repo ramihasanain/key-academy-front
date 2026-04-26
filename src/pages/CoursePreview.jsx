@@ -186,6 +186,12 @@ const CoursePreview = () => {
 
     const tokenForAuthCheck = localStorage.getItem('access_token');
     const isAuthenticated = tokenForAuthCheck && tokenForAuthCheck !== 'undefined' && tokenForAuthCheck !== 'null' && tokenForAuthCheck.trim() !== '';
+    const isCodeEmpty = code.trim() === '';
+    const popupActionBg = popup.type === 'success'
+        ? 'linear-gradient(135deg, #10b981, #059669)'
+        : popup.type === 'error'
+            ? 'linear-gradient(135deg, #ef4444, #dc2626)'
+            : 'linear-gradient(135deg, var(--primary, #7c3aed), var(--secondary, #ec4899))';
 
     return (
         <div className="preview-page">
@@ -395,8 +401,15 @@ const CoursePreview = () => {
                             <button
                                 type="submit"
                                 className="lc-submit-btn"
-                                disabled={isActivating}
-                                style={{ background: 'linear-gradient(135deg, var(--primary), var(--secondary))', color: 'white', border: 'none', boxShadow: '0 8px 25px rgba(131, 42, 150, 0.4)' }}
+                                disabled={isActivating || isCodeEmpty}
+                                style={{
+                                    background: 'linear-gradient(135deg, var(--primary, #7c3aed), var(--secondary, #ec4899))',
+                                    color: '#fff',
+                                    border: 'none',
+                                    boxShadow: '0 8px 25px rgba(131, 42, 150, 0.4)',
+                                    cursor: (isActivating || isCodeEmpty) ? 'not-allowed' : 'pointer',
+                                    opacity: (isActivating || isCodeEmpty) ? 0.7 : 1
+                                }}
                             >
                                 {isActivating ? 'دا نتأكد...' : <><HiOutlineSparkles /> فعل الدورة وابدي هسة</>}
                             </button>
@@ -445,12 +458,49 @@ const CoursePreview = () => {
                                 <button
                                     onClick={popup.actionFn}
                                     className={`dash-btn-primary premium-btn w-full text-center`}
-                                    style={{ border: 'none', background: 'linear-gradient(135deg, var(--primary), var(--secondary))', color: 'white', cursor: 'pointer' }}
+                                    onMouseOver={e => {
+                                        e.currentTarget.style.transform = 'translateY(-3px)';
+                                        e.currentTarget.style.boxShadow = '0 10px 25px rgba(0,0,0,0.2)';
+                                        e.currentTarget.style.filter = 'brightness(1.08)';
+                                    }}
+                                    onMouseOut={e => {
+                                        e.currentTarget.style.transform = 'translateY(0)';
+                                        e.currentTarget.style.boxShadow = 'none';
+                                        e.currentTarget.style.filter = 'none';
+                                    }}
+                                    style={{
+                                        border: 'none',
+                                        background: popupActionBg,
+                                        color: '#ffffff',
+                                        cursor: 'pointer',
+                                        padding: '12px 20px',
+                                        transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)'
+                                    }}
                                 >
                                     {popup.actionText}
                                 </button>
                                 {popup.type !== 'success' && (
-                                    <button className="dash-btn-secondary premium-btn w-full" onClick={() => setPopup({ ...popup, show: false })}>
+                                    <button
+                                        className="dash-btn-secondary premium-btn w-full"
+                                        onClick={() => setPopup({ ...popup, show: false })}
+                                        onMouseOver={e => {
+                                            e.currentTarget.style.transform = 'translateY(-3px)';
+                                            e.currentTarget.style.boxShadow = '0 10px 25px rgba(0,0,0,0.15)';
+                                            e.currentTarget.style.color = 'var(--purple, #7c3aed)';
+                                        }}
+                                        onMouseOut={e => {
+                                            e.currentTarget.style.transform = 'translateY(0)';
+                                            e.currentTarget.style.boxShadow = 'none';
+                                            e.currentTarget.style.color = 'var(--text-primary, #111827)';
+                                        }}
+                                        style={{
+                                            padding: '12px 20px',
+                                            border: '2px solid var(--border-glass, rgba(0,0,0,0.08))',
+                                            color: 'var(--text-primary, #111827)',
+                                            background: '#ffffff',
+                                            transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)'
+                                        }}
+                                    >
                                         إلغاء
                                     </button>
                                 )}

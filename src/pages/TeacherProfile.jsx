@@ -22,7 +22,7 @@ const staggerContainer = {
 
 const TeacherProfile = () => {
     const { id } = useParams()
-    const [activeTab, setActiveTab] = useState('courses')
+    const [activeTab, setActiveTab] = useState('cv')
     const [teacher, setTeacher] = useState(null)
     const [loading, setLoading] = useState(true)
 

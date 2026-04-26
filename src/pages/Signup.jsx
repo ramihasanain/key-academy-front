@@ -402,7 +402,7 @@ const Signup = () => {
 
                                     <button type="submit" className="btn-primary auth-submit-btn" disabled={loading}>
                                         <HiOutlineRocketLaunch />
-                                        {loading ? 'جاري التسجيل...' : 'التالي - كود التأكيد'}
+                                        {loading ? 'جاري التسجيل...' : 'التالي'}
                                     </button>
                                 </form>
 

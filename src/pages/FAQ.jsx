@@ -6,6 +6,22 @@ import ParticleBackground from '../components/ParticleBackground'
 import './FAQ.css'
 
 const categories = ['الكل', 'عام', 'التسجيل', 'الدورات', 'الدفع', 'تقني']
+const pendingFaqRequests = new Map()
+
+const fetchJsonOnceWhilePending = (url) =>
+    pendingFaqRequests.get(url) ||
+    (() => {
+        const request = fetch(url)
+            .then((response) => {
+                if (!response.ok) throw new Error(`HTTP ${response.status}`)
+                return response.json()
+            })
+            .finally(() => {
+                pendingFaqRequests.delete(url)
+            })
+        pendingFaqRequests.set(url, request)
+        return request
+    })()
 
 const FAQ = () => {
     const [faqData, setFaqData] = useState([])
@@ -17,8 +33,7 @@ const FAQ = () => {
     useEffect(() => {
         const fetchFAQs = async () => {
             try {
-                const response = await fetch(API + '/api/content/faq/')
-                const data = await response.json()
+                const data = await fetchJsonOnceWhilePending(API + '/api/content/faq/')
                 setFaqData(data)
             } catch (error) {
                 console.error("Error fetching FAQs:", error)

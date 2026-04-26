@@ -148,11 +148,35 @@
     color: var(--text-secondary);
     transition: all var(--transition-normal);
     font-size: 0.95rem;
+    position: relative;
+    overflow: hidden;
 }
 
 .dropdown-item:hover {
-    background: var(--bg-glass-strong);
+    background: linear-gradient(90deg, rgba(253, 186, 1, 0.12), rgba(236, 54, 101, 0.1));
     color: var(--text-primary);
+    transform: translateX(-4px);
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.1);
+}
+
+.dropdown-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    width: 0;
+    background: linear-gradient(180deg, var(--orange), var(--pink));
+    transition: width 0.25s ease;
+    opacity: 0.9;
+}
+
+.dropdown-item:hover::before {
+    width: 3px;
+}
+
+.dropdown-item:hover .dropdown-item-icon {
+    transform: scale(1.08);
 }
 
 .dropdown-item-icon {
@@ -164,6 +188,7 @@
     justify-content: center;
     font-size: 1.1rem;
     flex-shrink: 0;
+    transition: transform var(--transition-normal), background var(--transition-normal), color var(--transition-normal);
 }
 
 .dropdown-item-icon.science {

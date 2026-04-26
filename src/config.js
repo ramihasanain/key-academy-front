@@ -1,6 +1,6 @@
 // API Base URL — يتم تحديده تلقائياً حسب البيئة
-export const API = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
-
+const envApiUrl = (import.meta.env.VITE_API_URL || '').trim()
+export const API = envApiUrl || 'http://127.0.0.1:8000'
 let isRefreshing = false;
 let refreshSubscribers = [];
 
