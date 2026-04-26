@@ -74,6 +74,9 @@ function HomeRoute() {
         if (user?.role === 'assistant') {
             return <Navigate to="/ta" replace />
         }
+        if (user?.role === 'teacher') {
+            return <Navigate to="/teacher" replace />
+        }
     } catch {
         // Ignore invalid cached user payload and render home
     }
