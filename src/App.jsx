@@ -1,3 +1,4 @@
+import { lazy, Suspense, useEffect } from 'react'
 import { Routes, Route, useLocation } from 'react-router-dom'
 import { AnimatePresence } from 'framer-motion'
 import Navbar from './components/Navbar'
@@ -15,7 +16,6 @@ const StudentDashboard = lazy(() => import('./pages/StudentDashboard'))
 const CourseViewer = lazy(() => import('./pages/CourseViewer'))
 const LessonViewer = lazy(() => import('./pages/LessonViewer'))
 const CoursePreview = lazy(() => import('./pages/CoursePreview'))
-const VirtualLabs = lazy(() => import('./pages/VirtualLabs'))
 
 const AdminLayout = lazy(() => import('./pages/hq/AdminLayout').then(m => ({ default: m.AdminLayout })))
 const AdminOverview = lazy(() => import('./pages/hq/AdminOverview').then(m => ({ default: m.AdminOverview })))
@@ -46,7 +46,6 @@ const TeacherOverview = lazy(() => import('./pages/teacher/TeacherOverview').the
 const TeacherCourses = lazy(() => import('./pages/teacher/TeacherCourses').then(m => ({ default: m.TeacherCourses })))
 const TeacherAssistants = lazy(() => import('./pages/teacher/TeacherAssistants').then(m => ({ default: m.TeacherAssistants })))
 import { ProtectedRoute } from './components/ProtectedRoute'
-import { useEffect, lazy, Suspense } from 'react'
 
 function ScrollToTop() {
     const { pathname } = useLocation()
@@ -91,7 +90,6 @@ function App() {
                         <Route path="/course-preview/:courseId" element={<CoursePreview />} />
                         <Route path="/course/:courseId" element={<CourseViewer />} />
                         <Route path="/lesson/:lessonId" element={<LessonViewer />} />
-                        <Route path="/virtual-labs" element={<VirtualLabs />} />
                         <Route path="/student/exam/:examId" element={<WeeklyExamPortal />} />
                         
                         {/* HQ Admin Dashboard Routes */}
