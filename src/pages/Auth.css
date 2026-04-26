@@ -181,6 +181,18 @@ input[dir="ltr"] {
     color: var(--text-muted);
     font-size: 1.3rem;
     pointer-events: none;
+    transition: transform 0.25s ease, color 0.25s ease;
+}
+
+/* Keep login/signup input icon animation scoped to each field only */
+.auth-card:hover .input-icon {
+    transform: none !important;
+}
+
+.input-wrapper:hover .input-icon,
+.input-wrapper:focus-within .input-icon {
+    transform: translateY(-2px) scale(1.05);
+    color: var(--purple);
 }
 
 .select-icon {
