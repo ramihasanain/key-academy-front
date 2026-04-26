@@ -9,6 +9,9 @@ import './Auth.css'
 const Login = () => {
     const [phone, setPhone] = useState('')
     const [password, setPassword] = useState('')
+    const [mfaRequired, setMfaRequired] = useState(false)
+    const [mfaCode, setMfaCode] = useState('')
+    const [userId, setUserId] = useState(null)
     const [loading, setLoading] = useState(false)
     const [errorMsg, setErrorMsg] = useState('')
     const navigate = useNavigate()
@@ -24,16 +27,26 @@ const Login = () => {
 
         setLoading(true)
         try {
-            const res = await fetch(API + '/api/auth/login/', {
+            const endpoint = mfaRequired ? '/api/auth/2fa/verify/' : '/api/auth/login/'
+            const payload = mfaRequired ? { user_id: userId, code: mfaCode } : { phone, password }
+
+            const res = await fetch(API + endpoint, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ phone, password }),
+                body: JSON.stringify(payload),
             })
             const data = await res.json()
             if (!res.ok) {
                 setErrorMsg(data.error || 'رقم الهاتف أو كلمة المرور غلط')
                 return
             }
+
+            if (data.mfa_required) {
+                setMfaRequired(true)
+                setUserId(data.user_id)
+                return
+            }
+
             // حفظ التوكنات + بيانات المستخدم
             localStorage.setItem('access_token', data.access)
             localStorage.setItem('refresh_token', data.refresh)
@@ -78,44 +91,75 @@ const Login = () => {
                         <img src="/new-logo.png" alt="Key Academy" />
                     </div>
 
-                    <h2>تسجيل الدخول</h2>
-                    <p className="auth-subtitle">هلا بيك! سجل دخولك حتى تكمل دراستك</p>
+                    <h2>{mfaRequired ? 'التحقق بخطوتين' : 'تسجيل الدخول'}</h2>
+                    <p className="auth-subtitle">
+                        {mfaRequired ? 'أدخل الكود من تطبيق Google Authenticator' : 'هلا بيك! سجل دخولك حتى تكمل دراستك'}
+                    </p>
 
                     <form className="auth-form" onSubmit={handleSubmit}>
-                        <div className="input-group">
-                            <label>رقم الهاتف</label>
-                            <div className="input-wrapper">
-                                <input
-                                    type="tel"
-                                    placeholder="07XX XXX XXXX"
-                                    value={phone}
-                                    onChange={(e) => setPhone(e.target.value)}
-                                    required
-                                    dir="ltr"
-                                />
-                                <HiOutlinePhone className="input-icon" />
-                            </div>
-                        </div>
+                        {!mfaRequired ? (
+                            <>
+                                <div className="input-group">
+                                    <label>رقم الهاتف</label>
+                                    <div className="input-wrapper">
+                                        <input
+                                            type="tel"
+                                            placeholder="07XX XXX XXXX"
+                                            value={phone}
+                                            onChange={(e) => setPhone(e.target.value)}
+                                            required
+                                            dir="ltr"
+                                        />
+                                        <HiOutlinePhone className="input-icon" />
+                                    </div>
+                                </div>
 
-                        <div className="input-group">
-                            <label>كلمة المرور</label>
-                            <div className="input-wrapper">
-                                <input
-                                    type="password"
-                                    placeholder="اكتب الرمز السري"
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                    required
-                                />
-                                <HiOutlineLockClosed className="input-icon" />
+                                <div className="input-group">
+                                    <label>كلمة المرور</label>
+                                    <div className="input-wrapper">
+                                        <input
+                                            type="password"
+                                            placeholder="اكتب الرمز السري"
+                                            value={password}
+                                            onChange={(e) => setPassword(e.target.value)}
+                                            required
+                                        />
+                                        <HiOutlineLockClosed className="input-icon" />
+                                    </div>
+                                </div>
+                            </>
+                        ) : (
+                            <div className="input-group">
+                                <label>رمز التحقق (OTP)</label>
+                                <div className="input-wrapper">
+                                    <input
+                                        type="text"
+                                        placeholder="000000"
+                                        value={mfaCode}
+                                        onChange={(e) => setMfaCode(e.target.value)}
+                                        required
+                                        maxLength={6}
+                                        dir="ltr"
+                                        style={{ letterSpacing: '0.5em', textAlign: 'center', fontWeight: 'bold' }}
+                                        autoFocus
+                                    />
+                                    <HiOutlineLockClosed className="input-icon" />
+                                </div>
+                                <button 
+                                    type="button" 
+                                    onClick={() => setMfaRequired(false)}
+                                    style={{ background: 'none', border: 'none', color: '#832a96', fontSize: '0.85rem', cursor: 'pointer', marginTop: '10px', width: '100%', textAlign: 'right', fontWeight: '600' }}
+                                >
+                                    العودة لتسجيل الدخول
+                                </button>
                             </div>
-                        </div>
+                        )}
 
                         {errorMsg && <div style={{ color: '#ef4444', background: 'rgba(239,68,68,0.08)', padding: '10px 14px', borderRadius: '10px', marginBottom: '12px', fontSize: '0.9rem', textAlign: 'center' }}>{errorMsg}</div>}
 
                         <button type="submit" className="btn-primary" disabled={loading}>
                             <HiOutlineArrowLeftOnRectangle />
-                            {loading ? 'جاري الدخول...' : 'تسجيل الدخول'}
+                            {loading ? (mfaRequired ? 'جاري التحقق...' : 'جاري الدخول...') : (mfaRequired ? 'تأكيد الرمز' : 'تسجيل الدخول')}
                         </button>
                     </form>
 

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 
 /**
  * حارس الروابط (ProtectedRoute)
@@ -10,6 +10,7 @@ import { Navigate } from 'react-router-dom';
 export const ProtectedRoute = ({ children, allowedRoles }) => {
     const userStr = localStorage.getItem('user');
     const token = localStorage.getItem('access_token');
+    const location = useLocation();
     
     // إذا ما مسجل دخول أصلاً
     if (!token || !userStr || userStr === 'undefined') {
@@ -28,6 +29,12 @@ export const ProtectedRoute = ({ children, allowedRoles }) => {
             if (user.role === 'assistant') return <Navigate to="/ta" replace />;
             if (user.role === 'teacher') return <Navigate to="/teacher" replace />;
             return <Navigate to="/dashboard" replace />;
+        }
+
+        // [MFA ENFORCEMENT] - خاص بالإدارة والموظفين فقط
+        // إذا كان أدمن ولم يفعل الـ MFA، نوجهه لصفحة الإعداد (إلا إذا كان فيها أصلاً)
+        if (user.role === 'admin' && !user.mfa_enabled && location.pathname !== '/hq/2fa-setup') {
+            return <Navigate to="/hq/2fa-setup" replace />;
         }
         
         return children;

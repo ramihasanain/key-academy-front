@@ -26,6 +26,8 @@ const Teacher360View = lazy(() => import('./pages/hq/Teacher360View').then(m => 
 const TA360View = lazy(() => import('./pages/hq/TA360View').then(m => ({ default: m.TA360View })))
 const AdminMutedStudents = lazy(() => import('./pages/hq/AdminMutedStudents').then(m => ({ default: m.AdminMutedStudents })))
 const AdminModerationHistory = lazy(() => import('./pages/hq/AdminModerationHistory').then(m => ({ default: m.AdminModerationHistory })))
+const TwoFactorSetup = lazy(() => import('./pages/hq/TwoFactorSetup'))
+
 
 const TALayout = lazy(() => import('./pages/ta/TALayout').then(m => ({ default: m.TALayout })))
 const TAQA = lazy(() => import('./pages/ta/TAQA').then(m => ({ default: m.TAQA })))
@@ -135,6 +137,7 @@ function App() {
                             <Route path="teachers/:id/360" element={<Teacher360View />} />
                             <Route path="teacherassistants/:id/360" element={<TA360View />} />
                             <Route path=":model/:id" element={<AdminModelForm />} />
+                            <Route path="2fa-setup" element={<TwoFactorSetup />} />
                         </Route>
 
                         {/* Teacher Assistant Dashboard Routes */}
