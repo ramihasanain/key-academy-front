@@ -106,6 +106,19 @@ const Signup = () => {
                 setErrorMsg(Array.isArray(firstError) ? firstError[0] : firstError)
                 return
             }
+            // --- OTP BYPASS TEMP ---
+            if (data.access) {
+                localStorage.setItem('access_token', data.access)
+                localStorage.setItem('refresh_token', data.refresh)
+                localStorage.setItem('user', JSON.stringify(data.user))
+                setStep(3)
+                setTimeout(() => {
+                    navigate('/dashboard')
+                }, 3000)
+                return
+            }
+            // -----------------------
+
             // نجاح — انتقل لخطوة الـ OTP
             setStep(2)
         } catch (err) {
