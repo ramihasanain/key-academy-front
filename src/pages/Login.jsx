@@ -84,27 +84,31 @@ const Login = () => {
                     <form className="auth-form" onSubmit={handleSubmit}>
                         <div className="input-group">
                             <label>رقم الهاتف</label>
-                            <input
-                                type="tel"
-                                placeholder="07XX XXX XXXX"
-                                value={phone}
-                                onChange={(e) => setPhone(e.target.value)}
-                                required
-                                dir="ltr"
-                            />
-                            <HiOutlinePhone className="input-icon" />
+                            <div className="input-wrapper">
+                                <input
+                                    type="tel"
+                                    placeholder="07XX XXX XXXX"
+                                    value={phone}
+                                    onChange={(e) => setPhone(e.target.value)}
+                                    required
+                                    dir="ltr"
+                                />
+                                <HiOutlinePhone className="input-icon" />
+                            </div>
                         </div>
 
                         <div className="input-group">
                             <label>كلمة المرور</label>
-                            <input
-                                type="password"
-                                placeholder="اكتب الرمز السري"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                required
-                            />
-                            <HiOutlineLockClosed className="input-icon" />
+                            <div className="input-wrapper">
+                                <input
+                                    type="password"
+                                    placeholder="اكتب الرمز السري"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    required
+                                />
+                                <HiOutlineLockClosed className="input-icon" />
+                            </div>
                         </div>
 
                         {errorMsg && <div style={{ color: '#ef4444', background: 'rgba(239,68,68,0.08)', padding: '10px 14px', borderRadius: '10px', marginBottom: '12px', fontSize: '0.9rem', textAlign: 'center' }}>{errorMsg}</div>}

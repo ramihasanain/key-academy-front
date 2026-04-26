@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect } from 'react'
-import { Routes, Route, useLocation } from 'react-router-dom'
+import { Navigate, Routes, Route, useLocation } from 'react-router-dom'
 import { AnimatePresence } from 'framer-motion'
 import Navbar from './components/Navbar'
 import Footer from './components/Footer'
@@ -55,6 +55,32 @@ function ScrollToTop() {
     return null
 }
 
+function HomeRoute() {
+    const userStr = localStorage.getItem('user')
+    const token = localStorage.getItem('access_token')
+
+    if (!token || !userStr || userStr === 'undefined' || userStr === 'null') {
+        return <Home />
+    }
+
+    try {
+        const user = JSON.parse(userStr)
+        if (user?.role === 'student') {
+            return <Navigate to="/dashboard" replace />
+        }
+        if (user?.role === 'admin') {
+            return <Navigate to="/hq" replace />
+        }
+        if (user?.role === 'assistant') {
+            return <Navigate to="/ta" replace />
+        }
+    } catch {
+        // Ignore invalid cached user payload and render home
+    }
+
+    return <Home />
+}
+
 function App() {
     const location = useLocation()
     const path = location.pathname.toLowerCase()
@@ -72,7 +98,7 @@ function App() {
                     </div>
                 }>
                     <Routes location={location}>
-                        <Route path="/" element={<Home />} />
+                        <Route path="/" element={<HomeRoute />} />
                         <Route path="/about" element={<About />} />
                         <Route path="/features" element={<Features />} />
                         <Route path="/grades" element={<Grades />} />
