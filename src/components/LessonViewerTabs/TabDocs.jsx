@@ -7,20 +7,41 @@ import '../../pages/LessonViewer.css'
 
 const SecurePDFViewer = lazy(() => import('../SecurePDFViewer'))
 
+const docsRequestCache = new Map()
+
+const fetchCourseDocsOnce = (key, url) => {
+    if (docsRequestCache.has(key)) return docsRequestCache.get(key)
+    const request = fetch(url).then(res => {
+        if (!res.ok) throw new Error(`Failed to load course docs: ${res.status}`)
+        return res.json()
+    }).finally(() => {
+        docsRequestCache.delete(key)
+    })
+    docsRequestCache.set(key, request)
+    return request
+}
+
 const TabDocs = ({ lessonInfo, courseId, userData }) => {
     const [courseDocs, setCourseDocs] = useState([])
     const [viewedDoc, setViewedDoc] = useState(null)
 
     useEffect(() => {
         if (!courseId) return
-        fetch(`${API}/api/courses/${courseId}/`)
-            .then(res => res.json())
+        let isActive = true
+        fetchCourseDocsOnce(String(courseId), `${API}/api/courses/${courseId}/`)
             .then(data => {
+                if (!isActive) return
                 if (data.ministerial_docs) {
                     setCourseDocs(data.ministerial_docs)
                 }
             })
-            .catch(console.error)
+            .catch(err => {
+                if (!isActive) return
+                console.error(err)
+            })
+        return () => {
+            isActive = false
+        }
     }, [courseId])
 
     const getExt = (url) => url ? url.split('?')[0].split('.').pop().toUpperCase() : 'DOC'

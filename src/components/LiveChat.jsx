@@ -3,6 +3,20 @@ import { API } from '../config'
 import { HiOutlineUserGroup, HiOutlineXMark, HiOutlinePaperAirplane } from 'react-icons/hi2'
 import '../pages/LessonViewer.css' // Reuse the same CSS
 
+const groupChatHistoryCache = new Map()
+
+const fetchGroupChatOnce = (key, url, options) => {
+    if (groupChatHistoryCache.has(key)) return groupChatHistoryCache.get(key)
+    const request = fetch(url, options).then(r => {
+        if (!r.ok) throw new Error(`Failed to load chat history: ${r.status}`)
+        return r.json()
+    }).finally(() => {
+        groupChatHistoryCache.delete(key)
+    })
+    groupChatHistoryCache.set(key, request)
+    return request
+}
+
 const LiveChat = ({ courseId, userData, lessonId = null }) => {
     const [messages, setMessages] = useState([])
     const [input, setInput] = useState('')
@@ -28,12 +42,29 @@ const LiveChat = ({ courseId, userData, lessonId = null }) => {
     useEffect(() => {
         setLoading(true)
         const t = localStorage.getItem('access_token')
-        if (!t) return
-        fetch(`${API}/api/interactions/group-chat/?course=${courseId}&type=${chatType}`, { headers: { 'Authorization': `Bearer ${t}` } })
-            .then(r => r.json()).then(d => {
+        if (!t || !courseId) {
+            setLoading(false)
+            return
+        }
+        let isActive = true
+        const requestKey = `${courseId}:${chatType}:${t}`
+        fetchGroupChatOnce(
+            requestKey,
+            `${API}/api/interactions/group-chat/?course=${courseId}&type=${chatType}`,
+            { headers: { 'Authorization': `Bearer ${t}` } }
+        )
+            .then(d => {
+                if (!isActive) return
                 setMessages(d)
                 setLoading(false)
             })
+            .catch(() => {
+                if (!isActive) return
+                setLoading(false)
+            })
+        return () => {
+            isActive = false
+        }
     }, [courseId, chatType])
 
     // WebSocket Setup

@@ -3,6 +3,20 @@ import { API } from '../../config'
 import { HiOutlineNoSymbol, HiOutlineChatBubbleLeftRight, HiOutlinePaperAirplane } from 'react-icons/hi2'
 import '../../pages/LessonViewer.css'
 
+const qaRequestCache = new Map()
+
+const fetchQAOnce = (key, url, options) => {
+    if (qaRequestCache.has(key)) return qaRequestCache.get(key)
+    const request = fetch(url, options).then(r => {
+        if (!r.ok) throw new Error(`Failed to load QA: ${r.status}`)
+        return r.json()
+    }).finally(() => {
+        qaRequestCache.delete(key)
+    })
+    qaRequestCache.set(key, request)
+    return request
+}
+
 const TabQA = ({ lessonId, userData }) => {
     const [posts, setPosts] = useState([])
     const [input, setInput] = useState('')
@@ -16,10 +30,21 @@ const TabQA = ({ lessonId, userData }) => {
         setExpandedPosts(prev => ({ ...prev, [postId]: !prev[postId] }))
     }
 
-    const loadQA = () => {
+    const loadQA = (force = false) => {
         const t = localStorage.getItem('access_token')
-        fetch(`${API}/api/interactions/qa/?lesson=${lessonId}`, { headers: { 'Authorization': `Bearer ${t}` } })
-            .then(r => r.json()).then(d => { setPosts(d); setLoading(false) })
+        if (!t || !lessonId) {
+            setLoading(false)
+            return
+        }
+        const requestKey = `${lessonId}:${t}`
+        if (force) qaRequestCache.delete(requestKey)
+        const loader = force
+            ? fetch(`${API}/api/interactions/qa/?lesson=${lessonId}`, { headers: { 'Authorization': `Bearer ${t}` } }).then(r => {
+                if (!r.ok) throw new Error(`Failed to load QA: ${r.status}`)
+                return r.json()
+            })
+            : fetchQAOnce(requestKey, `${API}/api/interactions/qa/?lesson=${lessonId}`, { headers: { 'Authorization': `Bearer ${t}` } })
+        loader.then(d => { setPosts(d); setLoading(false) }).catch(() => setLoading(false))
     }
     useEffect(() => { loadQA() }, [lessonId])
 
@@ -29,7 +54,7 @@ const TabQA = ({ lessonId, userData }) => {
         fetch(`${API}/api/interactions/qa/`, {
             method: 'POST', headers: { 'Authorization': `Bearer ${t}`, 'Content-Type': 'application/json' },
             body: JSON.stringify({ lesson: lessonId, content: input })
-        }).then(r => r.json()).then(() => { setInput(''); loadQA() })
+        }).then(r => r.json()).then(() => { setInput(''); loadQA(true) })
     }
 
     const handleComment = (postId) => {
@@ -39,7 +64,7 @@ const TabQA = ({ lessonId, userData }) => {
         fetch(`${API}/api/interactions/qa/${postId}/comment/`, {
             method: 'POST', headers: { 'Authorization': `Bearer ${t}`, 'Content-Type': 'application/json' },
             body: JSON.stringify({ content: comment })
-        }).then(r => r.json()).then(() => { setCommentInputs(p => ({ ...p, [postId]: '' })); loadQA() })
+        }).then(r => r.json()).then(() => { setCommentInputs(p => ({ ...p, [postId]: '' })); loadQA(true) })
     }
 
     return (

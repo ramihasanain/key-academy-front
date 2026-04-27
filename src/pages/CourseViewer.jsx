@@ -25,10 +25,13 @@ import {
     HiOutlinePaperAirplane
 } from 'react-icons/hi2'
 import { VirtualLabsData } from '../data/VirtualLabsData'
+import EmptyState from '../components/core/EmptyState'
 const SecurePDFViewer = lazy(() => import('../components/SecurePDFViewer'))
 import LiveChat from '../components/LiveChat'
 import './CourseViewer.css'
 import './LessonViewer.css' // Import styling to make Chat fully identical
+
+const courseViewerRequestCache = new Map()
 
 /* ======== COURSE WEBSOCKET CHAT ======== */
 const CourseChatDrawer = ({ courseId, userData, onClose }) => {
@@ -80,13 +83,37 @@ const CourseViewer = () => {
 
     useEffect(() => {
         const token = localStorage.getItem('access_token')
+        const requestedCourseId = courseId || 1
+        const cacheKey = `${API}/api/courses/${requestedCourseId}/::${token && token !== 'undefined' && token !== 'null' ? 'auth' : 'anon'}`
+        const cachedEntry = courseViewerRequestCache.get(cacheKey)
+
+        if (cachedEntry?.data) {
+            setCourseData(cachedEntry.data)
+            if (cachedEntry.data.modules && cachedEntry.data.modules.length > 0) {
+                setExpandedModule(cachedEntry.data.modules[0].id)
+                setExpandedDocModule(cachedEntry.data.modules[0].id)
+            }
+            setLoading(false)
+            return
+        }
 
         // Fetch real data from backend
-        fetch(`${API}/api/courses/${courseId || 1}/`, {
-            headers: token && token !== 'undefined' && token !== 'null' ? { 'Authorization': `Bearer ${token}` } : {}
+        setLoading(true)
+        const requestPromise = cachedEntry?.promise || fetch(`${API}/api/courses/${requestedCourseId}/`, {
+            headers: token && token !== 'undefined' && token !== 'null' ? { Authorization: `Bearer ${token}` } : {}
         })
-            .then(res => res.json())
+            .then(res => {
+                if (!res.ok) throw new Error(`Failed to load course: ${res.status}`)
+                return res.json()
+            })
+
+        if (!cachedEntry?.promise) {
+            courseViewerRequestCache.set(cacheKey, { promise: requestPromise })
+        }
+
+        requestPromise
             .then(data => {
+                courseViewerRequestCache.set(cacheKey, { data })
                 setCourseData(data)
 
                 // Set default expanded modules based on the fetched data
@@ -97,6 +124,7 @@ const CourseViewer = () => {
                 setLoading(false)
             })
             .catch(err => {
+                courseViewerRequestCache.delete(cacheKey)
                 console.error(err)
                 setLoading(false)
             })
@@ -143,7 +171,7 @@ const CourseViewer = () => {
     }
 
     if (loading || !courseData) {
-        return <div className="cv-master-page" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}><h2 style={{ color: 'white' }}>جاري تحضير غرفتك الدراسية...</h2></div>
+        return <div className="cv-master-page" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}><h2 style={{ color: 'black' }}>جاري تحضير غرفتك الدراسية...</h2></div>
     }
 
     const isExamModule = (mod) => mod.title.includes('امتحان') || (mod.weekly_exam && (!mod.lessons || mod.lessons.length === 0));
@@ -152,6 +180,7 @@ const CourseViewer = () => {
 
     const computedModuleCount = standardModules.length;
     const computedLessonCount = standardModules.reduce((acc, mod) => acc + (mod.lessons?.length || 0), 0);
+    const hasDocuments = courseData?.modules?.some(mod => mod.lessons?.some(lesson => lesson.doc_file)) || false;
 
     return (
         <div className="cv-master-page">
@@ -264,8 +293,15 @@ const CourseViewer = () => {
                                     <p style={{ fontSize: '1.1rem', color: '#64748b', fontWeight: 600 }}>هذي كل الوحدات والمحاضرات اللي راح ناخذها بالدورة.</p>
                                 </div>
 
-                                {standardModules.map((mod, index) => (
-                                    <div key={mod.id} style={{ background: 'white', borderRadius: '24px', boxShadow: '0 4px 20px rgba(0,0,0,0.03)', border: '1px solid rgba(0,0,0,0.04)', overflow: 'hidden', marginBottom: '30px' }}>
+                                {standardModules.length === 0 ? (
+                                    <EmptyState
+                                        title="لا توجد وحدات أو دروس حالياً"
+                                        message="راح تظهر وحدات الدورة هنا أول ما تنضاف من قبل الأستاذ."
+                                        className="cv-super-glass"
+                                    />
+                                ) : (
+                                    standardModules.map((mod, index) => (
+                                        <div key={mod.id} style={{ background: 'white', borderRadius: '24px', boxShadow: '0 4px 20px rgba(0,0,0,0.03)', border: '1px solid rgba(0,0,0,0.04)', overflow: 'hidden', marginBottom: '30px' }}>
                                         {/* Module Header */}
                                         {mod.cover_image ? (
                                             <div style={{ position: 'relative', width: '100%', height: '220px' }}>
@@ -288,20 +324,20 @@ const CourseViewer = () => {
                                         )}
 
                                         {/* Lessons List */}
-                                        <div style={{ padding: '15px 30px' }}>
+                                        <div className="cv-lessons-list-wrap" style={{ padding: '15px 0' }}>
                                             {mod.lessons?.map(lesson => {
                                                 const isComp = lesson.is_completed;
                                                 return (
-                                                    <div
+                                                        <div
                                                         key={lesson.id}
                                                         className="cv-new-lesson-row hover-lift-subtle"
                                                         style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px', margin: '15px 0', background: 'rgba(255,255,255,1)', borderRadius: '16px', border: '1px solid rgba(0,0,0,0.05)', boxShadow: '0 4px 15px rgba(0,0,0,0.02)', cursor: 'pointer', transition: 'all 0.3s' }}
                                                         onClick={() => handleLessonClick({ ...lesson, isLocked: false })}
                                                     >
                                                         {/* Right Icon Block / Image */}
-                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '20px', flexGrow: 1 }}>
+                                                        <div className="cv-lesson-main-info" style={{ display: 'flex', alignItems: 'center', gap: '20px', flexGrow: 1 }}>
                                                             {lesson.cover_image ? (
-                                                                <div style={{ position: 'relative', width: '160px', height: '90px', flexShrink: 0, borderRadius: '12px', overflow: 'hidden', boxShadow: '0 4px 15px rgba(0,0,0,0.1)' }}>
+                                                                <div className="cv-lesson-media" style={{ position: 'relative', width: '160px', height: '90px', flexShrink: 0, borderRadius: '12px', overflow: 'hidden', boxShadow: '0 4px 15px rgba(0,0,0,0.1)' }}>
                                                                     <img src={lesson.cover_image} alt={lesson.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                                                     {lesson.type === 'video' && (
                                                                         <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.2)' }}>
@@ -310,22 +346,22 @@ const CourseViewer = () => {
                                                                     )}
                                                                 </div>
                                                             ) : (
-                                                                <div style={{ width: '120px', height: '80px', borderRadius: '12px', background: 'rgba(131, 42, 150, 0.05)', display: 'flex', justifyContent: 'center', alignItems: 'center', color: 'var(--purple)', fontSize: '2rem', flexShrink: 0 }}>
+                                                                <div className="cv-lesson-media cv-lesson-media-fallback" style={{ width: '120px', height: '80px', borderRadius: '12px', background: 'rgba(131, 42, 150, 0.05)', display: 'flex', justifyContent: 'center', alignItems: 'center', color: 'var(--purple)', fontSize: '2rem', flexShrink: 0 }}>
                                                                     {lesson.type === 'video' ? <HiOutlinePlayCircle /> : <HiOutlineDocumentText />}
                                                                 </div>
                                                             )}
 
                                                             {/* Center Info */}
-                                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'flex-start' }}>
+                                                            <div className="cv-lesson-content" style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'flex-start' }}>
                                                                 <h4 style={{ fontSize: '1.25rem', fontWeight: 900, color: '#0f172a', margin: '0' }}>{lesson.title}</h4>
-                                                                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '4px 14px', background: 'rgba(131, 42, 150, 0.08)', color: 'var(--purple)', borderRadius: '20px', fontSize: '0.85rem', fontWeight: 800 }}>
+                                                                <div className="cv-lesson-meta" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '4px 14px', background: 'rgba(131, 42, 150, 0.08)', color: 'var(--purple)', borderRadius: '20px', fontSize: '0.85rem', fontWeight: 800 }}>
                                                                     <HiOutlineClock style={{ fontSize: '1.1rem' }} /> {lesson.duration || (lesson.type === 'video' ? '30:00' : 'مستند')}
                                                                 </div>
                                                             </div>
                                                         </div>
 
                                                         {/* Left Action */}
-                                                        <div style={{ flexShrink: 0, marginRight: '20px' }}>
+                                                        <div className="cv-lesson-action-wrap" style={{ flexShrink: 0, marginRight: 0 }}>
                                                             <button style={{ padding: '12px 24px', borderRadius: '30px', background: isComp ? '#10B981' : '#1d4ed8', color: 'white', border: 'none', fontWeight: 800, fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', boxShadow: isComp ? '0 8px 20px rgba(16, 185, 129, 0.3)' : '0 8px 25px rgba(29, 78, 216, 0.3)', transition: 'all 0.3s', whiteSpace: 'nowrap' }}>
                                                                 {isComp ? 'مكتمل' : 'تشغيل الدرس'} {isComp ? <HiOutlineCheckCircle style={{ fontSize: '1.4rem' }} /> : <HiOutlinePlayCircle style={{ fontSize: '1.4rem' }} />}
                                                             </button>
@@ -334,8 +370,9 @@ const CourseViewer = () => {
                                                 )
                                             })}
                                         </div>
-                                    </div>
-                                ))}
+                                        </div>
+                                    ))
+                                )}
                             </motion.div>
                         )}
 
@@ -360,65 +397,73 @@ const CourseViewer = () => {
                                 </div>
 
                                 <div className="cv-docs-hierarchy">
-                                    {courseData.modules?.map(mod => {
-                                        const isExpanded = expandedDocModule === mod.id;
-                                        return (
-                                            <div key={`doc-${mod.id}`} className="cv-doc-folder">
-                                                <div className="cv-folder-header" onClick={() => toggleDocModule(mod.id)}>
-                                                    <div className="cv-folder-title">
-                                                        <div className="cv-folder-icon"><HiOutlineFolderOpen /></div>
-                                                        <h3>{mod.title}</h3>
+                                    {hasDocuments ? (
+                                        courseData.modules?.map(mod => {
+                                            const isExpanded = expandedDocModule === mod.id;
+                                            return (
+                                                <div key={`doc-${mod.id}`} className="cv-doc-folder">
+                                                    <div className="cv-folder-header" onClick={() => toggleDocModule(mod.id)}>
+                                                        <div className="cv-folder-title">
+                                                            <div className="cv-folder-icon"><HiOutlineFolderOpen /></div>
+                                                            <h3>{mod.title}</h3>
+                                                        </div>
+                                                        <div className="cv-folder-right">
+                                                            <button className="cv-btn-sleek" onClick={(e) => handleViewDoc(e, null, `ملزمة ${mod.title}`)}>
+                                                                عرض ملزمة الوحدة
+                                                            </button>
+                                                            <HiOutlineChevronDown className={`cv-chev-icon ${isExpanded ? 'rotated' : ''}`} />
+                                                        </div>
                                                     </div>
-                                                    <div className="cv-folder-right">
-                                                        <button className="cv-btn-sleek" onClick={(e) => handleViewDoc(e, null, `ملزمة ${mod.title}`)}>
-                                                            عرض ملزمة الوحدة
-                                                        </button>
-                                                        <HiOutlineChevronDown className={`cv-chev-icon ${isExpanded ? 'rotated' : ''}`} />
-                                                    </div>
-                                                </div>
 
-                                                <AnimatePresence>
-                                                    {isExpanded && (
-                                                        <motion.div className="cv-folder-contents" initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }}>
-                                                            {mod.lessons?.filter(l => l.doc_file).length > 0 ? (
-                                                                mod.lessons.filter(l => l.doc_file).map(lesson => (
-                                                                    <div key={`doc-l-${lesson.id}`} className="cv-file-row">
-                                                                        <div className="cv-file-info">
-                                                                            <div className="cv-file-icon"><HiOutlineDocumentArrowDown /></div>
-                                                                            <div className="cv-file-texts">
-                                                                                <h4>{lesson.title}</h4>
-                                                                                <span>ملف PDF • الحجم: {lesson.doc_size || '1.5MB'}</span>
+                                                    <AnimatePresence>
+                                                        {isExpanded && (
+                                                            <motion.div className="cv-folder-contents" initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }}>
+                                                                {mod.lessons?.filter(l => l.doc_file).length > 0 ? (
+                                                                    mod.lessons.filter(l => l.doc_file).map(lesson => (
+                                                                        <div key={`doc-l-${lesson.id}`} className="cv-file-row">
+                                                                            <div className="cv-file-info">
+                                                                                <div className="cv-file-icon"><HiOutlineDocumentArrowDown /></div>
+                                                                                <div className="cv-file-texts">
+                                                                                    <h4>{lesson.title}</h4>
+                                                                                    <span>ملف PDF • الحجم: {lesson.doc_size || '1.5MB'}</span>
+                                                                                </div>
                                                                             </div>
+                                                                            <button className="cv-btn-download-circle" title="عرض الملف" onClick={(e) => handleViewDoc(e, lesson.doc_file, lesson.title)}>
+                                                                                <HiOutlineDocumentText />
+                                                                            </button>
                                                                         </div>
-                                                                        <button className="cv-btn-download-circle" title="عرض الملف" onClick={(e) => handleViewDoc(e, lesson.doc_file, lesson.title)}>
-                                                                            <HiOutlineDocumentText />
-                                                                        </button>
-                                                                    </div>
-                                                                ))
-                                                            ) : (
-                                                                <div style={{ padding: '20px', textAlign: 'center', color: 'var(--text-muted)' }}>لا توجد مستندات مرفقة بدروس هذه الوحدة حالياً.</div>
-                                                            )}
-                                                        </motion.div>
-                                                    )}
-                                                </AnimatePresence>
-                                            </div>
-                                        )
-                                    })}
+                                                                    ))
+                                                                ) : (
+                                                                    <div style={{ padding: '20px', textAlign: 'center', color: 'var(--text-muted)' }}>لا توجد مستندات مرفقة بدروس هذه الوحدة حالياً.</div>
+                                                                )}
+                                                            </motion.div>
+                                                        )}
+                                                    </AnimatePresence>
+                                                </div>
+                                            )
+                                        })
+                                    ) : (
+                                        <EmptyState
+                                            title="لا توجد ملازم أو ملخصات حالياً"
+                                            message="عند إضافة ملفات الدروس، راح تظهر هنا مباشرة."
+                                            className="cv-super-glass"
+                                        />
+                                    )}
                                 </div>
                             </motion.div>
                         )}
 
                         {/* 3. MINISTERIAL QUESTIONS */}
                         {activeTab === 'ministerial' && (
-                            <motion.div
-                                key="ministerial-tab"
-                                initial={{ opacity: 0, y: 30 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                exit={{ opacity: 0, y: -20 }}
-                                className="cv-min-grid"
-                            >
-                                {courseData.ministerial_docs && courseData.ministerial_docs.length > 0 ? (
-                                    courseData.ministerial_docs.map((doc, idx) => (
+                            courseData.ministerial_docs?.length > 0 ? (
+                                <motion.div
+                                    key="ministerial-tab"
+                                    initial={{ opacity: 0, y: 30 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    exit={{ opacity: 0, y: -20 }}
+                                    className="cv-min-grid"
+                                >
+                                    {courseData.ministerial_docs.map((doc, idx) => (
                                         <motion.div
                                             key={doc.id || idx}
                                             className="cv-min-card-premium cv-super-glass"
@@ -437,11 +482,22 @@ const CourseViewer = () => {
                                                 <HiOutlineDocumentText /> تصفح الأسئلة
                                             </button>
                                         </motion.div>
-                                    ))
-                                ) : (
-                                    <p style={{ color: 'white', textAlign: 'center', width: '100%', gridColumn: '1 / -1' }}>لا توجد ملفات وزارية متاحة حالياً.</p>
-                                )}
-                            </motion.div>
+                                    ))}
+                                </motion.div>
+                            ) : (
+                                <motion.div
+                                    key="ministerial-tab"
+                                    initial={{ opacity: 0, y: 30 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    exit={{ opacity: 0, y: -20 }}
+                                >
+                                    <EmptyState
+                                        title="لا توجد ملفات وزارية متاحة حالياً"
+                                        message="سيتم إضافة الملفات الوزارية قريباً، راجع هذا القسم لاحقاً."
+                                        className="cv-super-glass"
+                                    />
+                                </motion.div>
+                            )
                         )}
 
                         {/* 4. EXAMS TAB (الامتحانات الأسبوعية) */}
@@ -461,9 +517,11 @@ const CourseViewer = () => {
                                 </div>
 
                                 {allExams.length === 0 ? (
-                                    <div style={{ padding: '40px', textAlign: 'center', color: '#94a3b8', fontSize: '1.2rem', background: 'rgba(255,255,255,0.7)', borderRadius: '20px', border: '2px dashed rgba(0,0,0,0.05)' }}>
-                                        ماكو امتحانات أسبوعية متوفرة حالياً.
-                                    </div>
+                                    <EmptyState
+                                        title="لا توجد امتحانات أسبوعية حالياً"
+                                        message="راح يتم نشر الاختبارات الأسبوعية هنا بعد تفعيلها."
+                                        className="cv-super-glass"
+                                    />
                                 ) : (
                                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '20px' }}>
                                         {allExams.map(exam => {

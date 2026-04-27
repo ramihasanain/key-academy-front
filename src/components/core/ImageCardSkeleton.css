@@ -1,0 +1,69 @@
+.image-card-skeleton {
+    pointer-events: none;
+}
+
+.image-card-skeleton-media {
+    width: calc(100% + 56px);
+    aspect-ratio: 1 / 1;
+    margin-top: -28px;
+    margin-left: -28px;
+    margin-right: -28px;
+    margin-bottom: 18px;
+    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+}
+
+.image-card-skeleton-line {
+    height: 14px;
+    border-radius: 999px;
+    margin-bottom: 12px;
+}
+
+.image-card-skeleton-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    margin: 10px 0 18px;
+}
+
+.image-card-skeleton-button {
+    width: 100%;
+    height: 48px;
+    border-radius: var(--radius-md);
+}
+
+.w-30 {
+    width: 30%;
+}
+
+.w-40 {
+    width: 40%;
+}
+
+.w-60 {
+    width: 60%;
+}
+
+.w-80 {
+    width: 80%;
+}
+
+.image-card-skeleton-shimmer {
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(90deg, rgba(148, 163, 184, 0.12), rgba(148, 163, 184, 0.24), rgba(148, 163, 184, 0.12));
+}
+
+.image-card-skeleton-shimmer::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    transform: translateX(-100%);
+    background: linear-gradient(110deg, transparent 25%, rgba(255, 255, 255, 0.55) 50%, transparent 75%);
+    animation: image-card-skeleton-shimmer 1.2s infinite;
+}
+
+@keyframes image-card-skeleton-shimmer {
+    100% {
+        transform: translateX(100%);
+    }
+}

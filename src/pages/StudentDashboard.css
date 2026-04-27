@@ -808,12 +808,19 @@
     background-repeat: no-repeat;
     background-position: left 20px center;
     background-size: 16px;
+    -webkit-text-fill-color: var(--text-primary);
 }
 
 .glass-select:focus {
     outline: none;
     border-color: var(--purple);
     box-shadow: 0 0 0 4px rgba(131, 42, 150, 0.1);
+}
+
+/* Prevent native select popup from flashing dark colors on open */
+.glass-select option {
+    background-color: #ffffff;
+    color: #0f172a;
 }
 
 /* Certificates */
@@ -1066,4 +1073,39 @@
     .floating-cap { font-size: 4rem; }
     .dash-stats-row { grid-template-columns: 1fr; }
     .input-row-half { flex-direction: column; }
+}
+
+@media (max-width: 480px) {
+    .premium-filters {
+        gap: 12px;
+    }
+
+    .dash-filter-group {
+        min-width: 0;
+        flex: 1 1 100%;
+    }
+
+    .glass-select {
+        padding: 12px 14px;
+        font-size: 0.95rem;
+        background-position: left 12px center;
+        background-size: 14px;
+    }
+}
+
+@media (max-width: 400px) {
+    .browse-hero-banner {
+        padding: 28px 16px;
+    }
+
+    .dash-filter-group label {
+        font-size: 0.86rem;
+        margin-bottom: 8px;
+    }
+
+    .glass-select {
+        padding: 11px 12px;
+        font-size: 0.88rem;
+        border-radius: 10px;
+    }
 }

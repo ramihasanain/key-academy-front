@@ -3,6 +3,7 @@ import { Navigate, Routes, Route, useLocation } from 'react-router-dom'
 import { AnimatePresence } from 'framer-motion'
 import Navbar from './components/Navbar'
 import Footer from './components/Footer'
+import GlobalLoader from './components/core/GlobalLoader'
 const Home = lazy(() => import('./pages/Home'))
 const About = lazy(() => import('./pages/About'))
 const Features = lazy(() => import('./pages/Features'))
@@ -89,19 +90,14 @@ function HomeRoute() {
 function App() {
     const location = useLocation()
     const path = location.pathname.toLowerCase()
-    const hideNav = ['/login', '/signup', '/dashboard'].includes(path) || path.startsWith('/course') || path.startsWith('/lesson') || path.startsWith('/student/exam') || path.startsWith('/hq') || path.startsWith('/ta') || path.startsWith('/ta-spy') || path === '/teacher' || path.startsWith('/teacher/')
+    const hideNav = ['/login', '/signup'].includes(path) || path.startsWith('/dashboard') || path.startsWith('/course') || path.startsWith('/lesson') || path.startsWith('/student/exam') || path.startsWith('/hq') || path.startsWith('/ta') || path.startsWith('/ta-spy') || path === '/teacher' || path.startsWith('/teacher/')
 
     return (
         <>
             <ScrollToTop />
             {!hideNav && <Navbar />}
             <main>
-                <Suspense fallback={
-                    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', flexDirection: 'column', gap: '20px' }}>
-                        <div style={{ width: '40px', height: '40px', border: '4px solid #f3f3f3', borderTop: '4px solid #832a96', borderRadius: '50%', animation: 'spin-react 1s linear infinite' }}></div>
-                        <style>{`@keyframes spin-react { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
-                    </div>
-                }>
+                <Suspense fallback={<GlobalLoader />}>
                     <Routes location={location}>
                         <Route path="/" element={<HomeRoute />} />
                         <Route path="/about" element={<About />} />
@@ -114,6 +110,11 @@ function App() {
                         <Route path="/login" element={<Login />} />
                         <Route path="/signup" element={<Signup />} />
                         <Route path="/dashboard" element={
+                            <ProtectedRoute allowedRoles={['student']}>
+                                <Navigate to="/dashboard/my-courses" replace />
+                            </ProtectedRoute>
+                        } />
+                        <Route path="/dashboard/:tab" element={
                             <ProtectedRoute allowedRoles={['student']}>
                                 <StudentDashboard />
                             </ProtectedRoute>

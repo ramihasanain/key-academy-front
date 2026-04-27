@@ -6,6 +6,7 @@ const AuthContext = createContext();
 export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }) => {
+    const hasInitializedRef = useRef(false);
     // Attempt to load from storage initially for instantly rendering components
     const [userData, setUserData] = useState(() => {
         const stored = localStorage.getItem('user');
@@ -21,6 +22,9 @@ export const AuthProvider = ({ children }) => {
     });
 
     useEffect(() => {
+        if (hasInitializedRef.current) return;
+        hasInitializedRef.current = true;
+
         // Listen to global logout event triggered by interceptor
         const handleLogout = () => {
             localStorage.removeItem('access_token');
@@ -30,11 +34,26 @@ export const AuthProvider = ({ children }) => {
         };
         window.addEventListener('auth:logout', handleLogout);
 
-        const checkAuth = async () => {
+        const bootstrapAuthFromStorage = async () => {
             const token = localStorage.getItem('access_token');
+            const storedUser = localStorage.getItem('user');
+            const hasCachedUser = storedUser && storedUser !== 'undefined' && storedUser !== 'null';
+
             if (!token || token === 'undefined' || token === 'null') {
                 handleLogout();
                 setLoading(false);
+                return;
+            }
+
+            // Use local cache as source of truth on app boot to avoid unnecessary /me calls.
+            if (hasCachedUser) {
+                try {
+                    setUserData(JSON.parse(storedUser));
+                } catch {
+                    handleLogout();
+                } finally {
+                    setLoading(false);
+                }
                 return;
             }
 
@@ -63,7 +82,7 @@ export const AuthProvider = ({ children }) => {
             }
         };
 
-        checkAuth();
+        bootstrapAuthFromStorage();
 
         return () => {
             window.removeEventListener('auth:logout', handleLogout);

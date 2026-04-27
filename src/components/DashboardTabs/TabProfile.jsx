@@ -65,7 +65,7 @@ const TabProfile = ({ videoStats }) => {
             </div>
 
             {/* Video Stats Section */}
-            <div className="section-header-row mt-6 pt-6" style={{ borderTop: '1px solid rgba(255,255,255,0.1)' }}>
+            <div className="section-header-row mt-6 pt-6" style={{marginTop: '20px',borderTop: '1px solid rgba(255,255,255,0.1)' }}>
                 <h2 className="dash-section-title">إحصائيات تفاعلات وأسئلة الفيديو 📊</h2>
             </div>
             {videoStats && (

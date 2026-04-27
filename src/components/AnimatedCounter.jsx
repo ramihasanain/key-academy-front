@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { motion, useAnimation } from 'framer-motion';
 
-const AnimatedCounter = ({ from = 0, to, duration = 2, suffix = '' }) => {
+const AnimatedCounter = ({ from = 0, to, duration = 0.6, suffix = '' }) => {
     const [count, setCount] = useState(from);
 
     useEffect(() => {

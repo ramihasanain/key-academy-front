@@ -16,6 +16,8 @@ import {
 } from 'react-icons/hi2'
 import './CoursePreview.css'
 
+const coursePreviewRequestCache = new Map()
+
 const CoursePreview = () => {
     const { courseId } = useParams()
     const navigate = useNavigate()
@@ -65,13 +67,38 @@ const CoursePreview = () => {
     }, [])
 
     useEffect(() => {
-        fetch(`${API}/api/courses/${courseId}/preview/`)
-            .then(res => res.json())
+        if (!courseId) {
+            setLoading(false)
+            return
+        }
+
+        const cacheKey = `${API}/api/courses/${courseId}/preview/`
+        const cachedEntry = coursePreviewRequestCache.get(cacheKey)
+
+        if (cachedEntry?.data) {
+            setCourse(cachedEntry.data)
+            setLoading(false)
+            return
+        }
+
+        setLoading(true)
+        const requestPromise = cachedEntry?.promise || fetch(cacheKey).then(res => {
+            if (!res.ok) throw new Error(`Failed to load course preview: ${res.status}`)
+            return res.json()
+        })
+
+        if (!cachedEntry?.promise) {
+            coursePreviewRequestCache.set(cacheKey, { promise: requestPromise })
+        }
+
+        requestPromise
             .then(data => {
+                coursePreviewRequestCache.set(cacheKey, { data })
                 setCourse(data)
                 setLoading(false)
             })
             .catch(err => {
+                coursePreviewRequestCache.delete(cacheKey)
                 console.error(err)
                 setLoading(false)
             })
@@ -228,7 +255,7 @@ const CoursePreview = () => {
                     {/* Immersive Cinematic Hero Section */}
                     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="preview-hero-immersive" style={{ position: 'relative', borderRadius: '32px', overflow: 'hidden', marginBottom: '40px', minHeight: '450px', display: 'flex', alignItems: 'flex-end', padding: '40px', boxShadow: '0 30px 60px rgba(0,0,0,0.15)' }}>
                         {course.hero_image ? (
-                            <img src={course.hero_image} alt={course.title} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', zIndex: 0 }} />
+                            <img src={course.hero_image} alt={course.title} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', zIndex: 0, }} />
                         ) : (
                             <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(135deg, var(--${course.color || 'primary'}), #000)`, zIndex: 0 }}></div>
                         )}
@@ -309,7 +336,7 @@ const CoursePreview = () => {
                                             <div key={lesson.id} className="p-lesson-row" style={{ opacity: lesson.is_locked ? 0.75 : 1, padding: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(0,0,0,0.05)', backgroundColor: lesson.is_locked ? '#fafafa' : 'transparent', borderRadius: '16px', marginBottom: '10px' }}>
                                                 <div className="p-lesson-info" style={{ display: 'flex', alignItems: 'flex-start', gap: '20px' }}>
                                                     {lesson.cover_image ? (
-                                                        <div style={{ position: 'relative', width: '160px', height: '90px', flexShrink: 0, borderRadius: '12px', overflow: 'hidden', boxShadow: '0 4px 15px rgba(0,0,0,0.1)' }}>
+                                                        <div className="p-lesson-media" style={{ position: 'relative', width: '160px', height: '90px', flexShrink: 0, borderRadius: '12px', overflow: 'hidden', boxShadow: '0 4px 15px rgba(0,0,0,0.1)' }}>
                                                             <img src={lesson.cover_image} alt={lesson.title} style={{ width: '100%', height: '100%', objectFit: 'cover', filter: lesson.is_locked ? 'grayscale(80%) blur(1px)' : 'none' }} />
                                                             {lesson.type === 'video' && !lesson.is_locked && (
                                                                 <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.2)' }}>
@@ -323,13 +350,13 @@ const CoursePreview = () => {
                                                             )}
                                                         </div>
                                                     ) : (
-                                                        <div style={{ width: '160px', height: '90px', flexShrink: 0, borderRadius: '12px', background: '#f0f4f8', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--purple)', fontSize: '2rem' }}>
+                                                        <div className="p-lesson-media p-lesson-media-fallback" style={{ width: '160px', height: '90px', flexShrink: 0, borderRadius: '12px', background: '#f0f4f8', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--purple)', fontSize: '2rem' }}>
                                                             {lesson.type === 'video' ? <HiOutlinePlayCircle /> : <HiOutlineDocumentText />}
                                                         </div>
                                                     )}
-                                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', paddingTop: '5px' }}>
+                                                    <div className="p-lesson-content" style={{ display: 'flex', flexDirection: 'column', gap: '8px', paddingTop: '5px' }}>
                                                         <h4 style={{ fontSize: '1.25rem', fontWeight: 900, margin: 0, color: 'var(--text-primary)' }}>{lesson.title}</h4>
-                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                                                        <div className="p-lesson-meta" style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
                                                             <span className="ls-time" style={{ background: lesson.is_locked ? 'rgba(0,0,0,0.05)' : 'rgba(131, 42, 150, 0.1)', color: lesson.is_locked ? 'var(--text-muted)' : 'var(--purple)', padding: '4px 12px', borderRadius: '20px', fontSize: '0.9rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '6px' }}>
                                                                 <HiOutlineClock /> {lesson.duration || lesson.doc_size}
                                                             </span>

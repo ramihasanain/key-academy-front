@@ -1,17 +1,23 @@
 import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import { HiOutlineClock } from 'react-icons/hi2'
+import EmptyState from '../core/EmptyState'
 
 const TabMyNotes = ({ myNotes }) => {
+    const hasNotes = Array.isArray(myNotes) && myNotes.length > 0
+
     return (
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="dash-tab-content">
             <div className="section-header-row">
                 <h2 className="dash-section-title">ملاحظاتي السابقة 📝</h2>
             </div>
             <div className="dash-courses-grid" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))' }}>
-                {myNotes.length === 0 ? (
-                    <div className="dash-no-results glass-panel" style={{ gridColumn: '1 / -1' }}>
-                        <p>ماكو أي ملاحظات مسجلة للحين.</p>
+                {!hasNotes ? (
+                    <div style={{ gridColumn: '1 / -1' }}>
+                        <EmptyState
+                            title="ما عندك ملاحظات بعد"
+                            message="لهسه ما مسجل أي ملاحظة. أول ما تكتب ملاحظة أثناء الدرس راح تظهر هنا مباشرة."
+                        />
                     </div>
                 ) : (
                     myNotes.map((note, i) => (

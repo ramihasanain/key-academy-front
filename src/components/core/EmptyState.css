@@ -1,0 +1,33 @@
+.core-empty-state {
+    width: 100%;
+    padding: 40px 24px;
+    border-radius: var(--radius-xl, 24px);
+    border: 1px solid rgba(131, 42, 150, 0.12);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.92), rgba(248, 250, 255, 0.95));
+    text-align: center;
+    box-shadow: 0 12px 30px rgba(131, 42, 150, 0.08);
+}
+
+.core-empty-state-logo {
+    display: block;
+    width: 76px;
+    height: 76px;
+    object-fit: contain;
+    margin: 0 auto 16px;
+    filter: drop-shadow(0 8px 16px rgba(131, 42, 150, 0.18));
+}
+
+.core-empty-state-title {
+    margin: 0 0 8px;
+    font-size: 1.25rem;
+    font-weight: 900;
+    color: var(--text-primary, #1f2937);
+}
+
+.core-empty-state-message {
+    margin: 0;
+    font-size: 1rem;
+    color: var(--text-muted, #6b7280);
+    font-weight: 600;
+    line-height: 1.7;
+}

@@ -3,6 +3,20 @@ import { API } from '../../config'
 import { HiOutlineComputerDesktop, HiOutlineGlobeAlt } from 'react-icons/hi2'
 import '../../pages/LessonViewer.css'
 
+const notesRequestCache = new Map()
+
+const fetchNotesOnce = (key, url, options) => {
+    if (notesRequestCache.has(key)) return notesRequestCache.get(key)
+    const request = fetch(url, options).then(r => {
+        if (!r.ok) throw new Error(`Failed to load notes: ${r.status}`)
+        return r.json()
+    }).finally(() => {
+        notesRequestCache.delete(key)
+    })
+    notesRequestCache.set(key, request)
+    return request
+}
+
 const TabNotes = ({ lessonId }) => {
     const [notes, setNotes] = useState([])
     const [input, setInput] = useState('')
@@ -10,8 +24,30 @@ const TabNotes = ({ lessonId }) => {
 
     useEffect(() => {
         const t = localStorage.getItem('access_token')
-        fetch(`${API}/api/interactions/notes/?lesson=${lessonId}`, { headers: { 'Authorization': `Bearer ${t}` } })
-            .then(r => r.json()).then(d => { setNotes(d); setLoading(false) }).catch(e => console.log(e))
+        if (!t || !lessonId) {
+            setLoading(false)
+            return
+        }
+        let isActive = true
+        const requestKey = `${lessonId}:${t}`
+        fetchNotesOnce(
+            requestKey,
+            `${API}/api/interactions/notes/?lesson=${lessonId}`,
+            { headers: { 'Authorization': `Bearer ${t}` } }
+        )
+            .then(d => {
+                if (!isActive) return
+                setNotes(d)
+                setLoading(false)
+            })
+            .catch(e => {
+                if (!isActive) return
+                console.log(e)
+                setLoading(false)
+            })
+        return () => {
+            isActive = false
+        }
     }, [lessonId])
 
     const handleSave = () => {
@@ -24,7 +60,7 @@ const TabNotes = ({ lessonId }) => {
     }
 
     const fmt = (s) => {
-        if(!s && s !== 0) return '0:00';
+        if(!s && sh !== 0) return '0:00';
         const m = Math.floor(s/60);
         const sec = s%60;
         return `${m}:${sec.toString().padStart(2,'0')}`;

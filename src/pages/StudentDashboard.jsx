@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { memo, useState, useEffect, useRef } from 'react'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import { API } from '../config'
 import { useUser } from '../hooks/useUser'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -28,20 +28,54 @@ import TabCompleted from '../components/DashboardTabs/TabCompleted'
 import TabCertificates from '../components/DashboardTabs/TabCertificates'
 import TabMyNotes from '../components/DashboardTabs/TabMyNotes'
 import TabProfile from '../components/DashboardTabs/TabProfile'
+import ImageCardSkeleton from '../components/core/ImageCardSkeleton'
 import './StudentDashboard.css'
 
 
 
 const subjects = ['الكل', 'الرياضيات', 'الفيزياء', 'الكيمياء', 'الأحياء', 'اللغة الانجليزية', 'اللغة العربية', 'اللغة الفرنسية']
 const grades = ['الكل', 'السادس العلمي', 'السادس الأدبي', 'السادس العلمي والأدبي', 'الثالث المتوسط']
+const DASHBOARD_TABS = ['my-courses', 'completed', 'certificates', 'my-notes', 'browse-courses', 'profile']
+const DISABLE_ENTRY_ANIMATION_IN_DEV = import.meta.env.DEV
+const LIGHT_TRANSITION = { duration: 0.22, ease: 'easeOut' }
+
+const STATS_ROW_ITEMS = [
+    { key: 'active_courses', iconClass: 'icon-orange', icon: <HiOutlineBookOpen />, label: 'دورات تقراها هسة', suffix: 'دورات' },
+    { key: 'completed_lessons', iconClass: 'icon-purple', icon: <HiOutlineFire />, label: 'دروس مخلصها', suffix: 'درس' },
+    { key: 'overall_progress', iconClass: 'icon-pink', icon: <HiOutlineChartBar />, label: 'نسبة الإنجاز', suffix: '%' },
+    { key: 'certificates_count', iconClass: 'icon-green', icon: <HiOutlineAcademicCap />, label: 'الشهادات', suffix: 'شهادة' }
+]
+
+const StatsRow = memo(function StatsRow({ stats }) {
+    console.log(stats);
+    return (
+        <div className="dash-stats-row">
+            {STATS_ROW_ITEMS.map((item, index) => (
+                <motion.div
+                    key={item.key}
+                    className="dash-stat-card glass-panel"
+                    initial={DISABLE_ENTRY_ANIMATION_IN_DEV ? false : { opacity: 0, y: 12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={DISABLE_ENTRY_ANIMATION_IN_DEV ? LIGHT_TRANSITION : { ...LIGHT_TRANSITION, delay: Math.min(index * 0.03, 0.09) }}
+                >
+                    <div className={`dash-stat-icon ${item.iconClass}`}>{item.icon}</div>
+                    <div className="dash-stat-info">
+                        <p>{item.label}</p>
+                        <h3>
+                            <AnimatedCounter to={stats[item.key] || 0} duration={0.35} />
+                            {item.suffix === '%' ? '%' : ` ${item.suffix}`}
+                        </h3>
+                    </div>
+                </motion.div>
+            ))}
+        </div>
+    )
+})
 
 const StudentDashboard = () => {
     const navigate = useNavigate()
-    const [activeTab, setActiveTabState] = useState(() => localStorage.getItem('dashboard_tab') || 'my-courses')
-    const setActiveTab = (tab) => {
-        setActiveTabState(tab);
-        localStorage.setItem('dashboard_tab', tab);
-    }
+    const { tab } = useParams()
+    const activeTab = DASHBOARD_TABS.includes(tab) ? tab : 'my-courses'
     const [sidebarOpen, setSidebarOpen] = useState(false)
 
     // Browse filters
@@ -59,15 +93,45 @@ const StudentDashboard = () => {
     const [allCourses, setAllCourses] = useState([])
     const [allTeachers, setAllTeachers] = useState([])
     const [loadingCourses, setLoadingCourses] = useState(true)
+    const [loadingMyCourses, setLoadingMyCourses] = useState(true)
     const [stats, setStats] = useState({ active_courses: 0, completed_lessons: 0, overall_progress: 0, certificates_count: 0 })
     const [myCourses, setMyCourses] = useState([])
     const [completedCourses, setCompletedCourses] = useState([])
     const [certificates, setCertificates] = useState([])
     const [myNotes, setMyNotes] = useState([])
     const [videoStats, setVideoStats] = useState(null)
-    const [fetchedTabs, setFetchedTabs] = useState({})
+    const fetchedTabsRef = useRef(new Set())
+    const browseRequestKeyRef = useRef('')
+    const statsFetchedRef = useRef(false)
 
     const { userData } = useUser()
+
+    useEffect(() => {
+        if (!tab || !DASHBOARD_TABS.includes(tab)) {
+            navigate('/dashboard/my-courses', { replace: true })
+        }
+    }, [tab, navigate])
+
+    // Fetch dashboard stats immediately (independent from courses/tabs loading)
+    useEffect(() => {
+        const token = localStorage.getItem('access_token')
+        if (!token || token === 'undefined' || token === 'null') return
+        if (statsFetchedRef.current) return
+        statsFetchedRef.current = true
+
+        fetch(API + '/api/enrollments/stats/', {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        })
+            .then(res => res.json())
+            .then(data => setStats(data))
+            .catch(err => {
+                console.error(err)
+                statsFetchedRef.current = false
+            })
+    }, [])
 
     if (!userData) {
         return (
@@ -82,10 +146,14 @@ const StudentDashboard = () => {
     // 1. Tab Data Lazy Loading (Only hits APIs when user actually opens the tab)
     useEffect(() => {
         const token = localStorage.getItem('access_token');
-        if (!token || token === 'undefined' || token === 'null') return;
+        if (!token || token === 'undefined' || token === 'null') {
+            setLoadingMyCourses(false)
+            return;
+        }
         
-        // Skip if this tab has already been fetched
-        if (fetchedTabs[activeTab]) return;
+        // Prevent duplicate calls in React.StrictMode (dev double-effect run)
+        if (fetchedTabsRef.current.has(activeTab)) return;
+        fetchedTabsRef.current.add(activeTab);
 
         const headers = {
             'Authorization': `Bearer ${token}`,
@@ -93,11 +161,7 @@ const StudentDashboard = () => {
         };
 
         if (activeTab === 'my-courses') {
-            fetch(API + '/api/enrollments/stats/', { headers })
-                .then(res => res.json())
-                .then(data => setStats(data))
-                .catch(console.error);
-
+            setLoadingMyCourses(true)
             fetch(API + '/api/enrollments/my-courses/', { headers })
                 .then(res => res.json())
                 .then(data => {
@@ -119,9 +183,9 @@ const StudentDashboard = () => {
                             day: 'numeric'
                         })
                     })));
-                }).catch(console.error);
-                
-            setFetchedTabs(prev => ({ ...prev, [activeTab]: true }));
+                })
+                .catch(console.error)
+                .finally(() => setLoadingMyCourses(false));
         }
 
         else if (activeTab === 'completed') {
@@ -139,8 +203,6 @@ const StudentDashboard = () => {
                         lastVisit: 'مكتملة'
                     })));
                 }).catch(console.error);
-                
-            setFetchedTabs(prev => ({ ...prev, [activeTab]: true }));
         }
 
         else if (activeTab === 'certificates') {
@@ -154,8 +216,6 @@ const StudentDashboard = () => {
                         file: c.pdf_file
                     })));
                 }).catch(console.error);
-                
-            setFetchedTabs(prev => ({ ...prev, [activeTab]: true }));
         }
 
         else if (activeTab === 'my-notes') {
@@ -163,8 +223,6 @@ const StudentDashboard = () => {
                 .then(res => res.json())
                 .then(data => setMyNotes(data))
                 .catch(console.error);
-                
-            setFetchedTabs(prev => ({ ...prev, [activeTab]: true }));
         }
 
         else if (activeTab === 'profile') {
@@ -172,8 +230,6 @@ const StudentDashboard = () => {
                 .then(res => res.json())
                 .then(data => setVideoStats(data))
                 .catch(console.error);
-                
-            setFetchedTabs(prev => ({ ...prev, [activeTab]: true }));
         }
 
         else if (activeTab === 'browse-courses') {
@@ -181,14 +237,16 @@ const StudentDashboard = () => {
                 .then(res => res.json())
                 .then(data => setAllTeachers(data))
                 .catch(console.error)
-                
-            setFetchedTabs(prev => ({ ...prev, [activeTab]: true }));
         }
 
-    }, [activeTab, fetchedTabs]);
+    }, [activeTab]);
 
     useEffect(() => {
         if (activeTab === 'browse-courses') {
+            const requestKey = `${activeTab}|${filterTeacher}|${filterSubject}|${filterGrade}`;
+            if (browseRequestKeyRef.current === requestKey) return;
+            browseRequestKeyRef.current = requestKey;
+
             setLoadingCourses(true);
             let url = API + '/api/courses/?limit=20'; // Fetch 20 max to avoid explosion
             if (filterTeacher !== 'الكل') url += `&teacher=${filterTeacher}`;
@@ -214,6 +272,11 @@ const StudentDashboard = () => {
         { id: 'certificates', label: 'شهاداتي', icon: <HiOutlineAcademicCap /> },
         { id: 'my-notes', label: 'ملاحظاتي', icon: <HiOutlinePencilSquare /> },
     ]
+
+    const handleTabChange = (nextTab) => {
+        navigate(`/dashboard/${nextTab}`);
+        setSidebarOpen(false);
+    }
 
     const handleEnroll = async () => {
         if (!enrollCode.trim()) {
@@ -259,9 +322,9 @@ const StudentDashboard = () => {
         return (
             <motion.div
                 className={`dash-course-card premium-card hover-glow ${isEnrolled ? 'enrolled-dimmed' : ''}`}
-                initial={{ opacity: 0, y: 30 }}
+                initial={DISABLE_ENTRY_ANIMATION_IN_DEV ? false : { opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.08, type: "spring", stiffness: 100 }}
+                transition={DISABLE_ENTRY_ANIMATION_IN_DEV ? LIGHT_TRANSITION : { ...LIGHT_TRANSITION, delay: Math.min(i * 0.025, 0.18) }}
                 style={isEnrolled ? { opacity: 0.85, filter: 'grayscale(60%)', border: '1px solid rgba(16, 185, 129, 0.3)' } : {}}
             >
                 <div className={`dash-course-accent accent-${course.color}`} style={{ background: course.color?.startsWith('#') ? course.color : undefined }}></div>
@@ -307,40 +370,6 @@ const StudentDashboard = () => {
         )
     }
 
-    // Ultra Premium Stats Row
-    const StatsRow = () => (
-        <div className="dash-stats-row">
-            <motion.div className="dash-stat-card glass-panel" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-                <div className="dash-stat-icon icon-orange"><HiOutlineBookOpen /></div>
-                <div className="dash-stat-info">
-                    <p>دورات تقراها هسة</p>
-                    <h3><AnimatedCounter to={stats.active_courses} /> دورات</h3>
-                </div>
-            </motion.div>
-            <motion.div className="dash-stat-card glass-panel" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
-                <div className="dash-stat-icon icon-purple"><HiOutlineFire /></div>
-                <div className="dash-stat-info">
-                    <p>دروس مخلصها</p>
-                    <h3><AnimatedCounter to={stats.completed_lessons} /> درس</h3>
-                </div>
-            </motion.div>
-            <motion.div className="dash-stat-card glass-panel" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
-                <div className="dash-stat-icon icon-pink"><HiOutlineChartBar /></div>
-                <div className="dash-stat-info">
-                    <p>نسبة الإنجاز</p>
-                    <h3><AnimatedCounter to={stats.overall_progress} />%</h3>
-                </div>
-            </motion.div>
-            <motion.div className="dash-stat-card glass-panel" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
-                <div className="dash-stat-icon icon-green"><HiOutlineAcademicCap /></div>
-                <div className="dash-stat-info">
-                    <p>الشهادات</p>
-                    <h3><AnimatedCounter to={stats.certificates_count} /> شهادة</h3>
-                </div>
-            </motion.div>
-        </div>
-    )
-
     return (
         <div className="dash-page ultra-premium">
             <ParticleBackground />
@@ -376,14 +405,14 @@ const StudentDashboard = () => {
 
                 <nav className="dash-nav">
                     {navItems.map(item => (
-                        <button key={item.id} className={`dash-nav-btn neon-hover ${activeTab === item.id ? 'active' : ''}`} onClick={() => { setActiveTab(item.id); setSidebarOpen(false) }}>
+                        <button key={item.id} className={`dash-nav-btn neon-hover ${activeTab === item.id ? 'active' : ''}`} onClick={() => handleTabChange(item.id)}>
                             <div className="nav-icon-wrapper">{item.icon}</div>
                             <span>{item.label}</span>
                             {activeTab === item.id && <motion.div className="active-indicator" layoutId="active-nav" />}
                         </button>
                     ))}
 
-                    <button className={`dash-nav-btn neon-hover ${activeTab === 'browse-courses' ? 'active' : ''}`} onClick={() => { setActiveTab('browse-courses'); setSidebarOpen(false) }}>
+                    <button className={`dash-nav-btn neon-hover ${activeTab === 'browse-courses' ? 'active' : ''}`} onClick={() => handleTabChange('browse-courses')}>
                         <div className="nav-icon-wrapper"><HiOutlineSquares2X2 /></div>
                         <span>اكتشف مواد جديدة</span>
                         {activeTab === 'browse-courses' && <motion.div className="active-indicator" layoutId="active-nav" />}
@@ -391,7 +420,7 @@ const StudentDashboard = () => {
 
 
 
-                    <button className={`dash-nav-btn neon-hover ${activeTab === 'profile' ? 'active' : ''}`} onClick={() => { setActiveTab('profile'); setSidebarOpen(false) }}>
+                    <button className={`dash-nav-btn neon-hover ${activeTab === 'profile' ? 'active' : ''}`} onClick={() => handleTabChange('profile')}>
                         <div className="nav-icon-wrapper"><HiOutlineUser /></div>
                         <span>الملف الشخصي</span>
                         {activeTab === 'profile' && <motion.div className="active-indicator" layoutId="active-nav" />}
@@ -470,7 +499,7 @@ const StudentDashboard = () => {
 
                 {/* ===== MY COURSES ===== */}
                 {activeTab === 'my-courses' && (
-                    <TabMyCourses myCourses={myCourses} stats={stats} StatsRow={StatsRow} />
+                    <TabMyCourses myCourses={myCourses} stats={stats} StatsRow={StatsRow} isLoading={loadingMyCourses} />
                 )}
 
                 {/* ===== COMPLETED ===== */}
@@ -490,7 +519,7 @@ const StudentDashboard = () => {
 
                 {/* ===== BROWSE BY TEACHER/SUBJECT ===== */}
                 {activeTab === 'browse-courses' && (
-                    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="dash-tab-content browse-view">
+                    <motion.div initial={DISABLE_ENTRY_ANIMATION_IN_DEV ? false : { opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={LIGHT_TRANSITION} className="dash-tab-content browse-view">
 
                         <div className="browse-hero-banner glass-panel">
                             <h2>دور على الدروس اللي تحتاجها 🔭</h2>
@@ -514,9 +543,13 @@ const StudentDashboard = () => {
                         </div>
 
                         <div className="dash-courses-grid mt-4">
-                            {allCourses.map((course, i) => (
-                                <BrowseCourseCard key={course.id} course={course} i={i} />
-                            ))}
+                            {loadingCourses ? (
+                                <ImageCardSkeleton count={6} />
+                            ) : (
+                                allCourses.map((course, i) => (
+                                    <BrowseCourseCard key={course.id} course={course} i={i} />
+                                ))
+                            )}
                         </div>
                         {allCourses.length === 0 && !loadingCourses && (
                             <div className="dash-no-results glass-panel">

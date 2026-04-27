@@ -43,6 +43,21 @@ import TabKeyAI from '../components/LessonViewerTabs/TabKeyAI'
 const SecurePDFViewer = lazy(() => import('../components/SecurePDFViewer'))
 import './LessonViewer.css'
 
+const lessonInfoRequestCache = new Map()
+const courseRequestCache = new Map()
+
+const fetchJsonOnce = (cache, key, url, options = {}) => {
+    if (cache.has(key)) return cache.get(key)
+    const request = fetch(url, options).then(res => {
+        if (!res.ok) throw new Error(`Request failed: ${res.status}`)
+        return res.json()
+    }).finally(() => {
+        cache.delete(key)
+    })
+    cache.set(key, request)
+    return request
+}
+
 /* ======== PORTAL SCREENS ======== */
 
 const ViewVideo = ({ lessonId, isCompleted, onComplete }) => {
@@ -80,8 +95,8 @@ const ViewVideo = ({ lessonId, isCompleted, onComplete }) => {
                         </svg>
                     </button>
                     
-                    <div style={{ display: 'flex', gap: '10px', width: '100%' }}>
-                        <a href="/KeyAcademy.exe" download="KeyAcademy.exe" className="lv-sb-btn-secondary" style={{ flex: 1, padding: '12px', justifyContent: 'center' }}>
+                    <div className="lv-sb-download-row">
+                        <a href="/KeyAcademy.exe" download="KeyAcademy.exe" className="lv-sb-btn-secondary lv-sb-download-btn" style={{ padding: '12px', justifyContent: 'center' }}>
                             <span>تحميل ويندوز 🪟</span>
                             <svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="0" className="lv-sb-btn-icon" style={{marginLeft: '10px'}}>
                                 <path fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
@@ -558,49 +573,61 @@ const LessonViewer = () => {
 
     // 1. Fetch Lesson Basic Info (Lightweight)
     useEffect(() => {
-        if (lessonId) {
-            const controller = new AbortController();
-            setIsLoading(true);
-            setLessonContent(null); // Reset content when switching lessons
-            fetch(`${API}/api/courses/lessons/${lessonId}/`, { signal: controller.signal })
-                .then(res => res.json())
-                .then(data => {
-                    setLessonInfo(data);
-                    setIsLoading(false);
-                })
-                .catch(err => {
-                    if (err.name === 'AbortError') return;
-                    console.error('Failed to fetch lesson', err);
-                    setIsLoading(false);
-                });
-            return () => controller.abort();
+        if (!lessonId) return
+        let isActive = true
+        setIsLoading(true)
+        setLessonContent(null) // Reset content when switching lessons
+        fetchJsonOnce(
+            lessonInfoRequestCache,
+            String(lessonId),
+            `${API}/api/courses/lessons/${lessonId}/`
+        )
+            .then(data => {
+                if (!isActive) return
+                setLessonInfo(data)
+                setIsLoading(false)
+            })
+            .catch(err => {
+                if (!isActive) return
+                console.error('Failed to fetch lesson', err)
+                setIsLoading(false)
+            })
+        return () => {
+            isActive = false
         }
-    }, [lessonId]);
+    }, [lessonId])
 
     // 2. Fetch Sidebar/Playlist (Once per courseId)
     useEffect(() => {
-        if (courseId && lessonList.length === 0) {
-            const controller = new AbortController();
-            const token = localStorage.getItem('access_token');
-            const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
-            fetch(`${API}/api/courses/${courseId}/`, { headers, signal: controller.signal })
-                .then(res => res.json())
-                .then(courseData => {
-                    let allLessons = [];
-                    courseData.modules?.forEach(m => {
-                        m.lessons?.forEach(l => {
-                            allLessons.push({ ...l, unitTitle: m.title });
-                        });
-                    });
-                    setLessonList(allLessons);
+        if (!courseId) return
+        let isActive = true
+        const token = localStorage.getItem('access_token')
+        const headers = token ? { 'Authorization': `Bearer ${token}` } : {}
+        const cacheKey = `${courseId}:${token || 'anon'}`
+        fetchJsonOnce(
+            courseRequestCache,
+            cacheKey,
+            `${API}/api/courses/${courseId}/`,
+            { headers }
+        )
+            .then(courseData => {
+                if (!isActive) return
+                const allLessons = []
+                courseData.modules?.forEach(m => {
+                    m.lessons?.forEach(l => {
+                        allLessons.push({ ...l, unitTitle: m.title })
+                    })
                 })
-                .catch(err => {
-                    if (err.name === 'AbortError') return;
-                    console.error('Failed to fetch playlist', err);
-                });
-            return () => controller.abort();
+                setLessonList(allLessons)
+            })
+            .catch(err => {
+                if (!isActive) return
+                console.error('Failed to fetch playlist', err)
+            })
+        return () => {
+            isActive = false
         }
-    }, [courseId, lessonList.length]);
+    }, [courseId]);
 
     // 3. Lazy Load Heavy Content (Slides/Text)
     useEffect(() => {
@@ -705,7 +732,7 @@ const LessonViewer = () => {
     if (isLoading) {
         return (
             <div className="lv-page" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                <h2 style={{ color: 'white' }}>جاري تحضير بيئة الدرس...</h2>
+                <h2 style={{ color: 'black' }}>جاري تحضير بيئة الدرس...</h2>
             </div>
         )
     }
@@ -839,26 +866,28 @@ const LessonViewer = () => {
                             ))}
                         </div>
                         <div className="lv-tab-body cv-super-glass">
-                            <div style={{ display: activeTab === 'notes' ? 'block' : 'none' }}>
+                            {activeTab === 'notes' && (
                                 <TabNotes lessonId={lessonId} />
-                            </div>
-                            <div style={{ display: activeTab === 'qa' ? 'block' : 'none' }}>
+                            )}
+                            {activeTab === 'qa' && (
                                 <TabQA lessonId={lessonId} userData={userData} />
-                            </div>
-                            <div style={{ display: activeTab === 'group' ? 'block' : 'none', height: '500px' }}>
+                            )}
+                            {activeTab === 'group' && (
+                                <div style={{ height: '500px' }}>
                                 <LiveChat courseId={courseId} userData={userData} lessonId={lessonId} />
-                            </div>
-                            <div style={{ display: activeTab === 'docs' ? 'block' : 'none' }}>
+                                </div>
+                            )}
+                            {activeTab === 'docs' && (
                                 <TabDocs lessonInfo={lessonInfo} courseId={courseId} userData={userData} />
-                            </div>
+                            )}
                             {CURRENT_LESSON.hasLab && (
-                                <div style={{ display: activeTab === 'lab' ? 'block' : 'none' }}>
+                                activeTab === 'lab' && <div>
                                     <TabLab />
                                 </div>
                             )}
-                            <div style={{ display: activeTab === 'keyai' ? 'block' : 'none' }}>
+                            {activeTab === 'keyai' && (
                                 <TabKeyAI lessonInfo={lessonInfo} userData={userData} />
-                            </div>
+                            )}
                         </div>
                     </div>
                 </main>

@@ -1,0 +1,36 @@
+.global-loader {
+    min-height: 100vh;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    padding: 24px;
+}
+
+.global-loader-logo {
+    width: min(230px, 55vw);
+    height: auto;
+    object-fit: contain;
+    animation: global-loader-float 2.6s ease-in-out infinite;
+    filter: drop-shadow(0 14px 26px rgba(131, 42, 150, 0.24));
+}
+
+.global-loader-text {
+    margin: 0;
+    font-size: clamp(1rem, 1.1vw + 0.85rem, 1.35rem);
+    font-weight: 800;
+    color: var(--text-primary, #1f2937);
+    letter-spacing: 0.3px;
+}
+
+@keyframes global-loader-float {
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-12px);
+    }
+}

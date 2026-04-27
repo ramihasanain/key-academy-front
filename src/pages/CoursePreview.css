@@ -633,3 +633,182 @@
     color: #4CAF50;
     font-size: 1.4rem;
 }
+
+/* Responsive fixes for narrow screens */
+.preview-nav-inner,
+.preview-container,
+.preview-main-col,
+.preview-section,
+.p-lesson-row,
+.p-lesson-info,
+.light-glass-card,
+.lc-teacher-info,
+.lc-teacher-info > div {
+    min-width: 0;
+}
+
+@media (max-width: 900px) {
+    .preview-nav-inner,
+    .preview-container {
+        padding-left: 20px;
+        padding-right: 20px;
+    }
+
+    .preview-container {
+        gap: 24px;
+    }
+
+    .preview-section {
+        padding: 24px;
+    }
+}
+
+@media (max-width: 625px) {
+    .preview-nav {
+        height: auto;
+        min-height: 64px;
+    }
+
+    .preview-nav-inner {
+        padding-top: 12px;
+        padding-bottom: 12px;
+        gap: 10px;
+    }
+
+    .preview-back-btn span {
+        display: none;
+    }
+
+    .preview-container {
+        margin-top: 88px;
+        padding-left: 12px;
+        padding-right: 12px;
+    }
+
+    .preview-main-col {
+        gap: 20px;
+    }
+
+    .preview-section {
+        padding: 16px;
+    }
+
+    .p-mod-lessons {
+        padding: 8px;
+    }
+
+    .p-lesson-row {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+        padding: 12px;
+    }
+
+    .p-lesson-info {
+        width: 100%;
+        gap: 10px;
+    }
+
+    .p-lesson-action {
+        width: 100%;
+    }
+
+    .ls-play-btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .light-glass-card {
+        padding: 16px;
+    }
+
+    .lc-teacher-info h3 {
+        font-size: 1.05rem;
+        overflow-wrap: anywhere;
+    }
+
+    .lc-price-pill {
+        font-size: 1.5rem;
+    }
+
+    .lc-input::placeholder {
+        font-size: 0.8rem;
+    }
+}
+
+@media (max-width: 700px) {
+    .p-mod-lessons {
+        padding: 0 !important;
+    }
+
+    .p-lesson-row {
+        display: block !important;
+        width: 100% !important;
+        padding: 10px 0 !important;
+        margin: 0 !important;
+        border-radius: 0 !important;
+        background: transparent !important;
+        border-bottom: 1px solid rgba(15, 23, 42, 0.12) !important;
+    }
+
+    .p-lesson-row:last-child {
+        border-bottom: none !important;
+    }
+
+    .p-lesson-info {
+        width: 100% !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        gap: 8px !important;
+        text-align: center;
+    }
+
+    .p-lesson-media {
+        width: min(100%, 220px) !important;
+        height: 130px !important;
+        border-radius: 10px !important;
+        margin: 0 auto !important;
+    }
+
+    .p-lesson-media-fallback {
+        font-size: 1.5rem !important;
+    }
+
+    .p-lesson-content {
+        width: 100% !important;
+        align-items: center !important;
+        gap: 6px !important;
+        padding-top: 0 !important;
+    }
+
+    .p-lesson-content h4 {
+        font-size: 1rem !important;
+        line-height: 1.45;
+    }
+
+    .p-lesson-meta {
+        justify-content: center;
+        gap: 10px !important;
+        flex-wrap: wrap;
+    }
+
+    .ls-time {
+        padding: 3px 9px !important;
+        font-size: 0.8rem !important;
+    }
+
+    .p-lesson-action {
+        width: 100%;
+        margin-top: 2px;
+        display: flex;
+        justify-content: center;
+    }
+
+    .ls-play-btn {
+        width: auto !important;
+        min-width: 150px;
+        justify-content: center;
+        padding: 9px 12px !important;
+        font-size: 0.92rem !important;
+    }
+}
