@@ -185,7 +185,7 @@ const ViewSlides = ({ lessonInfo, lessonContent, userData }) => {
 </script>`;
 
         return (
-            <div ref={containerRef} className="lv-screen lv-slides-screen" style={{ padding: 0, display: 'flex', flexDirection: 'column', width: '100%', minHeight: isFullscreen ? '100vh' : '75vh', background: '#fff', userSelect: 'none' }} onContextMenu={e => e.preventDefault()} onCopy={e => { e.preventDefault(); return false; }}>
+            <div ref={containerRef} className="lv-screen lv-slides-screen" style={{ padding: 0, display: 'flex', flexDirection: 'column', width: '100%', height: isFullscreen ? '100vh' : '100%', background: '#fff', userSelect: 'none' }} onContextMenu={e => e.preventDefault()} onCopy={e => { e.preventDefault(); return false; }}>
                 <div className="lv-sf-bar" style={{ padding: '15px 25px', background: 'rgba(0,0,0,0.8)', borderBottom: '1px solid var(--border-glass)', flexShrink: 0, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <span className="lv-sf-bar-title" style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#fff', fontWeight: 'bold' }}><HiOutlineSparkles /> السلايدات التفاعلية</span>
                     <button onClick={toggleFullscreen} style={{ background: 'rgba(255,255,255,0.15)', border: 'none', color: '#fff', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 'bold', transition: 'all 0.2s' }} onMouseOver={e => e.currentTarget.style.background = 'rgba(255,255,255,0.25)'} onMouseOut={e => e.currentTarget.style.background = 'rgba(255,255,255,0.15)'}>
@@ -236,7 +236,7 @@ const ViewSlides = ({ lessonInfo, lessonContent, userData }) => {
     }
 
     return (
-        <div ref={containerRef} className="lv-screen lv-slides-screen" style={{ padding: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column', minHeight: isFullscreen ? '100vh' : '75vh', background: '#fff' }}>
+        <div ref={containerRef} className="lv-screen lv-slides-screen" style={{ padding: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column', height: isFullscreen ? '100vh' : '100%', background: '#fff' }}>
             <div className="lv-sf-bar" style={{ padding: '15px 25px', background: 'rgba(0,0,0,0.8)', borderBottom: '1px solid var(--border-glass)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <span className="lv-sf-bar-title" style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#fff', fontWeight: 'bold' }}><HiOutlineDocumentText /> ملزمة وسلايدات الدرس</span>
                 <button onClick={toggleFullscreen} style={{ background: 'rgba(255,255,255,0.15)', border: 'none', color: '#fff', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 'bold', transition: 'all 0.2s' }} onMouseOver={e => e.currentTarget.style.background = 'rgba(255,255,255,0.25)'} onMouseOut={e => e.currentTarget.style.background = 'rgba(255,255,255,0.15)'}>
@@ -811,7 +811,7 @@ const LessonViewer = () => {
                     </div>
 
                     {/* Portal */}
-                    <div className={`lv-portal cv-super-glass ${(activeContent === 'slides' || activeContent === 'quiz') ? 'free-ratio' : ''}`} style={activeContent === 'slides' ? { height: '85vh', display: 'flex', flexDirection: 'column', padding: 0 } : activeContent === 'quiz' ? { minHeight: '85vh', display: 'flex', flexDirection: 'column', padding: 0 } : {}}>
+                    <div className={`lv-portal cv-super-glass ${(activeContent === 'slides' || activeContent === 'quiz') ? 'free-ratio' : ''}`} style={activeContent === 'slides' ? { height: '75vh', maxHeight: '900px', display: 'flex', flexDirection: 'column', padding: 0 } : activeContent === 'quiz' ? { height: '75vh', maxHeight: '900px', display: 'flex', flexDirection: 'column', padding: 0 } : {}}>
                         <AnimatePresence mode="wait">
                             {activeContent === 'video' && <motion.div key="v" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="lv-portal-inner"><ViewVideo lessonId={lessonId} isCompleted={lessonInfo?.is_completed} onComplete={handleMarkComplete} /></motion.div>}
                             {activeContent === 'slides' && <motion.div key="s" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="lv-portal-inner">
