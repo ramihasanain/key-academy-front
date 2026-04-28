@@ -406,7 +406,6 @@ const CoursePreview = () => {
                             <div className="lc-teacher-info">
                                 <img src={course.teacher_image || 'https://via.placeholder.com/150'} alt={course.teacher_name || 'Teacher'} className="lc-teacher-img" />
                                 <div>
-                                    <span className="lc-badge">دورة مميزة</span>
                                     <h3>{course.title}</h3>
                                 </div>
                             </div>

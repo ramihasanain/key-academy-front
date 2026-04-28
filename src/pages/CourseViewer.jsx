@@ -215,7 +215,6 @@ const CourseViewer = () => {
                         <div className="cv-hero-image-container">
                             <img src={courseData.hero_image || 'https://images.unsplash.com/photo-1635070041078-e363dbe005cb'} alt={courseData.title} className="cv-hero-img" />
                             <div className="cv-hero-img-overlay"></div>
-                            <div className="cv-hero-badge">دورة مميزة 🌟</div>
                         </div>
 
                         <div className="cv-hero-info">
