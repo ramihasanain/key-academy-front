@@ -59,7 +59,7 @@ const Signup = () => {
 
     // جلب المدن من الباك إند
     useEffect(() => {
-        fetch(API + '/api/content/cities/')
+        fetch(API + '/api/v1/content/cities/')
             .then(res => res.json())
             .then(data => setCitiesList(data))
             .catch(() => {
@@ -95,7 +95,7 @@ const Signup = () => {
 
         setLoading(true)
         try {
-            const res = await fetch(API + '/api/auth/signup/', {
+            const res = await fetch(API + '/api/v1/auth/signup/', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -189,7 +189,7 @@ const Signup = () => {
 
         setLoading(true)
         try {
-            const res = await fetch(API + '/api/auth/verify-otp/', {
+            const res = await fetch(API + '/api/v1/auth/verify-otp/', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ phone, otp: otpCode }),

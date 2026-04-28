@@ -580,7 +580,7 @@ const LessonViewer = () => {
         fetchJsonOnce(
             lessonInfoRequestCache,
             String(lessonId),
-            `${API}/api/courses/lessons/${lessonId}/`
+            `${API}/api/v1/courses/lessons/${lessonId}/`
         )
             .then(data => {
                 if (!isActive) return
@@ -607,7 +607,7 @@ const LessonViewer = () => {
         fetchJsonOnce(
             courseRequestCache,
             cacheKey,
-            `${API}/api/courses/${courseId}/`,
+            `${API}/api/v1/courses/${courseId}/`,
             { headers }
         )
             .then(courseData => {
@@ -636,7 +636,7 @@ const LessonViewer = () => {
             setIsLoadingContent(true);
             const token = localStorage.getItem('access_token');
             const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
-            fetch(`${API}/api/courses/lessons/${lessonId}/content/`, { headers, signal: controller.signal })
+            fetch(`${API}/api/v1/courses/lessons/${lessonId}/content/`, { headers, signal: controller.signal })
                 .then(res => {
                     if (!res.ok) throw new Error('Failed to fetch content');
                     return res.json();
@@ -658,7 +658,7 @@ const LessonViewer = () => {
         const token = localStorage.getItem('access_token');
         if (!token) return;
 
-        fetch(`${API}/api/courses/lessons/${lessonId}/complete/`, {
+        fetch(`${API}/api/v1/courses/lessons/${lessonId}/complete/`, {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${token}`,

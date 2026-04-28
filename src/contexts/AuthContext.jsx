@@ -59,7 +59,7 @@ export const AuthProvider = ({ children }) => {
 
             try {
                 // The global fetch interceptor automatically handles expired tokens and retries
-                const res = await fetch(`${API}/api/auth/me/`, {
+                const res = await fetch(`${API}/api/v1/auth/me/`, {
                     headers: {
                         'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json'
@@ -93,7 +93,7 @@ export const AuthProvider = ({ children }) => {
         const token = localStorage.getItem('access_token');
         if (!token) return;
         try {
-            const res = await fetch(`${API}/api/auth/me/`, {
+            const res = await fetch(`${API}/api/v1/auth/me/`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (res.ok) {

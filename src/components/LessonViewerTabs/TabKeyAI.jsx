@@ -33,7 +33,7 @@ const TabKeyAI = ({ lessonInfo, userData }) => {
 
         try {
             const token = localStorage.getItem('access_token')
-            const response = await fetch(`${API}/api/courses/lessons/${lessonId}/analyze/`, {
+            const response = await fetch(`${API}/api/v1/courses/lessons/${lessonId}/analyze/`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

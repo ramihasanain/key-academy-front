@@ -74,7 +74,7 @@ const CoursePreview = () => {
             return
         }
 
-        const cacheKey = `${API}/api/courses/${courseId}/preview/`
+        const cacheKey = `${API}/api/v1/courses/${courseId}/preview/`
         const cachedEntry = coursePreviewRequestCache.get(cacheKey)
 
         if (cachedEntry?.data) {

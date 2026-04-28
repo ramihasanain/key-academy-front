@@ -84,7 +84,7 @@ const CourseViewer = () => {
     useEffect(() => {
         const token = localStorage.getItem('access_token')
         const requestedCourseId = courseId || 1
-        const cacheKey = `${API}/api/courses/${requestedCourseId}/::${token && token !== 'undefined' && token !== 'null' ? 'auth' : 'anon'}`
+        const cacheKey = `${API}/api/v1/courses/${requestedCourseId}/::${token && token !== 'undefined' && token !== 'null' ? 'auth' : 'anon'}`
         const cachedEntry = courseViewerRequestCache.get(cacheKey)
 
         if (cachedEntry?.data) {
@@ -99,7 +99,7 @@ const CourseViewer = () => {
 
         // Fetch real data from backend
         setLoading(true)
-        const requestPromise = cachedEntry?.promise || fetch(`${API}/api/courses/${requestedCourseId}/`, {
+        const requestPromise = cachedEntry?.promise || fetch(`${API}/api/v1/courses/${requestedCourseId}/`, {
             headers: token && token !== 'undefined' && token !== 'null' ? { Authorization: `Bearer ${token}` } : {}
         })
             .then(res => {

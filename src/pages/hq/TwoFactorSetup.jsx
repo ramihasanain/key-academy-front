@@ -22,7 +22,7 @@ const TwoFactorSetup = () => {
         setError('')
         try {
             const token = localStorage.getItem('access_token')
-            const res = await fetch(API + '/api/auth/2fa/setup/', {
+            const res = await fetch(API + '/api/v1/auth/2fa/setup/', {
                 headers: { 'Authorization': `Bearer ${token}` }
             })
             const data = await res.json()
@@ -46,7 +46,7 @@ const TwoFactorSetup = () => {
         setError('')
         try {
             const token = localStorage.getItem('access_token')
-            const res = await fetch(API + '/api/auth/2fa/activate/', {
+            const res = await fetch(API + '/api/v1/auth/2fa/activate/', {
                 method: 'POST',
                 headers: { 
                     'Content-Type': 'application/json',

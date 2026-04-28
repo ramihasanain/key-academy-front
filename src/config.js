@@ -16,7 +16,7 @@ window.fetch = async function(...args) {
     let [resource, config] = args;
     
     // Apply interceptor ONLY for our API and NOT for auth endpoints to prevent loops
-    if (typeof resource === 'string' && resource.startsWith(API) && !resource.includes('/api/auth/refresh/') && !resource.includes('/api/auth/login/') && !resource.includes('/api/auth/signup/')) {
+    if (typeof resource === 'string' && resource.startsWith(API) && !resource.includes('/api/v1/auth/refresh/') && !resource.includes('/api/v1/auth/login/') && !resource.includes('/api/v1/auth/signup/')) {
         
         // Auto-inject the latest token if available to prevent race conditions during state updates
         const currentToken = localStorage.getItem('access_token');
@@ -38,7 +38,7 @@ window.fetch = async function(...args) {
                 if (!isRefreshing) {
                     isRefreshing = true;
                     try {
-                        const refreshRes = await originalFetch(`${API}/api/auth/refresh/`, {
+                        const refreshRes = await originalFetch(`${API}/api/v1/auth/refresh/`, {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ refresh: refreshToken })

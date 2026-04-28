@@ -28,7 +28,7 @@ const TabDocs = ({ lessonInfo, courseId, userData }) => {
     useEffect(() => {
         if (!courseId) return
         let isActive = true
-        fetchCourseDocsOnce(String(courseId), `${API}/api/courses/${courseId}/`)
+        fetchCourseDocsOnce(String(courseId), `${API}/api/v1/courses/${courseId}/`)
             .then(data => {
                 if (!isActive) return
                 if (data.ministerial_docs) {

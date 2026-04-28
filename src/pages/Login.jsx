@@ -38,7 +38,7 @@ const Login = () => {
 
         setLoading(true)
         try {
-            const endpoint = mfaRequired ? '/api/auth/2fa/verify/' : '/api/auth/login/'
+            const endpoint = mfaRequired ? '/api/v1/auth/2fa/verify/' : '/api/v1/auth/login/'
             const payload = mfaRequired ? { user_id: userId, code: mfaCode } : { phone, password
                 // , captcha_token: token
             }
