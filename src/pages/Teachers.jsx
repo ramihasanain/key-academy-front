@@ -20,6 +20,8 @@ import SectionTitle from '../components/SectionTitle'
 import ParticleBackground from '../components/ParticleBackground'
 import './Teachers.css'
 
+let teachersRequestPromise = null
+
 const fadeInUp = {
     hidden: { opacity: 0, y: 30 },
     visible: (i = 0) => ({ opacity: 1, y: 0, transition: { duration: 0.5, delay: i * 0.08 } })
@@ -60,11 +62,15 @@ const Teachers = () => {
             } catch(e) {}
         }
 
-        fetch(API + '/api/teachers/')
+        if (!teachersRequestPromise) {
+            teachersRequestPromise = fetch('https://key-academy.fra1.digitaloceanspaces.com/landing-data/teachers.json')
             .then(res => {
                 if (!res.ok) throw new Error('Failed to fetch')
                 return res.json()
             })
+        }
+
+        teachersRequestPromise
             .then(data => {
                 if (Array.isArray(data)) {
                     // Prevent image double-fetching due to new AWS S3 signatures

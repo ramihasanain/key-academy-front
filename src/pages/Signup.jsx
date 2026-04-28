@@ -39,6 +39,18 @@ const Signup = () => {
     const [citiesList, setCitiesList] = useState([])
     const [loading, setLoading] = useState(false)
     const [errorMsg, setErrorMsg] = useState('')
+    const fieldMessageMap = {
+        phone: 'رقم الهاتف مطلوب',
+        username: 'اسم المستخدم مطلوب',
+        first_name: 'الاسم الأول مطلوب',
+        last_name: 'الاسم الأخير مطلوب',
+        parent_phone: 'رقم ولي الأمر مطلوب',
+        city: 'المدينة مطلوبة',
+        grade: 'المرحلة الدراسية مطلوبة',
+        branch: 'المسار الدراسي مطلوب',
+        password: 'كلمة السر مطلوبة',
+        confirm_password: 'تأكيد كلمة السر مطلوب',
+    }
 
     // OTP
     const [otp, setOtp] = useState(['', '', '', '', '', ''])
@@ -101,9 +113,28 @@ const Signup = () => {
             })
             const data = await res.json()
             if (!res.ok) {
-                // عرض أول خطأ موجود
-                const firstError = Object.values(data)[0]
-                setErrorMsg(Array.isArray(firstError) ? firstError[0] : firstError)
+                const collectErrors = (value, fieldPath = '') => {
+                    if (typeof value === 'string') {
+                        const fieldKey = fieldPath.split('.').pop()
+                        const customMessage = fieldMessageMap[fieldKey]
+                        if (customMessage) return [customMessage]
+                        return [fieldPath ? `${fieldPath}: ${value}` : value]
+                    }
+                    if (Array.isArray(value)) {
+                        return value.flatMap((item) => collectErrors(item, fieldPath))
+                    }
+                    if (value && typeof value === 'object') {
+                        return Object.entries(value).flatMap(([key, item]) => {
+                            const nextFieldPath = fieldPath ? `${fieldPath}.${key}` : key
+                            return collectErrors(item, nextFieldPath)
+                        })
+                    }
+                    return []
+                }
+
+                const apiErrors = collectErrors(data)
+                const fallbackError = 'تعذر إنشاء الحساب، حاول مرة ثانية'
+                setErrorMsg(apiErrors.length ? apiErrors.join(' - ') : fallbackError)
                 return
             }
             // --- OTP BYPASS TEMP ---

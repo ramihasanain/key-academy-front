@@ -233,7 +233,7 @@ const StudentDashboard = () => {
         }
 
         else if (activeTab === 'browse-courses') {
-            fetch(API + '/api/teachers/')
+            fetch('https://key-academy.fra1.digitaloceanspaces.com/landing-data/teachers.json')
                 .then(res => res.json())
                 .then(data => setAllTeachers(data))
                 .catch(console.error)

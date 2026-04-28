@@ -16,6 +16,11 @@ const Login = () => {
     const [loading, setLoading] = useState(false)
     const [errorMsg, setErrorMsg] = useState('')
     const navigate = useNavigate()
+    const fieldMessageMap = {
+        captcha_token: 'الكابشا مطلوبة',
+        password: 'كلمة السر مطلوبة',
+        phone: 'رقم الهاتف مطلوب',
+    }
     // const { executeRecaptcha } = useGoogleReCaptcha();
     const handleSubmit = async (e) => {
         e.preventDefault()
@@ -47,6 +52,9 @@ const Login = () => {
             if (!res.ok) {
                 const collectErrors = (value, fieldPath = '') => {
                     if (typeof value === 'string') {
+                        const fieldKey = fieldPath.split('.').pop()
+                        const customMessage = fieldMessageMap[fieldKey]
+                        if (customMessage) return [customMessage]
                         return [fieldPath ? `${fieldPath}: ${value}` : value]
                     }
                     if (Array.isArray(value)) {
@@ -62,7 +70,7 @@ const Login = () => {
                 }
 
                 const apiErrors = collectErrors(data)
-                const fallbackError = data.error || 'رقم الهاتف أو كلمة المرور غلط'
+                const fallbackError = 'تعذر تسجيل الدخول، حاول مرة ثانية'
                 setErrorMsg(apiErrors.length ? apiErrors.join(' - ') : fallbackError)
                 return
             }
