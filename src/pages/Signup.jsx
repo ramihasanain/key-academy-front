@@ -237,7 +237,7 @@ const Signup = () => {
             >
                 <div className="glass-card auth-card">
                     <div className="auth-logo">
-                        <img src="/new-logo.png" alt="Key Academy" />
+                        <img src="/new-logo.png" alt="Key Academy" onClick={() => navigate('/')} />
                     </div>
 
                     <div className="signup-steps">

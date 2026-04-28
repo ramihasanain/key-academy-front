@@ -86,6 +86,7 @@
 .auth-logo img {
     height: 85px;
     width: auto;
+    cursor: pointer;
 }
 
 .auth-logo span {

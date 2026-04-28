@@ -7,11 +7,14 @@ import {
     HiOutlineNoSymbol
 } from 'react-icons/hi2'
 import ImageCardSkeleton from '../core/ImageCardSkeleton'
+import EmptyState from '../core/EmptyState'
 
 const DISABLE_ENTRY_ANIMATION_IN_DEV = import.meta.env.DEV
 const LIGHT_TRANSITION = { duration: 0.22, ease: "easeOut" }
 
 const TabMyCourses = ({ myCourses, stats, StatsRow, isLoading = false }) => {
+    const showEmptyState = !isLoading && myCourses.length === 0
+
     return (
         <motion.div initial={DISABLE_ENTRY_ANIMATION_IN_DEV ? false : { opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={LIGHT_TRANSITION} className="dash-tab-content">
             <StatsRow stats={stats} />
@@ -20,25 +23,30 @@ const TabMyCourses = ({ myCourses, stats, StatsRow, isLoading = false }) => {
                 <h2 className="dash-section-title">دورات أدرسها هسة <span className="title-badge">مباشر</span></h2>
             </div>
 
-            <div className="dash-courses-grid">
+            <div className={`dash-courses-grid ${showEmptyState ? 'dash-courses-grid-single' : ''}`.trim()}>
                 {isLoading ? (
                     <ImageCardSkeleton count={6} />
+                ) : showEmptyState ? (
+                    <EmptyState
+                        title="ما عندك دورات حالياً"
+                        message="بعدك ما مشترك بأي دورة. اختار مادة من تبويب اكتشف مواد جديدة."
+                    />
                 ) : (
                     myCourses.map((course, i) => (
                         <motion.div key={course.id} className={`dash-course-card premium-card hover-lift ${!course.isActive ? 'grayscale' : ''}`} initial={DISABLE_ENTRY_ANIMATION_IN_DEV ? false : { opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={DISABLE_ENTRY_ANIMATION_IN_DEV ? LIGHT_TRANSITION : { ...LIGHT_TRANSITION, delay: Math.min(i * 0.025, 0.18) }} style={!course.isActive ? { filter: 'grayscale(0.6)', opacity: 0.8 } : {}}>
-                            <div className={`dash-course-accent accent-${course.color} glow-accent`} style={{ background: course.color?.startsWith('#') ? course.color : undefined, ...(course.color?.startsWith('#') ? { boxShadow: `0 2px 15px ${course.color}` } : {}) }}></div>
                             <div className="dash-course-body">
                                 <div className="dash-teacher-row" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '16px' }}>
-                                    <div className={`dash-teacher-avatar ta-${course.color} soft-shadow ${course.teacherAvatar ? 'has-avatar' : ''}`} style={course.color?.startsWith('#') ? { background: course.color, borderColor: course.color, color: 'white' } : {}}>
-                                        {course.teacherAvatar ? (
+                                    <div
+                                        className={`dash-teacher-avatar ta-${course.color} soft-shadow ${course.hero_image ? 'has-avatar' : ''}`}
+                                        style={!course.hero_image && course.color?.startsWith('#') ? { background: course.color, borderColor: course.color, color: 'white' } : {}}
+                                    >
+                                        {course.hero_image ? (
                                             <img
-                                                src={course.teacherAvatar}
-                                                alt={course.teacher}
+                                                src={course.hero_image}
+                                                alt={course.hero_image}
                                                 className="teacher-real-avatar"
                                                 width="300"
-                                                height="3a00"
-                                                loading="lazy"
-                                                decoding="async"
+                                                height="300"
                                             />
                                         ) : (
                                             course.teacherInitials

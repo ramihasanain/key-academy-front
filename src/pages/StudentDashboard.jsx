@@ -172,6 +172,7 @@ const StudentDashboard = () => {
                         teacher: e.course.teacher_name,
                         teacherInitials: e.course.teacher_initials,
                         teacherAvatar: e.course.teacher_image,
+                        hero_image: e.course.hero_image,
                         progress: e.progress || 0,
                         totalLessons: e.total_lessons || 0,
                         completedLessons: e.completed_lessons || 0,
@@ -233,7 +234,7 @@ const StudentDashboard = () => {
         }
 
         else if (activeTab === 'browse-courses') {
-            fetch('https://key-academy.fra1.digitaloceanspaces.com/landing-data/teachers.json')
+            fetch('https://fra1.digitaloceanspaces.com/key-academy-cloud/landing-data/teachers.json')
                 .then(res => res.json())
                 .then(data => setAllTeachers(data))
                 .catch(console.error)
@@ -248,7 +249,7 @@ const StudentDashboard = () => {
             browseRequestKeyRef.current = requestKey;
 
             setLoadingCourses(true);
-            let url = API + '/api/courses/?limit=20'; // Fetch 20 max to avoid explosion
+            let url = 'https://fra1.digitaloceanspaces.com/key-academy-cloud/landing-data/courses.json'; // Fetch 20 max to avoid explosion
             if (filterTeacher !== 'الكل') url += `&teacher=${filterTeacher}`;
             if (filterSubject !== 'الكل') url += `&subject=${encodeURIComponent(filterSubject)}`;
             if (filterGrade !== 'الكل') url += `&grade=${encodeURIComponent(filterGrade)}`;
@@ -325,9 +326,8 @@ const StudentDashboard = () => {
                 initial={DISABLE_ENTRY_ANIMATION_IN_DEV ? false : { opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={DISABLE_ENTRY_ANIMATION_IN_DEV ? LIGHT_TRANSITION : { ...LIGHT_TRANSITION, delay: Math.min(i * 0.025, 0.18) }}
-                style={isEnrolled ? { opacity: 0.85, filter: 'grayscale(60%)', border: '1px solid rgba(16, 185, 129, 0.3)' } : {}}
+                style={isEnrolled ? { opacity: 0.85, filter: 'grayscale(60%)', border: '2px solid #832a96' } : { border: '2px solid #832a96' }}
             >
-                <div className={`dash-course-accent accent-${course.color}`} style={{ background: course.color?.startsWith('#') ? course.color : undefined }}></div>
 
                 {isEnrolled && (
                     <div style={{ position: 'absolute', top: '15px', right: '15px', background: '#10B981', color: 'white', padding: '4px 12px', borderRadius: '20px', fontSize: '0.85rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '4px', zIndex: 10, boxShadow: '0 4px 10px rgba(16, 185, 129, 0.3)' }}>
@@ -338,8 +338,8 @@ const StudentDashboard = () => {
                 <div className="dash-course-body" style={{ position: 'relative' }}>
                     <div className="dash-teacher-row" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '16px' }}>
                         <div className={`dash-teacher-avatar ta-${course.color} ${course.teacher_image ? 'has-avatar' : ''}`} style={{ marginBottom: '8px', ...(course.color?.startsWith('#') ? { background: course.color, borderColor: course.color, color: 'white' } : {}) }}>
-                            {course.teacher_image ? (
-                                <img src={course.teacher_image} alt={course.teacher_name} className="teacher-real-avatar" />
+                            {course.hero_image ? (
+                                <img src={course.hero_image} alt={course.hero_image} className="teacher-real-avatar" />
                             ) : (
                                 course.teacher_initials
                             )}
@@ -353,7 +353,7 @@ const StudentDashboard = () => {
 
                     <div className="dash-course-meta-row">
                         <span className="dash-lessons-count"><HiOutlineBookOpen /> {course.lessons_count || 0} درس</span>
-                        <span className="dash-price"><HiOutlineCurrencyDollar /> {course.price}</span>
+                        <span className="dash-price">{course.price} د.ع </span>
                     </div>
 
                     {isEnrolled ? (

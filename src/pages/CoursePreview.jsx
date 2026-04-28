@@ -14,6 +14,8 @@ import {
     HiOutlineUserGroup,
     HiStar
 } from 'react-icons/hi2'
+import EmptyState from '../components/core/EmptyState'
+import GlobalLoader from '../components/core/GlobalLoader'
 import './CoursePreview.css'
 
 const coursePreviewRequestCache = new Map()
@@ -105,7 +107,7 @@ const CoursePreview = () => {
     }, [courseId])
 
     if (loading || !course) {
-        return <div className="preview-page" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>جاري تحميل الدورة...</div>
+        return <GlobalLoader text="جاري تحميل الدورة..." />
     }
 
 
@@ -261,13 +263,11 @@ const CoursePreview = () => {
                         )}
                         <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(15, 23, 42, 0.95) 0%, rgba(15, 23, 42, 0.4) 40%, rgba(15, 23, 42, 0) 100%)', zIndex: 1 }}></div>
 
-                        <div style={{ position: 'relative', zIndex: 2, display: 'flex', flexDirection: 'column', gap: '25px', width: '100%' }}>
-                            <h1 style={{ color: 'white', fontSize: 'clamp(2rem, 4vw, 3.5rem)', fontWeight: 900, margin: 0, textShadow: '0 4px 25px rgba(0,0,0,0.6)', lineHeight: 1.2 }}>{course.title}</h1>
-                            
+                        <div style={{ position: 'relative', zIndex: 2, display: 'flex', flexDirection: 'column', gap: '25px', width: '100%' }}>                            
                             {/* Stylish Glassmorphism Teacher Card */}
                             <div 
                                 onClick={handleTeacherClick}
-                                style={{ display: 'inline-flex', alignItems: 'center', gap: '15px', background: 'rgba(255, 255, 255, 0.15)', backdropFilter: 'blur(20px)', padding: '10px 30px 10px 10px', borderRadius: '50px', border: '1px solid rgba(255, 255, 255, 0.3)', alignSelf: 'flex-start', boxShadow: '0 10px 30px rgba(0,0,0,0.2)', cursor: 'pointer', transition: 'all 0.3s' }}
+                                style={{ display: 'inline-flex', alignItems: 'center', gap: '15px', background: 'rgba(255, 255, 255, 0.15)', backdropFilter: 'blur(20px)', padding: '10px', borderRadius: '50px', border: '1px solid rgba(255, 255, 255, 0.3)', alignSelf: 'flex-start', boxShadow: '0 10px 30px rgba(0,0,0,0.2)', cursor: 'pointer', transition: 'all 0.3s' }}
                                 onMouseOver={e => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.25)'}
                                 onMouseOut={e => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.15)'}
                             >
@@ -285,7 +285,14 @@ const CoursePreview = () => {
                     {/* About Section */}
                     <div className="preview-section fade-in-up" style={{ animationDelay: '0.1s' }}>
                         <h2 className="section-title">شنو راح تتعلم بهذي الدورة؟</h2>
-                        <p className="preview-about-text">{course.description}</p>
+                        {course.description?.trim() ? (
+                            <p className="preview-about-text">{course.description}</p>
+                        ) : (
+                            <EmptyState
+                                title="الوصف غير متوفر حالياً"
+                                message="لسه ما انضاف وصف لهذي الدورة."
+                            />
+                        )}
                     </div>
 
                     {/* Curriculum Section (Free vs Locked Blurred) */}

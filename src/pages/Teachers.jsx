@@ -63,7 +63,7 @@ const Teachers = () => {
         }
 
         if (!teachersRequestPromise) {
-            teachersRequestPromise = fetch('https://key-academy.fra1.digitaloceanspaces.com/landing-data/teachers.json')
+            teachersRequestPromise = fetch('https://fra1.digitaloceanspaces.com/key-academy-cloud/landing-data/teachers.json')
             .then(res => {
                 if (!res.ok) throw new Error('Failed to fetch')
                 return res.json()
@@ -214,7 +214,7 @@ const Teachers = () => {
                                 <motion.div key={teacher.id} className={`glass-card teacher-page-card color-${colorValue}`} variants={fadeInUp} initial="hidden" whileInView="visible" viewport={{ once: true }} custom={i} style={colorValue?.startsWith('#') ? { background: colorValue, borderColor: 'transparent', boxShadow: `0 10px 30px ${colorValue}33` } : {}}>
                                     <div className="teacher-avatar">
                                         {teacher.image ? (
-                                            <img src={teacher.image} alt={teacher.name} loading="lazy" decoding="async" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                            <img src={teacher.image} alt={teacher.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                         ) : (
                                             <div className="teacher-avatar-placeholder" style={{ borderRadius: 0 }}>{teacher.initials || 'أ'}</div>
                                         )}

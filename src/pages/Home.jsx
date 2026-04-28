@@ -73,7 +73,7 @@ const Home = () => {
     useEffect(() => {
         const fetchTeachers = async () => {
             try {
-                const data = await fetchJsonOnceWhilePending('https://key-academy.fra1.digitaloceanspaces.com/landing-data/teachers.json')
+                const data = await fetchJsonOnceWhilePending('https://fra1.digitaloceanspaces.com/key-academy-cloud/landing-data/teachers.json')
                 if (Array.isArray(data)) {
                     setTeachers(data)
                 }
@@ -230,7 +230,7 @@ const Home = () => {
                                 <div className={`glass-card teacher-card color-${colorValue}`} style={colorValue?.startsWith('#') ? { background: colorValue, borderColor: 'transparent', boxShadow: `0 10px 30px ${colorValue}33` } : {}}>
                                     <div className="tc-image-wrapper">
                                         {teacher.image ? (
-                                            <img src={teacher.image} alt={teacher.name} loading="lazy" decoding="async" />
+                                            <img src={teacher.image} alt={teacher.name} />
                                         ) : (
                                             <div className="tc-avatar-placeholder">{teacher.initials || 'أ'}</div>
                                         )}

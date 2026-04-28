@@ -25,7 +25,7 @@ const getTeacherProfile = async (id) => {
     if (!id) return null
 
     if (!teacherRequestCache.has(id)) {
-        const request = fetch(`https://key-academy.fra1.digitaloceanspaces.com/landing-data/teachers/${id}.json`)
+        const request = fetch(`https://fra1.digitaloceanspaces.com/key-academy-cloud/landing-data/teachers/${id}.json`)
             .then(res => {
                 if (!res.ok) throw new Error('Failed to load teacher profile')
                 return res.json()

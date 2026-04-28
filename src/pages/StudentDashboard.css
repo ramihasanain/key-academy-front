@@ -495,11 +495,21 @@
     gap: 30px;
 }
 
+.dash-courses-grid-single {
+    grid-template-columns: 1fr !important;
+}
+
+@media (min-width: 1200px) {
+    .dash-courses-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
 .premium-card {
     background: rgba(255, 255, 255, 0.8);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.8);
+    border: 2px solid #832a96;
     border-radius: var(--radius-xl);
     overflow: hidden;
     position: relative;
@@ -553,12 +563,12 @@
 
 .dash-teacher-avatar {
     width: calc(100% + 56px);
-    aspect-ratio: 1 / 1;
+    aspect-ratio: 16 / 9;
     margin-top: -28px;
     margin-left: -28px;
     margin-right: -28px;
     margin-bottom: 16px;
-    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+    border-radius: 0;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -566,6 +576,7 @@
     font-weight: 900;
     color: white;
     position: relative;
+    z-index: 1;
     overflow: hidden;
     box-shadow: 0 4px 15px rgba(0,0,0,0.05);
 }
@@ -577,7 +588,7 @@
 .teacher-real-avatar {
     width: 100%;
     height: 100%;
-    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+    border-radius: 0;
     object-fit: cover;
     transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -746,7 +757,7 @@
 }
 
 .dash-lessons-count { color: var(--text-secondary); }
-.dash-price { color: var(--orange); font-weight: 900; font-size: 1.1rem; }
+.dash-price { color: #832a96; font-weight: 900; font-size: 1.1rem; }
 
 /* Browse Heroes & Filters */
 .browse-hero-banner {
