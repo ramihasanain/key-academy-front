@@ -45,7 +45,25 @@ const Login = () => {
             })
             const data = await res.json()
             if (!res.ok) {
-                setErrorMsg(data.error || 'رقم الهاتف أو كلمة المرور غلط')
+                const collectErrors = (value, fieldPath = '') => {
+                    if (typeof value === 'string') {
+                        return [fieldPath ? `${fieldPath}: ${value}` : value]
+                    }
+                    if (Array.isArray(value)) {
+                        return value.flatMap((item) => collectErrors(item, fieldPath))
+                    }
+                    if (value && typeof value === 'object') {
+                        return Object.entries(value).flatMap(([key, item]) => {
+                            const nextFieldPath = fieldPath ? `${fieldPath}.${key}` : key
+                            return collectErrors(item, nextFieldPath)
+                        })
+                    }
+                    return []
+                }
+
+                const apiErrors = collectErrors(data)
+                const fallbackError = data.error || 'رقم الهاتف أو كلمة المرور غلط'
+                setErrorMsg(apiErrors.length ? apiErrors.join(' - ') : fallbackError)
                 return
             }
 
