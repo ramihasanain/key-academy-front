@@ -73,7 +73,7 @@ const Home = () => {
     useEffect(() => {
         const fetchTeachers = async () => {
             try {
-                const data = await fetchJsonOnceWhilePending(API + '/api/teachers/?limit=10')
+                const data = await fetchJsonOnceWhilePending('https://key-academy.fra1.digitaloceanspaces.com/landing-data/teachers.json')
                 if (Array.isArray(data)) {
                     setTeachers(data)
                 }

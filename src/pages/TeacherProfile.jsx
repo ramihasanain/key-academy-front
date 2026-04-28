@@ -1,9 +1,8 @@
 import { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
-import { API } from '../config'
 import { motion } from 'framer-motion'
-import { FaStar, FaGraduationCap, FaBriefcase, FaTrophy, FaChalkboardTeacher } from 'react-icons/fa'
-import { HiOutlineDocumentText, HiOutlineVideoCamera, HiOutlineUserGroup, HiOutlineEnvelope } from 'react-icons/hi2'
+import { FaBriefcase, FaTrophy, FaChalkboardTeacher } from 'react-icons/fa'
+import { HiOutlineDocumentText } from 'react-icons/hi2'
 import ParticleBackground from '../components/ParticleBackground'
 import './Teachers.css'
 
@@ -20,21 +19,54 @@ const staggerContainer = {
     visible: { opacity: 1, transition: { staggerChildren: 0.1 } }
 }
 
+const teacherRequestCache = new Map()
+
+const getTeacherProfile = async (id) => {
+    if (!id) return null
+
+    if (!teacherRequestCache.has(id)) {
+        const request = fetch(`https://key-academy.fra1.digitaloceanspaces.com/landing-data/teachers/${id}.json`)
+            .then(res => {
+                if (!res.ok) throw new Error('Failed to load teacher profile')
+                return res.json()
+            })
+            .catch((error) => {
+                teacherRequestCache.delete(id)
+                throw error
+            })
+        teacherRequestCache.set(id, request)
+    }
+
+    return teacherRequestCache.get(id)
+}
+
 const TeacherProfile = () => {
     const { id } = useParams()
     const [activeTab, setActiveTab] = useState('cv')
     const [teacher, setTeacher] = useState(null)
     const [loading, setLoading] = useState(true)
+    const [imageErrored, setImageErrored] = useState(false)
 
     useEffect(() => {
+        let cancelled = false
         setLoading(true)
-        fetch(`${API}/api/teachers/${id}/`)
-            .then(res => res.json())
+        setImageErrored(false)
+        getTeacherProfile(id)
             .then(data => {
-                setTeacher(data)
-                setLoading(false)
+                if (!cancelled) {
+                    setTeacher(data)
+                    setLoading(false)
+                }
             })
-            .catch(() => setLoading(false))
+            .catch((error) => {
+                if (!cancelled) {
+                    setLoading(false)
+                }
+            })
+
+        return () => {
+            cancelled = true
+        }
     }, [id])
 
     if (loading) {
@@ -65,10 +97,10 @@ const TeacherProfile = () => {
 
                         {/* Sidebar (Right side) */}
                         <aside className="profile-sidebar">
-                            <motion.div className={`glass-card teacher-card color-${teacher.color}`} initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} style={{ padding: 0, height: 'auto', ...(teacher.color?.startsWith('#') ? { background: teacher.color, borderColor: 'transparent', boxShadow: `0 10px 30px ${teacher.color}33` } : {}) }}>
+                            <motion.div className={`glass-card teacher-card profile-sidebar-card color-${teacher.color}`} initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} style={{ padding: 0, height: 'auto', ...(teacher.color?.startsWith('#') ? { background: teacher.color, borderColor: 'transparent', boxShadow: `0 10px 30px ${teacher.color}33` } : {}) }}>
                                 <div className="tc-image-wrapper" style={{ height: '280px' }}>
-                                    {teacher.image ? (
-                                        <img src={teacher.image} alt={teacher.name} />
+                                    {teacher.image && !imageErrored ? (
+                                        <img src={teacher.image} alt={teacher.name} onError={() => setImageErrored(true)} />
                                     ) : (
                                         <div className="tc-avatar-placeholder">{teacher.initials}</div>
                                     )}
@@ -77,7 +109,7 @@ const TeacherProfile = () => {
                                     <h4 style={{ fontSize: '1.5rem' }}>{teacher.name}</h4>
                                     <div className="tc-subject">{teacher.subject}</div>
                                     <div className="tc-grade">{teacher.grade}</div>
-                                    <Link to="/login" className="tc-btn" style={{ width: '100%', textAlign: 'center' }}>سجل بدوراتي</Link>
+                                    <Link to="/login" className="tc-btn profile-enroll-btn">سجل بدوراتي</Link>
                                 </div>
                             </motion.div>
                         </aside>

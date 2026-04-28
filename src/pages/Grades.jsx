@@ -21,6 +21,7 @@ import {
 import { FaMosque, FaDna, FaPenNib } from 'react-icons/fa'
 import SectionTitle from '../components/SectionTitle'
 import ParticleBackground from '../components/ParticleBackground'
+import EmptyState from '../components/core/EmptyState'
 import './Grades.css'
 
 const API_BASE = API + '/api'
@@ -164,14 +165,14 @@ const Grades = () => {
         setApiError(false)
 
         const fetchData = selectedSlug
-            ? safeFetchJson(`${API_BASE}/content/grades/${selectedSlug}/`)
+            ? safeFetchJson(`https://key-academy.fra1.digitaloceanspaces.com/landing-data/content/grades/${selectedSlug}.json`)
                 .then((gradeData) => [gradeData])
-            : safeFetchJson(`${API_BASE}/content/grades/`)
+            : safeFetchJson(`https://key-academy.fra1.digitaloceanspaces.com/landing-data/content/grades.json`)
                 .then(async (gradesList) => {
                     if (!Array.isArray(gradesList)) return []
                     const detailed = await Promise.all(
                         gradesList.map(g =>
-                            safeFetchJson(`${API_BASE}/content/grades/${g.slug}/`).catch(() => null)
+                            safeFetchJson(`https://key-academy.fra1.digitaloceanspaces.com/landing-data/content/grades/${g.slug}.json`).catch(() => null)
                         )
                     )
                     return detailed.filter(d => d && !d.error)
@@ -328,8 +329,11 @@ const Grades = () => {
                                                 </Link>
                                             </motion.div>
                                         )) : (
-                                            <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '40px 0', color: 'var(--text-muted)' }}>
-                                                لا توجد مواد لهذا الفرع حالياً.
+                                            <div style={{ gridColumn: '1/-1' }}>
+                                                <EmptyState
+                                                    title="لا توجد مواد لهذا الفرع حالياً"
+                                                    message="جرّب اختيار فرع آخر أو ارجع لاحقاً."
+                                                />
                                             </div>
                                         )}
                                     </motion.div>

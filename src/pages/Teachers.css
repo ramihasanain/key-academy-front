@@ -322,11 +322,81 @@
     top: 100px;
 }
 
-.teacher-sidebar-card {
-    padding: 30px 24px;
+.profile-sidebar-card {
+    border-radius: 24px;
+}
+
+.profile-sidebar-card .tc-image-wrapper {
+    background: rgba(255, 255, 255, 0.12);
+}
+
+.profile-sidebar-card .tc-image-wrapper img {
+    object-fit: cover;
+    object-position: center;
+}
+
+.profile-sidebar-card .tc-avatar-placeholder {
+    font-size: 3rem;
+    color: rgba(255, 255, 255, 0.9);
+    background: rgba(255, 255, 255, 0.12);
+}
+
+.profile-sidebar-card .tc-info-wrapper {
+    padding: 20px 20px 22px;
+    gap: 8px;
+}
+
+.profile-sidebar-card .tc-info-wrapper h4 {
+    margin-bottom: 0;
+    line-height: 1.35;
+    font-size: 1.4rem !important;
+}
+
+.profile-sidebar-card .tc-subject,
+.profile-sidebar-card .tc-grade {
+    margin-bottom: 0;
+    line-height: 1.5;
+}
+
+.profile-sidebar-card .tc-grade {
+    color: rgba(255, 255, 255, 0.92);
+    font-weight: 700;
+}
+
+.profile-sidebar-card .tc-btn {
+    margin-top: 14px;
+    width: 100%;
     text-align: center;
-    border-radius: 20px;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+    justify-content: center;
+    font-size: 0.98rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.profile-sidebar-card .tc-btn:hover {
+    transform: translateY(-1px) scale(1.01);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.18);
+}
+
+.profile-sidebar-card .profile-enroll-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: 46px;
+    border-radius: 14px;
+    font-size: 1rem;
+    letter-spacing: 0.1px;
+    font-weight: 900;
+    background: rgba(255, 255, 255, 0.96);
+    color: #1f2937;
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.16);
+}
+
+.profile-sidebar-card .profile-enroll-btn:hover {
+    background: #ffffff;
+    color: #111827;
+    transform: translateY(-2px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
 }
 
 .sidebar-avatar-wrapper {
