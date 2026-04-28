@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { API } from '../config'
 import { motion } from 'framer-motion'
 import { HiOutlinePhone, HiOutlineLockClosed, HiOutlineArrowLeftOnRectangle } from 'react-icons/hi2'
-import { useGoogleReCaptcha } from 'react-google-recaptcha-v3'
+// import { useGoogleReCaptcha } from 'react-google-recaptcha-v3'
 import ParticleBackground from '../components/ParticleBackground'
 import './Auth.css'
 
@@ -16,14 +16,14 @@ const Login = () => {
     const [loading, setLoading] = useState(false)
     const [errorMsg, setErrorMsg] = useState('')
     const navigate = useNavigate()
-    const { executeRecaptcha } = useGoogleReCaptcha();
+    // const { executeRecaptcha } = useGoogleReCaptcha();
     const handleSubmit = async (e) => {
         e.preventDefault()
-        if (!executeRecaptcha) {
-            alert("Captcha not ready");
-            return;
-          }
-        const token = await executeRecaptcha('login');
+        // if (!executeRecaptcha) {
+        //     alert("Captcha not ready");
+        //     return;
+        //   }
+        // const token = await executeRecaptcha('login');
         setErrorMsg('')
 
         if (!/^\d{11}$/.test(phone)) {
@@ -34,7 +34,9 @@ const Login = () => {
         setLoading(true)
         try {
             const endpoint = mfaRequired ? '/api/auth/2fa/verify/' : '/api/auth/login/'
-            const payload = mfaRequired ? { user_id: userId, code: mfaCode } : { phone, password, captcha_token: token}
+            const payload = mfaRequired ? { user_id: userId, code: mfaCode } : { phone, password
+                // , captcha_token: token
+            }
 
             const res = await fetch(API + endpoint, {
                 method: 'POST',

@@ -201,16 +201,16 @@ function App() {
             <Route path="/faq" element={<FAQ />} />
             <Route
               path="/login"
-              element={
-                <GoogleReCaptchaProvider
-                  reCaptchaKey={
-                    import.meta.env.VITE_GOOGLE_RECAPTCHA_KEY ||
-                    "6LeXlM4sAAAAAG-MrvJK1QQ2Ibly6ff36yS4R8pB"
-                  }
-                >
-                  <Login />
-                </GoogleReCaptchaProvider>
-              }
+              element={<Login />}
+              // element={
+              //   <GoogleReCaptchaProvider
+              //     reCaptchaKey={
+              //       import.meta.env.VITE_GOOGLE_RECAPTCHA_KEY
+              //     }
+              //   >
+              //     <Login />
+              //   </GoogleReCaptchaProvider>
+              // }
             />
             <Route path="/signup" element={<Signup />} />
             <Route
