@@ -1,6 +1,7 @@
 import { lazy, Suspense, useEffect } from 'react'
 import { Navigate, Routes, Route, useLocation } from 'react-router-dom'
 import { AnimatePresence } from 'framer-motion'
+import { GoogleReCaptchaProvider } from 'react-google-recaptcha-v3'
 import Navbar from './components/Navbar'
 import Footer from './components/Footer'
 import GlobalLoader from './components/core/GlobalLoader'
@@ -107,7 +108,11 @@ function App() {
                         <Route path="/teachers" element={<Teachers />} />
                         <Route path="/teachers/:id" element={<TeacherProfile />} />
                         <Route path="/faq" element={<FAQ />} />
-                        <Route path="/login" element={<Login />} />
+                        <Route path="/login" element={
+                            <GoogleReCaptchaProvider reCaptchaKey="6LeXlM4sAAAAAG-MrvJK1QQ2Ibly6ff36yS4R8pB">
+                                <Login />
+                            </GoogleReCaptchaProvider>
+                        } />
                         <Route path="/signup" element={<Signup />} />
                         <Route path="/dashboard" element={
                             <ProtectedRoute allowedRoles={['student']}>
