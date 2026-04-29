@@ -192,11 +192,11 @@ const ViewSlides = ({ lessonInfo, lessonContent, userData }) => {
                         {isFullscreen ? 'إنهاء التكبير ✖' : 'تكبير الشاشة ⛶'}
                     </button>
                 </div>
-                <div className="lv-sf-viewer interactive-html-wrap" style={{ width: '100%', flex: 1, padding: 0, background: '#fff', position: 'relative' }}>
+                <div className="lv-sf-viewer interactive-html-wrap" style={{ width: '100%', flex: 1, padding: 0, background: '#fff', position: 'relative', minHeight: 0, overflowY: 'auto', overflowX: 'hidden', display: 'block' }}>
                     {isIframe ? (
                         <div
                             dangerouslySetInnerHTML={{ __html: rawCode }}
-                            style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}
+                            style={{ width: '100%', minHeight: '100%', display: 'block' }}
                             ref={(el) => {
                                 if (el) {
                                     setTimeout(() => {
@@ -204,9 +204,10 @@ const ViewSlides = ({ lessonInfo, lessonContent, userData }) => {
                                         if (iframe) {
                                             iframe.style.width = '100%';
                                             iframe.style.height = '100%';
-                                            iframe.style.maxHeight = '100%';
+                                            iframe.style.minHeight = '100%';
                                             iframe.style.border = 'none';
                                             iframe.style.borderRadius = isFullscreen ? '0' : '0 0 16px 16px';
+                                            iframe.style.display = 'block';
                                         }
                                     }, 150);
                                 }
@@ -215,7 +216,7 @@ const ViewSlides = ({ lessonInfo, lessonContent, userData }) => {
                     ) : (
                         <iframe
                             srcDoc={rawCode + secureScript}
-                            style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none', backgroundColor: '#fff', borderRadius: isFullscreen ? '0' : '0 0 16px 16px' }}
+                            style={{ width: '100%', minHeight: '100%', height: '100%', border: 'none', backgroundColor: '#fff', borderRadius: isFullscreen ? '0' : '0 0 16px 16px', display: 'block' }}
                             title="السلايدات التفاعلية"
                         />
                     )}

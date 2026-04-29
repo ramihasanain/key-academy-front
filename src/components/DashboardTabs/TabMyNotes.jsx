@@ -44,6 +44,7 @@ const TabMyNotes = ({ myNotes, isLoading }) => {
                                     </div>
                                 </div>
                                 <div
+                                    className="dash-note-quill"
                                     style={{
                                         margin: '15px 0',
                                         lineHeight: '1.6',

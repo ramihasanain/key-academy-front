@@ -1,4 +1,4 @@
-import { useState, Suspense } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import { useParams } from 'react-router-dom'
 import { API } from '../../config'
 import robotVideoWebm from '../../assets/robot_website.webm'
@@ -17,6 +17,25 @@ const TabKeyAI = ({ lessonInfo, userData }) => {
     ])
     const [input, setInput] = useState('')
     const [isLoading, setIsLoading] = useState(false)
+    const [isSmallScreen, setIsSmallScreen] = useState(() =>
+        typeof window !== 'undefined' ? window.innerWidth < 1250 : false
+    )
+    const [isVerySmallScreen, setIsVerySmallScreen] = useState(() =>
+        typeof window !== 'undefined' ? window.innerWidth < 500 : false
+    )
+    const [isUltraSmallScreen, setIsUltraSmallScreen] = useState(() =>
+        typeof window !== 'undefined' ? window.innerWidth < 450 : false
+    )
+
+    useEffect(() => {
+        const handleResize = () => {
+            setIsSmallScreen(window.innerWidth < 1250)
+            setIsVerySmallScreen(window.innerWidth < 500)
+            setIsUltraSmallScreen(window.innerWidth < 450)
+        }
+        window.addEventListener('resize', handleResize)
+        return () => window.removeEventListener('resize', handleResize)
+    }, [])
 
     const sendMsg = async () => {
         if (!input.trim() || isLoading) return
@@ -60,16 +79,16 @@ const TabKeyAI = ({ lessonInfo, userData }) => {
     }
 
     return (
-        <div className="lv-tab-pane lv-fade" style={{ minHeight: '500px', display: 'flex', gap: '30px' }}>
+        <div className="lv-tab-pane lv-fade" style={{ minHeight: '500px', display: 'flex', gap: isSmallScreen ? '14px' : '30px', flexDirection: isSmallScreen ? 'column' : 'row', fontSize: isVerySmallScreen ? '13px' : 'inherit' }}>
             {/* The Robot Mascot Area (First in RTL = Right side) */}
-            <div className="lv-ai-robot-side" style={{ flex: '0 0 280px', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', minHeight: '100%', position: 'relative' }}>
+            <div className="lv-ai-robot-side" style={{ flex: isSmallScreen ? '0 0 auto' : '0 0 280px', display: isSmallScreen ? 'none' : 'flex', flexDirection: 'column', justifyContent: isSmallScreen ? 'flex-end' : 'center', alignItems: isSmallScreen ? 'flex-end' : 'center', minHeight: isSmallScreen ? 'auto' : '100%', position: 'relative', order: isSmallScreen ? 2 : 0, width: isSmallScreen ? '100%' : 'auto' }}>
                 <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%' }}>
                     <video 
                         autoPlay 
                         loop 
                         muted 
                         playsInline 
-                        style={{ width: '100%', maxWidth: '350px', height: 'auto', objectFit: 'contain', filter: 'drop-shadow(0 15px 30px rgba(0,0,0,0.15))' }}
+                        style={{ width: isSmallScreen ? '130px' : '100%', maxWidth: isSmallScreen ? '130px' : '350px', height: 'auto', objectFit: 'contain', filter: 'drop-shadow(0 15px 30px rgba(0,0,0,0.15))', opacity: isSmallScreen ? 0.9 : 1 }}
                     >
                         <source src={robotVideoMov} type='video/mp4; codecs="hvc1"' />
                         <source src={robotVideoWebm} type="video/webm" />
@@ -78,7 +97,7 @@ const TabKeyAI = ({ lessonInfo, userData }) => {
             </div>
 
             {/* Chat Area (Second in RTL = Left side) */}
-            <div className="lv-ai-chat-side" style={{ flex: 1, display: 'flex', flexDirection: 'column', background: 'var(--bg-glass)', borderRadius: '16px', padding: '24px', boxShadow: '0 8px 30px rgba(0,0,0,0.05)', border: '1px solid rgba(131, 42, 150, 0.1)', position: 'relative', userSelect: 'none' }} onContextMenu={(e) => e.preventDefault()}>
+            <div className="lv-ai-chat-side" style={{ flex: 1, display: 'flex', flexDirection: 'column', background: 'var(--bg-glass)', borderRadius: '16px', padding: isSmallScreen ? '16px' : '24px', boxShadow: '0 8px 30px rgba(0,0,0,0.05)', border: '1px solid rgba(131, 42, 150, 0.1)', position: 'relative', userSelect: 'none', minHeight: isSmallScreen ? '460px' : 'auto' }} onContextMenu={(e) => e.preventDefault()}>
                 
                 {/* Watermark Overlay */}
                 {userData && (
@@ -91,15 +110,27 @@ const TabKeyAI = ({ lessonInfo, userData }) => {
                     </div>
                 )}
 
-                <div className="lv-ai-header" style={{ borderBottom: '1px solid rgba(0,0,0,0.05)', paddingBottom: '16px', marginBottom: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'relative', zIndex: 1 }}>
+                <div className="lv-ai-header" style={{ borderBottom: '1px solid rgba(0,0,0,0.05)', paddingBottom: '16px', marginBottom: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'relative', zIndex: 1, gap: isVerySmallScreen ? '8px' : '12px' }}>
+                    {isSmallScreen && (
+                        <video
+                            autoPlay
+                            loop
+                            muted
+                            playsInline
+                            style={{ width: isVerySmallScreen ? '58px' : '72px', minWidth: isVerySmallScreen ? '58px' : '72px', height: isVerySmallScreen ? '58px' : '72px', objectFit: 'contain', filter: 'drop-shadow(0 8px 16px rgba(0,0,0,0.12))', opacity: 0.92 }}
+                        >
+                            <source src={robotVideoMov} type='video/mp4; codecs="hvc1"' />
+                            <source src={robotVideoWebm} type="video/webm" />
+                        </video>
+                    )}
                     <div className="lv-ai-info">
-                        <h4 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '10px' }}>Key AI <span className="lv-ai-badge">ذكاء اصطناعي</span></h4>
-                        <p style={{ margin: 0, marginTop: '4px' }}>مساعدك الشخصي لفهم الدرس بشكل أعمق</p>
+                        <h4 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '10px', fontSize: isVerySmallScreen ? '15px' : 'inherit' }}>Key AI <span className="lv-ai-badge" style={{ fontSize: isUltraSmallScreen ? '8px' : (isVerySmallScreen ? '10px' : 'inherit'), padding: isUltraSmallScreen ? '2px 6px' : undefined }}>ذكاء اصطناعي</span></h4>
+                        <p style={{ margin: 0, marginTop: '4px', fontSize: isVerySmallScreen ? '12px' : 'inherit' }}>مساعدك الشخصي لفهم الدرس بشكل أعمق</p>
                     </div>
-                    <div className="lv-ai-status"><span className="lv-gc-dot"></span> متصل</div>
+                    <div className="lv-ai-status" style={{ fontSize: isUltraSmallScreen ? '7px' : (isVerySmallScreen ? '10px' : 'inherit') }}><span className="lv-gc-dot"></span> متصل</div>
                 </div>
 
-                <div className="lv-ai-msgs" style={{ position: 'relative', zIndex: 1, overflowY: 'auto', flex: 1, paddingBottom: '15px' }}>
+                <div className="lv-ai-msgs" style={{ position: 'relative', zIndex: 1, overflowY: 'auto', flex: 1, paddingBottom: '15px', fontSize: isVerySmallScreen ? '12px' : 'inherit' }}>
                     {messages.map((msg, i) => (
                         <motion.div key={i} className={`lv-ai-msg ${msg.role}`} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
                             {msg.role === 'ai' && <div className="lv-ai-msg-avatar" style={{ background: 'transparent', padding: 0, border: 'none' }}>
@@ -144,6 +175,7 @@ const TabKeyAI = ({ lessonInfo, userData }) => {
                             }
                         }}
                         disabled={isLoading}
+                        style={{ fontSize: isVerySmallScreen ? '12px' : 'inherit' }}
                     />
                     <button className="lv-ai-send-btn" onClick={sendMsg} disabled={isLoading} style={{ opacity: isLoading ? 0.7 : 1, alignSelf: 'flex-end' }}>
                         {isLoading ? <span style={{ fontSize: '18px', animation: 'spin 1s linear infinite', display: 'inline-block' }}>⏳</span> : <HiOutlinePaperAirplane style={{ transform: 'scaleX(-1)' }} />}

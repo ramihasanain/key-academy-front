@@ -1120,3 +1120,85 @@
         border-radius: 10px;
     }
 }
+
+/* ===== Dashboard saved-note Quill output ===== */
+.dash-note-quill,
+.dash-note-quill p,
+.dash-note-quill li {
+    line-height: 1.6;
+}
+.dash-note-quill p { margin: 0 0 10px 0; }
+.dash-note-quill ul {
+    list-style: disc;
+    direction: rtl;
+    padding-right: 1.5em;
+    padding-left: 0;
+    margin-right: 0;
+    margin-bottom: 10px;
+}
+.dash-note-quill ol {
+    list-style: decimal;
+    direction: rtl;
+    padding-right: 1.5em;
+    padding-left: 0;
+    margin-right: 0;
+    margin-bottom: 10px;
+}
+.dash-note-quill li {
+    list-style-position: outside;
+    margin-bottom: 4px;
+    padding-right: 0.3em;
+}
+.dash-note-quill li.ql-align-left {
+    direction: ltr;
+    text-align: left;
+    padding-right: 0;
+    padding-left: 0.3em;
+}
+.dash-note-quill li.ql-align-right {
+    direction: rtl;
+    text-align: right;
+    padding-right: 0.3em;
+    padding-left: 0;
+}
+.dash-note-quill h1 {
+    font-size: 1.5rem;
+    font-weight: 800;
+    margin: 0.4em 0;
+    color: var(--text-primary, #1f2937);
+}
+.dash-note-quill h2 {
+    font-size: 1.25rem;
+    font-weight: 800;
+    margin: 0.4em 0;
+    color: var(--text-primary, #1f2937);
+}
+.dash-note-quill h3 {
+    font-size: 1.1rem;
+    font-weight: 800;
+    margin: 0.4em 0;
+    color: var(--text-primary, #1f2937);
+}
+.dash-note-quill blockquote {
+    border-right: 4px solid var(--primary, #832a96);
+    border-left: none;
+    padding: 8px 14px;
+    margin: 8px 0;
+    background: rgba(131, 42, 150, 0.05);
+    border-radius: 8px;
+    font-style: italic;
+    color: #475569;
+}
+.dash-note-quill a {
+    color: var(--primary, #832a96);
+    text-decoration: underline;
+}
+.dash-note-quill a:hover { opacity: 0.85; }
+.dash-note-quill strong, .dash-note-quill b { font-weight: 800; }
+.dash-note-quill em, .dash-note-quill i { font-style: italic; }
+.dash-note-quill u { text-decoration: underline; }
+.dash-note-quill s, .dash-note-quill del { text-decoration: line-through; }
+.dash-note-quill .ql-align-left { text-align: left; }
+.dash-note-quill .ql-align-center { text-align: center; }
+.dash-note-quill .ql-align-right { text-align: right; }
+.dash-note-quill .ql-align-justify { text-align: justify; }

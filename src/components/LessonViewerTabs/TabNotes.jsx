@@ -1,9 +1,18 @@
 import { useState, useEffect } from 'react'
-import ReactQuill from 'react-quill'
+import ReactQuill, { Quill } from 'react-quill'
 import 'react-quill/dist/quill.snow.css'
 import { API } from '../../config'
 import { HiOutlineComputerDesktop, HiOutlineGlobeAlt } from 'react-icons/hi2'
 import '../../pages/LessonViewer.css'
+
+const AlignFormat = Quill.import('formats/align')
+AlignFormat.whitelist = ['left', 'center', 'right', 'justify']
+Quill.register(AlignFormat, true)
+
+const QuillIcons = Quill.import('ui/icons')
+if (QuillIcons && QuillIcons.align && !QuillIcons.align.left) {
+    QuillIcons.align.left = QuillIcons.align['']
+}
 
 const notesRequestCache = new Map()
 
@@ -24,12 +33,26 @@ const TabNotes = ({ lessonId }) => {
     const [input, setInput] = useState('')
     const [loading, setLoading] = useState(true)
     const quillModules = {
-        toolbar: { container: '#lv-notes-toolbar' }
+        toolbar: [
+            [{ header: [1, 2, 3, false] }],
+            ['bold', 'italic', 'underline', 'strike'],
+            [{ list: 'ordered' }, { list: 'bullet' }],
+            [{ align: 'left' }, { align: 'center' }, { align: 'right' }, { align: 'justify' }],
+            ['blockquote'],
+            ['clean'],
+        ]
     }
     const quillFormats = [
+        'header',
         'bold',
         'italic',
-        'underline'
+        'underline',
+        'strike',
+        'list',
+        'bullet',
+        'align',
+        'link',
+        'blockquote'
     ]
 
     useEffect(() => {
@@ -85,11 +108,6 @@ const TabNotes = ({ lessonId }) => {
     return (
         <div className="lv-tab-pane lv-fade">
             <div className="lv-notes-editor">
-                <div className="lv-ne-toolbar" id="lv-notes-toolbar">
-                    <button className="lv-tb-b ql-bold" type="button" aria-label="Bold"></button>
-                    <button className="lv-tb-b ql-italic" type="button" aria-label="Italic"></button>
-                    <button className="lv-tb-b ql-underline" type="button" aria-label="Underline"></button>
-                </div>
                 <ReactQuill
                     className="lv-ne-area lv-ne-quill"
                     theme="snow"
