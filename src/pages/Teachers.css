@@ -324,15 +324,19 @@
 
 .profile-sidebar-card {
     border-radius: 24px;
+    overflow: hidden;
 }
 
 .profile-sidebar-card .tc-image-wrapper {
     background: rgba(255, 255, 255, 0.12);
+    border-radius: 24px 24px 0 0;
+    overflow: hidden;
 }
 
 .profile-sidebar-card .tc-image-wrapper img {
     object-fit: cover;
     object-position: center;
+    border-radius: 24px 24px 0 0;
 }
 
 .profile-sidebar-card .tc-avatar-placeholder {

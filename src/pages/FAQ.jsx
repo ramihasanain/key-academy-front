@@ -33,7 +33,7 @@ const FAQ = () => {
     useEffect(() => {
         const fetchFAQs = async () => {
             try {
-                const data = await fetchJsonOnceWhilePending('https://key-academy-cloud.fra1.digitaloceanspaces.com/landing-data/content/faq/list.json')
+                const data = await fetchJsonOnceWhilePending('https://key-academy-cloud.fra1.digitaloceanspaces.com/landing-data/faq/list.json')
                 setFaqData(data)
             } catch (error) {
                 console.error("Error fetching FAQs:", error)

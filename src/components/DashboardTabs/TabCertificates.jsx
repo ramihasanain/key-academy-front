@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion'
 import EmptyState from '../core/EmptyState'
 
-const TabCertificates = ({ certificates }) => {
+const TabCertificates = ({ certificates, isLoading = false }) => {
     const hasCertificates = Array.isArray(certificates) && certificates.length > 0
 
     return (
@@ -23,6 +23,7 @@ const TabCertificates = ({ certificates }) => {
                 </div>
             ) : (
                 <EmptyState
+                    isLoading={isLoading}
                     title="ما عندك شهادات بعد"
                     message="بعدك ما مكمل دورة حتى تنضاف شهادة هنا. أول ما تكمل دورة راح تظهر شهادتك."
                 />

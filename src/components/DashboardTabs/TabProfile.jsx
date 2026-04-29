@@ -1,8 +1,9 @@
 import { motion } from 'framer-motion'
 import { HiOutlineUser } from 'react-icons/hi2'
 import { useUser } from '../../hooks/useUser'
+import EmptyState from '../core/EmptyState'
 
-const TabProfile = ({ videoStats }) => {
+const TabProfile = ({ videoStats, isLoading = false }) => {
     const { userData } = useUser()
 
     if (!userData) return null;
@@ -68,7 +69,7 @@ const TabProfile = ({ videoStats }) => {
             <div className="section-header-row mt-6 pt-6" style={{marginTop: '20px',borderTop: '1px solid rgba(255,255,255,0.1)' }}>
                 <h2 className="dash-section-title">إحصائيات تفاعلات وأسئلة الفيديو 📊</h2>
             </div>
-            {videoStats && (
+            {videoStats ? (
                 <div className="dash-profile-card glass-panel premium-profile video-stats-card" style={{ marginTop: '20px' }}>
                     <div style={{ display: 'flex', gap: '20px', justifyContent: 'center', marginBottom: '30px', flexWrap: 'wrap' }}>
                         <div className="hq-stat-card" style={{ padding: '20px', borderRadius: '15px', textAlign: 'center', minWidth: '150px', flex: 1, background: 'rgba(56, 189, 248, 0.05)', border: '1px solid rgba(56, 189, 248, 0.2)' }}>
@@ -122,6 +123,12 @@ const TabProfile = ({ videoStats }) => {
                         )}
                     </div>
                 </div>
+            ) : (
+                <EmptyState
+                    isLoading={isLoading}
+                    title="ماكو إحصائيات بعد"
+                    message="أول ما تتفاعل ويا أسئلة الفيديو راح تبين كل الإحصائيات هنا."
+                />
             )}
         </motion.div>
     )

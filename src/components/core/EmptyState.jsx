@@ -6,8 +6,14 @@ const EmptyState = ({
     message = 'ماكو شي ينعرض بهل الصفحة حالياً.',
     logoSrc = '/key-icon-logo.png',
     logoAlt = 'Key Academy',
-    className = ''
+    className = '',
+    isLoading = false,
+    loadingTitle = 'جاري تحميل البيانات...',
+    loadingMessage = 'انتظر شوية، ده نجيب المعلومات.'
 }) => {
+    const displayTitle = isLoading ? loadingTitle : title
+    const displayMessage = isLoading ? loadingMessage : message
+
     return (
         <motion.div
             initial={{ opacity: 0, y: 12 }}
@@ -15,8 +21,8 @@ const EmptyState = ({
             className={`core-empty-state ${className}`.trim()}
         >
             <img src={logoSrc} alt={logoAlt} className="core-empty-state-logo" />
-            <h3 className="core-empty-state-title">{title}</h3>
-            <p className="core-empty-state-message">{message}</p>
+            <h3 className="core-empty-state-title">{displayTitle}</h3>
+            <p className="core-empty-state-message">{displayMessage}</p>
         </motion.div>
     )
 }

@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { HiOutlineClock } from 'react-icons/hi2'
 import EmptyState from '../core/EmptyState'
 
-const TabMyNotes = ({ myNotes }) => {
+const TabMyNotes = ({ myNotes, isLoading }) => {
     const hasNotes = Array.isArray(myNotes) && myNotes.length > 0
 
     return (
@@ -15,6 +15,7 @@ const TabMyNotes = ({ myNotes }) => {
                 {!hasNotes ? (
                     <div style={{ gridColumn: '1 / -1' }}>
                         <EmptyState
+                            isLoading={isLoading}
                             title="ما عندك ملاحظات بعد"
                             message="لهسه ما مسجل أي ملاحظة. أول ما تكتب ملاحظة أثناء الدرس راح تظهر هنا مباشرة."
                         />
@@ -34,7 +35,10 @@ const TabMyNotes = ({ myNotes }) => {
                                         {note.lesson_title && <span style={{ fontSize: '0.75rem', background: 'rgba(131, 42, 150, 0.1)', color: 'var(--primary)', padding: '4px 10px', borderRadius: '12px', fontWeight: 'bold' }}>{note.lesson_title}</span>}
                                     </div>
                                 </div>
-                                <p style={{ margin: '15px 0', lineHeight: '1.6', color: 'var(--text-main)', fontSize: '1.05rem', whiteSpace: 'pre-wrap', flexGrow: 1 }}>{note.content}</p>
+                                <div
+                                    style={{ margin: '15px 0', lineHeight: '1.6', color: 'var(--text-main)', fontSize: '1.05rem', flexGrow: 1 }}
+                                    dangerouslySetInnerHTML={{ __html: note.content || '' }}
+                                />
                                 {note.lesson && (
                                     <div className="dash-btn-secondary premium-btn" style={{ marginTop: 'auto', textAlign: 'center', padding: '10px' }}>
                                         الذهاب للدرس المنشورة فيه

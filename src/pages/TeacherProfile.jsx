@@ -98,16 +98,16 @@ const TeacherProfile = () => {
                         {/* Sidebar (Right side) */}
                         <aside className="profile-sidebar">
                             <motion.div className={`glass-card teacher-card profile-sidebar-card color-${teacher.color}`} initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} style={{ padding: 0, height: 'auto', ...(teacher.color?.startsWith('#') ? { background: teacher.color, borderColor: 'transparent', boxShadow: `0 10px 30px ${teacher.color}33` } : {}) }}>
-                                <div className="tc-image-wrapper" style={{ height: '280px' }}>
+                                <div className="tc-image-wrapper" style={{ height: '330px' }}>
                                     {teacher.image && !imageErrored ? (
-                                        <img src={teacher.image} alt={teacher.name} onError={() => setImageErrored(true)} />
+                                        <img src={teacher.image} alt={teacher.name} onError={() => setImageErrored(true)} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                     ) : (
                                         <div className="tc-avatar-placeholder">{teacher.initials}</div>
                                     )}
                                 </div>
                                 <div className="tc-info-wrapper">
                                     <h4 style={{ fontSize: '1.5rem' }}>{teacher.name}</h4>
-                                    <div className="tc-subject">{teacher.subject}</div>
+                                    <div className="tc-subject" style={{ color: 'white' }}>{teacher.subject}</div>
                                     <div className="tc-grade">{teacher.grade}</div>
                                     <Link to="/login" className="tc-btn profile-enroll-btn">سجل بدوراتي</Link>
                                 </div>

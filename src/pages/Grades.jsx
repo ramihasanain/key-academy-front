@@ -114,12 +114,26 @@ const safeFetchJson = (url) =>
         return request
     })()
 
-const getSlugFromRoute = (routeGradeId) => {
+const normalizeGradeIdFromRoute = (routeGradeId) => {
     if (!routeGradeId) return null
     const lowered = routeGradeId.toLowerCase()
-    if (lowered === 'grade-6' || lowered.includes('sixth')) return 'grade-6'
-    if (lowered === 'grade-3' || lowered.includes('third')) return 'grade-3'
-    return lowered.startsWith('grade-') ? lowered : null
+    if (lowered === 'grade-6' || lowered.includes('sixth')) return { id: 1, slug: 'grade-6' }
+    if (lowered === 'grade-3' || lowered.includes('third')) return { id: 2, slug: 'grade-3' }
+    if (lowered.startsWith('grade-')) return { slug: lowered }
+    return null
+}
+
+const gradeMatchesRoute = (grade, routeMatch) => {
+    if (!routeMatch) return true
+    if (routeMatch.id && Number(grade?.id) === Number(routeMatch.id)) return true
+    if (routeMatch.slug && grade?.slug === routeMatch.slug) return true
+    return false
+}
+
+const buildGradeDetailsUrl = (grade) => {
+    if (grade?.id) return `https://key-academy-cloud.fra1.digitaloceanspaces.com/landing-data/grades/details/${grade.id}.json`
+    if (grade?.slug) return `https://key-academy-cloud.fra1.digitaloceanspaces.com/landing-data/grades/details/${grade.slug}.json`
+    return null
 }
 
 const subjectInBranch = (subject, branchName) => {
@@ -159,20 +173,23 @@ const Grades = () => {
     const [selectedBranch, setSelectedBranch] = useState({}) // { [gradeSlug]: 'علمي' | 'أدبي' | 'all' }
 
     useEffect(() => {
-        const selectedSlug = getSlugFromRoute(gradeId)
+        const routeMatch = normalizeGradeIdFromRoute(gradeId)
 
         setLoading(true)
         setApiError(false)
 
-        const fetchData = selectedSlug
-            ? safeFetchJson(`https://key-academy-cloud.fra1.digitaloceanspaces.com/landing-data/content/grades/details/${selectedSlug}.json`)
-                .then((gradeData) => [gradeData])
-            : safeFetchJson(`https://key-academy-cloud.fra1.digitaloceanspaces.com/landing-data/content/grades/list.json`)
+        const fetchData = routeMatch?.id
+            ? safeFetchJson(`https://key-academy-cloud.fra1.digitaloceanspaces.com/landing-data/grades/details/${routeMatch.id}.json`)
+                .then((gradeData) => gradeData && !gradeData.error ? [gradeData] : [])
+            : safeFetchJson(`https://key-academy-cloud.fra1.digitaloceanspaces.com/landing-data/grades/list.json`)
                 .then(async (gradesList) => {
                     if (!Array.isArray(gradesList)) return []
                     const detailed = await Promise.all(
-                        gradesList.map(g =>
-                            safeFetchJson(`https://key-academy-cloud.fra1.digitaloceanspaces.com/landing-data/content/grades/details/${g.slug}.json`).catch(() => null)
+                        gradesList.map((g) => {
+                            const detailsUrl = buildGradeDetailsUrl(g)
+                            if (!detailsUrl) return Promise.resolve(null)
+                            return safeFetchJson(detailsUrl).catch(() => null)
+                        }
                         )
                     )
                     return detailed.filter(d => d && !d.error)
@@ -239,8 +256,8 @@ const Grades = () => {
                 (() => {
                     const gradesToRender = grades.filter(data => {
                         if (!gradeId) return true
-                        const expectedSlug = getSlugFromRoute(gradeId)
-                        return expectedSlug ? data.slug === expectedSlug : data.slug === gradeId
+                        const routeMatch = normalizeGradeIdFromRoute(gradeId)
+                        return gradeMatchesRoute(data, routeMatch)
                     });
 
                     if (gradesToRender.length === 0) {

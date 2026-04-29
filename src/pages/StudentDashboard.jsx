@@ -29,6 +29,7 @@ import TabCertificates from '../components/DashboardTabs/TabCertificates'
 import TabMyNotes from '../components/DashboardTabs/TabMyNotes'
 import TabProfile from '../components/DashboardTabs/TabProfile'
 import ImageCardSkeleton from '../components/core/ImageCardSkeleton'
+import EmptyState from '../components/core/EmptyState'
 import './StudentDashboard.css'
 
 
@@ -93,6 +94,10 @@ const StudentDashboard = () => {
     const [allCourses, setAllCourses] = useState([])
     const [loadingCourses, setLoadingCourses] = useState(true)
     const [loadingMyCourses, setLoadingMyCourses] = useState(true)
+    const [loadingCompletedCourses, setLoadingCompletedCourses] = useState(false)
+    const [loadingCertificates, setLoadingCertificates] = useState(false)
+    const [loadingMyNotes, setLoadingMyNotes] = useState(false)
+    const [loadingVideoStats, setLoadingVideoStats] = useState(false)
     const [stats, setStats] = useState({ active_courses: 0, completed_lessons: 0, overall_progress: 0, certificates_count: 0 })
     const [myCourses, setMyCourses] = useState([])
     const [completedCourses, setCompletedCourses] = useState([])
@@ -189,6 +194,7 @@ const StudentDashboard = () => {
         }
 
         else if (activeTab === 'completed') {
+            setLoadingCompletedCourses(true)
             fetch(API + '/api/enrollments/completed/', { headers })
                 .then(res => res.json())
                 .then(data => {
@@ -202,10 +208,13 @@ const StudentDashboard = () => {
                         date: new Date(e.completed_at || e.enrolled_at).toLocaleDateString('ar-IQ'),
                         lastVisit: 'مكتملة'
                     })));
-                }).catch(console.error);
+                })
+                .catch(console.error)
+                .finally(() => setLoadingCompletedCourses(false));
         }
 
         else if (activeTab === 'certificates') {
+            setLoadingCertificates(true)
             fetch(API + '/api/enrollments/certificates/', { headers })
                 .then(res => res.json())
                 .then(data => {
@@ -215,21 +224,27 @@ const StudentDashboard = () => {
                         issueDate: new Date(c.issue_date).toLocaleDateString('ar-IQ'),
                         file: c.pdf_file
                     })));
-                }).catch(console.error);
+                })
+                .catch(console.error)
+                .finally(() => setLoadingCertificates(false));
         }
 
         else if (activeTab === 'my-notes') {
+            setLoadingMyNotes(true)
             fetch(API + '/api/interactions/notes/', { headers })
                 .then(res => res.json())
                 .then(data => setMyNotes(data))
-                .catch(console.error);
+                .catch(console.error)
+                .finally(() => setLoadingMyNotes(false));
         }
 
         else if (activeTab === 'profile') {
+            setLoadingVideoStats(true)
             fetch(API + '/api/interactions/video-stats/', { headers })
                 .then(res => res.json())
                 .then(data => setVideoStats(data))
-                .catch(console.error);
+                .catch(console.error)
+                .finally(() => setLoadingVideoStats(false));
         }
 
     }, [activeTab]);
@@ -512,17 +527,17 @@ const StudentDashboard = () => {
 
                 {/* ===== COMPLETED ===== */}
                 {activeTab === 'completed' && (
-                    <TabCompleted completedCourses={completedCourses} />
+                    <TabCompleted completedCourses={completedCourses} isLoading={loadingCompletedCourses} />
                 )}
 
                 {/* ===== CERTIFICATES ===== */}
                 {activeTab === 'certificates' && (
-                    <TabCertificates certificates={certificates} />
+                    <TabCertificates certificates={certificates} isLoading={loadingCertificates} />
                 )}
 
                 {/* ===== MY NOTES ===== */}
                 {activeTab === 'my-notes' && (
-                    <TabMyNotes myNotes={myNotes} />
+                    <TabMyNotes myNotes={myNotes} isLoading={loadingMyNotes} />
                 )}
 
                 {/* ===== BROWSE BY TEACHER/SUBJECT ===== */}
@@ -560,17 +575,18 @@ const StudentDashboard = () => {
                             )}
                         </div>
                         {filteredCourses.length === 0 && !loadingCourses && (
-                            <div className="dash-no-results glass-panel">
-                                <span className="no-res-icon">🔍</span>
-                                <p>ما داحصل أي دورة بهذي المواصفات</p>
-                            </div>
+                            <EmptyState
+                                className="dash-no-results glass-panel"
+                                title="ماكو دورات مطابقة حالياً"
+                                message="غيّر الفلاتر أو اختار أستاذ/مادة ثانية حتى تطلعلك نتائج."
+                            />
                         )}
                     </motion.div>
                 )}
 
                 {/* ===== PROFILE ===== */}
                 {activeTab === 'profile' && (
-                    <TabProfile videoStats={videoStats} />
+                    <TabProfile videoStats={videoStats} isLoading={loadingVideoStats} />
                 )}
             </main>
 

@@ -2,7 +2,7 @@ import { motion } from 'framer-motion'
 import { HiOutlineClock, HiOutlineCheckCircle } from 'react-icons/hi2'
 import EmptyState from '../core/EmptyState'
 
-const TabCompleted = ({ completedCourses }) => {
+const TabCompleted = ({ completedCourses, isLoading = false }) => {
     const hasCompletedCourses = Array.isArray(completedCourses) && completedCourses.length > 0
 
     return (
@@ -39,6 +39,7 @@ const TabCompleted = ({ completedCourses }) => {
                 </div>
             ) : (
                 <EmptyState
+                    isLoading={isLoading}
                     title="ما عندك دورات مكتملة بعد"
                     message="هسه ماكو كورسات مكتملة للآن. كمّل دراسة دوراتك الحالية وراح تشوفها هنا مباشرة."
                 />
