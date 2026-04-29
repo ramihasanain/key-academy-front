@@ -73,9 +73,9 @@ const SCHEMAS = {
         ]
     },
     activationcards: {
-        title: 'كارت تفعيل', endpoint: 'activationcards',
+        title: 'كودتفعيل', endpoint: 'activationcards',
         fields: [
-            { key: 'code', label: 'كود الكارت (14 رقم)', type: 'text', required: true },
+            { key: 'code', label: 'كود الكود(14 رقم)', type: 'text', required: true },
             { key: 'course', label: 'رقم الدورة المرتبطة بالـ ID', type: 'number', required: true },
             { key: 'is_used', label: 'تم الاستخدام؟', type: 'boolean' }
         ]

@@ -701,7 +701,7 @@ const LessonViewer = () => {
 
     const handleContentChange = (id) => {
         if (isPreview && id !== 'video') {
-            alert('هذا المحتوى مقفول بالوضع التجريبي! اكتب كارت الاشتراك جوة حتى تفتحه 💎')
+            alert('هذا المحتوى مقفول بالوضع التجريبي! اكتب كودالاشتراك جوة حتى تفتحه 💎')
             return
         }
         setActiveContent(id)
@@ -834,12 +834,12 @@ const LessonViewer = () => {
                                 <div className="lv-pb-icon-light"><HiOutlineSparkles /></div>
                                 <div className="lv-pb-text">
                                     <h3>انت دتشوف الدرس بـ "الوضع التجريبي"</h3>
-                                    <p>حتى تفتح كل الدروس والملازم والامتحانات.. اكتب كارت الاشتراك مالتك جوة.</p>
+                                    <p>حتى تفتح كل الدروس والمستندات والامتحانات.. اكتب كودالاشتراك مالتك جوة.</p>
                                 </div>
                             </div>
                             <form className="lv-pb-form-light" onSubmit={handlePreviewActivate}>
                                 <div className="lv-pb-input-wrap">
-                                    <input type="text" placeholder="اكتب كارت الاشتراك (14 رقم)" value={previewCode} onChange={e => setPreviewCode(e.target.value)} disabled={isActivating} maxLength={14} />
+                                    <input type="text" placeholder="اكتب كودالاشتراك (14 رقم)" value={previewCode} onChange={e => setPreviewCode(e.target.value)} disabled={isActivating} maxLength={14} />
                                 </div>
                                 <button type="submit" className="premium-btn exact-btn-purple" disabled={isActivating}>
                                     {isActivating ? 'دا يفتح...' : 'فعل كل الدروس'}

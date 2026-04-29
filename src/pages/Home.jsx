@@ -73,7 +73,7 @@ const Home = () => {
     useEffect(() => {
         const fetchTeachers = async () => {
             try {
-                const data = await fetchJsonOnceWhilePending('https://fra1.digitaloceanspaces.com/key-academy-cloud/landing-data/teachers.json')
+                const data = await fetchJsonOnceWhilePending('https://key-academy-cloud.fra1.digitaloceanspaces.com/landing-data/teachers/list.json')
                 if (Array.isArray(data)) {
                     setTeachers(data)
                 }
@@ -199,7 +199,7 @@ const Home = () => {
                                             <Link to="/grades/sixth-literary" className="grade-branch-tag">الفرع الأدبي</Link>
                                         </>
                                     ) : (
-                                        <Link to={grade.link} className="grade-branch-tag" style={{ width: '100%', justifyContent: 'center' }}>المنهج المتكامل</Link>
+                                        <Link to={grade.link} className="grade-branch-tag" style={{ width: '100%', justifyContent: 'center' }}>المنهاج المتكامل</Link>
                                     )}
                                 </div>
                             </motion.div>

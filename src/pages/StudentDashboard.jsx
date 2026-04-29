@@ -1,4 +1,4 @@
-import { memo, useState, useEffect, useRef } from 'react'
+import { memo, useState, useEffect, useRef, useMemo } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { API } from '../config'
 import { useUser } from '../hooks/useUser'
@@ -91,7 +91,6 @@ const StudentDashboard = () => {
 
     // Real API Data states
     const [allCourses, setAllCourses] = useState([])
-    const [allTeachers, setAllTeachers] = useState([])
     const [loadingCourses, setLoadingCourses] = useState(true)
     const [loadingMyCourses, setLoadingMyCourses] = useState(true)
     const [stats, setStats] = useState({ active_courses: 0, completed_lessons: 0, overall_progress: 0, certificates_count: 0 })
@@ -101,7 +100,7 @@ const StudentDashboard = () => {
     const [myNotes, setMyNotes] = useState([])
     const [videoStats, setVideoStats] = useState(null)
     const fetchedTabsRef = useRef(new Set())
-    const browseRequestKeyRef = useRef('')
+    const browseCoursesFetchedRef = useRef(false)
     const statsFetchedRef = useRef(false)
 
     const { userData } = useUser()
@@ -233,28 +232,15 @@ const StudentDashboard = () => {
                 .catch(console.error);
         }
 
-        else if (activeTab === 'browse-courses') {
-            fetch('https://fra1.digitaloceanspaces.com/key-academy-cloud/landing-data/teachers.json')
-                .then(res => res.json())
-                .then(data => setAllTeachers(data))
-                .catch(console.error)
-        }
-
     }, [activeTab]);
 
     useEffect(() => {
         if (activeTab === 'browse-courses') {
-            const requestKey = `${activeTab}|${filterTeacher}|${filterSubject}|${filterGrade}`;
-            if (browseRequestKeyRef.current === requestKey) return;
-            browseRequestKeyRef.current = requestKey;
+            if (browseCoursesFetchedRef.current) return;
+            browseCoursesFetchedRef.current = true;
 
             setLoadingCourses(true);
-            let url = 'https://fra1.digitaloceanspaces.com/key-academy-cloud/landing-data/courses.json'; // Fetch 20 max to avoid explosion
-            if (filterTeacher !== 'الكل') url += `&teacher=${filterTeacher}`;
-            if (filterSubject !== 'الكل') url += `&subject=${encodeURIComponent(filterSubject)}`;
-            if (filterGrade !== 'الكل') url += `&grade=${encodeURIComponent(filterGrade)}`;
-            
-            fetch(url)
+            fetch('https://key-academy-cloud.fra1.digitaloceanspaces.com/landing-data/courses/list.json')
                 .then(res => res.json())
                 .then(data => {
                     setAllCourses(data);
@@ -265,7 +251,29 @@ const StudentDashboard = () => {
                     setLoadingCourses(false);
                 });
         }
-    }, [activeTab, filterTeacher, filterSubject, filterGrade]);
+    }, [activeTab]);
+
+    const availableTeachers = useMemo(() => {
+        const teacherMap = new Map();
+        allCourses.forEach(course => {
+            if (!teacherMap.has(course.teacher_id)) {
+                teacherMap.set(course.teacher_id, {
+                    id: course.teacher_id,
+                    name: course.teacher_name
+                });
+            }
+        });
+        return Array.from(teacherMap.values());
+    }, [allCourses]);
+
+    const filteredCourses = useMemo(() => {
+        return allCourses.filter(course => {
+            const matchesTeacher = filterTeacher === 'الكل' || String(course.teacher_id) === String(filterTeacher);
+            const matchesSubject = filterSubject === 'الكل' || course.subject === filterSubject;
+            const matchesGrade = filterGrade === 'الكل' || course.grade === filterGrade;
+            return matchesTeacher && matchesSubject && matchesGrade;
+        });
+    }, [allCourses, filterTeacher, filterSubject, filterGrade]);
 
     const navItems = [
         { id: 'my-courses', label: 'دوراتي الحالية', icon: <HiOutlineBookOpen /> },
@@ -523,18 +531,18 @@ const StudentDashboard = () => {
 
                         <div className="browse-hero-banner glass-panel">
                             <h2>دور على الدروس اللي تحتاجها 🔭</h2>
-                            <p>اختار الأستاذ والمادة اللي تناسبك وفعل كارت التفعيل مالتك</p>
+                            <p>اختار الأستاذ والمادة اللي تناسبك وفعل كودالتفعيل مالتك</p>
 
                             <div className="dash-filters premium-filters">
                                 <div className="dash-filter-group">
-                                    <label>تفلتر حسب الأستاذ</label>
+                                    <label>فلتر حسب الأستاذ</label>
                                     <select className="glass-select" value={filterTeacher} onChange={e => setFilterTeacher(e.target.value)}>
                                         <option value="الكل">كل الأساتذة</option>
-                                        {allTeachers.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
+                                        {availableTeachers.map(t => <option key={t.id} value={String(t.id)}>{t.name}</option>)}
                                     </select>
                                 </div>
                                 <div className="dash-filter-group">
-                                    <label>تفلتر حسب المادة</label>
+                                    <label>فلتر حسب المادة</label>
                                     <select className="glass-select" value={filterSubject} onChange={e => setFilterSubject(e.target.value)}>
                                         {subjects.map(s => <option key={s} value={s}>{s === 'الكل' ? 'كل المواد' : s}</option>)}
                                     </select>
@@ -546,12 +554,12 @@ const StudentDashboard = () => {
                             {loadingCourses ? (
                                 <ImageCardSkeleton count={6} />
                             ) : (
-                                allCourses.map((course, i) => (
+                                filteredCourses.map((course, i) => (
                                     <BrowseCourseCard key={course.id} course={course} i={i} />
                                 ))
                             )}
                         </div>
-                        {allCourses.length === 0 && !loadingCourses && (
+                        {filteredCourses.length === 0 && !loadingCourses && (
                             <div className="dash-no-results glass-panel">
                                 <span className="no-res-icon">🔍</span>
                                 <p>ما داحصل أي دورة بهذي المواصفات</p>
@@ -578,7 +586,7 @@ const StudentDashboard = () => {
                             <div className="enroll-modal-icon float-anim">
                                 <HiOutlineKey />
                             </div>
-                            <h3 className="gradient-text">فعل كارت الاشتراك</h3>
+                            <h3 className="gradient-text">فعل كودالاشتراك</h3>
 
                             <div className="modal-course-card">
                                 <p className="enroll-modal-course">{enrollModal.title}</p>

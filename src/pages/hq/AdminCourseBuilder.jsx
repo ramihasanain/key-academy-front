@@ -930,7 +930,7 @@ export const AdminCourseBuilder = ({ id }) => {
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
                     <h3 style={{ margin: 0, fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
                         <HiOutlineDocumentText size={22} color="var(--hq-primary)" />
-                        3. الملازم ومستندات الدورة الآمنة (Course Library)
+                        3. المستندات الدورة الآمنة (Course Library)
                     </h3>
                     <button className="hq-btn-secondary" onClick={addCourseDoc} style={{ background: '#f8fafc', color: 'var(--hq-primary)', border: '1px solid #cbd5e1', padding: '10px 20px', borderRadius: '10px' }}>
                         <HiOutlinePlus size={20} /> <span>إضافة ملف PDF للدورة</span>
@@ -959,7 +959,7 @@ export const AdminCourseBuilder = ({ id }) => {
                             <button className="hq-action-btn delete" onClick={() => removeCourseDoc(dIndex)}><HiOutlineTrash size={18} /></button>
                         </div>
                     ))}
-                    {courseDocs.length === 0 && <p style={{ textAlign: 'center', color: '#94a3b8', margin: 0 }}>لا توجد أي ملازم مرفقة بكامل الدورة حالياً. استخدم هذا القسم لرفع أسئلة وزارية أو ملف شامل.</p>}
+                    {courseDocs.length === 0 && <p style={{ textAlign: 'center', color: '#94a3b8', margin: 0 }}>لا توجد أي مستندات مرفقة بكامل الدورة حالياً. استخدم هذا القسم لرفع أسئلة وزارية أو ملف شامل.</p>}
                 </div>
             </div>
 

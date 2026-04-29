@@ -78,9 +78,9 @@ const TabDocs = ({ lessonInfo, courseId, userData }) => {
 
     return (
         <div className="lv-tab-pane lv-fade">
-            <h4 className="lv-section-label">ملازم ومرفقات الدرس</h4>
+            <h4 className="lv-section-label">مستندات الدرس</h4>
             {docsList.length === 0 ? (
-                <p style={{ color: '#94a3b8' }}>لا توجد ملفات مرفقة بهذا الدرس حالياً.</p>
+                <p style={{ color: '#94a3b8' }}>لا توجد مستندات مرفقة بهذا الدرس حالياً.</p>
             ) : (
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '24px' }}>
                     {docsList.map((doc, index) => (

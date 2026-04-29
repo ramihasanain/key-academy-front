@@ -30,6 +30,7 @@ const Signup = () => {
     const [password, setPassword] = useState('')
     const [confirmPassword, setConfirmPassword] = useState('')
     const [city, setCity] = useState('بغداد')
+    const [area, setArea] = useState('')
     const [grade, setGrade] = useState('الصف السادس الإعدادي')
     const [branch, setBranch] = useState('الفرع العلمي')
 
@@ -55,10 +56,14 @@ const Signup = () => {
     // OTP
     const [otp, setOtp] = useState(['', '', '', '', '', ''])
     const otpRefs = useRef([])
+    const hasFetchedCitiesRef = useRef(false)
     const navigate = useNavigate()
 
     // جلب المدن من الباك إند
     useEffect(() => {
+        if (hasFetchedCitiesRef.current) return
+        hasFetchedCitiesRef.current = true
+
         fetch(API + '/api/v1/content/cities/')
             .then(res => res.json())
             .then(data => setCitiesList(data))
@@ -75,6 +80,12 @@ const Signup = () => {
                 ])
             })
     }, [])
+
+    useEffect(() => {
+        if (city !== 'بغداد') {
+            setArea('')
+        }
+    }, [city])
 
     const handleSignup = async (e) => {
         e.preventDefault()
@@ -105,6 +116,7 @@ const Signup = () => {
                     last_name: lastName,
                     parent_phone: parentPhone,
                     city,
+                    area: city === 'بغداد' ? area : null,
                     grade,
                     branch: grade === 'الثالث المتوسط' ? '' : branch,
                     password,
@@ -395,6 +407,21 @@ const Signup = () => {
                                             <HiOutlineMapPin className="input-icon select-icon" />
                                         </div>
                                     </div>
+
+                                    {city === 'بغداد' && (
+                                        <div className="input-group">
+                                            <label>المنطقة</label>
+                                            <div className="input-wrapper">
+                                                <input
+                                                    type="text"
+                                                    placeholder="اكتب المنطقة"
+                                                    value={area}
+                                                    onChange={(e) => setArea(e.target.value)}
+                                                />
+                                                <HiOutlineMapPin className="input-icon" />
+                                            </div>
+                                        </div>
+                                    )}
 
                                     {/* Grade & Branch */}
                                     <div className="input-group">

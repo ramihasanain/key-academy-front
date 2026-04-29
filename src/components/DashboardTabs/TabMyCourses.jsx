@@ -20,7 +20,7 @@ const TabMyCourses = ({ myCourses, stats, StatsRow, isLoading = false }) => {
             <StatsRow stats={stats} />
 
             <div className="section-header-row">
-                <h2 className="dash-section-title">دورات أدرسها هسة <span className="title-badge">مباشر</span></h2>
+                <h2 className="dash-section-title">دورات أدرسها هسة</h2>
             </div>
 
             <div className={`dash-courses-grid ${showEmptyState ? 'dash-courses-grid-single' : ''}`.trim()}>
@@ -29,7 +29,7 @@ const TabMyCourses = ({ myCourses, stats, StatsRow, isLoading = false }) => {
                 ) : showEmptyState ? (
                     <EmptyState
                         title="ما عندك دورات حالياً"
-                        message="بعدك ما مشترك بأي دورة. اختار مادة من تبويب اكتشف مواد جديدة."
+                        message="بعدك ما مشترك بأي دورة. اختار مادة اكتشف مواد جديدة."
                     />
                 ) : (
                     myCourses.map((course, i) => (

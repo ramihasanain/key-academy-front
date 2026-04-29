@@ -165,14 +165,14 @@ const Grades = () => {
         setApiError(false)
 
         const fetchData = selectedSlug
-            ? safeFetchJson(`https://fra1.digitaloceanspaces.com/key-academy-cloud/landing-data/content/grades/${selectedSlug}.json`)
+            ? safeFetchJson(`https://key-academy-cloud.fra1.digitaloceanspaces.com/landing-data/content/grades/details/${selectedSlug}.json`)
                 .then((gradeData) => [gradeData])
-            : safeFetchJson(`https://fra1.digitaloceanspaces.com/key-academy-cloud/landing-data/content/grades.json`)
+            : safeFetchJson(`https://key-academy-cloud.fra1.digitaloceanspaces.com/landing-data/content/grades/list.json`)
                 .then(async (gradesList) => {
                     if (!Array.isArray(gradesList)) return []
                     const detailed = await Promise.all(
                         gradesList.map(g =>
-                            safeFetchJson(`https://fra1.digitaloceanspaces.com/key-academy-cloud/landing-data/content/grades/${g.slug}.json`).catch(() => null)
+                            safeFetchJson(`https://key-academy-cloud.fra1.digitaloceanspaces.com/landing-data/content/grades/details/${g.slug}.json`).catch(() => null)
                         )
                     )
                     return detailed.filter(d => d && !d.error)

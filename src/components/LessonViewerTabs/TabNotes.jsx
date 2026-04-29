@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react'
+import ReactQuill from 'react-quill'
+import 'react-quill/dist/quill.snow.css'
 import { API } from '../../config'
 import { HiOutlineComputerDesktop, HiOutlineGlobeAlt } from 'react-icons/hi2'
 import '../../pages/LessonViewer.css'
@@ -21,6 +23,14 @@ const TabNotes = ({ lessonId }) => {
     const [notes, setNotes] = useState([])
     const [input, setInput] = useState('')
     const [loading, setLoading] = useState(true)
+    const quillModules = {
+        toolbar: { container: '#lv-notes-toolbar' }
+    }
+    const quillFormats = [
+        'bold',
+        'italic',
+        'underline'
+    ]
 
     useEffect(() => {
         const t = localStorage.getItem('access_token')
@@ -50,8 +60,14 @@ const TabNotes = ({ lessonId }) => {
         }
     }, [lessonId])
 
+    const isQuillContentEmpty = (value) => {
+        const plainText = (value || '').replace(/<(.|\n)*?>/g, '').replace(/&nbsp;/g, ' ').trim()
+        return plainText.length === 0
+    }
+    const canSave = !isQuillContentEmpty(input)
+
     const handleSave = () => {
-        if (!input.trim()) return
+        if (!canSave) return
         const t = localStorage.getItem('access_token')
         fetch(`${API}/api/interactions/notes/`, {
             method: 'POST', headers: { 'Authorization': `Bearer ${t}`, 'Content-Type': 'application/json' },
@@ -69,9 +85,21 @@ const TabNotes = ({ lessonId }) => {
     return (
         <div className="lv-tab-pane lv-fade">
             <div className="lv-notes-editor">
-                <div className="lv-ne-toolbar"><button className="lv-tb-b"><b>B</b></button><button className="lv-tb-b"><i>I</i></button><button className="lv-tb-b"><u>U</u></button></div>
-                <textarea className="lv-ne-area" rows="5" placeholder="اكتب ملاحظاتك الخاصة هنا... هذي الملاحظات بس انت تشوفها." value={input} onChange={e => setInput(e.target.value)}></textarea>
-                <div className="lv-ne-foot"><button className="premium-btn exact-btn-purple lv-sm-btn" onClick={handleSave}>احفظ الملاحظة</button></div>
+                <div className="lv-ne-toolbar" id="lv-notes-toolbar">
+                    <button className="lv-tb-b ql-bold" type="button" aria-label="Bold"></button>
+                    <button className="lv-tb-b ql-italic" type="button" aria-label="Italic"></button>
+                    <button className="lv-tb-b ql-underline" type="button" aria-label="Underline"></button>
+                </div>
+                <ReactQuill
+                    className="lv-ne-area lv-ne-quill"
+                    theme="snow"
+                    value={input}
+                    onChange={setInput}
+                    modules={quillModules}
+                    formats={quillFormats}
+                    placeholder="اكتب ملاحظاتك الخاصة هنا... هذي الملاحظات بس انت تشوفها."
+                />
+                <div className="lv-ne-foot"><button className="premium-btn exact-btn-purple lv-sm-btn" onClick={handleSave} disabled={!canSave}>احفظ الملاحظة</button></div>
             </div>
             <h4 className="lv-section-label">ملاحظاتي السابقة</h4>
             {loading ? <p>جاري التحميل...</p> : notes.length === 0 ? <p style={{ color: '#94a3b8' }}>ماكو أي ملاحظات مسجلة.</p> : notes.map(n => (
@@ -87,7 +115,7 @@ const TabNotes = ({ lessonId }) => {
                         </span>
                         <span className="lv-nc-date" style={{fontSize: '0.75rem', marginBottom: 0}}>يوم: {new Date(n.created_at).toLocaleDateString('ar-IQ')}</span>
                     </div>
-                    <p>{n.content}</p>
+                    <div className="lv-note-content" dangerouslySetInnerHTML={{ __html: n.content || '' }} />
                 </div>
             ))}
         </div>

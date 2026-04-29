@@ -63,7 +63,7 @@ const Teachers = () => {
         }
 
         if (!teachersRequestPromise) {
-            teachersRequestPromise = fetch('https://fra1.digitaloceanspaces.com/key-academy-cloud/landing-data/teachers.json')
+            teachersRequestPromise = fetch('https://key-academy-cloud.fra1.digitaloceanspaces.com/landing-data/teachers/list.json')
             .then(res => {
                 if (!res.ok) throw new Error('Failed to fetch')
                 return res.json()

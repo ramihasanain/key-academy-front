@@ -124,7 +124,7 @@ const CoursePreview = () => {
                 show: true,
                 type: 'auth',
                 title: 'خطوة واحدة بس!',
-                message: 'لازم تسجل دخولك أول أو تسوي حساب جديد حتى تكدر تفعل كارت الاشتراك وتبدي ويانا 💎',
+                message: 'لازم تسجل دخولك أول أو تسوي حساب جديد حتى تكدر تفعل كودالاشتراك وتبدي ويانا 💎',
                 actionText: 'تسجيل الدخول',
                 actionFn: () => navigate('/login')
             })
@@ -136,7 +136,7 @@ const CoursePreview = () => {
                 show: true,
                 type: 'error',
                 title: 'انتبه!',
-                message: 'رجاءً اكتب كارت الاشتراك بشكل صحيح (على الأقل 5 أرقام).',
+                message: 'رجاءً اكتب كودالاشتراك بشكل صحيح (على الأقل 5 أرقام).',
                 actionText: 'حسناً',
                 actionFn: () => setPopup({ ...popup, show: false })
             })
@@ -297,7 +297,7 @@ const CoursePreview = () => {
 
                     {/* Curriculum Section (Free vs Locked Blurred) */}
                     <div className="preview-section fade-in-up" style={{ animationDelay: '0.2s' }}>
-                        <h2 className="section-title">منهج الدورة</h2>
+                        <h2 className="section-title">منهاج الدورة</h2>
                         <p className="section-subtitle">هذي كل الوحدات والمحاضرات اللي راح ناخذها بالدورة.</p>
 
                         <div className="preview-modules-list">
@@ -417,12 +417,12 @@ const CoursePreview = () => {
                         <div className="lc-divider"></div>
 
                         <form onSubmit={handleActivate} className="lc-activation-form">
-                            <label className="lc-form-label">عندك كارت اشتراك؟</label>
+                            <label className="lc-form-label">عندك كوداشتراك؟</label>
                             <div className="lc-input-wrap">
                                 <HiOutlineCreditCard className="lc-input-icon" />
                                 <input
                                     type="text"
-                                    placeholder="اكتب كارت الاشتراك المكون من 14 رقم..."
+                                    placeholder="اكتب كودالاشتراك المكون من 14 رقم..."
                                     value={code}
                                     onChange={e => setCode(e.target.value.trim())}
                                     disabled={isActivating}

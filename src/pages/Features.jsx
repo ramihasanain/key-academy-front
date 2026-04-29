@@ -39,7 +39,7 @@ const Features = () => {
         { icon: <HiOutlineServerStack />, c: 'o', title: 'قوة تقنية', desc: 'سيرفرات قوية تتحمل أعداد كبيرة بدون ما توقف أو تفصل.' },
         { icon: <HiOutlineMagnifyingGlass />, c: 'p', title: 'بحث ذكي', desc: 'تكدر تلگة الأستاذ أو المادة اللي تريدها بثواني.' },
         { icon: <HiOutlineUserCircle />, c: 'v', title: 'ملفات الأساتذة', desc: 'ملف تعريفي لكل أستاذ' },
-        { icon: <HiOutlineDocumentText />, c: 'o', title: 'أسئلة وزارية', desc: 'أسئلة وزارية وملازم مرتبة وجاهزة لكل درس.' },
+        { icon: <HiOutlineDocumentText />, c: 'o', title: 'أسئلة وزارية', desc: 'أسئلة وزارية ومستندات مرتبة وجاهزة لكل درس.' },
         { icon: <HiOutlineQuestionMarkCircle />, c: 'p', title: 'توقف مفاجئ', desc: 'أسئلة تطلعلك وأنت تباوع المحاضرة حتى تبقيك مركز وتختبر فهمك.' },
         { icon: <HiOutlinePencilSquare />, c: 'v', title: 'ملاحظاتك الخاصة', desc: 'دفتر ملاحظات ذكي الك، تكتب بي اللي تريده لكل درس وينحفظ يمك.' },
         { icon: <HiOutlineChatBubbleLeftRight />, c: 'o', title: 'بيئة تفاعلية', desc: 'تكدر تحجي وتسأل الأساتذة والمساعدين والطلاب بكل سهولة.' },

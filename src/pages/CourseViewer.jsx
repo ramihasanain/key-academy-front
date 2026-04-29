@@ -255,8 +255,8 @@ const CourseViewer = () => {
                 <div className="cv-floating-tabs-container">
                     <div className="cv-segmented-control">
                         {[
-                            { id: 'lessons', label: 'المنهج والدروس', icon: <HiOutlinePlayCircle /> },
-                            { id: 'documents', label: 'ملازم وملخصات', icon: <HiOutlineDocumentText /> },
+                            { id: 'lessons', label: 'المنهاج والدروس', icon: <HiOutlinePlayCircle /> },
+                            { id: 'documents', label: 'المستندات', icon: <HiOutlineDocumentText /> },
                             { id: 'ministerial', label: 'أسئلة وزارية', icon: <HiOutlineDocumentDuplicate /> },
                             { id: 'exams', label: 'امتحانات أسبوعية', icon: <HiOutlineClipboardDocumentCheck /> }
                         ].map(tab => (
@@ -277,7 +277,7 @@ const CourseViewer = () => {
                 <div className="cv-dynamic-content">
                     <AnimatePresence mode="wait">
 
-                        {/* 1. TIMELINE SYLLABUS (المنهج والوحدات) */}
+                        {/* 1. TIMELINE SYLLABUS (المنهاج والوحدات) */}
                         {activeTab === 'lessons' && (
                             <motion.div
                                 key="lessons-tab"
@@ -288,7 +288,7 @@ const CourseViewer = () => {
                                 className="cv-timeline-container"
                             >
                                 <div style={{ textAlign: 'center', marginBottom: '30px' }}>
-                                    <h2 style={{ fontSize: '2.2rem', fontWeight: 900, color: '#0f172a', marginBottom: '10px' }}>منهج الدورة</h2>
+                                    <h2 style={{ fontSize: '2.2rem', fontWeight: 900, color: '#0f172a', marginBottom: '10px' }}>منهاج الدورة</h2>
                                     <p style={{ fontSize: '1.1rem', color: '#64748b', fontWeight: 600 }}>هذي كل الوحدات والمحاضرات اللي راح ناخذها بالدورة.</p>
                                 </div>
 
@@ -386,10 +386,10 @@ const CourseViewer = () => {
                             >
                                 <div className="cv-docs-top-banner">
                                     <div className="cv-docs-banner-text">
-                                        <h2>ملازم ومستندات الدورة</h2>
-                                        <p>تكدر تتصفح وتقرأ كل الملازم والملخصات مباشرة من داخل المنصة وبدون تحميل.</p>
+                                        <h2>مستندات الدورة</h2>
+                                        <p>تكدر تتصفح وتقرأ كل المستندات مباشرة من داخل المنصة وبدون تحميل.</p>
                                     </div>
-                                    <button className="cv-btn-massive-gradient" onClick={(e) => handleViewDoc(e, null, 'ملازم المادة كاملة')}>
+                                    <button className="cv-btn-massive-gradient" onClick={(e) => handleViewDoc(e, null, 'مستندات المادة كاملة')}>
                                         <HiOutlineDocumentText className="massive-icon" />
                                         <span>تصفح كل الملازم</span>
                                     </button>
@@ -443,7 +443,7 @@ const CourseViewer = () => {
                                         })
                                     ) : (
                                         <EmptyState
-                                            title="لا توجد ملازم أو ملخصات حالياً"
+                                            title="لا توجد مستندات حالياً"
                                             message="عند إضافة ملفات الدروس، راح تظهر هنا مباشرة."
                                             className="cv-super-glass"
                                         />

@@ -49,7 +49,7 @@ const About = () => {
                     <div className="values-grid">
                         {[
                             { icon: <HiOutlineRocketLaunch />, color: 'purple', title: 'تغيير حقيقي', desc: 'نسوي فرق واضح بالدراسة الأونلاين ونخليها أسهل وأكثر فائدة' },
-                            { icon: <HiOutlineTrophy />, color: 'orange', title: 'الأول دايماً', desc: 'نكون الخيار الأول للطالب العراقي من ناحية الجودة والمستوى' },
+                            { icon: <HiOutlineTrophy />, color: 'orange', title: 'الأول دائماً', desc: 'نكون الخيار الأول للطالب العراقي من ناحية الجودة والمستوى' },
                             { icon: <HiOutlineLightBulb />, color: 'pink', title: 'دراسة ذكية', desc: 'نطور طريقتك بالدراسة ونخلي التكنولوجيا تخدمك بدل ما تعبك' },
                             { icon: <HiOutlineUserGroup />, color: 'blue', title: 'ثقة كبيرة', desc: 'وفرنا بيئة تريح الأستاذ وتخلي الطالب واثق من دراسته ويانا بدون تعقيد' },
                             { icon: <HiOutlineAcademicCap />, color: 'green', title: 'تغنيك عن الكل', desc: 'وفرنالك كل اللي تحتاجه بمكان واحد، ما راح تحتاج تدور منا ومنا' },
