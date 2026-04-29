@@ -3,6 +3,14 @@ import { Link } from 'react-router-dom'
 import { HiOutlineClock } from 'react-icons/hi2'
 import EmptyState from '../core/EmptyState'
 
+const normalizeNoteContent = (content = '') => {
+    if (!content) return ''
+
+    return content
+        .replace(/(?:^|;)\s*color\s*:\s*[^;]+;?/gi, '')
+        .replace(/(?:^|;)\s*background(?:-color)?\s*:\s*[^;]+;?/gi, '')
+}
+
 const TabMyNotes = ({ myNotes, isLoading }) => {
     const hasNotes = Array.isArray(myNotes) && myNotes.length > 0
 
@@ -36,8 +44,18 @@ const TabMyNotes = ({ myNotes, isLoading }) => {
                                     </div>
                                 </div>
                                 <div
-                                    style={{ margin: '15px 0', lineHeight: '1.6', color: 'var(--text-main)', fontSize: '1.05rem', flexGrow: 1 }}
-                                    dangerouslySetInnerHTML={{ __html: note.content || '' }}
+                                    style={{
+                                        margin: '15px 0',
+                                        lineHeight: '1.6',
+                                        color: '#1f2937',
+                                        background: 'rgba(131, 42, 150, 0.06)',
+                                        border: '1px solid rgba(131, 42, 150, 0.15)',
+                                        borderRadius: '12px',
+                                        padding: '14px',
+                                        fontSize: '1.05rem',
+                                        flexGrow: 1,
+                                    }}
+                                    dangerouslySetInnerHTML={{ __html: normalizeNoteContent(note.content) }}
                                 />
                                 {note.lesson && (
                                     <div className="dash-btn-secondary premium-btn" style={{ marginTop: 'auto', textAlign: 'center', padding: '10px' }}>

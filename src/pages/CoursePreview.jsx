@@ -436,7 +436,7 @@ const CoursePreview = () => {
                                 className="lc-submit-btn"
                                 disabled={isActivating || isCodeEmpty}
                                 style={{
-                                    background: 'linear-gradient(135deg, var(--primary, #7c3aed), var(--secondary, #ec4899))',
+                                    background: 'linear-gradient(135deg, #7c3aed, #ec4899)',
                                     color: '#fff',
                                     border: 'none',
                                     boxShadow: '0 8px 25px rgba(131, 42, 150, 0.4)',
