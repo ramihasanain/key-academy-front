@@ -215,6 +215,8 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
+    object-position: top center;
+    display: block;
     transition: transform 0.5s ease;
 }
 
@@ -335,7 +337,7 @@
 
 .profile-sidebar-card .tc-image-wrapper img {
     object-fit: cover;
-    object-position: center;
+    object-position: top center;
     border-radius: 24px 24px 0 0;
 }
 
@@ -705,5 +707,70 @@
     
     .cv-timeline-content {
         margin-right: 0;
+    }
+}
+
+@media (max-width: 600px) {
+    .subjects-filter-wrapper {
+        margin-bottom: 18px;
+        padding-bottom: 8px;
+    }
+
+    .subjects-filter-container {
+        gap: 10px;
+        padding: 6px 0;
+    }
+
+    .subject-filter-btn {
+        gap: 6px;
+        padding: 8px 14px;
+        font-size: 0.9rem;
+    }
+
+    .subject-filter-btn .s-icon {
+        font-size: 1.1rem;
+    }
+
+    .scroll-arrow {
+        width: 36px;
+        height: 36px;
+        font-size: 1.1rem;
+    }
+
+    .left-arrow {
+        margin-right: 8px;
+    }
+
+    .right-arrow {
+        margin-left: 8px;
+    }
+
+    .teachers-layout {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+
+    .teachers-filter {
+        position: relative;
+        top: 0;
+        display: flex;
+        gap: 14px;
+        flex-wrap: wrap;
+        padding: 14px;
+    }
+
+    .teachers-filter .filter-group {
+        margin-bottom: 0;
+        flex: 1 1 240px;
+    }
+
+    .teachers-filter .filter-group h4 {
+        margin-bottom: 8px;
+    }
+
+    .teachers-filter .filter-group label {
+        display: inline-flex;
+        margin-left: 14px;
+        padding: 4px 0;
     }
 }

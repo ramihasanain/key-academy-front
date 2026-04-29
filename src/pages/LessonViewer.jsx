@@ -259,9 +259,11 @@ const ViewQuiz = ({ lessonId, userData }) => {
     const [answers, setAnswers] = useState({})
     const [result, setResult] = useState(null)
     const [history, setHistory] = useState([])
+    const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false)
     const [isLoading, setIsLoading] = useState(true)
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [timeLeft, setTimeLeft] = useState(null)
+    const quizContainerRef = useRef(null)
 
     useEffect(() => {
         let interval = null;
@@ -279,6 +281,19 @@ const ViewQuiz = ({ lessonId, userData }) => {
         }
         return () => clearInterval(interval);
     }, [phase, timeLeft]);
+
+    useEffect(() => {
+        if (!isHistoryModalOpen) return
+        const handleEscape = (event) => {
+            if (event.key === 'Escape') {
+                setIsHistoryModalOpen(false)
+            }
+        }
+        document.addEventListener('keydown', handleEscape)
+        return () => {
+            document.removeEventListener('keydown', handleEscape)
+        }
+    }, [isHistoryModalOpen])
 
     const formatTime = (seconds) => {
         if (seconds === null) return `${quizData?.duration_minutes || 0}:00`;
@@ -320,7 +335,20 @@ const ViewQuiz = ({ lessonId, userData }) => {
 
     const pick = (qId, i) => setAnswers(p => ({ ...p, [qId]: i }))
 
+    const scrollQuizToStart = () => {
+        const quizEl = quizContainerRef.current
+        if (!quizEl) return
+
+        quizEl.scrollTo({ top: 0, behavior: 'smooth' })
+        quizEl.scrollIntoView({ behavior: 'smooth', block: 'start' })
+
+        const yOffset = -120
+        const y = quizEl.getBoundingClientRect().top + window.scrollY + yOffset
+        window.scrollTo({ top: y, behavior: 'smooth' })
+    }
+
     const submitQuiz = () => {
+        scrollQuizToStart()
         setIsSubmitting(true)
         const token = localStorage.getItem('access_token')
         fetch(`${API}/api/quizzes/${quizData.id}/submit/`, {
@@ -343,16 +371,9 @@ const ViewQuiz = ({ lessonId, userData }) => {
                     attempted_at: new Date().toISOString()
                 }, ...prev])
 
-                // Smoothly scroll to the results section, accounting for fixed headers
+                // Keep the AI test view pinned to its start after submit/result.
                 setTimeout(() => {
-                    const resultEl = document.querySelector('.lv-quiz-result') || document.querySelector('.lv-quiz-screen');
-                    if (resultEl) {
-                        const yOffset = -120; // Extra offset to account for navbar and padding
-                        const y = resultEl.getBoundingClientRect().top + window.scrollY + yOffset;
-                        window.scrollTo({ top: y, behavior: 'smooth' });
-                    } else {
-                        window.scrollTo({ top: 0, behavior: 'smooth' });
-                    }
+                    scrollQuizToStart()
                 }, 150);
             })
             .catch(err => {
@@ -386,7 +407,7 @@ const ViewQuiz = ({ lessonId, userData }) => {
     </div>
 
     return (
-        <div className="lv-screen lv-quiz-screen" style={{ position: 'relative', userSelect: 'none' }} onContextMenu={e => e.preventDefault()}>
+        <div ref={quizContainerRef} className="lv-screen lv-quiz-screen" style={{ position: 'relative', userSelect: 'none' }} onContextMenu={e => e.preventDefault()}>
             
             {/* Watermark Overlay */}
             {userData && (
@@ -411,9 +432,7 @@ const ViewQuiz = ({ lessonId, userData }) => {
                         <div className="lv-qi-stat"><strong>AI</strong> ذكاء اصطناعي</div>
                     </div>
                     <button className="premium-btn exact-btn-orange lv-qi-start" onClick={() => { setPhase('exam'); setTimeLeft(quizData.duration_minutes * 60); }}>ابدأ التحدي الآن</button>
-                    {history.length > 0 && <button className="lv-txt-link" onClick={() => {
-                        alert(`عندك ${history.length} محاولات سابقة، أفضلها ${Math.max(...history.map(h => h.percentage))}%`)
-                    }}><HiOutlineClock /> عرض محاولاتي السابقة ({history.length})</button>}
+                    {history.length > 0 && <button className="lv-txt-link" onClick={() => setIsHistoryModalOpen(true)}><HiOutlineClock /> عرض محاولاتي السابقة ({history.length})</button>}
                 </div>
             )}
             {phase === 'exam' && (
@@ -514,10 +533,19 @@ const ViewQuiz = ({ lessonId, userData }) => {
                         })}
                     </div>
 
-                    {/* History */}
-                    {history.length > 0 && (
-                        <div className="lv-qr-history">
-                            <h4><HiOutlineClock /> سجل محاولاتك اللي فاتت</h4>
+                </div>
+            )}
+            </div>
+            {isHistoryModalOpen && createPortal(
+                <div className="lv-history-modal-overlay" role="dialog" aria-modal="true" aria-label="سجل المحاولات" onClick={() => setIsHistoryModalOpen(false)}>
+                    <div className="lv-history-modal" onClick={(event) => event.stopPropagation()}>
+                        <div className="lv-history-modal-head">
+                            <h4><HiOutlineClock /> سجل محاولاتك السابقة</h4>
+                            <button className="lv-history-modal-close" onClick={() => setIsHistoryModalOpen(false)} aria-label="إغلاق">
+                                <HiOutlineXMark />
+                            </button>
+                        </div>
+                        <div className="lv-history-modal-body">
                             <table className="lv-ht-table">
                                 <thead><tr><th>تاريخ المحاولة</th><th>النتيجة</th><th>الحالة</th></tr></thead>
                                 <tbody>
@@ -531,10 +559,10 @@ const ViewQuiz = ({ lessonId, userData }) => {
                                 </tbody>
                             </table>
                         </div>
-                    )}
-                </div>
+                    </div>
+                </div>,
+                document.body
             )}
-            </div>
         </div>
     )
 }

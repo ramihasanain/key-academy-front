@@ -133,10 +133,6 @@ const Home = () => {
                                     <FaRocket className="hero-action-icon rocket-icon" />
                                     <span className="hero-action-text">يلا نبدي</span>
                                 </Link>
-                                <Link to="/features" className="hero-action-link">
-                                    <FaPlay className="hero-action-icon play-icon" />
-                                    <span className="hero-action-text">شوف المنصة شلون تشتغل</span>
-                                </Link>
                             </motion.div>
                         </div>
 

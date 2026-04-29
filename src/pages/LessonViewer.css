@@ -700,6 +700,81 @@
 .lv-pill.green { background: rgba(16, 185, 129, 0.1); color: #10b981; }
 .lv-pill.red { background: rgba(239, 68, 68, 0.1); color: #dc2626; }
 
+.lv-history-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.55);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 24px;
+    z-index: 9999;
+}
+
+.lv-history-modal {
+    width: min(920px, 100%);
+    max-height: 85vh;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(255, 255, 255, 0.9));
+    border: 1px solid rgba(131, 42, 150, 0.18);
+    border-radius: 20px;
+    box-shadow: 0 25px 70px rgba(15, 23, 42, 0.28);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.lv-history-modal-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding: 18px 22px;
+    border-bottom: 1px solid rgba(131, 42, 150, 0.12);
+    background: linear-gradient(90deg, rgba(131, 42, 150, 0.08), rgba(236, 54, 101, 0.05));
+}
+
+.lv-history-modal-head h4 {
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--purple);
+    font-size: 1.05rem;
+    font-weight: 900;
+}
+
+.lv-history-modal-close {
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+    border: 1px solid rgba(131, 42, 150, 0.16);
+    background: rgba(255, 255, 255, 0.85);
+    color: var(--purple);
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.4rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.lv-history-modal-close:hover {
+    transform: translateY(-1px);
+    border-color: rgba(131, 42, 150, 0.3);
+    background: #fff;
+}
+
+.lv-history-modal-body {
+    padding: 18px 22px 22px;
+    overflow: auto;
+}
+
+.lv-history-modal-body .lv-ht-table {
+    margin: 0;
+}
+
 /* ===== BOTTOM TABS ===== */
 .lv-bottom-section {
     margin-top: 40px;
@@ -1434,6 +1509,14 @@
     .lv-rv-card { padding: 16px; }
     .lv-rv-question { font-size: 1rem; }
     .lv-ht-table th, .lv-ht-table td { padding: 10px 12px; font-size: 0.85rem; }
+    .lv-history-modal-overlay { padding: 14px; }
+    .lv-history-modal {
+        max-height: 88vh;
+        border-radius: 16px;
+    }
+    .lv-history-modal-head { padding: 14px; }
+    .lv-history-modal-head h4 { font-size: 0.95rem; }
+    .lv-history-modal-body { padding: 10px 10px 14px; }
 }
 
 @media (max-width: 1025px) and (min-width: 750px) {
