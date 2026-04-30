@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { API } from '../config'
 import { motion } from 'framer-motion'
 import { HiOutlinePhone, HiOutlineLockClosed, HiOutlineArrowLeftOnRectangle } from 'react-icons/hi2'
+import fpPromise from '@fingerprintjs/fingerprintjs'
 // import { useGoogleReCaptcha } from 'react-google-recaptcha-v3'
 import ParticleBackground from '../components/ParticleBackground'
 import './Auth.css'
@@ -15,6 +16,7 @@ const Login = () => {
     const [userId, setUserId] = useState(null)
     const [loading, setLoading] = useState(false)
     const [errorMsg, setErrorMsg] = useState('')
+    const [isUnauthorized, setIsUnauthorized] = useState(false)
     const navigate = useNavigate()
     const fieldMessageMap = {
         captcha_token: 'الكابشا مطلوبة',
@@ -38,10 +40,14 @@ const Login = () => {
 
         setLoading(true)
         try {
+            const fp = await fpPromise.load()
+            const result = await fp.get()
+            const browser_fingerprint = result.visitorId
+
             const endpoint = mfaRequired ? '/api/v1/auth/2fa/verify/' : '/api/v1/auth/login/'
-            const payload = mfaRequired ? { user_id: userId, code: mfaCode } : { phone, password
-                // , captcha_token: token
-            }
+            const payload = mfaRequired 
+                ? { user_id: userId, code: mfaCode, browser_fingerprint } 
+                : { phone, password, browser_fingerprint }
 
             const res = await fetch(API + endpoint, {
                 method: 'POST',
@@ -67,6 +73,11 @@ const Login = () => {
                         })
                     }
                     return []
+                }
+
+                if (data.error_code === 'UNAUTHORIZED_DEVICE') {
+                    setIsUnauthorized(true)
+                    return
                 }
 
                 const apiErrors = collectErrors(data)
@@ -109,6 +120,58 @@ const Login = () => {
         } finally {
             setLoading(false)
         }
+    }
+
+    if (isUnauthorized) {
+        return (
+            <div className="auth-page" style={{ background: '#b91c1c' }}>
+                <ParticleBackground />
+                <div style={{
+                    position: 'relative', zIndex: 10, background: 'rgba(69, 10, 10, 0.6)', 
+                    backdropFilter: 'blur(12px)', padding: '3rem', borderRadius: '24px', 
+                    boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)', border: '1px solid rgba(239, 68, 68, 0.3)',
+                    textAlign: 'center', maxWidth: '500px', width: '90%', margin: '0 auto'
+                }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '16px', marginBottom: '24px' }}>
+                        <div style={{
+                            width: '70px', height: '70px', background: 'rgba(239, 68, 68, 0.2)', 
+                            color: '#ef4444', borderRadius: '50%', display: 'flex', alignItems: 'center', 
+                            justifyContent: 'center', boxShadow: '0 0 40px rgba(239,68,68,0.4)'
+                        }}>
+                            <HiOutlineLockClosed size={36} />
+                        </div>
+                        <h2 style={{ color: 'white', fontSize: '1.25rem', fontWeight: 'bold', margin: 0, textAlign: 'right', lineHeight: '1.4' }}>
+                            Key Academy
+                            <br/>
+                            <span style={{ fontSize: '0.9rem', color: '#fca5a5', fontWeight: 'normal' }}>مفتاحك نحو التفوق</span>
+                        </h2>
+                    </div>
+                    
+                    <h1 style={{ fontSize: '2.25rem', fontWeight: '900', color: 'white', marginBottom: '1rem', letterSpacing: '0.05em' }}>
+                        غير مصرح لك بالدخول!
+                    </h1>
+                    
+                    <p style={{ color: '#fecaca', fontSize: '1.125rem', marginBottom: '2rem', lineHeight: '1.6' }}>
+                        عذراً، هذا الجهاز غير مسجل ضمن الأجهزة المعتمدة.
+                        <br/>
+                        <span style={{ fontWeight: 'bold', color: 'white', display: 'block', marginTop: '8px' }}>
+                            تم تسجيل محاولة الدخول وتوثيق عنوان الـ IP الخاص بك.
+                        </span>
+                    </p>
+
+                    <button 
+                        onClick={() => window.location.reload()}
+                        style={{
+                            background: 'rgba(255, 255, 255, 0.1)', color: 'white', fontWeight: 'bold', 
+                            padding: '12px 32px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.2)',
+                            cursor: 'pointer', transition: 'all 0.2s', textTransform: 'uppercase', letterSpacing: '0.1em'
+                        }}
+                    >
+                        العودة للصفحة الرئيسية
+                    </button>
+                </div>
+            </div>
+        )
     }
 
     return (
