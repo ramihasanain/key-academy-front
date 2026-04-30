@@ -447,12 +447,23 @@ const ViewQuiz = ({ lessonId, userData }) => {
                             <div key={q.id} className="lv-qe-card">
                                 <h4 className="lv-qe-q"><span className="lv-qe-num">{qi + 1}</span> {q.text}</h4>
                                 <div className="lv-qe-opts">
-                                    {q.options.map((opt, oi) => (
-                                        <button key={oi} className={`lv-qe-opt ${answers[q.id] === oi ? 'selected' : ''}`} onClick={() => pick(q.id, oi)}>
-                                            <span className="lv-qe-radio">{answers[q.id] === oi && <HiCheckCircle />}</span>
-                                            {opt}
-                                        </button>
-                                    ))}
+                                    {(!q.question_type || q.question_type === 'MCQ') ? (
+                                        q.options.map((opt, oi) => (
+                                            <button key={oi} className={`lv-qe-opt ${answers[q.id] === oi ? 'selected' : ''}`} onClick={() => pick(q.id, oi)}>
+                                                <span className="lv-qe-radio">{answers[q.id] === oi && <HiCheckCircle />}</span>
+                                                {opt}
+                                            </button>
+                                        ))
+                                    ) : (
+                                        <textarea
+                                            className="lv-text-answer-box"
+                                            placeholder={q.question_type === 'MATH_EQUATION' ? "اكتب المعادلة الرياضية هنا..." : "اكتب إجابتك هنا..."}
+                                            value={answers[q.id] || ''}
+                                            onChange={(e) => pick(q.id, e.target.value)}
+                                            rows="4"
+                                            style={{ width: '100%', padding: '15px', borderRadius: '12px', border: '2px solid rgba(0,0,0,0.1)', fontSize: '1rem', fontFamily: 'inherit', resize: 'vertical', minHeight: '100px' }}
+                                        />
+                                    )}
                                 </div>
                             </div>
                         ))}
@@ -498,28 +509,48 @@ const ViewQuiz = ({ lessonId, userData }) => {
                                         <span className="lv-rv-qnum">السؤال {qi + 1}</span>
                                     </div>
                                     <p className="lv-rv-question">{q.question}</p>
-                                    <div className="lv-rv-answers">
-                                        {q.options.map((opt, oi) => {
-                                            let cls = ''
-                                            if (oi === q.correct_index) cls = 'correct-answer'
-                                            else if (oi === userAnswer && !isCorrect) cls = 'wrong-answer'
-                                            return (
-                                                <div key={oi} className={`lv-rv-opt ${cls}`}>
-                                                    {oi === q.correct_index && <HiCheckCircle className="lv-rv-icon green" />}
-                                                    {oi === userAnswer && !isCorrect && oi !== q.correct_index && <span className="lv-rv-icon red">✕</span>}
-                                                    {oi !== q.correct_index && oi !== userAnswer && <span className="lv-rv-icon neutral">○</span>}
-                                                    <div style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
-                                                        <span>{opt}</span>
-                                                        {q.options_explanations && q.options_explanations[oi] && (
-                                                            <span style={{ fontSize: '0.8rem', color: '#64748b', marginTop: '4px' }}>💡 {q.options_explanations[oi]}</span>
-                                                        )}
+                                    {(!q.question_type || q.question_type === 'MCQ') ? (
+                                        <div className="lv-rv-answers">
+                                            {q.options.map((opt, oi) => {
+                                                let cls = ''
+                                                if (oi === q.correct_index) cls = 'correct-answer'
+                                                else if (oi === userAnswer && !isCorrect) cls = 'wrong-answer'
+                                                return (
+                                                    <div key={oi} className={`lv-rv-opt ${cls}`}>
+                                                        {oi === q.correct_index && <HiCheckCircle className="lv-rv-icon green" />}
+                                                        {oi === userAnswer && !isCorrect && oi !== q.correct_index && <span className="lv-rv-icon red">✕</span>}
+                                                        {oi !== q.correct_index && oi !== userAnswer && <span className="lv-rv-icon neutral">○</span>}
+                                                        <div style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
+                                                            <span>{opt}</span>
+                                                            {q.options_explanations && q.options_explanations[oi] && (
+                                                                <span style={{ fontSize: '0.8rem', color: '#64748b', marginTop: '4px' }}>💡 {q.options_explanations[oi]}</span>
+                                                            )}
+                                                        </div>
+                                                        {oi === userAnswer && <span className="lv-rv-tag user">إجابتك</span>}
+                                                        {oi === q.correct_index && <span className="lv-rv-tag correct">الإجابة الصحيحة</span>}
                                                     </div>
-                                                    {oi === userAnswer && <span className="lv-rv-tag user">إجابتك</span>}
-                                                    {oi === q.correct_index && <span className="lv-rv-tag correct">الإجابة الصحيحة</span>}
+                                                )
+                                            })}
+                                        </div>
+                                    ) : (
+                                        <div className="lv-rv-text-answers" style={{ display: 'flex', flexDirection: 'column', gap: '15px', marginTop: '10px' }}>
+                                            <div style={{ background: 'rgba(0,0,0,0.03)', padding: '15px', borderRadius: '8px', border: '1px solid rgba(0,0,0,0.1)' }}>
+                                                <strong>إجابتك:</strong>
+                                                <p style={{ marginTop: '5px', whiteSpace: 'pre-wrap' }}>{userAnswer || 'لم تقم بالإجابة'}</p>
+                                                <div style={{ fontSize: '0.9rem', color: '#64748b', marginTop: '8px' }}>درجة التقييم: {q.evaluation_score}%</div>
+                                            </div>
+                                            <div style={{ background: 'rgba(16, 185, 129, 0.1)', padding: '15px', borderRadius: '8px', border: '1px solid rgba(16, 185, 129, 0.3)' }}>
+                                                <strong style={{ color: '#10b981' }}>الإجابة النموذجية:</strong>
+                                                <p style={{ marginTop: '5px', color: '#047857', whiteSpace: 'pre-wrap' }}>{q.model_answer}</p>
+                                            </div>
+                                            {q.feedback && (
+                                                <div style={{ background: 'rgba(239, 68, 68, 0.1)', padding: '15px', borderRadius: '8px', border: '1px solid rgba(239, 68, 68, 0.3)' }}>
+                                                    <strong style={{ color: '#ef4444' }}>ملاحظات:</strong>
+                                                    <p style={{ marginTop: '5px', color: '#b91c1c' }}>{q.feedback}</p>
                                                 </div>
-                                            )
-                                        })}
-                                    </div>
+                                            )}
+                                        </div>
+                                    )}
                                     {q.explanation && (
                                         <div className="lv-rv-explain" style={{ background: 'rgba(131, 42, 150, 0.05)', padding: '15px', borderRadius: '12px', marginTop: '15px', borderLeft: '4px solid #832A96' }}>
                                             <HiOutlineSparkles className="lv-rv-ai-icon" style={{ color: '#832A96' }} />

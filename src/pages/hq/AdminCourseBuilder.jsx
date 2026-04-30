@@ -210,7 +210,7 @@ export const AdminCourseBuilder = ({ id }) => {
     const addQuestion = (mIndex, lIndex, qzIndex) => {
         const newMods = [...modules]
         newMods[mIndex].lessons[lIndex].quizzes[qzIndex].questions.push({
-            localId: Date.now(), text: '', options: ['خيار 1', 'خيار 2', 'خيار 3', 'خيار 4'], options_explanations: ['', '', '', ''], correct_index: 0, order: newMods[mIndex].lessons[lIndex].quizzes[qzIndex].questions.length + 1
+            localId: Date.now(), text: '', question_type: 'MCQ', model_answer: '', keywords: [], options: ['خيار 1', 'خيار 2', 'خيار 3', 'خيار 4'], options_explanations: ['', '', '', ''], correct_index: 0, order: newMods[mIndex].lessons[lIndex].quizzes[qzIndex].questions.length + 1
         })
         setModules(newMods)
     }
@@ -878,16 +878,40 @@ export const AdminCourseBuilder = ({ id }) => {
                                                                                         <div style={{ flex: 1 }}>
                                                                                             <textarea value={qs.text} onChange={e => updateQuestion(mIndex, lIndex, qzIndex, qsIndex, 'text', e.target.value)} placeholder={`نص السؤال الجوهري رقم ${qsIndex + 1}...`} style={{ width: '100%', padding: '12px', border: '1px solid #cbd5e1', borderRadius: '8px', outline: 'none', resize: 'none', minHeight: '60px', fontFamily: 'inherit' }} />
                                                                                         </div>
+                                                                                        <div style={{ width: '200px' }}>
+                                                                                            <select value={qs.question_type || 'MCQ'} onChange={e => updateQuestion(mIndex, lIndex, qzIndex, qsIndex, 'question_type', e.target.value)} style={{ width: '100%', padding: '12px', border: '1px solid #cbd5e1', borderRadius: '8px', outline: 'none', background: 'white' }}>
+                                                                                                <option value="MCQ">اختيار من متعدد</option>
+                                                                                                <option value="MATH_EQUATION">معادلة رياضية</option>
+                                                                                                <option value="SCIENCE_TEXT">سؤال نصي علمي</option>
+                                                                                            </select>
+                                                                                        </div>
                                                                                     </div>
-                                                                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '10px', paddingRight: '45px', marginTop: '5px' }}>
-                                                                                        {qs.options.map((opt, optIndex) => (
-                                                                                            <div key={optIndex} style={{ display: 'flex', alignItems: 'center', gap: '10px', border: `2px solid ${qs.correct_index === optIndex ? '#10b981' : '#f1f5f9'}`, borderRadius: '8px', padding: '8px 12px', background: qs.correct_index === optIndex ? 'rgba(16,185,129,0.05)' : 'white', transition: 'all 0.2s', cursor: 'pointer' }} onClick={() => updateQuestion(mIndex, lIndex, qzIndex, qsIndex, 'correct_index', optIndex)}>
-                                                                                                <input type="radio" name={`qs-${qs.localId}`} checked={qs.correct_index === optIndex} onChange={() => { }} style={{ width: '20px', height: '20px', accentColor: '#10b981', cursor: 'pointer' }} />
-                                                                                                <input type="text" value={opt} onChange={e => updateQuestionOption(mIndex, lIndex, qzIndex, qsIndex, optIndex, e.target.value)} placeholder={`خيار ${optIndex + 1}`} onClick={e => e.stopPropagation()} style={{ border: 'none', background: 'transparent', outline: 'none', flex: 1, fontSize: '0.95rem', fontWeight: qs.correct_index === optIndex ? 'bold' : 'normal' }} />
-                                                                                                <input type="text" value={qs.options_explanations ? qs.options_explanations[optIndex] : ''} onChange={e => updateQuestionOptionExplanation(mIndex, lIndex, qzIndex, qsIndex, optIndex, e.target.value)} placeholder="شرح مبسط للإجابة (لماذا خطأ/صح)" onClick={e => e.stopPropagation()} style={{ border: '1px solid #e2e8f0', background: '#f8fafc', outline: 'none', flex: 1.5, fontSize: '0.85rem', padding: '6px 10px', borderRadius: '6px' }} />
+                                                                                    
+                                                                                    {(!qs.question_type || qs.question_type === 'MCQ') ? (
+                                                                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '10px', paddingRight: '45px', marginTop: '5px' }}>
+                                                                                            {qs.options.map((opt, optIndex) => (
+                                                                                                <div key={optIndex} style={{ display: 'flex', alignItems: 'center', gap: '10px', border: `2px solid ${qs.correct_index === optIndex ? '#10b981' : '#f1f5f9'}`, borderRadius: '8px', padding: '8px 12px', background: qs.correct_index === optIndex ? 'rgba(16,185,129,0.05)' : 'white', transition: 'all 0.2s', cursor: 'pointer' }} onClick={() => updateQuestion(mIndex, lIndex, qzIndex, qsIndex, 'correct_index', optIndex)}>
+                                                                                                    <input type="radio" name={`qs-${qs.localId}`} checked={qs.correct_index === optIndex} onChange={() => { }} style={{ width: '20px', height: '20px', accentColor: '#10b981', cursor: 'pointer' }} />
+                                                                                                    <input type="text" value={opt} onChange={e => updateQuestionOption(mIndex, lIndex, qzIndex, qsIndex, optIndex, e.target.value)} placeholder={`خيار ${optIndex + 1}`} onClick={e => e.stopPropagation()} style={{ border: 'none', background: 'transparent', outline: 'none', flex: 1, fontSize: '0.95rem', fontWeight: qs.correct_index === optIndex ? 'bold' : 'normal' }} />
+                                                                                                    <input type="text" value={qs.options_explanations ? qs.options_explanations[optIndex] : ''} onChange={e => updateQuestionOptionExplanation(mIndex, lIndex, qzIndex, qsIndex, optIndex, e.target.value)} placeholder="شرح مبسط للإجابة (لماذا خطأ/صح)" onClick={e => e.stopPropagation()} style={{ border: '1px solid #e2e8f0', background: '#f8fafc', outline: 'none', flex: 1.5, fontSize: '0.85rem', padding: '6px 10px', borderRadius: '6px' }} />
+                                                                                                </div>
+                                                                                            ))}
+                                                                                        </div>
+                                                                                    ) : (
+                                                                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', paddingRight: '45px', marginTop: '5px' }}>
+                                                                                            <div>
+                                                                                                <label style={{ fontSize: '0.85rem', fontWeight: 'bold', color: '#475569', display: 'block', marginBottom: '5px' }}>الإجابة النموذجية (المعادلة أو النص الأساسي)</label>
+                                                                                                <textarea value={qs.model_answer || ''} onChange={e => updateQuestion(mIndex, lIndex, qzIndex, qsIndex, 'model_answer', e.target.value)} placeholder="اكتب الإجابة النموذجية هنا..." style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #cbd5e1', outline: 'none', resize: 'vertical' }} />
                                                                                             </div>
-                                                                                        ))}
-                                                                                    </div>
+                                                                                            
+                                                                                            {qs.question_type === 'SCIENCE_TEXT' && (
+                                                                                                <div>
+                                                                                                    <label style={{ fontSize: '0.85rem', fontWeight: 'bold', color: '#475569', display: 'block', marginBottom: '5px' }}>الكلمات المفتاحية (افصل بينها بفاصلة)</label>
+                                                                                                    <input type="text" value={Array.isArray(qs.keywords) ? qs.keywords.join(', ') : qs.keywords || ''} onChange={e => updateQuestion(mIndex, lIndex, qzIndex, qsIndex, 'keywords', e.target.value.split(',').map(k => k.trim()).filter(k => k))} placeholder="مثال: طاقة، حرارة، تفاعل..." style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #cbd5e1', outline: 'none' }} />
+                                                                                                </div>
+                                                                                            )}
+                                                                                        </div>
+                                                                                    )}
                                                                                 </div>
                                                                             ))}
                                                                             <div style={{ marginTop: '20px', padding: '20px', background: '#f8fafc', border: '1px dashed #cbd5e1', borderRadius: '10px' }}>
