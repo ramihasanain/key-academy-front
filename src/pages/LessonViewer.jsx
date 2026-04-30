@@ -5,7 +5,27 @@ import { API } from '../config'
 import { useAuth } from '../contexts/AuthContext'
 import { useUser } from '../hooks/useUser'
 import { motion, AnimatePresence } from 'framer-motion'
+import 'mathlive'
 const ReactMarkdown = lazy(() => import('react-markdown'))
+
+const MathInput = ({ value, onChange }) => {
+    const mf = useRef(null);
+    useEffect(() => {
+        if (mf.current) {
+            mf.current.value = value || '';
+            const handleInput = (e) => onChange(e.target.value);
+            mf.current.addEventListener('input', handleInput);
+            return () => mf.current?.removeEventListener('input', handleInput);
+        }
+    }, [onChange]);
+    useEffect(() => {
+        if (mf.current && mf.current.value !== value) {
+            mf.current.value = value || '';
+        }
+    }, [value]);
+    return <math-field ref={mf} style={{ width: '100%', padding: '15px', borderRadius: '12px', border: '2px solid rgba(0,0,0,0.1)', fontSize: '1.5rem', background: '#f8fafc', minHeight: '60px', direction: 'ltr' }}></math-field>;
+}
+
 import {
     HiOutlineArrowRight,
     HiOutlineCheckBadge,
@@ -455,14 +475,18 @@ const ViewQuiz = ({ lessonId, userData }) => {
                                             </button>
                                         ))
                                     ) : (
-                                        <textarea
-                                            className="lv-text-answer-box"
-                                            placeholder={q.question_type === 'MATH_EQUATION' ? "اكتب المعادلة الرياضية هنا..." : "اكتب إجابتك هنا..."}
-                                            value={answers[q.id] || ''}
-                                            onChange={(e) => pick(q.id, e.target.value)}
-                                            rows="4"
-                                            style={{ width: '100%', padding: '15px', borderRadius: '12px', border: '2px solid rgba(0,0,0,0.1)', fontSize: '1rem', fontFamily: 'inherit', resize: 'vertical', minHeight: '100px' }}
-                                        />
+                                        q.question_type === 'MATH_EQUATION' ? (
+                                            <MathInput value={answers[q.id]} onChange={(val) => pick(q.id, val)} />
+                                        ) : (
+                                            <textarea
+                                                className="lv-text-answer-box"
+                                                placeholder="اكتب إجابتك هنا..."
+                                                value={answers[q.id] || ''}
+                                                onChange={(e) => pick(q.id, e.target.value)}
+                                                rows="4"
+                                                style={{ width: '100%', padding: '15px', borderRadius: '12px', border: '2px solid rgba(0,0,0,0.1)', fontSize: '1rem', fontFamily: 'inherit', resize: 'vertical', minHeight: '100px' }}
+                                            />
+                                        )
                                     )}
                                 </div>
                             </div>
@@ -536,12 +560,20 @@ const ViewQuiz = ({ lessonId, userData }) => {
                                         <div className="lv-rv-text-answers" style={{ display: 'flex', flexDirection: 'column', gap: '15px', marginTop: '10px' }}>
                                             <div style={{ background: 'rgba(0,0,0,0.03)', padding: '15px', borderRadius: '8px', border: '1px solid rgba(0,0,0,0.1)' }}>
                                                 <strong>إجابتك:</strong>
-                                                <p style={{ marginTop: '5px', whiteSpace: 'pre-wrap' }}>{userAnswer || 'لم تقم بالإجابة'}</p>
+                                                {q.question_type === 'MATH_EQUATION' ? (
+                                                    <div style={{ marginTop: '10px', fontSize: '1.2rem', direction: 'ltr', textAlign: 'left' }} dangerouslySetInnerHTML={{ __html: `<math-field readonly>${userAnswer || ''}</math-field>` }}></div>
+                                                ) : (
+                                                    <p style={{ marginTop: '5px', whiteSpace: 'pre-wrap' }}>{userAnswer || 'لم تقم بالإجابة'}</p>
+                                                )}
                                                 <div style={{ fontSize: '0.9rem', color: '#64748b', marginTop: '8px' }}>درجة التقييم: {q.evaluation_score}%</div>
                                             </div>
                                             <div style={{ background: 'rgba(16, 185, 129, 0.1)', padding: '15px', borderRadius: '8px', border: '1px solid rgba(16, 185, 129, 0.3)' }}>
                                                 <strong style={{ color: '#10b981' }}>الإجابة النموذجية:</strong>
-                                                <p style={{ marginTop: '5px', color: '#047857', whiteSpace: 'pre-wrap' }}>{q.model_answer}</p>
+                                                {q.question_type === 'MATH_EQUATION' ? (
+                                                    <div style={{ marginTop: '10px', fontSize: '1.2rem', direction: 'ltr', textAlign: 'left' }} dangerouslySetInnerHTML={{ __html: `<math-field readonly>${q.model_answer || ''}</math-field>` }}></div>
+                                                ) : (
+                                                    <p style={{ marginTop: '5px', color: '#047857', whiteSpace: 'pre-wrap' }}>{q.model_answer}</p>
+                                                )}
                                             </div>
                                             {q.feedback && (
                                                 <div style={{ background: 'rgba(239, 68, 68, 0.1)', padding: '15px', borderRadius: '8px', border: '1px solid rgba(239, 68, 68, 0.3)' }}>

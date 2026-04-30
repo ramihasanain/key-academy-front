@@ -3,6 +3,25 @@ import { useNavigate } from 'react-router-dom'
 import { API } from '../../config'
 import { HiOutlineArrowRight, HiOutlineCheckCircle, HiOutlinePlus, HiOutlineTrash, HiOutlineChevronDown, HiOutlineChevronUp, HiOutlineDocumentText, HiOutlinePuzzlePiece, HiOutlineCog, HiOutlineVideoCamera, HiOutlinePaperClip, HiOutlineSparkles } from 'react-icons/hi2'
 import './Admin.css'
+import 'mathlive'
+
+const MathInput = ({ value, onChange }) => {
+    const mf = useRef(null);
+    useEffect(() => {
+        if (mf.current) {
+            mf.current.value = value || '';
+            const handleInput = (e) => onChange(e.target.value);
+            mf.current.addEventListener('input', handleInput);
+            return () => mf.current?.removeEventListener('input', handleInput);
+        }
+    }, [onChange]);
+    useEffect(() => {
+        if (mf.current && mf.current.value !== value) {
+            mf.current.value = value || '';
+        }
+    }, [value]);
+    return <math-field ref={mf} style={{ width: '100%', padding: '15px', borderRadius: '12px', border: '2px solid rgba(0,0,0,0.1)', fontSize: '1.5rem', background: '#f8fafc', minHeight: '60px', direction: 'ltr' }}></math-field>;
+}
 
 // --- Smart Visual Editor Components ---
 const SmartImagePreview = ({ fileOrUrl }) => {
@@ -901,7 +920,11 @@ export const AdminCourseBuilder = ({ id }) => {
                                                                                         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', paddingRight: '45px', marginTop: '5px' }}>
                                                                                             <div>
                                                                                                 <label style={{ fontSize: '0.85rem', fontWeight: 'bold', color: '#475569', display: 'block', marginBottom: '5px' }}>الإجابة النموذجية (المعادلة أو النص الأساسي)</label>
-                                                                                                <textarea value={qs.model_answer || ''} onChange={e => updateQuestion(mIndex, lIndex, qzIndex, qsIndex, 'model_answer', e.target.value)} placeholder="اكتب الإجابة النموذجية هنا..." style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #cbd5e1', outline: 'none', resize: 'vertical' }} />
+                                                                                                {qs.question_type === 'MATH_EQUATION' ? (
+                                                                                                    <MathInput value={qs.model_answer || ''} onChange={(val) => updateQuestion(mIndex, lIndex, qzIndex, qsIndex, 'model_answer', val)} />
+                                                                                                ) : (
+                                                                                                    <textarea value={qs.model_answer || ''} onChange={e => updateQuestion(mIndex, lIndex, qzIndex, qsIndex, 'model_answer', e.target.value)} placeholder="اكتب الإجابة النموذجية هنا..." style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #cbd5e1', outline: 'none', resize: 'vertical' }} />
+                                                                                                )}
                                                                                             </div>
                                                                                             
                                                                                             {qs.question_type === 'SCIENCE_TEXT' && (
