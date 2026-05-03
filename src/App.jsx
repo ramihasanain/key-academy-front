@@ -61,6 +61,11 @@ const AdminModerationHistory = lazy(() =>
   })),
 );
 const TwoFactorSetup = lazy(() => import("./pages/hq/TwoFactorSetup"));
+const AdminQuickFillCourses = lazy(() =>
+  import("./pages/hq/AdminQuickFillCourses").then((m) => ({
+    default: m.AdminQuickFillCourses,
+  })),
+);
 
 const TALayout = lazy(() =>
   import("./pages/ta/TALayout").then((m) => ({ default: m.TALayout })),
@@ -273,6 +278,7 @@ function App() {
               <Route path="students/:id/360" element={<Student360View />} />
               <Route path="teachers/:id/360" element={<Teacher360View />} />
               <Route path="teacherassistants/:id/360" element={<TA360View />} />
+              <Route path="quick-courses" element={<AdminQuickFillCourses />} />
               <Route path=":model/:id" element={<AdminModelForm />} />
               <Route path="2fa-setup" element={<TwoFactorSetup />} />
             </Route>

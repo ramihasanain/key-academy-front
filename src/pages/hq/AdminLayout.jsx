@@ -64,6 +64,7 @@ export const AdminLayout = () => {
         // Let's just do a simple check. If permission list contains 'view_course', 'view_user', etc.
         const pathMap = {
             'users': 'view_user', 'students': 'view_user', 'courses': 'view_course',
+            'quick-courses': 'add_course',
             'teachers': 'view_teacher', 'enrollments': 'view_enrollment',
             'contactmessages': 'view_contactmessage', 'faqs': 'view_faqitem',
             'muted-students': 'view_user',
@@ -83,6 +84,7 @@ export const AdminLayout = () => {
         { path: 'subjects', icon: <HiOutlineDocumentText />, label: 'المواد الدراسية' },
         { path: 'students', icon: <HiOutlineUsers />, label: 'الطلاب المسجلين' },
         { path: 'courses', icon: <HiOutlineBookOpen />, label: 'المناهج والدورات' },
+        { path: 'quick-courses', icon: <HiOutlineBookOpen />, label: 'التعبئة السريعة (Excel)' },
         { path: 'teachers', icon: <HiOutlineAcademicCap />, label: 'الأساتذة' },
         { path: 'teacherassistants', icon: <HiOutlineBriefcase />, label: 'مساعدي الأساتذة' },
         { path: 'coursegroups', icon: <HiOutlineUserGroup />, label: 'المجموعات (للمساعدين)' },
