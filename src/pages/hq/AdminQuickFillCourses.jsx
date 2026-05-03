@@ -10,13 +10,12 @@ export const AdminQuickFillCourses = () => {
     const [rows, setRows] = useState([]);
     const [isSaving, setIsSaving] = useState(false);
 
-    // Pre-defined price options based on your request
     const PRICE_OPTIONS = [
-        { label: '200 الف', value: '200000' },
-        { label: '250 الف', value: '250000' },
-        { label: '300 الف', value: '300000' },
-        { label: '350 الف', value: '350000' },
-        { label: '400 الف', value: '400000' },
+        { label: '200,000', value: '200,000' },
+        { label: '250,000', value: '250,000' },
+        { label: '300,000', value: '300,000' },
+        { label: '350,000', value: '350,000' },
+        { label: '400,000', value: '400,000' },
     ];
 
     useEffect(() => {
