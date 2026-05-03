@@ -4,10 +4,12 @@ import './Admin.css';
 
 export const AdminQuickFillCourses = () => {
     const [teachers, setTeachers] = useState([]);
-    const [rows, setRows] = useState([
-        { id: Date.now(), title: '', teacher: '', is_free: 'paid', price: '', hero_image: null, status: 'idle' } // status: idle | loading | success | error
-    ]);
+    const [globalTeacher, setGlobalTeacher] = useState('');
+    const [globalPrice, setGlobalPrice] = useState('50000');
+    const [globalImage, setGlobalImage] = useState(null);
+    const [courseNames, setCourseNames] = useState('');
     const [isSaving, setIsSaving] = useState(false);
+    const [results, setResults] = useState([]); // { title, status }
 
     useEffect(() => {
         fetchTeachers();
@@ -16,7 +18,6 @@ export const AdminQuickFillCourses = () => {
     const fetchTeachers = async () => {
         try {
             const tk = localStorage.getItem('access_token');
-            // Assuming pagination exists, we might need a large limit
             const res = await fetch(API + '/api/hq/teachers/?limit=1000', {
                 headers: { 'Authorization': `Bearer ${tk}` }
             });
@@ -29,48 +30,40 @@ export const AdminQuickFillCourses = () => {
         }
     };
 
-    const addRow = () => {
-        setRows([...rows, { id: Date.now(), title: '', teacher: '', is_free: 'paid', price: '', hero_image: null, status: 'idle' }]);
-    };
-
-    const removeRow = (id) => {
-        setRows(rows.filter(r => r.id !== id));
-    };
-
-    const handleRowChange = (id, field, value) => {
-        setRows(rows.map(r => r.id === id ? { ...r, [field]: value } : r));
-    };
-
-    const handleImageChange = (id, e) => {
-        const file = e.target.files[0];
-        setRows(rows.map(r => r.id === id ? { ...r, hero_image: file } : r));
+    const handleImageChange = (e) => {
+        setGlobalImage(e.target.files[0]);
     };
 
     const saveAll = async () => {
+        if (!globalTeacher) {
+            alert("الرجاء اختيار الأستاذ أولاً");
+            return;
+        }
+
+        const names = courseNames.split('\n').map(n => n.trim()).filter(n => n.length > 0);
+        if (names.length === 0) {
+            alert("الرجاء إدخال أسماء الدورات");
+            return;
+        }
+
         setIsSaving(true);
         const tk = localStorage.getItem('access_token');
         
-        const newRows = [...rows];
-        
-        for (let i = 0; i < newRows.length; i++) {
-            const row = newRows[i];
-            if (!row.title || !row.teacher) continue; // skip empty or incomplete rows
-            if (row.status === 'success') continue; // already saved
-            
-            newRows[i].status = 'loading';
-            setRows([...newRows]);
+        const newResults = names.map(n => ({ title: n, status: 'loading' }));
+        setResults(newResults);
 
+        for (let i = 0; i < names.length; i++) {
+            const title = names[i];
+            
             try {
                 const formData = new FormData();
-                formData.append('title', row.title);
-                formData.append('teacher', row.teacher);
+                formData.append('title', title);
+                formData.append('teacher', globalTeacher);
+                formData.append('price', globalPrice);
+                formData.append('is_published', 'true'); // All active
                 
-                // Determine price based on is_free choice
-                const finalPrice = row.is_free === 'free' ? '0' : (row.price || '0');
-                formData.append('price', finalPrice);
-                
-                if (row.hero_image) {
-                    formData.append('hero_image', row.hero_image);
+                if (globalImage) {
+                    formData.append('hero_image', globalImage);
                 }
 
                 const res = await fetch(API + '/api/hq/courses/', {
@@ -82,16 +75,15 @@ export const AdminQuickFillCourses = () => {
                 });
 
                 if (res.ok) {
-                    newRows[i].status = 'success';
+                    newResults[i].status = 'success';
                 } else {
-                    newRows[i].status = 'error';
-                    console.error('Failed to save row', row, await res.text());
+                    newResults[i].status = 'error';
                 }
             } catch (err) {
-                newRows[i].status = 'error';
-                console.error('Exception saving row', row, err);
+                newResults[i].status = 'error';
             }
-            setRows([...newRows]);
+            // Trigger re-render to show progress
+            setResults([...newResults]);
         }
         setIsSaving(false);
     };
@@ -99,113 +91,97 @@ export const AdminQuickFillCourses = () => {
     return (
         <div className="hq-overview">
             <div className="hq-page-header">
-                <h3>التعبئة السريعة للدورات</h3>
-                <p>إضافة عدة دورات في وقت واحد بطريقة سريعة (مثل Excel)</p>
+                <h3>التعبئة السريعة للدورات (نسخ / لصق)</h3>
+                <p>قم باختيار الإعدادات العامة والصق أسماء الدورات، ليتم إنشاؤها جميعاً كدورات مدفوعة وفعالة.</p>
             </div>
 
-            <div className="hq-card" style={{ padding: '20px', overflowX: 'auto' }}>
-                <table className="hq-grid-table" style={{ width: '100%', minWidth: '800px' }}>
-                    <thead>
-                        <tr>
-                            <th>اسم الدورة</th>
-                            <th>الأستاذ</th>
-                            <th>النوع</th>
-                            <th>السعر</th>
-                            <th>غلاف الدورة</th>
-                            <th>الحالة</th>
-                            <th>إجراء</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {rows.map((row, index) => (
-                            <tr key={row.id} style={{ background: row.status === 'success' ? '#dcfce7' : row.status === 'error' ? '#fee2e2' : 'transparent' }}>
-                                <td>
-                                    <input 
-                                        type="text" 
-                                        className="hq-input" 
-                                        placeholder="اسم الدورة..." 
-                                        value={row.title}
-                                        onChange={(e) => handleRowChange(row.id, 'title', e.target.value)}
-                                        disabled={row.status === 'loading' || row.status === 'success'}
-                                    />
-                                </td>
-                                <td>
-                                    <select 
-                                        className="hq-input" 
-                                        value={row.teacher} 
-                                        onChange={(e) => handleRowChange(row.id, 'teacher', e.target.value)}
-                                        disabled={row.status === 'loading' || row.status === 'success'}
-                                    >
-                                        <option value="">اختر الأستاذ...</option>
-                                        {teachers.map(t => (
-                                            <option key={t.id} value={t.id}>{t.name || t.user?.username || `أستاذ ${t.id}`}</option>
-                                        ))}
-                                    </select>
-                                </td>
-                                <td>
-                                    <select 
-                                        className="hq-input" 
-                                        value={row.is_free} 
-                                        onChange={(e) => handleRowChange(row.id, 'is_free', e.target.value)}
-                                        disabled={row.status === 'loading' || row.status === 'success'}
-                                    >
-                                        <option value="paid">مدفوعة</option>
-                                        <option value="free">مجانية</option>
-                                    </select>
-                                </td>
-                                <td>
-                                    <input 
-                                        type="text" 
-                                        className="hq-input" 
-                                        placeholder="السعر..." 
-                                        value={row.price}
-                                        onChange={(e) => handleRowChange(row.id, 'price', e.target.value)}
-                                        disabled={row.is_free === 'free' || row.status === 'loading' || row.status === 'success'}
-                                        style={{ opacity: row.is_free === 'free' ? 0.5 : 1 }}
-                                    />
-                                </td>
-                                <td>
-                                    <input 
-                                        type="file" 
-                                        className="hq-input" 
-                                        accept="image/*"
-                                        onChange={(e) => handleImageChange(row.id, e)}
-                                        disabled={row.status === 'loading' || row.status === 'success'}
-                                    />
-                                </td>
-                                <td style={{ textAlign: 'center', fontWeight: 'bold' }}>
-                                    {row.status === 'idle' && <span style={{ color: '#6b7280' }}>قيد الانتظار</span>}
-                                    {row.status === 'loading' && <span style={{ color: '#3b82f6' }}>جاري الحفظ...</span>}
-                                    {row.status === 'success' && <span style={{ color: '#10b981' }}>✓ تم الحفظ</span>}
-                                    {row.status === 'error' && <span style={{ color: '#ef4444' }}>✗ خطأ</span>}
-                                </td>
-                                <td>
-                                    <button 
-                                        className="hq-action-btn delete"
-                                        onClick={() => removeRow(row.id)}
-                                        disabled={row.status === 'loading'}
-                                    >
-                                        حذف
-                                    </button>
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-                
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '20px' }}>
-                    <button className="hq-btn-outline" onClick={addRow}>
-                        + إضافة صف جديد
-                    </button>
+            <div className="hq-card" style={{ padding: '20px', maxWidth: '800px', margin: '0 auto' }}>
+                <div style={{ display: 'flex', gap: '20px', marginBottom: '20px' }}>
+                    <div style={{ flex: 1 }}>
+                        <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>الأستاذ (مطلوب)</label>
+                        <select 
+                            className="hq-input" 
+                            value={globalTeacher} 
+                            onChange={(e) => setGlobalTeacher(e.target.value)}
+                            disabled={isSaving}
+                        >
+                            <option value="">اختر الأستاذ الموحد...</option>
+                            {teachers.map(t => (
+                                <option key={t.id} value={t.id}>{t.name || t.user?.username || `أستاذ ${t.id}`}</option>
+                            ))}
+                        </select>
+                    </div>
                     
-                    <button 
-                        className="hq-btn-primary" 
-                        onClick={saveAll}
-                        disabled={isSaving}
-                    >
-                        {isSaving ? 'جاري الحفظ...' : 'حفظ جميع الدورات'}
-                    </button>
+                    <div style={{ flex: 1 }}>
+                        <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>السعر الموحد (مطلوب)</label>
+                        <input 
+                            type="text" 
+                            className="hq-input" 
+                            placeholder="مثال: 50000" 
+                            value={globalPrice}
+                            onChange={(e) => setGlobalPrice(e.target.value)}
+                            disabled={isSaving}
+                        />
+                    </div>
                 </div>
+
+                <div style={{ marginBottom: '20px' }}>
+                    <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>غلاف الدورة الموحد (اختياري)</label>
+                    <input 
+                        type="file" 
+                        className="hq-input" 
+                        accept="image/*"
+                        onChange={handleImageChange}
+                        disabled={isSaving}
+                    />
+                </div>
+
+                <div style={{ marginBottom: '20px' }}>
+                    <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>أسماء الدورات (كل اسم في سطر مستقل)</label>
+                    <textarea 
+                        className="hq-input" 
+                        rows="15"
+                        placeholder="دورة الفيزياء الفصل الأول&#10;دورة الكيمياء العضوية&#10;الرياضيات المكثف..."
+                        value={courseNames}
+                        onChange={(e) => setCourseNames(e.target.value)}
+                        disabled={isSaving}
+                        style={{ height: 'auto', resize: 'vertical' }}
+                    ></textarea>
+                </div>
+                
+                <button 
+                    className="hq-btn-primary" 
+                    onClick={saveAll}
+                    disabled={isSaving}
+                    style={{ width: '100%', padding: '15px', fontSize: '18px' }}
+                >
+                    {isSaving ? 'جاري الإنشاء...' : 'إنشاء جميع الدورات دفعة واحدة'}
+                </button>
+
+                {results.length > 0 && (
+                    <div style={{ marginTop: '30px' }}>
+                        <h4>سجل الإنشاء</h4>
+                        <ul style={{ listStyle: 'none', padding: 0 }}>
+                            {results.map((res, i) => (
+                                <li key={i} style={{ 
+                                    padding: '10px', 
+                                    marginBottom: '5px', 
+                                    background: res.status === 'success' ? '#dcfce7' : res.status === 'error' ? '#fee2e2' : '#f3f4f6',
+                                    borderRadius: '5px',
+                                    display: 'flex',
+                                    justifyContent: 'space-between'
+                                }}>
+                                    <span>{res.title}</span>
+                                    <strong>
+                                        {res.status === 'loading' && <span style={{ color: '#3b82f6' }}>جاري...</span>}
+                                        {res.status === 'success' && <span style={{ color: '#10b981' }}>نجاح ✓</span>}
+                                        {res.status === 'error' && <span style={{ color: '#ef4444' }}>فشل ✗</span>}
+                                    </strong>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                )}
             </div>
         </div>
     );
