@@ -45,7 +45,7 @@ const Signup = () => {
         username: 'اسم المستخدم مطلوب',
         first_name: 'الاسم الأول مطلوب',
         last_name: 'الاسم الأخير مطلوب',
-        parent_phone: 'رقم ولي الأمر مطلوب',
+        parent_phone: 'رقم ولي الأمر غير صحيح',
         city: 'المدينة مطلوبة',
         grade: 'المرحلة الدراسية مطلوبة',
         branch: 'المسار الدراسي مطلوب',
@@ -330,7 +330,7 @@ const Signup = () => {
 
                                     {/* Parent Phone */}
                                     <div className="input-group">
-                                        <label>رقم ولي الأمر</label>
+                                        <label>رقم ولي الأمر (اختياري)</label>
                                         <div className="phone-wrapper">
                                             <div className="phone-prefix">+964</div>
                                             <input
@@ -338,7 +338,6 @@ const Signup = () => {
                                                 placeholder="07XX XXX XXXX"
                                                 value={parentPhone}
                                                 onChange={(e) => setParentPhone(e.target.value)}
-                                                required
                                                 dir="ltr"
                                             />
                                             <HiOutlinePhone className="input-icon" />
