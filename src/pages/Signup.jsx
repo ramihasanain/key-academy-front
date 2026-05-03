@@ -118,7 +118,7 @@ const Signup = () => {
                     city,
                     area: city === 'بغداد' ? area : null,
                     grade,
-                    branch: grade === 'الثالث المتوسط' ? '' : branch,
+                    branch: grade === 'الثالث المتوسط' ? null : (branch === 'الفرع العلمي' ? 1 : 2),
                     password,
                     confirm_password: confirmPassword,
                 }),
