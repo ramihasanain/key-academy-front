@@ -51,7 +51,7 @@ export const AdminCourseBuilder = ({ id }) => {
     const [course, setCourse] = useState({
         title: '', description: '', price: '0',
         teacher: '', subject: '', grade: '', is_published: true, color: 'blue',
-        students_per_group: 200
+        students_per_group: 200, order: 0
     })
 
     const [courseDocs, setCourseDocs] = useState([]) // MinisterialDocs
@@ -621,6 +621,11 @@ export const AdminCourseBuilder = ({ id }) => {
                             <option value="purple">رصاصي بنفسجي</option>
                             <option value="orange">برتقالي ملتهب</option>
                         </select>
+                    </div>
+
+                    <div className="hq-df-group">
+                        <label>الترتيب (الأقل يظهر أولاً)</label>
+                        <input type="number" value={course.order || 0} onChange={e => setCourse({ ...course, order: parseInt(e.target.value) || 0 })} />
                     </div>
                 </div>
 

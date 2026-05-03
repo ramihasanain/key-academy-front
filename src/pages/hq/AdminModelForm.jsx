@@ -58,6 +58,7 @@ const SCHEMAS = {
             { key: 'initials', label: 'اسم رمزي (رمز الدورة)', type: 'text' },
             { key: 'rating', label: 'التقييم الظاهري (مثال: 4.8)', type: 'text' },
             { key: 'students_count', label: 'عدد الطلاب الوهمي/البدائي', type: 'number' },
+            { key: 'order', label: 'الترتيب (الأقل يظهر أولاً)', type: 'number' },
             { key: 'is_active', label: 'حساب الأستاذ فعال؟', type: 'boolean' }
         ]
     },
