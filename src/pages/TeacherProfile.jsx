@@ -46,6 +46,27 @@ const TeacherProfile = () => {
     const [teacher, setTeacher] = useState(null)
     const [loading, setLoading] = useState(true)
     const [imageErrored, setImageErrored] = useState(false)
+    const [coursesList, setCoursesList] = useState([])
+    const [loadingCourses, setLoadingCourses] = useState(false)
+    const [coursesFetched, setCoursesFetched] = useState(false)
+
+    useEffect(() => {
+        if (activeTab === 'courses' && !coursesFetched && !loadingCourses) {
+            setLoadingCourses(true)
+            fetch('https://key-academy-cloud.fra1.digitaloceanspaces.com/landing-data/courses/list.json')
+                .then(res => res.json())
+                .then(data => {
+                    setCoursesList(data)
+                    setCoursesFetched(true)
+                    setLoadingCourses(false)
+                })
+                .catch(err => {
+                    console.error('Failed to fetch courses list', err)
+                    setCoursesFetched(true)
+                    setLoadingCourses(false)
+                })
+        }
+    }, [activeTab, coursesFetched, loadingCourses])
 
     useEffect(() => {
         let cancelled = false
@@ -77,13 +98,26 @@ const TeacherProfile = () => {
         return <div className="page-transition profile-page" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}><div style={{ fontSize: '1.2rem', color: 'var(--text-muted)' }}>عذراً، الأستاذ غير موجود</div></div>
     }
 
-    const displayedCourses = teacher.courses && teacher.courses.length > 0 ? teacher.courses.map(c => ({
-        id: c.id,
-        title: c.title,
-        desc: c.description || '',
-        lessons: c.lessons_count || 0,
-        img: c.hero_image || 'https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=500&auto=format&fit=crop&q=60'
-    })) : []
+    const filteredCourses = coursesList.filter(c => String(c.teacher_id) === String(id))
+
+    let displayedCourses = []
+    if (coursesFetched && filteredCourses.length > 0) {
+        displayedCourses = filteredCourses.map(c => ({
+            id: c.id,
+            title: c.title,
+            desc: c.subject + ' - ' + c.grade || '',
+            lessons: c.lessons_count || 0,
+            img: c.hero_image || 'https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=500&auto=format&fit=crop&q=60'
+        }))
+    } else if (!coursesFetched && teacher.courses && teacher.courses.length > 0) {
+        displayedCourses = teacher.courses.map(c => ({
+            id: c.id,
+            title: c.title,
+            desc: c.description || '',
+            lessons: c.lessons_count || 0,
+            img: c.hero_image || 'https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=500&auto=format&fit=crop&q=60'
+        }))
+    }
 
     return (
         <div className="page-transition profile-page">
@@ -170,7 +204,11 @@ const TeacherProfile = () => {
 
                             {activeTab === 'courses' && (
                                 <motion.div className="profile-courses-grid mt-3" variants={staggerContainer} initial="hidden" animate="visible">
-                                    {displayedCourses.length > 0 ? displayedCourses.map((course, i) => (
+                                    {loadingCourses ? (
+                                        <div style={{ textAlign: 'center', padding: '3rem 0', color: 'var(--text-muted)', gridColumn: '1 / -1' }}>
+                                            <div style={{ fontSize: '1.2rem' }}>جاري تحميل الدورات...</div>
+                                        </div>
+                                    ) : displayedCourses.length > 0 ? displayedCourses.map((course, i) => (
                                         <motion.div key={i} className={`glass-card profile-course-card color-${teacher.color || 'blue'}`} variants={fadeInUp} style={teacher.color?.startsWith('#') ? { background: teacher.color, borderColor: 'transparent', boxShadow: `0 10px 30px ${teacher.color}33` } : {}}>
                                             <div className="course-card-img">
                                                 <img src={course.img} alt={course.title} />
