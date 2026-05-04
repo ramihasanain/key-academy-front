@@ -79,8 +79,9 @@ const Footer = () => {
 
           <div className="footer-col">
             <h4>تواصل معنا</h4>
-            <a href="mailto:info@keyacademy.iq">info@keyacademy.iq</a>
-            <a href="tel:+9647700000000">+964 770 000 0000</a>
+            <a href="mailto:info@key.academy">info@key.academy</a>
+            <a href="tel:07777007006">07777007006</a>
+            <a href="tel:07877007006">07877007006</a>
             <a href="#">بغداد، العراق</a>
           </div>
         </div>
