@@ -54,7 +54,7 @@ export const TAStudentsList = () => {
                         <input 
                             type="text" 
                             className="hq-input" 
-                            placeholder="ابحث بالاسم، الإيميل، الهاتف..."
+                            placeholder="ابحث بالاسم أو الإيميل..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                             style={{ paddingRight: '45px', width: '100%' }}
@@ -78,7 +78,6 @@ export const TAStudentsList = () => {
                             <thead style={{ background: 'rgba(255,255,255,0.02)', borderBottom: '1px solid var(--hq-border)' }}>
                                 <tr>
                                     <th style={{ padding: '15px 20px', color: 'var(--hq-text-muted)', fontWeight: 'bold' }}>الطالب</th>
-                                    <th style={{ padding: '15px 20px', color: 'var(--hq-text-muted)', fontWeight: 'bold' }}>الهاتف</th>
                                     <th style={{ padding: '15px 20px', color: 'var(--hq-text-muted)', fontWeight: 'bold' }}>الحالة</th>
                                     <th style={{ padding: '15px 20px', color: 'var(--hq-text-muted)', fontWeight: 'bold' }}>الانضمام</th>
                                     <th style={{ padding: '15px 20px', color: 'var(--hq-text-muted)', fontWeight: 'bold', width: '150px' }}>الإجراء</th>
@@ -91,7 +90,6 @@ export const TAStudentsList = () => {
                                             <div style={{ color: 'var(--hq-primary-text)', fontWeight: 'bold', fontSize: '1.05rem' }}>{student.name}</div>
                                             <div style={{ fontSize: '0.85rem', color: 'var(--hq-text-muted)', marginTop: '2px' }}>@{student.username}</div>
                                         </td>
-                                        <td style={{ padding: '15px 20px', color: 'var(--hq-primary-text)' }}>{student.phone}</td>
                                         <td style={{ padding: '15px 20px' }}>
                                             {student.muted_until && new Date(student.muted_until) > new Date() ? (
                                                 <span style={{ color: '#ef4444', background: 'rgba(239,68,68,0.1)', padding: '4px 10px', borderRadius: '8px', fontSize: '0.85rem', display: 'inline-flex', alignItems: 'center', gap: '4px' }}><HiOutlineNoSymbol /> محظور</span>

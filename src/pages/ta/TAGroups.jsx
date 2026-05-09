@@ -305,7 +305,7 @@ export const TAGroups = () => {
                                                     onClick={() => setPrivateTarget(null)}
                                                     style={{ padding: '8px', cursor: 'pointer', fontSize: '12px', background: privateTarget === null ? 'rgba(131, 42, 150, 0.1)' : 'transparent', color: privateTarget === null ? 'var(--hq-primary)' : 'var(--hq-text-muted)', borderRadius: '6px', display: 'flex', alignItems: 'center', gap: '8px', fontWeight: privateTarget === null ? 'bold' : 'normal' }}
                                                 >
-                                                    🌍 الدردشة العامة
+                                                    🌍 المجموعة العامة
                                                 </div>
                                                 {/* Private Inbox Contacts */}
                                                 {inboxContacts.map(contact => (

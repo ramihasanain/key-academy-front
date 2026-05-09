@@ -169,14 +169,14 @@ export const Student360View = ({ id }) => {
 
     const renderHierarchy = (item, timeField) => (
         <div style={{ marginTop: '8px', fontSize: '0.8rem', color: 'var(--hq-text-muted)', display: 'flex', flexWrap: 'wrap', gap: '6px', alignItems: 'center' }}>
-            <span style={{background: 'rgba(99, 102, 241, 0.1)', color: '#6366f1', padding: '2px 6px', borderRadius: '4px'}}>{item.subject_title || 'عام'}</span>
+            <span style={{ background: 'rgba(99, 102, 241, 0.1)', color: '#6366f1', padding: '2px 6px', borderRadius: '4px' }}>{item.subject_title || 'عام'}</span>
             <span>-</span>
-            <span style={{color: 'var(--hq-primary-text)'}}>{item.course_title || '-'}</span>
+            <span style={{ color: 'var(--hq-primary-text)' }}>{item.course_title || '-'}</span>
             <span>-</span>
-            <span style={{color: 'var(--hq-text-muted)'}}>{item.module_title || '-'}</span>
+            <span style={{ color: 'var(--hq-text-muted)' }}>{item.module_title || '-'}</span>
             <span>-</span>
-            <span style={{color: '#34d399'}}>{item.lesson_title || '-'}</span>
-            <span style={{marginRight: 'auto', background: 'rgba(56, 189, 248, 0.1)', color: '#38bdf8', padding: '2px 8px', borderRadius: '4px', fontSize: '0.75rem'}}>
+            <span style={{ color: '#34d399' }}>{item.lesson_title || '-'}</span>
+            <span style={{ marginRight: 'auto', background: 'rgba(56, 189, 248, 0.1)', color: '#38bdf8', padding: '2px 8px', borderRadius: '4px', fontSize: '0.75rem' }}>
                 {item[timeField] ? new Date(item[timeField]).toLocaleString('ar-EG') : '-'}
             </span>
         </div>
@@ -186,7 +186,7 @@ export const Student360View = ({ id }) => {
     const teachersList = [...new Set(courses.map(c => c.teacher))];
     const coursesList = [...new Set(courses.map(c => c.title))];
 
-    const filteredCourses = courses.filter(c => 
+    const filteredCourses = courses.filter(c =>
         (!subjectFilter || c.subject === subjectFilter) &&
         (!courseFilter || c.title === courseFilter) &&
         (!teacherFilter || c.teacher === teacherFilter)
@@ -211,7 +211,7 @@ export const Student360View = ({ id }) => {
                     </button>
                     <div>
                         <h2 style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
-                            ملف الطالب (360) - {student.full_name} (@{student.username})
+                            ملف الطالب - {student.full_name} (@{student.username})
                             {!student.is_active && <span style={{ fontSize: '0.7rem', background: '#ef4444', color: 'white', padding: '2px 8px', borderRadius: '12px' }}>مجمد ❄️</span>}
                         </h2>
                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', fontSize: '0.8rem', color: 'var(--hq-primary-text)' }}>
@@ -307,16 +307,16 @@ export const Student360View = ({ id }) => {
             <div className="hq-table-card" style={{ marginBottom: '20px', padding: '15px 20px', display: 'flex', gap: '15px', alignItems: 'center', background: 'var(--hq-bg)', flexWrap: 'wrap' }}>
                 <strong style={{ color: 'var(--hq-primary-text)' }}>فلاتر السجل (360):</strong>
                 <select value={subjectFilter} onChange={e => setSubjectFilter(e.target.value)} style={{ padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--hq-border)', background: 'transparent', color: 'var(--hq-primary-text)', outline: 'none' }}>
-                    <option value="" style={{color: 'black'}}>كل المواد</option>
-                    {subjectsList.map(s => <option key={s} value={s} style={{color: 'black'}}>{s}</option>)}
+                    <option value="" style={{ color: 'black' }}>كل المواد</option>
+                    {subjectsList.map(s => <option key={s} value={s} style={{ color: 'black' }}>{s}</option>)}
                 </select>
                 <select value={courseFilter} onChange={e => setCourseFilter(e.target.value)} style={{ padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--hq-border)', background: 'transparent', color: 'var(--hq-primary-text)', outline: 'none' }}>
-                    <option value="" style={{color: 'black'}}>كل الدورات</option>
-                    {coursesList.map(c => <option key={c} value={c} style={{color: 'black'}}>{c}</option>)}
+                    <option value="" style={{ color: 'black' }}>كل الدورات</option>
+                    {coursesList.map(c => <option key={c} value={c} style={{ color: 'black' }}>{c}</option>)}
                 </select>
                 <select value={teacherFilter} onChange={e => setTeacherFilter(e.target.value)} style={{ padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--hq-border)', background: 'transparent', color: 'var(--hq-primary-text)', outline: 'none' }}>
-                    <option value="" style={{color: 'black'}}>كل الأساتذة</option>
-                    {teachersList.map(t => <option key={t} value={t} style={{color: 'black'}}>{t}</option>)}
+                    <option value="" style={{ color: 'black' }}>كل الأساتذة</option>
+                    {teachersList.map(t => <option key={t} value={t} style={{ color: 'black' }}>{t}</option>)}
                 </select>
                 {(subjectFilter || courseFilter || teacherFilter) && (
                     <button onClick={() => { setSubjectFilter(''); setCourseFilter(''); setTeacherFilter(''); }} style={{ background: 'transparent', border: 'none', color: '#ef4444', cursor: 'pointer', textDecoration: 'underline' }}>
@@ -342,11 +342,11 @@ export const Student360View = ({ id }) => {
                                 <span>الدروس المكتملة: {c.completed_lessons} من أصل {c.total_lessons}</span>
                                 <span>تاريخ الاشتراك: {new Date(c.enrolled_at).toLocaleDateString('ar-EG')}</span>
                             </div>
-                            <div style={{ display: 'flex', flexWrap:'wrap', gap:'10px', marginTop: '10px', fontSize: '0.80rem', color: 'var(--hq-text-muted)' }}>
-                                <span style={{background: 'rgba(99, 102, 241, 0.1)', color: '#6366f1', padding: '3px 8px', borderRadius: '4px'}}>المادة: {c.subject}</span>
-                                <span style={{background: 'rgba(52, 211, 153, 0.1)', color: '#34d399', padding: '3px 8px', borderRadius: '4px'}}>الأستاذ: {c.teacher}</span>
-                                <span style={{background: 'rgba(251, 191, 36, 0.1)', color: '#fbbf24', padding: '3px 8px', borderRadius: '4px'}}>المجموعة: {c.group_index}</span>
-                                <span style={{background: 'rgba(236, 72, 153, 0.1)', color: '#ec4899', padding: '3px 8px', borderRadius: '4px'}}>المساعد المشرف: {c.assistant}</span>
+                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', marginTop: '10px', fontSize: '0.80rem', color: 'var(--hq-text-muted)' }}>
+                                <span style={{ background: 'rgba(99, 102, 241, 0.1)', color: '#6366f1', padding: '3px 8px', borderRadius: '4px' }}>المادة: {c.subject}</span>
+                                <span style={{ background: 'rgba(52, 211, 153, 0.1)', color: '#34d399', padding: '3px 8px', borderRadius: '4px' }}>الأستاذ: {c.teacher}</span>
+                                <span style={{ background: 'rgba(251, 191, 36, 0.1)', color: '#fbbf24', padding: '3px 8px', borderRadius: '4px' }}>المجموعة: {c.group_index}</span>
+                                <span style={{ background: 'rgba(236, 72, 153, 0.1)', color: '#ec4899', padding: '3px 8px', borderRadius: '4px' }}>المساعد المشرف: {c.assistant}</span>
                             </div>
                         </div>
                     ))}
@@ -379,7 +379,7 @@ export const Student360View = ({ id }) => {
                     <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
                         {filteredQuizzes.length === 0 ? <p style={{ color: 'var(--hq-text-muted)' }}>لا يوجد اختبارات تطابق الفلتر</p> : filteredQuizzes.map((q, i) => (
                             <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--hq-bg)', padding: '10px 15px', borderRadius: '8px' }}>
-                                <div style={{flex: 1}}>
+                                <div style={{ flex: 1 }}>
                                     <p style={{ margin: '0 0 5px', fontWeight: 'bold', color: 'var(--hq-primary-text)' }}>{q.quiz_title}</p>
                                     {renderHierarchy(q, 'attempted_at')}
                                 </div>
@@ -486,16 +486,16 @@ export const Student360View = ({ id }) => {
 
                         {dialog.type === 'multi_select' && (
                             <div style={{ marginBottom: '25px' }}>
-                                <select 
-                                    multiple 
-                                    id="hq-dialog-multi-select" 
+                                <select
+                                    multiple
+                                    id="hq-dialog-multi-select"
                                     style={{ width: '100%', padding: '15px', borderRadius: '12px', border: '1px solid #334155', background: '#0f172a', color: '#f8fafc', fontSize: '14px', minHeight: '150px' }}
                                 >
                                     {dialog.options.map(opt => (
                                         <option key={opt.value} value={opt.value} style={{ padding: '8px', cursor: 'pointer' }}>{opt.label}</option>
                                     ))}
                                 </select>
-                                <p style={{fontSize:'0.8rem', color:'#94a3b8', marginTop:'10px', textAlign: 'center'}}>* يُرجى الضغط على المفتاح Ctrl لاختيار أكثر من دورة معاً</p>
+                                <p style={{ fontSize: '0.8rem', color: '#94a3b8', marginTop: '10px', textAlign: 'center' }}>* يُرجى الضغط على المفتاح Ctrl لاختيار أكثر من دورة معاً</p>
                             </div>
                         )}
 
@@ -531,7 +531,7 @@ export const Student360View = ({ id }) => {
                             )}
                             {dialog.type === 'multi_select' && (
                                 <>
-                                    <button onClick={() => { 
+                                    <button onClick={() => {
                                         const select = document.getElementById('hq-dialog-multi-select');
                                         const selectedValues = Array.from(select.selectedOptions).map(opt => opt.value);
                                         if (selectedValues.length === 0) { alert('الرجاء اختيار خيار واحد على الأقل'); return; }
