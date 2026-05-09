@@ -133,7 +133,6 @@ const LiveChat = ({ courseId, userData, lessonId = null }) => {
                         <p style={{ marginTop: '4px' }}>{chatType === 'public' ? 'شوف رسائل المدرس وباقي الطلاب واسأل بمجموعة الدورة' : 'رسائلك هنا يشوفها الأستاذ والمساعد فقط ويجاوبك بشكل خاص'}</p>
                     </div>
                 </div>
-                <div className="lv-gc-live"><span className="lv-gc-dot"></span> Socket متصل</div>
             </div>
 
             <div className="lv-gc-msgs" style={{ flex: 1, overflowY: 'auto', padding: '10px 15px', minHeight: '200px' }}>
