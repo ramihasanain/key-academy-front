@@ -45,16 +45,16 @@ export const TAStudentsList = () => {
                     </h1>
                     <p style={{ color: 'var(--hq-text-muted)', marginTop: '5px', fontSize: '0.95rem' }}>بحث وفلترة جميع الطلاب المسجلين بصلاحيتك.</p>
                 </div>
-                
+
                 <form onSubmit={handleSearch} style={{ display: 'flex', gap: '10px', width: '100%', maxWidth: '400px' }}>
                     <div style={{ position: 'relative', flex: 1 }}>
                         <span style={{ position: 'absolute', top: '50%', right: '15px', transform: 'translateY(-50%)', color: 'var(--hq-text-muted)' }}>
                             <HiOutlineMagnifyingGlass size={20} />
                         </span>
-                        <input 
-                            type="text" 
-                            className="hq-input" 
-                            placeholder="ابحث بالاسم أو الإيميل..."
+                        <input
+                            type="text"
+                            className="hq-input"
+                            placeholder="ابحث بالاسم"
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                             style={{ paddingRight: '45px', width: '100%' }}
@@ -103,7 +103,7 @@ export const TAStudentsList = () => {
                                             {new Date(student.date_joined).toLocaleDateString('ar-EG')}
                                         </td>
                                         <td style={{ padding: '15px 20px' }}>
-                                            <button 
+                                            <button
                                                 onClick={() => navigate(`/ta/student/${student.id}/360`)}
                                                 style={{ background: 'rgba(131, 42, 150, 0.1)', color: 'var(--hq-primary)', border: '1px solid rgba(131, 42, 150, 0.2)', padding: '8px 15px', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px', fontWeight: 'bold', transition: 'all 0.2s', ':hover': { background: 'var(--hq-primary)', color: 'white' } }}
                                             >
