@@ -1,6 +1,15 @@
+import fpPromise from '@fingerprintjs/fingerprintjs';
+
 // API Base URL — يتم تحديده تلقائياً حسب البيئة
 const envApiUrl = (import.meta.env.VITE_API_URL || '').trim()
 export const API = envApiUrl || 'http://127.0.0.1:8000'
+
+// تهيئة البصمة مرة واحدة
+let deviceFingerprint = '';
+fpPromise.load().then(fp => fp.get()).then(result => {
+    deviceFingerprint = result.visitorId;
+});
+
 let isRefreshing = false;
 let refreshSubscribers = [];
 
@@ -18,14 +27,29 @@ window.fetch = async function(...args) {
     // Apply interceptor ONLY for our API and NOT for auth endpoints to prevent loops
     if (typeof resource === 'string' && resource.startsWith(API) && !resource.includes('/api/v1/auth/refresh/') && !resource.includes('/api/v1/auth/login/') && !resource.includes('/api/v1/auth/signup/')) {
         
-        // Auto-inject the latest token if available to prevent race conditions during state updates
+
+// Auto-inject the latest token if available to prevent race conditions during state updates
         const currentToken = localStorage.getItem('access_token');
-        if (currentToken && config && config.headers) {
+        if (config && config.headers) {
              if (config.headers instanceof Headers) {
-                 if (config.headers.has('Authorization')) config.headers.set('Authorization', `Bearer ${currentToken}`);
-             } else if (config.headers['Authorization']) {
-                 config.headers['Authorization'] = `Bearer ${currentToken}`;
+                 if (currentToken && config.headers.has('Authorization') === false) {
+                     config.headers.set('Authorization', `Bearer ${currentToken}`);
+                 }
+                 if (deviceFingerprint) {
+                     config.headers.set('x-device-fingerprint', deviceFingerprint);
+                 }
+             } else {
+                 if (currentToken && !config.headers['Authorization']) {
+                     config.headers['Authorization'] = `Bearer ${currentToken}`;
+                 }
+                 if (deviceFingerprint) {
+                     config.headers['x-device-fingerprint'] = deviceFingerprint;
+                 }
              }
+        } else if (config) {
+             config.headers = {};
+             if (currentToken) config.headers['Authorization'] = `Bearer ${currentToken}`;
+             if (deviceFingerprint) config.headers['x-device-fingerprint'] = deviceFingerprint;
         }
 
         let response = await originalFetch(resource, config);

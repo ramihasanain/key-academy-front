@@ -68,8 +68,22 @@ const courseRequestCache = new Map()
 
 const fetchJsonOnce = (cache, key, url, options = {}) => {
     if (cache.has(key)) return cache.get(key)
-    const request = fetch(url, options).then(res => {
-        if (!res.ok) throw new Error(`Request failed: ${res.status}`)
+    const request = fetch(url, options).then(async res => {
+        if (!res.ok) {
+            if (res.status === 403) {
+                try {
+                    const errData = await res.json();
+                    if (errData.error === 'DEVICE_LIMIT_REACHED') {
+                        alert(errData.message || 'انت مسموحلك جهاز واحد تواصل مع الادارة');
+                        window.location.href = '/dashboard';
+                        throw new Error('DEVICE_LIMIT_REACHED');
+                    }
+                } catch(e) {
+                    if (e.message === 'DEVICE_LIMIT_REACHED') throw e;
+                }
+            }
+            throw new Error(`Request failed: ${res.status}`)
+        }
         return res.json()
     }).finally(() => {
         cache.delete(key)

@@ -102,8 +102,22 @@ const CourseViewer = () => {
         const requestPromise = cachedEntry?.promise || fetch(`${API}/api/v1/courses/${requestedCourseId}/`, {
             headers: token && token !== 'undefined' && token !== 'null' ? { Authorization: `Bearer ${token}` } : {}
         })
-            .then(res => {
-                if (!res.ok) throw new Error(`Failed to load course: ${res.status}`)
+            .then(async res => {
+                if (!res.ok) {
+                    if (res.status === 403) {
+                        try {
+                            const errData = await res.json();
+                            if (errData.error === 'DEVICE_LIMIT_REACHED') {
+                                alert(errData.message || 'انت مسموحلك جهاز واحد تواصل مع الادارة');
+                                window.location.href = '/dashboard';
+                                throw new Error('DEVICE_LIMIT_REACHED');
+                            }
+                        } catch (e) {
+                            if (e.message === 'DEVICE_LIMIT_REACHED') throw e;
+                        }
+                    }
+                    throw new Error(`Failed to load course: ${res.status}`)
+                }
                 return res.json()
             })
 
