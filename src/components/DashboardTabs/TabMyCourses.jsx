@@ -73,7 +73,7 @@ const TabMyCourses = ({ myCourses, stats, StatsRow, isLoading = false }) => {
                                 </div>
 
                                 {course.isActive ? (
-                                    <Link to={`/course/${course.id}`} className={`dash-btn-primary exact-btn-${course.color} premium-btn`} style={course.color?.startsWith('#') ? { background: course.color, borderColor: course.color } : {}}>
+                                    <Link to={`/course/${course.slug || course.id}`} className={`dash-btn-primary exact-btn-${course.color} premium-btn`} style={course.color?.startsWith('#') ? { background: course.color, borderColor: course.color } : {}}>
                                         <HiOutlineBookOpen /> كمل دراستك
                                     </Link>
                                 ) : (

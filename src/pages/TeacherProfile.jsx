@@ -217,7 +217,7 @@ const TeacherProfile = () => {
                                             <div className="course-card-content">
                                                 <h4>{course.title}</h4>
                                                 <p>{course.desc}</p>
-                                                <Link to={`/course-preview/${course.id || 1}`} className="btn-primary w-full text-center mt-2" style={{ width: '100%', justifyContent: 'center' }}>شوف التفاصيل الكاملة</Link>
+                                                <Link to={`/course-preview/${course.slug || course.id}`} className="btn-primary w-full text-center mt-2" style={{ width: '100%', justifyContent: 'center' }}>شوف التفاصيل الكاملة</Link>
                                             </div>
                                         </motion.div>
                                     )) : (

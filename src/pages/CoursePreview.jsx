@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
+import { Helmet } from 'react-helmet-async'
 import { API } from '../config'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
@@ -21,7 +22,7 @@ import './CoursePreview.css'
 const coursePreviewRequestCache = new Map()
 
 const CoursePreview = () => {
-    const { courseId } = useParams()
+    const { slug } = useParams()
     const navigate = useNavigate()
     const [scrolled, setScrolled] = useState(false)
     const [code, setCode] = useState('')
@@ -69,12 +70,12 @@ const CoursePreview = () => {
     }, [])
 
     useEffect(() => {
-        if (!courseId) {
+        if (!slug) {
             setLoading(false)
             return
         }
 
-        const cacheKey = `${API}/api/v1/courses/${courseId}/preview/`
+        const cacheKey = `${API}/api/v1/courses/${slug}/preview/`
         const cachedEntry = coursePreviewRequestCache.get(cacheKey)
 
         if (cachedEntry?.data) {
@@ -104,7 +105,7 @@ const CoursePreview = () => {
                 console.error(err)
                 setLoading(false)
             })
-    }, [courseId])
+    }, [slug])
 
     if (loading || !course) {
         return <GlobalLoader text="جاري تحميل الدورة..." />
@@ -119,7 +120,7 @@ const CoursePreview = () => {
         const token = localStorage.getItem('access_token')
         if (!token || token === 'undefined' || token === 'null' || token.trim() === '') {
             localStorage.setItem('pending_course_code', code)
-            localStorage.setItem('pending_course_redirect', `/course-preview/${courseId}`)
+            localStorage.setItem('pending_course_redirect', `/course-preview/${slug}`)
             setPopup({
                 show: true,
                 type: 'auth',
@@ -151,7 +152,7 @@ const CoursePreview = () => {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
-                body: JSON.stringify({ code, course_id: courseId })
+                body: JSON.stringify({ code, course_id: course.id })
             });
             let data;
             try {
@@ -201,7 +202,7 @@ const CoursePreview = () => {
             return
         }
         // Navigate to the real Lesson Viewer but with a '?preview=true' query string
-        navigate(`/lesson/${lessonId}?preview=true&course=${courseId}`)
+        navigate(`/lesson/${lessonId}?preview=true&course=${course.id}`)
     }
 
     const cardMouseMove = (e) => {
@@ -224,6 +225,26 @@ const CoursePreview = () => {
 
     return (
         <div className="preview-page">
+            <Helmet>
+                <title>{course.title} | منصة كي</title>
+                <meta name="description" content={course.description || "سجل الآن في هذه الدورة المتميزة مع منصة كي التعليمية."} />
+                <meta property="og:title" content={`${course.title} | منصة كي`} />
+                <meta property="og:description" content={course.description} />
+                {course.hero_image && <meta property="og:image" content={course.hero_image} />}
+                <script type="application/ld+json">
+                    {JSON.stringify({
+                        "@context": "https://schema.org",
+                        "@type": "Course",
+                        "name": course.title,
+                        "description": course.description || course.title,
+                        "provider": {
+                            "@type": "Organization",
+                            "name": "Key Academy",
+                            "sameAs": "https://keyacademy.com"
+                        }
+                    })}
+                </script>
+            </Helmet>
             {/* Ambient Backgrounds */}
             <div className="preview-mesh">
                 <div className={`preview-blob blob-${course.color}-1`}></div>

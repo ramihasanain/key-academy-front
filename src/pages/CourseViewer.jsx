@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, lazy, Suspense } from 'react'
+import { Helmet } from 'react-helmet-async'
 import { createPortal } from 'react-dom'
 import { Link, useParams, useNavigate } from 'react-router-dom'
 import { API } from '../config'
@@ -68,7 +69,7 @@ const CourseChatDrawer = ({ courseId, userData, onClose }) => {
 };
 
 const CourseViewer = () => {
-    const { courseId } = useParams()
+    const { slug } = useParams()
     const [courseData, setCourseData] = useState(null)
     const [loading, setLoading] = useState(true)
 
@@ -83,7 +84,7 @@ const CourseViewer = () => {
 
     useEffect(() => {
         const token = localStorage.getItem('access_token')
-        const requestedCourseId = courseId || 1
+        const requestedCourseId = slug || 1
         const cacheKey = `${API}/api/v1/courses/${requestedCourseId}/::${token && token !== 'undefined' && token !== 'null' ? 'auth' : 'anon'}`
         const cachedEntry = courseViewerRequestCache.get(cacheKey)
 
@@ -142,7 +143,7 @@ const CourseViewer = () => {
                 console.error(err)
                 setLoading(false)
             })
-    }, [courseId])
+    }, [slug])
 
     useEffect(() => {
         const handleScroll = () => {
@@ -169,7 +170,7 @@ const CourseViewer = () => {
             return
         }
         if (!lesson.isLocked) {
-            navigate(`/lesson/${lesson.id}?course=${courseId}`)
+            navigate(`/lesson/${lesson.id}?course=${courseData.id}`)
         } else {
             alert(`هذا الدرس مقفول هسة، لازم تكمل الدروس اللي قبله بالبداية.`)
         }
@@ -198,6 +199,9 @@ const CourseViewer = () => {
 
     return (
         <div className="cv-master-page">
+            <Helmet>
+                <title>{courseData.title} | غرفتك الدراسية</title>
+            </Helmet>
             {/* Animated Mesh Background */}
             <div className="cv-mesh-bg">
                 <div className="mesh-blob mesh-blob-1"></div>
@@ -702,7 +706,7 @@ const CourseViewer = () => {
             {createPortal(
                 <AnimatePresence>
                     {isChatOpen && (
-                        <CourseChatDrawer courseId={courseId} userData={userData} onClose={() => setIsChatOpen(false)} />
+                        <CourseChatDrawer courseId={courseData?.id} userData={userData} onClose={() => setIsChatOpen(false)} />
                     )}
                 </AnimatePresence>,
                 document.body

@@ -249,10 +249,10 @@ function App() {
               }
             />
             <Route
-              path="/course-preview/:courseId"
+              path="/course-preview/:slug"
               element={<CoursePreview />}
             />
-            <Route path="/course/:courseId" element={<CourseViewer />} />
+            <Route path="/course/:slug" element={<CourseViewer />} />
             <Route path="/lesson/:lessonId" element={<LessonViewer />} />
             <Route
               path="/student/exam/:examId"

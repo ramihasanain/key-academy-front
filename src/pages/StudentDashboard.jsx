@@ -380,11 +380,11 @@ const StudentDashboard = () => {
                     </div>
 
                     {isEnrolled ? (
-                        <Link to={`/course/${course.id}`} className={`premium-btn`} style={{ textDecoration: 'none', background: '#f1f5f9', color: '#1e293b', border: '1px solid #cbd5e1' }}>
+                        <Link to={`/course/${course.slug || course.id}`} className={`premium-btn`} style={{ textDecoration: 'none', background: '#f1f5f9', color: '#1e293b', border: '1px solid #cbd5e1' }}>
                             <HiOutlineBookOpen /> كمل دراستك
                         </Link>
                     ) : (
-                        <Link to={`/course-preview/${course.id}`} className={`premium-btn exact-btn-${course.color}`} style={{ textDecoration: 'none', ...(course.color?.startsWith('#') ? { background: course.color, borderColor: course.color } : {}) }}>
+                        <Link to={`/course-preview/${course.slug || course.id}`} className={`premium-btn exact-btn-${course.color}`} style={{ textDecoration: 'none', ...(course.color?.startsWith('#') ? { background: course.color, borderColor: course.color } : {}) }}>
                             <HiOutlineArrowRight /> شوف تفاصيل الدورة
                         </Link>
                     )}
