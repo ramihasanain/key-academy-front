@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { API } from '../../config'
-import { HiOutlineChatBubbleOvalLeftEllipsis, HiOutlineCheckBadge, HiOutlinePaperAirplane, HiOutlineNoSymbol } from 'react-icons/hi2'
+import { HiOutlineChatBubbleOvalLeftEllipsis, HiOutlineCheckBadge, HiOutlinePaperAirplane, HiOutlineNoSymbol, HiOutlineChevronRight, HiOutlineChevronLeft, HiOutlineChatBubbleLeftRight } from 'react-icons/hi2'
+import '../../pages/LessonViewer.css'
 
 export const TAQA = () => {
     const [posts, setPosts] = useState([])
@@ -181,6 +182,12 @@ export const TAQA = () => {
         }
     }
 
+    const currentModule = courseTree.find(c => c.id === parseInt(selectedCourse))?.modules.find(m => m.id === parseInt(selectedModule))
+    const lessonsList = currentModule?.lessons || []
+    const currentLessonIndex = lessonsList.findIndex(l => l.id === parseInt(selectedLesson))
+    const prevLessonId = currentLessonIndex > 0 ? lessonsList[currentLessonIndex - 1].id : null
+    const nextLessonId = currentLessonIndex !== -1 && currentLessonIndex < lessonsList.length - 1 ? lessonsList[currentLessonIndex + 1].id : null
+
     return (
         <div style={{ padding: '20px' }}>
             <div style={{ display: 'flex', gap: '20px', marginBottom: '20px', borderBottom: '1px solid var(--hq-border)', paddingBottom: '15px' }}>
@@ -232,17 +239,130 @@ export const TAQA = () => {
                             {courseTree.find(c => c.id === parseInt(selectedCourse))?.modules.map(m => <option key={m.id} value={m.id}>{m.title}</option>)}
                         </select>
                     </div>
-                    <div style={{ flex: '1 1 200px' }}>
+                    <div style={{ flex: '1 1 200px', display: 'flex', flexDirection: 'column' }}>
                         <label style={{ display: 'block', marginBottom: '8px', color: 'var(--hq-text-muted)', fontSize: '13px' }}>الدرس:</label>
-                        <select className="hq-input" value={selectedLesson} onChange={e => setSelectedLesson(e.target.value)} disabled={!selectedModule} style={{ width: '100%', background: 'var(--hq-bg)' }}>
-                            <option value="">-- اختر الدرس --</option>
-                            {courseTree.find(c => c.id === parseInt(selectedCourse))?.modules.find(m => m.id === parseInt(selectedModule))?.lessons.map(l => <option key={l.id} value={l.id}>{l.title}</option>)}
-                        </select>
+                        <div style={{ display: 'flex', gap: '8px' }}>
+                            <button 
+                                disabled={!prevLessonId} 
+                                onClick={() => setSelectedLesson(prevLessonId.toString())}
+                                style={{ background: 'var(--hq-bg)', border: '1px solid var(--hq-border)', color: prevLessonId ? 'var(--hq-primary)' : 'var(--hq-text-muted)', borderRadius: '8px', padding: '0 10px', cursor: prevLessonId ? 'pointer' : 'not-allowed', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                                title="الدرس السابق"
+                            >
+                                <HiOutlineChevronRight />
+                            </button>
+                            <select className="hq-input" value={selectedLesson} onChange={e => setSelectedLesson(e.target.value)} disabled={!selectedModule} style={{ flex: 1, background: 'var(--hq-bg)' }}>
+                                <option value="">-- اختر الدرس --</option>
+                                {lessonsList.map(l => <option key={l.id} value={l.id}>{l.title}</option>)}
+                            </select>
+                            <button 
+                                disabled={!nextLessonId} 
+                                onClick={() => setSelectedLesson(nextLessonId.toString())}
+                                style={{ background: 'var(--hq-bg)', border: '1px solid var(--hq-border)', color: nextLessonId ? 'var(--hq-primary)' : 'var(--hq-text-muted)', borderRadius: '8px', padding: '0 10px', cursor: nextLessonId ? 'pointer' : 'not-allowed', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                                title="الدرس التالي"
+                            >
+                                <HiOutlineChevronLeft />
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}
 
-            <div style={{ display: 'grid', gridTemplateColumns: tab === 'studentView' ? '1fr' : 'repeat(auto-fill, minmax(350px, 1fr))', gap: '20px' }}>
+            {tab === 'studentView' ? (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', maxWidth: '800px', margin: '0 auto', width: '100%' }}>
+                    {displayPosts.map(p => (
+                        <div key={p.id} className="lv-post-card">
+                            <div className="lv-post-header">
+                                <div className="lv-post-avatar">👤</div>
+                                <div className="lv-post-meta" style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                        <strong>
+                                            {p.student?.full_name || p.student?.username || 'مجهول'} 
+                                            {p.student?.muted_until && new Date(p.student.muted_until) > new Date() && (
+                                                <span title="هذا الطالب محظور حالياً" style={{ color: '#ef4444', marginRight: '5px' }}><HiOutlineNoSymbol size={14} /></span>
+                                            )}
+                                            <span className="lv-student-badge" style={{ marginRight: '5px' }}>طالب</span>
+                                        </strong>
+                                        {p.comments?.some(c => c.is_teacher && !c.is_hidden) && (
+                                            <span style={{ background: '#10b981', color: 'white', padding: '2px 8px', borderRadius: '12px', fontSize: '11px', fontWeight: 'bold' }}>✓ تمت الإجابة</span>
+                                        )}
+                                        {p.is_hidden && <span style={{ color: '#ef4444', marginRight: '8px', fontSize: '11px', background: 'rgba(239, 68, 68, 0.1)', padding: '2px 6px', borderRadius: '4px' }}>سؤال محذوف</span>}
+                                    </div>
+                                    <span>{new Date(p.created_at).toLocaleString('ar-EG', { weekday: 'long', year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
+                                </div>
+                            </div>
+                            <p className="lv-post-body" style={{ color: p.is_hidden ? 'var(--hq-text-muted)' : 'inherit', textDecoration: p.is_hidden ? 'line-through' : 'none' }}>{p.content}</p>
+                            
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '10px', flexWrap: 'wrap' }}>
+                                <button className="lv-post-reply-toggle" style={{ margin: 0 }}><HiOutlineChatBubbleLeftRight /> {p.comments?.filter(c => !c.is_hidden)?.length || 0} تعليقات</button>
+                                {!sessionStorage.getItem('spy_token') && (
+                                    <>
+                                        <button onClick={() => handleMute(p.student.id, p.student.full_name)} style={{ background: 'transparent', border: 'none', color: '#ef4444', cursor: 'pointer', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '4px', fontWeight: 'bold' }}>🚫 كتم</button>
+                                        <button onClick={() => handleHide('qapost', p.id, p.is_hidden)} style={{ background: 'transparent', border: 'none', color: p.is_hidden ? '#10b981' : '#ef4444', cursor: 'pointer', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '4px', fontWeight: 'bold' }}>{p.is_hidden ? '🔙 استرجاع' : '🗑️ حذف'}</button>
+                                        <button onClick={() => handleResolve(p.id, p.is_resolved)} style={{ background: 'transparent', border: 'none', color: p.is_resolved ? '#10b981' : '#f59e0b', cursor: 'pointer', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '4px', fontWeight: 'bold' }}>{p.is_resolved ? '🔙 لم تحل' : '✨ حُلّت'}</button>
+                                    </>
+                                )}
+                            </div>
+
+                            <div className="lv-comments-section" style={{ display: 'block', marginTop: '15px' }}>
+                                {[...(p.comments || [])].sort((a, b) => {
+                                    if (a.is_pinned && !b.is_pinned) return -1;
+                                    if (b.is_pinned && !a.is_pinned) return 1;
+                                    return new Date(a.created_at) - new Date(b.created_at);
+                                }).map(c => (
+                                    <div key={c.id} className={`lv-comment ${c.author_role === 'teacher' ? 'prof-comment' : (c.is_teacher ? 'teacher-comment' : '')}`}>
+                                        <div className={`lv-comment-avatar ${c.author_role === 'teacher' ? 'prof-av' : (c.is_teacher ? 'teacher-av' : '')}`}>👤</div>
+                                        <div className="lv-comment-content" style={{ flex: 1 }}>
+                                            <div className="lv-comment-head" style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '10px' }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap' }}>
+                                                    <strong className={c.author_role === 'teacher' ? 'prof-name' : (c.is_teacher ? 'teacher-name' : '')}>
+                                                        {c.is_pinned && <span style={{ marginLeft: '4px' }}>📌</span>}
+                                                        {c.is_teacher
+                                                            ? (c.author?.full_name || c.author?.first_name || c.author?.username || 'أستاذ')
+                                                            : (c.author?.username || 'طالب')
+                                                        }
+                                                        {c.author_role === 'teacher' ? <span className="lv-teacher-badge" style={{ background: 'linear-gradient(90deg, #f59e0b, #d97706)', marginRight: '5px' }}>أستاذ المادة</span> :
+                                                            c.is_teacher ? <span className="lv-teacher-badge" style={{ marginRight: '5px' }}>مساعد</span> : <span className="lv-student-badge" style={{ marginRight: '5px' }}>طالب</span>}
+                                                    </strong>
+                                                    <span style={{ marginRight: '8px' }}>{new Date(c.created_at).toLocaleString('ar-EG', { weekday: 'long', year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
+                                                </div>
+                                                {!sessionStorage.getItem('spy_token') && (
+                                                    <div style={{ display: 'flex', gap: '5px' }}>
+                                                        {(c.author_role === 'teacher' || c.is_teacher) && (
+                                                            <button onClick={() => handlePin(c.id)} style={{ background: 'transparent', border: 'none', color: c.is_pinned ? '#3b82f6' : '#64748b', cursor: 'pointer', fontSize: '11px', fontWeight: 'bold' }}>
+                                                                {c.is_pinned ? '📌 فك' : '📌 تثبيت'}
+                                                            </button>
+                                                        )}
+                                                        <button onClick={() => handleHide('qacomment', c.id, c.is_hidden)} style={{ background: 'transparent', border: 'none', color: c.is_hidden ? '#10b981' : '#ef4444', cursor: 'pointer', fontSize: '11px', fontWeight: 'bold' }}>{c.is_hidden ? '🔙 استرجاع' : '🗑️ حذف'}</button>
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <p style={{ color: c.is_hidden ? 'var(--hq-text-muted)' : 'inherit', textDecoration: c.is_hidden ? 'line-through' : 'none' }}>{c.content}</p>
+                                        </div>
+                                    </div>
+                                ))}
+                                
+                                {!sessionStorage.getItem('spy_token') && (
+                                    activePost === p.id ? (
+                                        <div className="lv-comment-write" style={{ marginTop: '10px' }}>
+                                            <input type="text" placeholder="اكتب ردك هنا..." className="lv-comment-input" value={replyText} onChange={e => setReplyText(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') submitReply(p.id) }} />
+                                            <button className="lv-comment-send" onClick={() => submitReply(p.id)}><HiOutlinePaperAirplane style={{ transform: 'scaleX(-1)' }} /></button>
+                                            <button onClick={() => setActivePost(null)} style={{ background: 'transparent', color: '#ef4444', border: 'none', cursor: 'pointer', marginRight: '10px', fontWeight: 'bold' }}>إلغاء</button>
+                                        </div>
+                                    ) : (
+                                        <button
+                                            onClick={() => { setActivePost(p.id); setReplyText(''); }}
+                                            style={{ background: 'transparent', color: 'var(--hq-primary)', border: '1px dashed var(--hq-border)', padding: '10px', borderRadius: '8px', cursor: 'pointer', width: '100%', display: 'block', textAlign: 'center', marginTop: '10px', fontWeight: 'bold' }}
+                                        >
+                                            + إضافة رد
+                                        </button>
+                                    )
+                                )}
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            ) : (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', gap: '20px' }}>
                 {displayPosts.map(p => (
                     <div key={p.id} style={{
                         background: 'var(--hq-surface)',
@@ -383,6 +503,7 @@ export const TAQA = () => {
                     </div>
                 ))}
             </div>
+            )}
             {displayPosts.length === 0 && <div style={{ textAlign: 'center', color: 'var(--hq-text-muted)', padding: '40px', fontSize: '18px' }}>لا توجد بيانات حالياً! ✨</div>}
 
             {/* Custom Dialog Overlay */}
