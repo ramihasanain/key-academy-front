@@ -94,6 +94,11 @@ const TAStudentStats = lazy(() =>
     default: m.TAStudentStats,
   })),
 );
+const TAActivitiesList = lazy(() =>
+  import("./pages/ta/TAActivitiesList").then((m) => ({
+    default: m.TAActivitiesList,
+  })),
+);
 const TAStudentsList = lazy(() =>
   import("./pages/ta/TAStudentsList").then((m) => ({
     default: m.TAStudentsList,
@@ -294,6 +299,7 @@ function App() {
               }
             >
               <Route index element={<TAStudentStats />} />
+              <Route path="activities" element={<TAActivitiesList />} />
               <Route path="students" element={<TAStudentsList />} />
               <Route path="qa" element={<TAQA />} />
               <Route path="groups" element={<TAGroups />} />

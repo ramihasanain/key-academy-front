@@ -14,6 +14,38 @@ export const TAStudentStats = () => {
     const [stats, setStats] = useState(null)
     const [loading, setLoading] = useState(true)
 
+    const handleActivityClick = async (act) => {
+        // Optimistic UI update
+        setStats(prev => ({
+            ...prev,
+            recentActivities: prev.recentActivities.filter(a => a.id !== act.id || a.type !== act.type)
+        }));
+
+        // Fire API to dismiss
+        const tk = sessionStorage.getItem('spy_token') || localStorage.getItem('access_token');
+        try {
+            await fetch(${API}/api/interactions/activities/dismiss/, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': Bearer 
+                },
+                body: JSON.stringify({ activity_type: act.type, object_id: act.id })
+            });
+        } catch(e) { console.error(e) }
+
+        // Navigate based on type
+        if (act.type === 'lesson_progress' || act.type === 'exam_submission') {
+            navigate(/ta/students//360);
+        } else if (act.type === 'qa_comment' || act.type === 'qa_post') {
+            navigate(/ta/qa);
+        } else if (act.type === 'note') {
+            navigate(/ta/notes);
+        } else if (act.type === 'group_message') {
+            navigate(/ta/groups);
+        }
+    };
+
     const fetchStats = async () => {
         const tk = sessionStorage.getItem('spy_token') || localStorage.getItem('access_token')
         const url = courseId
@@ -157,22 +189,37 @@ export const TAStudentStats = () => {
                         <div style={{ padding: '20px', borderBottom: '1px solid rgba(255,255,255,0.06)', background: 'rgba(255,255,255,0.02)' }}>
                             <h3 style={{ margin: 0, color: 'var(--hq-primary-text)', fontSize: '1.2rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
                                 <HiOutlineClock color="#6366f1" size={24} />
-                                أحدث الأنشطة الحية
+                                أحدث الأنشطة
                             </h3>
                         </div>
                         <div style={{ padding: '10px 20px' }}>
                             {(!stats?.recentActivities || stats.recentActivities.length === 0) ? (
                                 <div style={{ padding: '30px 0', textAlign: 'center', color: 'var(--hq-text-muted)' }}>لا يوجد نشاط حديث</div>
                             ) : stats.recentActivities.map((act, i) => (
-                                <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: '15px', padding: '15px 0', borderBottom: i !== stats.recentActivities.length - 1 ? '1px dashed rgba(255,255,255,0.1)' : 'none' }}>
+                                <div 
+                                    key={i} 
+                                    onClick={() => handleActivityClick(act)}
+                                    style={{ 
+                                        display: 'flex', alignItems: 'flex-start', gap: '15px', padding: '15px 10px', 
+                                        borderBottom: i !== stats.recentActivities.length - 1 ? '1px dashed rgba(255,255,255,0.1)' : 'none',
+                                        cursor: 'pointer', transition: 'background 0.2s', borderRadius: '8px'
+                                    }}
+                                    onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'}
+                                    onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                                >
                                     <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#6366f1', marginTop: '6px', boxShadow: '0 0 10px rgba(99, 102, 241, 0.5)' }}></div>
                                     <div style={{ flex: 1 }}>
                                         <div style={{ color: 'var(--hq-primary-text)', fontSize: '1rem' }}><span style={{ fontWeight: 'bold' }}>{act.student_name}</span> {act.action_text || 'قام بإنهاء درس:'}</div>
                                         <div style={{ color: '#818cf8', fontSize: '0.9rem', marginTop: '4px' }}>{act.item_title || act.lesson_title}</div>
                                     </div>
-                                    <div style={{ color: 'var(--hq-text-muted)', fontSize: '0.85rem' }}>{act.time}</div>
+                                    <div style={{ color: 'var(--hq-text-muted)', fontSize: '0.85rem' }}>{new Date(act.timestamp).toLocaleDateString('ar-EG')}</div>
                                 </div>
                             ))}
+                        </div>
+                        <div style={{ padding: '15px', textAlign: 'center', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+                            <button onClick={() => navigate('/ta/activities')} style={{ background: 'transparent', border: 'none', color: '#6366f1', cursor: 'pointer', fontSize: '1rem', fontWeight: 'bold' }}>
+                                استعراض الكل &larr;
+                            </button>
                         </div>
                     </div>
 
