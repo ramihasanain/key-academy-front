@@ -62,7 +62,8 @@ export const TAGroups = () => {
         fetchMessages(courseId, groupId)
 
         const tk = sessionStorage.getItem('spy_token') || localStorage.getItem('access_token');
-        const wsUrl = `ws://127.0.0.1:8000/ws/chat/${courseId}/${groupId}/?token=${tk}`;
+        const wsBaseUrl = API.replace(/^http/, 'ws');
+        const wsUrl = `${wsBaseUrl}/ws/chat/${courseId}/${groupId}/?token=${tk}`;
         const ws = new WebSocket(wsUrl);
 
         ws.onmessage = (e) => {
