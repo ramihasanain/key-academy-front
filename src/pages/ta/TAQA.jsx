@@ -204,7 +204,9 @@ export const TAQA = () => {
                                         {p.is_hidden && <span style={{ color: '#ef4444', marginRight: '8px', fontSize: '11px', background: 'rgba(239, 68, 68, 0.1)', padding: '2px 6px', borderRadius: '4px' }}>سؤال محذوف</span>}
                                         <span style={{ marginRight: '8px', background: 'rgba(131, 42, 150, 0.1)', color: 'var(--purple)', padding: '2px 6px', borderRadius: '12px', fontSize: '11px', fontWeight: 'bold' }}>طالب</span>
                                     </strong>
-                                    <small style={{ color: 'var(--hq-text-muted)', fontSize: '12px', marginTop: '2px' }}>{new Date(p.created_at).toLocaleDateString('ar-EG', { hour: 'numeric', minute: 'numeric' })}</small>
+                                    <small style={{ color: 'var(--hq-text-muted)', fontSize: '12px', marginTop: '2px', direction: 'ltr', textAlign: 'right' }}>
+                                        {new Date(p.created_at).toLocaleString('ar-EG', { weekday: 'long', year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                                    </small>
                                 </div>
                             </div>
                         </div>
@@ -258,6 +260,9 @@ export const TAQA = () => {
                                         </div>
                                         <div style={{ fontSize: '14px', lineHeight: '1.6', color: c.is_hidden ? 'var(--hq-text-muted)' : 'var(--hq-text-main)', textDecoration: c.is_hidden ? 'line-through' : 'none' }}>
                                             {c.content}
+                                        </div>
+                                        <div style={{ fontSize: '11px', color: 'var(--hq-text-muted)', marginTop: '6px', textAlign: 'left', direction: 'ltr' }}>
+                                            {new Date(c.created_at).toLocaleString('ar-EG', { weekday: 'long', year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
                                         </div>
                                     </div>
                                 ))}

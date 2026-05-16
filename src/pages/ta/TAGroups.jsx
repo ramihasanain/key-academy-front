@@ -375,7 +375,7 @@ export const TAGroups = () => {
                                     <span>محادثة خاصة: {privateTarget.name}</span>
                                 </>
                             ) : (
-                                <span>المحادثة الحية: مجموعة ({groups.find(g => g.id === activeGroupId)?.index}) 🔴</span>
+                                <span>مجموعة ({groups.find(g => g.id === activeGroupId)?.index})</span>
                             )}
                         </div>
 
@@ -438,6 +438,9 @@ export const TAGroups = () => {
                                             )}
                                         </div>
                                     )}
+                                    <div style={{ fontSize: '11px', color: 'var(--hq-text-muted)', marginTop: '8px', textAlign: 'left', direction: 'ltr' }}>
+                                        {new Date(m.created_at).toLocaleString('ar-EG', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                                    </div>
                                 </div>
                             ))}
                             <div ref={endOfMessagesRef} />
