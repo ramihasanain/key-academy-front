@@ -49,7 +49,18 @@ export const TAGroups = () => {
             })
             if (resGr.ok) {
                 const dataGr = await resGr.json()
-                setGroups(dataGr.results || dataGr)
+                const fetchedGroups = dataGr.results || dataGr
+                setGroups(fetchedGroups)
+                if (fetchedGroups.length > 0 && !activeGroupId) {
+                     const first = fetchedGroups[0];
+                     setActiveCourseId(first.course);
+                     setActiveGroupId(first.id);
+                     setMessages([]);
+                     setPrivateTarget(null);
+                     setInboxContacts([]);
+                     fetchInbox(first.course, first.id);
+                     startPolling(first.course, first.id);
+                }
             }
         }
         fetchCourses()
@@ -292,76 +303,47 @@ export const TAGroups = () => {
         <div style={{ display: 'flex', height: '80vh', gap: '20px' }}>
             {/* Left Sidebar: Select Course & Group */}
             <div style={{ width: '250px', background: 'var(--hq-surface)', border: '1px solid var(--hq-border)', borderRadius: '12px', padding: '15px', overflowY: 'auto' }}>
-                <h3 style={{ color: 'var(--hq-primary)', margin: '0 0 20px 0', fontSize: '16px' }}>قوائم الكورسات والمجموعات</h3>
-                {courses.map(c => {
-                    const courseGroups = groups.filter(g => g.course === c.id)
-
-                    return (
-                        <div key={c.id} style={{ marginBottom: '15px' }}>
-                            <div style={{ color: 'var(--hq-text-main)', fontWeight: 'bold', marginBottom: '8px' }}>{c.title}</div>
-                            {courseGroups.length === 0 ? (
-                                <div style={{ color: 'var(--hq-text-muted)', fontSize: '0.8rem', paddingRight: '10px' }}>لا توجد لك مجموعات محددة مسندة لك بهذه الدورة</div>
-                            ) : courseGroups.map(g => {
-                                const isActive = activeCourseId === c.id && activeGroupId === g.id
-                                return (
-                                    <React.Fragment key={g.id}>
-                                        <div
-                                            onClick={() => handleSelectGroup(c.id, g.id)}
-                                            style={{
-                                                padding: '10px',
-                                                background: isActive ? 'rgba(131, 42, 150, 0.1)' : 'transparent',
-                                                color: isActive ? 'var(--hq-primary)' : 'var(--hq-text-muted)',
-                                                borderLeft: isActive ? '3px solid var(--hq-primary)' : '3px solid transparent',
-                                                cursor: 'pointer',
-                                                fontSize: '14px',
-                                                marginBottom: '5px',
-                                                borderRadius: '0 8px 8px 0',
-                                                fontWeight: isActive ? 'bold' : 'normal'
-                                            }}
-                                        >
-                                            مجموعة الدورة ({g.index})
-                                        </div>
-                                        {/* Nested Accordion for Inbox */}
-                                        {isActive && (
-                                            <div style={{ paddingRight: '15px', display: 'flex', flexDirection: 'column', gap: '5px', marginBottom: '10px', borderRight: '1px solid var(--hq-border)' }}>
-                                                {/* Global Chat */}
-                                                <div
-                                                    onClick={() => setPrivateTarget(null)}
-                                                    style={{ padding: '8px', cursor: 'pointer', fontSize: '12px', background: privateTarget === null ? 'rgba(131, 42, 150, 0.1)' : 'transparent', color: privateTarget === null ? 'var(--hq-primary)' : 'var(--hq-text-muted)', borderRadius: '6px', display: 'flex', alignItems: 'center', gap: '8px', fontWeight: privateTarget === null ? 'bold' : 'normal' }}
-                                                >
-                                                    🌍 المجموعة العامة
-                                                </div>
-                                                {/* Private Inbox Contacts */}
-                                                {inboxContacts.map(contact => (
-                                                    <div
-                                                        key={contact.id}
-                                                        onClick={() => {
-                                                            setPrivateTarget(contact);
-                                                            setInboxContacts(prev => prev.map(c => c.id === contact.id ? { ...c, unread_count: 0 } : c));
-                                                        }}
-                                                        style={{ padding: '8px', cursor: 'pointer', fontSize: '12px', background: privateTarget?.id === contact.id ? 'rgba(16, 185, 129, 0.1)' : 'transparent', color: privateTarget?.id === contact.id ? '#10b981' : 'var(--hq-text-muted)', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontWeight: privateTarget?.id === contact.id ? 'bold' : 'normal' }}
-                                                    >
-                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', overflow: 'hidden' }}>
-                                                            💬 <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{contact.name || contact.username}</span>
-                                                            {contact.muted_until && new Date(contact.muted_until) > new Date() && (
-                                                                <span title="هذا الطالب محظور حالياً" style={{ color: '#ef4444', display: 'flex', alignItems: 'center' }}>
-                                                                    <HiOutlineNoSymbol size={12} />
-                                                                </span>
-                                                            )}
-                                                        </div>
-                                                        {contact.unread_count > 0 && (
-                                                            <span style={{ background: '#ef4444', color: 'white', padding: '1px 5px', borderRadius: '8px', fontSize: '10px' }}>{contact.unread_count}</span>
-                                                        )}
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        )}
-                                    </React.Fragment>
-                                )
-                            })}
+                <h3 style={{ color: 'var(--hq-primary)', margin: '0 0 20px 0', fontSize: '16px' }}>قائمة الدردشة</h3>
+                
+                {groups.length === 0 ? (
+                    <div style={{ color: 'var(--hq-text-muted)', fontSize: '0.8rem', paddingRight: '10px' }}>لا توجد لك مجموعات محددة مسندة لك</div>
+                ) : (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                        {/* Global Chat */}
+                        <div
+                            onClick={() => setPrivateTarget(null)}
+                            style={{ padding: '10px', cursor: 'pointer', fontSize: '14px', background: privateTarget === null ? 'rgba(131, 42, 150, 0.1)' : 'transparent', color: privateTarget === null ? 'var(--hq-primary)' : 'var(--hq-text-main)', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '8px', fontWeight: privateTarget === null ? 'bold' : 'normal' }}
+                        >
+                            🌍 مجموعة الدورة العامة
                         </div>
-                    )
-                })}
+                        
+                        <div style={{ margin: '15px 0 5px 0', fontSize: '12px', color: 'var(--hq-text-muted)', fontWeight: 'bold' }}>رسائل الطلاب الخاصة</div>
+
+                        {/* Private Inbox Contacts */}
+                        {inboxContacts.map(contact => (
+                            <div
+                                key={contact.id}
+                                onClick={() => {
+                                    setPrivateTarget(contact);
+                                    setInboxContacts(prev => prev.map(c => c.id === contact.id ? { ...c, unread_count: 0 } : c));
+                                }}
+                                style={{ padding: '10px', cursor: 'pointer', fontSize: '13px', background: privateTarget?.id === contact.id ? 'rgba(16, 185, 129, 0.1)' : 'transparent', color: privateTarget?.id === contact.id ? '#10b981' : 'var(--hq-text-main)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontWeight: privateTarget?.id === contact.id ? 'bold' : 'normal' }}
+                            >
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', overflow: 'hidden' }}>
+                                    💬 <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{contact.name || contact.username}</span>
+                                    {contact.muted_until && new Date(contact.muted_until) > new Date() && (
+                                        <span title="هذا الطالب محظور حالياً" style={{ color: '#ef4444', display: 'flex', alignItems: 'center' }}>
+                                            <HiOutlineNoSymbol size={14} />
+                                        </span>
+                                    )}
+                                </div>
+                                {contact.unread_count > 0 && (
+                                    <span style={{ background: '#ef4444', color: 'white', padding: '2px 6px', borderRadius: '10px', fontSize: '11px', fontWeight: 'bold' }}>{contact.unread_count}</span>
+                                )}
+                            </div>
+                        ))}
+                    </div>
+                )}
             </div>
 
             {/* Right Side: Chat Box */}
