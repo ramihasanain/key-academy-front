@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { API } from '../../config'
 import { HiOutlineChatBubbleOvalLeftEllipsis, HiOutlineCheckBadge, HiOutlinePaperAirplane, HiOutlineNoSymbol, HiOutlineChevronRight, HiOutlineChevronLeft, HiOutlineChatBubbleLeftRight } from 'react-icons/hi2'
 import '../../pages/LessonViewer.css'
+import { TAStudent360 } from './TAStudent360'
 
 export const TAQA = () => {
     const [posts, setPosts] = useState([])
@@ -9,6 +10,7 @@ export const TAQA = () => {
     const [activePost, setActivePost] = useState(null)
     const [tab, setTab] = useState('pending') // pending, answered, resolved, deleted, studentView
     const [dialog, setDialog] = useState(null) // { type, message, options?, onConfirm, onCancel }
+    const [selectedStudentId, setSelectedStudentId] = useState(null)
 
     // Student View States
     const [courseTree, setCourseTree] = useState([])
@@ -276,7 +278,12 @@ export const TAQA = () => {
                                 <div className="lv-post-meta" style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                         <strong>
-                                            {p.student?.full_name || p.student?.username || 'مجهول'} 
+                                            <span 
+                                                style={{ cursor: 'pointer', textDecoration: 'underline' }} 
+                                                onClick={() => setSelectedStudentId(p.student?.id)}
+                                            >
+                                                {p.student?.full_name || p.student?.username || 'مجهول'} 
+                                            </span>
                                             {p.student?.muted_until && new Date(p.student.muted_until) > new Date() && (
                                                 <span title="هذا الطالب محظور حالياً" style={{ color: '#ef4444', marginRight: '5px' }}><HiOutlineNoSymbol size={14} /></span>
                                             )}
@@ -318,7 +325,11 @@ export const TAQA = () => {
                                                         {c.is_pinned && <span style={{ marginLeft: '4px' }}>📌</span>}
                                                         {c.is_teacher
                                                             ? (c.author?.full_name || c.author?.first_name || c.author?.username || 'أستاذ')
-                                                            : (c.author?.username || 'طالب')
+                                                            : (
+                                                                <span style={{ cursor: 'pointer', textDecoration: 'underline' }} onClick={() => setSelectedStudentId(c.author?.id)}>
+                                                                    {c.author?.username || 'طالب'}
+                                                                </span>
+                                                            )
                                                         }
                                                         {c.author_role === 'teacher' ? <span className="lv-teacher-badge" style={{ background: 'linear-gradient(90deg, #f59e0b, #d97706)', marginRight: '5px' }}>أستاذ المادة</span> :
                                                             c.is_teacher ? <span className="lv-teacher-badge" style={{ marginRight: '5px' }}>مساعد</span> : <span className="lv-student-badge" style={{ marginRight: '5px' }}>طالب</span>}
@@ -383,7 +394,12 @@ export const TAQA = () => {
                                 </div>
                                 <div style={{ display: 'flex', flexDirection: 'column' }}>
                                     <strong style={{ color: 'var(--hq-primary)', fontSize: '15px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                        {p.student?.full_name || p.student?.username || 'مجهول'}
+                                        <span 
+                                            style={{ cursor: 'pointer', textDecoration: 'underline' }} 
+                                            onClick={() => setSelectedStudentId(p.student?.id)}
+                                        >
+                                            {p.student?.full_name || p.student?.username || 'مجهول'}
+                                        </span>
                                         {p.student?.muted_until && new Date(p.student.muted_until) > new Date() && (
                                             <span title="هذا الطالب محظور حالياً" style={{ color: '#ef4444' }}>
                                                 <HiOutlineNoSymbol size={16} />
@@ -434,7 +450,13 @@ export const TAQA = () => {
                                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '6px' }}>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
                                                 <span style={{ fontSize: '13px', fontWeight: 'bold', color: c.is_hidden ? 'var(--hq-text-muted)' : (c.author_role === 'teacher' ? '#f59e0b' : (c.is_teacher ? '#10b981' : 'var(--purple)')) }}>
-                                                    {c.author?.first_name || c.author?.username}
+                                                    {c.is_teacher || c.author_role === 'teacher' ? (
+                                                        c.author?.first_name || c.author?.username
+                                                    ) : (
+                                                        <span style={{ cursor: 'pointer', textDecoration: 'underline' }} onClick={() => setSelectedStudentId(c.author?.id)}>
+                                                            {c.author?.first_name || c.author?.username || 'طالب'}
+                                                        </span>
+                                                    )}
                                                 </span>
                                                 {c.author_role === 'teacher' ? <span style={{ background: '#f59e0b', color: 'white', padding: '2px 6px', borderRadius: '12px', fontSize: '10px', fontWeight: 'bold' }}>أستاذ المادة</span> :
                                                     c.is_teacher ? <span style={{ background: '#10b981', color: 'white', padding: '2px 6px', borderRadius: '12px', fontSize: '10px', fontWeight: 'bold' }}>مساعد</span> :
@@ -557,6 +579,13 @@ export const TAQA = () => {
                                 <button onClick={dialog.onCancel} style={{ background: 'transparent', color: 'var(--hq-text-muted)', border: '1px solid var(--hq-text-muted)', padding: '10px 20px', borderRadius: '8px', cursor: 'pointer' }}>إلغاء</button>
                             )}
                         </div>
+                    </div>
+                </div>
+            )}
+            {selectedStudentId && (
+                <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(15, 23, 42, 0.75)', backdropFilter: 'blur(8px)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'auto' }}>
+                    <div style={{ background: 'var(--hq-surface, #ffffff)', borderRadius: '16px', width: '90%', maxWidth: '1400px', maxHeight: '90vh', overflowY: 'auto', position: 'relative', boxShadow: '0 20px 40px rgba(0,0,0,0.5)' }}>
+                        <TAStudent360 studentIdProp={selectedStudentId} onClose={() => setSelectedStudentId(null)} />
                     </div>
                 </div>
             )}

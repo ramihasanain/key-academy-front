@@ -67,13 +67,6 @@ export const TAStudent360 = ({ studentIdProp, onClose }) => {
             {/* KPIs */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px', marginBottom: '30px' }}>
                 <div className="hq-stat-card" style={{ padding: '15px' }}>
-                    <div className="hq-sc-icon" style={{ background: 'rgba(56, 189, 248, 0.1)', color: '#38bdf8', width: '40px', height: '40px' }}><HiOutlineBookOpen size={20} /></div>
-                    <div className="hq-sc-info">
-                        <h3 style={{ fontSize: '0.85rem', color: 'var(--hq-text-muted)' }}>دورات مسجل بها</h3>
-                        <div className="hq-sc-value" style={{ fontSize: '1.3rem', color: 'var(--hq-primary-text)' }}>{courses?.length || 0}</div>
-                    </div>
-                </div>
-                <div className="hq-stat-card" style={{ padding: '15px' }}>
                     <div className="hq-sc-icon" style={{ background: 'rgba(251, 191, 36, 0.1)', color: '#fbbf24', width: '40px', height: '40px' }}><HiOutlineChartBar size={20} /></div>
                     <div className="hq-sc-info">
                         <h3 style={{ fontSize: '0.85rem', color: 'var(--hq-text-muted)' }}>الأسئلة والملاحظات</h3>
@@ -105,7 +98,7 @@ export const TAStudent360 = ({ studentIdProp, onClose }) => {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                     <div className="hq-card" style={{ padding: '20px' }}>
                         <h3 style={{ marginTop: 0, marginBottom: '15px', color: 'var(--hq-primary-text)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <HiOutlineChartBar /> تقدم المناهج ({courses.length})
+                            <HiOutlineChartBar /> تقدم المنهاج ({courses.length})
                         </h3>
                         {courses.length === 0 ? <p style={{ color: 'var(--hq-text-muted)' }}>لا يوجد اشتراكات فعالة.</p> : (
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
