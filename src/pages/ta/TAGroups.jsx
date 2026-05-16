@@ -266,7 +266,7 @@ export const TAGroups = () => {
             // For text-only messages, use WebSocket for instant delivery
             if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
                 wsRef.current.send(JSON.stringify({
-                    content: finalContent,
+                    content: messageText,
                     is_private: !!privateTarget,
                     recipient_id: privateTarget ? privateTarget.id : 0
                 }))
