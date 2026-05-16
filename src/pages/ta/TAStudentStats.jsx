@@ -167,8 +167,8 @@ export const TAStudentStats = () => {
                                 <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: '15px', padding: '15px 0', borderBottom: i !== stats.recentActivities.length - 1 ? '1px dashed rgba(255,255,255,0.1)' : 'none' }}>
                                     <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#6366f1', marginTop: '6px', boxShadow: '0 0 10px rgba(99, 102, 241, 0.5)' }}></div>
                                     <div style={{ flex: 1 }}>
-                                        <div style={{ color: 'var(--hq-primary-text)', fontSize: '1rem' }}><span style={{ fontWeight: 'bold' }}>{act.student_name}</span> قام بإنهاء درس:</div>
-                                        <div style={{ color: '#818cf8', fontSize: '0.9rem', marginTop: '4px' }}>{act.lesson_title}</div>
+                                        <div style={{ color: 'var(--hq-primary-text)', fontSize: '1rem' }}><span style={{ fontWeight: 'bold' }}>{act.student_name}</span> {act.action_text || 'قام بإنهاء درس:'}</div>
+                                        <div style={{ color: '#818cf8', fontSize: '0.9rem', marginTop: '4px' }}>{act.item_title || act.lesson_title}</div>
                                     </div>
                                     <div style={{ color: 'var(--hq-text-muted)', fontSize: '0.85rem' }}>{act.time}</div>
                                 </div>
