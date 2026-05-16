@@ -438,8 +438,15 @@ export const TAGroups = () => {
                                             )}
                                         </div>
                                     )}
-                                    <div style={{ fontSize: '11px', color: 'var(--hq-text-muted)', marginTop: '8px', textAlign: 'left', direction: 'ltr' }}>
-                                        {new Date(m.created_at).toLocaleString('ar-EG', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                                    <div style={{ fontSize: '11px', color: 'var(--hq-text-muted)', marginTop: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', direction: 'ltr' }}>
+                                        <span>
+                                            {m.is_private && (m.sender_role === 'teacher' || m.sender_role === 'assistant') && (
+                                                <span style={{ marginRight: '8px', color: (m.is_read || m.read_by_student) ? '#3b82f6' : 'var(--hq-text-muted)', fontWeight: 'bold' }}>
+                                                    {(m.is_read || m.read_by_student) ? '✓✓ تمت المشاهدة' : '✓ تم الإرسال'}
+                                                </span>
+                                            )}
+                                        </span>
+                                        <span>{new Date(m.created_at).toLocaleString('ar-EG', { weekday: 'long', year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
                                     </div>
                                 </div>
                             ))}

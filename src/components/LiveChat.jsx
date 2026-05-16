@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { API } from '../config'
-import { HiOutlineUserGroup, HiOutlineXMark, HiOutlinePaperAirplane } from 'react-icons/hi2'
+import { HiOutlineUserGroup, HiOutlineXMark, HiOutlinePaperAirplane, HiOutlinePaperClip, HiOutlineMicrophone, HiOutlineStop, HiOutlinePhoto } from 'react-icons/hi2'
 import '../pages/LessonViewer.css' // Reuse the same CSS
 
 const groupChatHistoryCache = new Map()
@@ -23,6 +23,14 @@ const LiveChat = ({ courseId, userData, lessonId = null }) => {
     const [chatType, setChatType] = useState('public') // 'public' | 'private'
     const [socket, setSocket] = useState(null)
     const [loading, setLoading] = useState(true)
+
+    // Attachments & Voice
+    const [file, setFile] = useState(null)
+    const [isRecording, setIsRecording] = useState(false)
+    const [audioBlob, setAudioBlob] = useState(null)
+    const fileInputRef = useRef(null)
+    const mediaRecorderRef = useRef(null)
+    const audioChunksRef = useRef([])
 
     const isMuted = userData?.muted_until && new Date(userData.muted_until) > new Date();
     const messagesEndRef = useRef(null)
@@ -99,12 +107,85 @@ const LiveChat = ({ courseId, userData, lessonId = null }) => {
         return () => ws.close()
     }, [courseId])
 
-    const handleSend = () => {
-        if (!input.trim() || !socket) return
-        const payload = { content: input, is_private: chatType === 'private', lesson_id: lessonId }
-        socket.send(JSON.stringify(payload))
-        setInput('')
+    const startRecording = async () => {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            const mediaRecorder = new MediaRecorder(stream);
+            mediaRecorderRef.current = mediaRecorder;
+            audioChunksRef.current = [];
+
+            mediaRecorder.ondataavailable = (e) => {
+                if (e.data.size > 0) audioChunksRef.current.push(e.data);
+            };
+
+            mediaRecorder.onstop = () => {
+                const blob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+                setAudioBlob(blob);
+                stream.getTracks().forEach(track => track.stop());
+            };
+
+            mediaRecorder.start();
+            setIsRecording(true);
+        } catch (err) {
+            alert("يرجى السماح باستخدام الميكروفون لتسجيل الصوت.");
+        }
+    };
+
+    const stopRecording = () => {
+        if (mediaRecorderRef.current && isRecording) {
+            mediaRecorderRef.current.stop();
+            setIsRecording(false);
+        }
+    };
+
+    const handleSend = async () => {
+        if (!input.trim() && !file && !audioBlob) return
+
+        if (file || audioBlob) {
+            const fd = new FormData()
+            fd.append('course', courseId)
+            fd.append('is_private', chatType === 'private')
+            if (lessonId) fd.append('lesson_id', lessonId)
+            if (input.trim()) fd.append('content', input.trim())
+
+            if (file) {
+                fd.append('attachment', file)
+            } else if (audioBlob) {
+                fd.append('attachment', new File([audioBlob], 'voice-message.webm', { type: 'audio/webm' }))
+            }
+
+            setInput('')
+            setFile(null)
+            setAudioBlob(null)
+
+            const tk = localStorage.getItem('access_token')
+            await fetch(API + '/api/interactions/group-chat/', {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${tk}` },
+                body: fd
+            })
+        } else {
+            if (!socket) return
+            const payload = { content: input, is_private: chatType === 'private', lesson_id: lessonId }
+            socket.send(JSON.stringify(payload))
+            setInput('')
+        }
     }
+
+    // Mark as read logic
+    useEffect(() => {
+        if (chatType === 'private') {
+            const unreadMessages = displayedMessages.filter(m => (m.sender_role === 'teacher' || m.sender_role === 'assistant') && !m.is_read && !m.read_by_student);
+            if (unreadMessages.length > 0) {
+                const tk = localStorage.getItem('access_token')
+                fetch(API + '/api/interactions/group-chat/mark-read/', {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${tk}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message_ids: unreadMessages.map(m => m.id) })
+                }).catch(() => {}) // Ignore errors if endpoint doesn't exist
+            }
+        }
+    }, [messages, chatType])
 
     // Filter messages to strictly enforce what we see
     const displayedMessages = messages.filter(m => {
@@ -178,9 +259,74 @@ const LiveChat = ({ courseId, userData, lessonId = null }) => {
                     <HiOutlineXMark /> عذراً، أنت محظور من الدردشة العامة حالياً حتى {new Date(userData.muted_until).toLocaleString('ar-IQ')}
                 </div>
             ) : (
-                <div className="lv-gc-input-row" style={{ marginTop: 'auto', padding: '15px', borderTop: '1px solid #e2e8f0', background: '#f8fafc', flexShrink: 0 }}>
-                    <input type="text" className="lv-gc-input" placeholder={chatType === 'public' ? "اكتب رسالتك للمجموعة العـامة..." : "اكتب رسالتك للمساعد الخـاص..."} value={input} onChange={e => setInput(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') handleSend() }} />
-                    <button className="lv-gc-send-btn" onClick={handleSend}><HiOutlinePaperAirplane style={{ transform: 'scaleX(-1)' }} /></button>
+                <div style={{ padding: '15px', borderTop: '1px solid #e2e8f0', background: '#f8fafc', flexShrink: 0, display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                    {(file || audioBlob) && (
+                        <div style={{ background: 'rgba(16, 185, 129, 0.1)', border: '1px solid #10b981', padding: '8px 12px', borderRadius: '8px', color: '#10b981', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '13px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 'bold' }}>
+                                {audioBlob ? <HiOutlineMicrophone size={16} /> : <HiOutlinePaperClip size={16} />}
+                                <span>{audioBlob ? 'مقطع صوتي جاهز للإرسال 🎵' : `مرفق: ${file.name}`}</span>
+                            </div>
+                            <button onClick={() => { setFile(null); setAudioBlob(null); }} style={{ background: 'transparent', border: 'none', color: '#ef4444', cursor: 'pointer', fontWeight: 'bold' }}>إلغاء ×</button>
+                        </div>
+                    )}
+                    
+                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                        {chatType === 'private' && (
+                            <>
+                                <button
+                                    onClick={() => fileInputRef.current?.click()}
+                                    style={{ background: 'transparent', color: file ? '#10b981' : 'var(--text-muted)', border: 'none', padding: '8px', borderRadius: '50%', cursor: 'pointer', display: 'flex' }}
+                                    title="إرفاق صورة"
+                                >
+                                    <HiOutlinePhoto size={20} />
+                                </button>
+                                <button
+                                    onClick={() => fileInputRef.current?.click()}
+                                    style={{ background: 'transparent', color: file ? '#10b981' : 'var(--text-muted)', border: 'none', padding: '8px', borderRadius: '50%', cursor: 'pointer', display: 'flex' }}
+                                    title="إرفاق ملف"
+                                >
+                                    <HiOutlinePaperClip size={20} />
+                                </button>
+                                <input
+                                    type="file"
+                                    ref={fileInputRef}
+                                    style={{ display: 'none' }}
+                                    onChange={e => setFile(e.target.files[0])}
+                                />
+
+                                {!isRecording ? (
+                                    <button
+                                        onClick={startRecording}
+                                        style={{ background: 'transparent', color: 'var(--text-muted)', border: 'none', padding: '8px', borderRadius: '50%', cursor: 'pointer', display: 'flex' }}
+                                        title="تسجيل رسالة صوتية"
+                                    >
+                                        <HiOutlineMicrophone size={20} />
+                                    </button>
+                                ) : (
+                                    <button
+                                        onClick={stopRecording}
+                                        style={{ background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', border: 'none', padding: '8px', borderRadius: '50%', cursor: 'pointer', display: 'flex', animation: 'pulse 1s infinite' }}
+                                        title="إيقاف وحفظ"
+                                    >
+                                        <HiOutlineStop size={20} />
+                                    </button>
+                                )}
+                            </>
+                        )}
+                        <input 
+                            type="text" 
+                            className="lv-gc-input" 
+                            placeholder={chatType === 'public' ? "اكتب رسالتك للمجموعة العـامة..." : (file ? `مرفق: ${file.name}` : (audioBlob ? "صوتية 🎵" : (isRecording ? "جاري التسجيل..." : "اكتب رسالتك للمساعد الخـاص...")))} 
+                            value={input} 
+                            onChange={e => setInput(e.target.value)} 
+                            onKeyDown={e => { if (e.key === 'Enter') handleSend() }} 
+                            disabled={isRecording}
+                            style={{ flex: 1, padding: '10px 15px', borderRadius: '20px', border: '1px solid var(--border-glass)', background: '#fff' }}
+                        />
+                        <button className="lv-gc-send-btn" onClick={handleSend} style={{ background: 'var(--primary)', color: '#fff', border: 'none', width: '40px', height: '40px', borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <HiOutlinePaperAirplane style={{ transform: 'rotate(-45deg)', marginLeft: '2px' }} />
+                        </button>
+                    </div>
                 </div>
             )}
         </div>
