@@ -383,7 +383,21 @@ export const TAGroups = () => {
                                 }}>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '5px' }}>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: m.sender_role === 'teacher' ? '#f59e0b' : (m.sender_role === 'assistant' ? '#10b981' : 'var(--hq-primary)'), fontSize: '13px', fontWeight: 'bold' }}>
-                                            {m.sender?.full_name || m.sender?.username}
+                                            <span 
+                                                onClick={() => {
+                                                    if (m.sender_role === 'student' || !m.sender_role) {
+                                                        const isTeacher = window.location.pathname.startsWith('/teacher');
+                                                        const url = isTeacher ? `/teacher/students/${m.sender.id}/360` : `/ta/student/${m.sender.id}/360`;
+                                                        window.open(url, '_blank', 'width=1000,height=800');
+                                                    }
+                                                }}
+                                                style={{ 
+                                                    cursor: (m.sender_role === 'student' || !m.sender_role) ? 'pointer' : 'default', 
+                                                    textDecoration: (m.sender_role === 'student' || !m.sender_role) ? 'underline' : 'none' 
+                                                }}
+                                            >
+                                                {m.sender?.full_name || m.sender?.username}
+                                            </span>
                                             {m.sender_role === 'teacher' && <span style={{ background: '#f59e0b', color: 'white', padding: '2px 6px', borderRadius: '12px', fontSize: '10px' }}>أستاذ المادة</span>}
                                             {m.sender_role === 'assistant' && <span style={{ background: '#10b981', color: 'white', padding: '2px 6px', borderRadius: '12px', fontSize: '10px' }}>مساعد</span>}
                                             {m.is_hidden && <span style={{ color: '#ef4444', fontSize: '11px' }}>(رسالة محذوفة)</span>}
