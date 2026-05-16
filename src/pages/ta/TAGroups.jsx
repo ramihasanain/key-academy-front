@@ -121,7 +121,7 @@ export const TAGroups = () => {
     const handleHide = (msgId) => {
         setDialog({
             type: 'confirm',
-            message: 'متأكد من إخفاء هذه الرسالة؟ ستبدو محذوفة للجميع.',
+            message: 'متأكد من إخفاء هذه الرسالة؟ ستبدو محذوفة للجميع. لكن ستبقى ظاهرة لدى الادارة',
             onConfirm: async () => {
                 setDialog(null)
                 const tk = sessionStorage.getItem('spy_token') || localStorage.getItem('access_token');
