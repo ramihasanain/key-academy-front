@@ -173,9 +173,9 @@ const LiveChat = ({ courseId, userData, lessonId = null }) => {
                 <div ref={messagesEndRef} />
             </div>
 
-            {isMuted ? (
+            {isMuted && chatType === 'public' ? (
                 <div style={{ background: 'rgba(239, 68, 68, 0.08)', borderTop: '1px solid rgba(239, 68, 68, 0.2)', padding: '15px', color: '#ef4444', textAlign: 'center', fontSize: '13px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', flexShrink: 0 }}>
-                    <HiOutlineXMark /> عذراً، أنت محظور من الدردشة حالياً حتى {new Date(userData.muted_until).toLocaleString('ar-IQ')}
+                    <HiOutlineXMark /> عذراً، أنت محظور من الدردشة العامة حالياً حتى {new Date(userData.muted_until).toLocaleString('ar-IQ')}
                 </div>
             ) : (
                 <div className="lv-gc-input-row" style={{ marginTop: 'auto', padding: '15px', borderTop: '1px solid #e2e8f0', background: '#f8fafc', flexShrink: 0 }}>

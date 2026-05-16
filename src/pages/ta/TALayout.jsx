@@ -23,6 +23,52 @@ export const TALayout = () => {
     const [pwdMsg, setPwdMsg] = useState('')
 
     useEffect(() => {
+        if ('Notification' in window && Notification.permission !== 'granted' && Notification.permission !== 'denied') {
+            Notification.requestPermission();
+        }
+
+        const tk = sessionStorage.getItem('spy_token') || localStorage.getItem('access_token');
+        if (tk) {
+            const wsUrl = API.replace(/^http/, 'ws');
+            const baseUrl = wsUrl.endsWith('/') ? wsUrl.slice(0, -1) : wsUrl;
+            const ws = new WebSocket(\/ws/ta-notifications/?token=\);
+            
+            const playNotificationSound = () => {
+                try {
+                    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                    const osc = ctx.createOscillator();
+                    const gainNode = ctx.createGain();
+                    osc.connect(gainNode);
+                    gainNode.connect(ctx.destination);
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(880, ctx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(1760, ctx.currentTime + 0.1);
+                    gainNode.gain.setValueAtTime(0.3, ctx.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1);
+                    osc.start(ctx.currentTime);
+                    osc.stop(ctx.currentTime + 0.1);
+                } catch (e) { console.error('Audio Notification failed', e); }
+            };
+
+            ws.onmessage = (e) => {
+                const data = JSON.parse(e.data);
+                if (data.message && (data.message.sender_role === 'student' || data.message.sender_role === 'user')) {
+                    playNotificationSound();
+                    if ('Notification' in window && Notification.permission === 'granted') {
+                        new Notification('رسالة جديدة - أكاديمية مفتاح', { 
+                            body: data.message.content || 'يوجد مرفق جديد'
+                        });
+                    }
+                }
+            };
+            
+            return () => {
+                ws.close();
+            };
+        }
+    }, []);
+
+    useEffect(() => {
         const fetchProfile = async () => {
             const tk = sessionStorage.getItem('spy_token') || localStorage.getItem('access_token')
             try {

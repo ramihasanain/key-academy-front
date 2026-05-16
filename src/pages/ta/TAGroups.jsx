@@ -72,22 +72,7 @@ export const TAGroups = () => {
         const wsUrl = `${wsBaseUrl}/ws/chat/${courseId}/${groupId}/?token=${tk}`;
         const ws = new WebSocket(wsUrl);
 
-        const playNotificationSound = () => {
-            try {
-                const ctx = new (window.AudioContext || window.webkitAudioContext)();
-                const osc = ctx.createOscillator();
-                const gainNode = ctx.createGain();
-                osc.connect(gainNode);
-                gainNode.connect(ctx.destination);
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(880, ctx.currentTime); // A5
-                osc.frequency.exponentialRampToValueAtTime(1760, ctx.currentTime + 0.1); // A6
-                gainNode.gain.setValueAtTime(0.3, ctx.currentTime);
-                gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1);
-                osc.start(ctx.currentTime);
-                osc.stop(ctx.currentTime + 0.1);
-            } catch (e) { console.error('Audio Notification failed', e); }
-        };
+
 
         ws.onmessage = (e) => {
             const data = JSON.parse(e.data);
@@ -97,15 +82,7 @@ export const TAGroups = () => {
                     return [...prev, data.message];
                 });
 
-                // Notify if it's from a student
-                if (data.message.sender_role === 'student' || data.message.sender_role === 'user') {
-                    playNotificationSound();
-                    if ('Notification' in window && Notification.permission === 'granted') {
-                        new Notification('رسالة جديدة - أكاديمية مفتاح', { 
-                            body: data.message.content || 'يوجد مرفق جديد'
-                        });
-                    }
-                }
+
 
                 // Update inbox unread counts for private messages
                 if (data.message.is_private && data.message.sender) {

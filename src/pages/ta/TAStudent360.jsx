@@ -33,7 +33,7 @@ export const TAStudent360 = ({ studentIdProp, onClose }) => {
         fetchData()
     }, [id, navigate])
 
-    if (loading) return <div className="hq-loading" style={{ padding: '50px' }}>جاري سحب بيانات الطالب التفصيلية (360)...</div>
+    if (loading) return <div className="hq-loading" style={{ padding: '50px' }}>جاري تحميل ملف الطالب...</div>
     if (!data) return <div className="hq-loading" style={{ color: 'red' }}>لم يتم العثور على الطالب.</div>
 
     const { student, courses, history, quizzes, interactions, video_stats } = data
@@ -47,7 +47,7 @@ export const TAStudent360 = ({ studentIdProp, onClose }) => {
                     </button>
                     <div>
                         <h2 style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px', color: 'var(--hq-primary-text)' }}>
-                            الملف الدراسي الشامل - {student.full_name}
+                            ملف الطالب - {student.full_name}
                             <span style={{ fontSize: '1rem', color: 'var(--hq-text-muted)', fontWeight: 'normal' }}>@{student.username}</span>
                             {!student.is_active && <span style={{ fontSize: '0.7rem', background: '#ef4444', color: 'white', padding: '2px 8px', borderRadius: '12px' }}>مجمد ❄️</span>}
                         </h2>
