@@ -107,7 +107,7 @@ export const TAStudentsList = () => {
                                                 onClick={() => navigate(`/ta/student/${student.id}/360`)}
                                                 style={{ background: 'rgba(131, 42, 150, 0.1)', color: 'var(--hq-primary)', border: '1px solid rgba(131, 42, 150, 0.2)', padding: '8px 15px', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px', fontWeight: 'bold', transition: 'all 0.2s', ':hover': { background: 'var(--hq-primary)', color: 'white' } }}
                                             >
-                                                ملف 360 <HiOutlineArrowLeft />
+                                                ملف الطالب <HiOutlineArrowLeft />
                                             </button>
                                         </td>
                                     </tr>

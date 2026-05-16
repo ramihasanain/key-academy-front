@@ -9,7 +9,8 @@ import {
     HiOutlinePencilSquare,
     HiOutlineNoSymbol,
     HiOutlineClock,
-    HiOutlineClipboardDocumentCheck
+    HiOutlineClipboardDocumentCheck,
+    HiOutlineBell
 } from 'react-icons/hi2'
 import '../hq/Admin.css'
 
@@ -21,6 +22,8 @@ export const TALayout = () => {
     const [showPwdModal, setShowPwdModal] = useState(false)
     const [newPwd, setNewPwd] = useState('')
     const [pwdMsg, setPwdMsg] = useState('')
+    const [notifications, setNotifications] = useState([])
+    const [showNotifications, setShowNotifications] = useState(false)
 
     useEffect(() => {
         if ('Notification' in window && Notification.permission !== 'granted' && Notification.permission !== 'denied') {
@@ -31,7 +34,7 @@ export const TALayout = () => {
         if (tk) {
             const wsUrl = API.replace(/^http/, 'ws');
             const baseUrl = wsUrl.endsWith('/') ? wsUrl.slice(0, -1) : wsUrl;
-            const ws = new WebSocket(\/ws/ta-notifications/?token=\);
+            const ws = new WebSocket(`${baseUrl}/ws/ta-notifications/?token=${tk}`);
             
             const playNotificationSound = () => {
                 try {
@@ -54,6 +57,14 @@ export const TALayout = () => {
                 const data = JSON.parse(e.data);
                 if (data.message && (data.message.sender_role === 'student' || data.message.sender_role === 'user')) {
                     playNotificationSound();
+                    
+                    setNotifications(prev => [{
+                        id: data.message.id || Date.now(),
+                        title: 'رسالة من ' + (data.message.sender_name || 'طالب'),
+                        content: data.message.content || 'تم إرسال مرفق جديد',
+                        time: new Date().toLocaleTimeString('ar-IQ', { hour: '2-digit', minute: '2-digit' })
+                    }, ...prev]);
+
                     if ('Notification' in window && Notification.permission === 'granted') {
                         new Notification('رسالة جديدة - أكاديمية مفتاح', { 
                             body: data.message.content || 'يوجد مرفق جديد'
@@ -195,7 +206,45 @@ export const TALayout = () => {
                             <p style={{ margin: 0, color: 'var(--hq-text-muted)', fontSize: '13px' }}>كادر المتابعة والتقييم</p>
                         </div>
                     </div>
-                    <div className="hq-tb-right">
+                    <div className="hq-tb-right" style={{ display: 'flex', alignItems: 'center', gap: '25px' }}>
+                        
+                        {/* Notification Bell */}
+                        <div style={{ position: 'relative' }}>
+                            <div style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '8px', background: 'var(--hq-primary-bg)', borderRadius: '50%' }} onClick={() => setShowNotifications(!showNotifications)}>
+                                <HiOutlineBell size={24} color="var(--hq-primary)" />
+                                {notifications.length > 0 && (
+                                    <span style={{ position: 'absolute', top: '-2px', right: '-2px', background: '#ef4444', color: 'white', borderRadius: '50%', width: '18px', height: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', fontWeight: 'bold', border: '2px solid white' }}>
+                                        {notifications.length}
+                                    </span>
+                                )}
+                            </div>
+
+                            {/* Notification Dropdown */}
+                            {showNotifications && (
+                                <div style={{ position: 'absolute', top: '50px', left: '-10px', background: 'white', border: '1px solid var(--hq-border)', borderRadius: '12px', width: '320px', boxShadow: '0 10px 25px rgba(0,0,0,0.1)', zIndex: 1000, overflow: 'hidden' }}>
+                                    <div style={{ padding: '15px', borderBottom: '1px solid var(--hq-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f8fafc' }}>
+                                        <h4 style={{ margin: 0, color: 'var(--hq-primary)', fontSize: '15px' }}>الإشعارات الحديثة</h4>
+                                        <button onClick={() => setNotifications([])} style={{ background: 'none', border: 'none', color: 'var(--hq-text-muted)', cursor: 'pointer', fontSize: '12px' }}>تعليم كمقروء</button>
+                                    </div>
+                                    <div style={{ maxHeight: '350px', overflowY: 'auto' }}>
+                                        {notifications.length === 0 ? (
+                                            <div style={{ padding: '40px', textAlign: 'center', color: 'var(--hq-text-muted)' }}>لا توجد إشعارات جديدة 🔕</div>
+                                        ) : (
+                                            notifications.map(notif => (
+                                                <div key={notif.id} onClick={() => { navigate('/ta/groups'); setShowNotifications(false) }} style={{ padding: '15px', borderBottom: '1px solid #f1f5f9', cursor: 'pointer', transition: 'background 0.2s', backgroundColor: 'white' }} onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#f8fafc'} onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'white'}>
+                                                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                                                        <strong style={{ fontSize: '13px', color: 'var(--hq-primary-text)' }}>{notif.title}</strong>
+                                                        <span style={{ fontSize: '11px', color: 'var(--hq-text-muted)' }}>{notif.time}</span>
+                                                    </div>
+                                                    <p style={{ margin: 0, fontSize: '12px', color: 'var(--hq-text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{notif.content}</p>
+                                                </div>
+                                            ))
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+
                         <div className="hq-admin-profile" style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
                             <div className="hq-ap-info" style={{ textAlign: 'left' }}>
                                 <strong>{profile ? profile.first_name || profile.username : 'المساعد'}</strong>
