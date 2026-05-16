@@ -234,22 +234,19 @@ export const TAStudent360 = () => {
                                             <span>دقة الإجابات: <strong style={{color: ls.total_answers ? (ls.correct_answers/ls.total_answers >= 0.5 ? '#10b981' : '#ef4444') : 'inherit'}}>{ls.total_answers ? Math.round((ls.correct_answers/ls.total_answers)*100) : 0}%</strong></span>
                                         </div>
                                         
-                                        <div style={{ fontSize: '0.8rem', color: 'var(--hq-primary-text)', marginBottom: '5px' }}>سجل المشاهدات:</div>
-                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                                            {ls.sessions.slice(0,3).map((sess, sidx) => (
-                                                <div key={sidx} style={{ display: 'flex', justifyContent: 'space-between', background: 'rgba(0,0,0,0.2)', padding: '5px 10px', borderRadius: '6px', fontSize: '0.75rem' }}>
-                                                    <span style={{color: 'var(--hq-text-muted)'}}>{new Date(sess.created_at).toLocaleDateString('ar-EG')}</span>
-                                                    <div style={{ display: 'flex', gap: '4px' }}>
-                                                        {sess.answers.length === 0 ? <span style={{opacity: 0.5}}>مكتمل بدون أسئلة</span> : (
-                                                            sess.answers.map((ans, aidx) => (
-                                                                <span key={aidx} style={{ padding: '1px 5px', borderRadius: '4px', background: ans.is_correct ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.2)', border: `1px solid ${ans.is_correct ? 'rgba(16, 185, 129, 0.3)' : 'rgba(239, 68, 68, 0.3)'}`, color: ans.is_correct ? '#34d399' : '#f87171' }}>
-                                                                    Q{ans.quiz_index + 1} {ans.is_correct ? '✅' : '❌'}
-                                                                </span>
-                                                            ))
-                                                        )}
+                                        <div style={{ fontSize: '0.8rem', color: 'var(--hq-primary-text)', marginBottom: '5px' }}>أول إجابة للطالب لكل سؤال:</div>
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                            {ls.first_answers && ls.first_answers.length === 0 ? <span style={{opacity: 0.5}}>لم يجب على أي سؤال</span> : (
+                                                ls.first_answers.map((ans, aidx) => (
+                                                    <div key={aidx} style={{ padding: '8px 10px', borderRadius: '6px', background: ans.is_correct ? 'rgba(16, 185, 129, 0.05)' : 'rgba(239, 68, 68, 0.05)', border: `1px solid ${ans.is_correct ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.2)'}` }}>
+                                                        <div style={{ color: 'var(--hq-primary-text)', marginBottom: '4px', fontWeight: 'bold', fontSize: '0.85rem' }}>{ans.question_text}</div>
+                                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                            <span style={{ color: ans.is_correct ? '#34d399' : '#f87171', fontSize: '0.8rem' }}>إجابة الطالب: {ans.answer_text}</span>
+                                                            <span style={{ fontSize: '0.75rem', color: 'var(--hq-text-muted)' }}>{new Date(ans.created_at).toLocaleDateString('ar-EG')} {ans.is_correct ? '✅' : '❌'}</span>
+                                                        </div>
                                                     </div>
-                                                </div>
-                                            ))}
+                                                ))
+                                            )}
                                         </div>
                                     </div>
                                 ))}

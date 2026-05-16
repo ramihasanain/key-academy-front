@@ -92,22 +92,19 @@ const TabProfile = ({ videoStats, isLoading = false }) => {
                                         الدقة: <strong>{ls.total_answers ? Math.round((ls.correct_answers / ls.total_answers) * 100) : 0}%</strong>
                                     </span>
                                 </div>
-                                <h5 style={{ color: 'var(--text-primary, #444)', fontSize: '0.9rem', marginBottom: '10px', fontWeight: '600' }}>آخر جلسات المشاهدة والإجابات:</h5>
+                                <h5 style={{ color: 'var(--text-primary, #444)', fontSize: '0.9rem', marginBottom: '10px', fontWeight: '600' }}>أول إجابة لك لكل سؤال:</h5>
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                                    {ls.sessions.map((sess, sidx) => (
-                                        <div key={sidx} style={{ background: 'var(--bg-secondary, rgba(0,0,0,0.02))', padding: '10px 15px', borderRadius: '8px', fontSize: '0.85rem', color: 'var(--text-secondary, #555)', display: 'flex', flexWrap: 'wrap', gap: '15px', alignItems: 'center', border: '1px solid var(--border-color, rgba(0,0,0,0.02))' }}>
-                                            <span style={{ fontWeight: '500' }}>🕒 {new Date(sess.created_at).toLocaleString('ar-IQ')}</span>
-                                            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                                                <span style={{ color: 'var(--text-muted, #777)' }}>الإجابات:</span>
-                                                {sess.answers.map((ans, aidx) => (
-                                                    <span key={aidx} style={{ padding: '2px 8px', borderRadius: '4px', background: ans.is_correct ? 'rgba(16, 185, 129, 0.15)' : 'rgba(239, 68, 68, 0.15)', border: `1px solid ${ans.is_correct ? 'rgba(16, 185, 129, 0.3)' : 'rgba(239, 68, 68, 0.3)'}`, color: ans.is_correct ? '#059669' : '#dc2626' }}>
-                                                        س{ans.quiz_index + 1}: {ans.is_correct ? '✅' : '❌'}
-                                                    </span>
-                                                ))}
-                                                {sess.answers.length === 0 && <span style={{ opacity: 0.6, fontStyle: 'italic' }}>انتهت المشاهدة بلا إجابات</span>}
+                                    {ls.first_answers && ls.first_answers.length === 0 ? <span style={{opacity: 0.5}}>لم تجب على أي سؤال بعد</span> : (
+                                        ls.first_answers.map((ans, aidx) => (
+                                            <div key={aidx} style={{ padding: '10px 15px', borderRadius: '8px', background: ans.is_correct ? 'rgba(16, 185, 129, 0.05)' : 'rgba(239, 68, 68, 0.05)', border: `1px solid ${ans.is_correct ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.2)'}` }}>
+                                                <div style={{ color: 'var(--text-primary, #333)', marginBottom: '6px', fontWeight: 'bold', fontSize: '0.9rem' }}>{ans.question_text}</div>
+                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
+                                                    <span style={{ color: ans.is_correct ? '#059669' : '#dc2626', fontSize: '0.85rem', fontWeight: '500' }}>إجابتك: {ans.answer_text}</span>
+                                                    <span style={{ fontSize: '0.8rem', color: 'var(--text-muted, #777)' }}>🕒 {new Date(ans.created_at).toLocaleDateString('ar-EG')} {ans.is_correct ? '✅' : '❌'}</span>
+                                                </div>
                                             </div>
-                                        </div>
-                                    ))}
+                                        ))
+                                    )}
                                 </div>
                             </div>
                         ))}
