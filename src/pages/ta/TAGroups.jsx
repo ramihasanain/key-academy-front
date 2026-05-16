@@ -233,35 +233,47 @@ export const TAGroups = () => {
     const sendMessage = async () => {
         if (!messageText.trim() && !file && !audioBlob) return
 
-        const fd = new FormData()
-        fd.append('course', activeCourseId)
-        fd.append('group', activeGroupId)
-
         let finalContent = messageText;
         if (privateTarget) {
             finalContent = `__PRIVATE_MSG__[${privateTarget.id}]::${finalContent || ' '}`;
         }
 
-        if (finalContent) fd.append('content', finalContent)
+        if (file || audioBlob) {
+            // For attachments, we MUST use HTTP POST
+            const fd = new FormData()
+            fd.append('course', activeCourseId)
+            fd.append('group', activeGroupId)
+            if (finalContent) fd.append('content', finalContent)
 
-        if (file) {
-            fd.append('attachment', file)
-        } else if (audioBlob) {
-            fd.append('attachment', new File([audioBlob], 'voice-message.webm', { type: 'audio/webm' }))
+            if (file) {
+                fd.append('attachment', file)
+            } else if (audioBlob) {
+                fd.append('attachment', new File([audioBlob], 'voice-message.webm', { type: 'audio/webm' }))
+            }
+
+            setMessageText('')
+            setFile(null)
+            setAudioBlob(null)
+
+            const tk = sessionStorage.getItem('spy_token') || localStorage.getItem('access_token');
+            await fetch(API + '/api/interactions/group-chat/', {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${tk}` },
+                body: fd
+            })
+        } else {
+            // For text-only messages, use WebSocket for instant delivery
+            if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+                wsRef.current.send(JSON.stringify({
+                    content: finalContent,
+                    is_private: !!privateTarget,
+                    recipient_id: privateTarget ? privateTarget.id : 0
+                }))
+                setMessageText('')
+            } else {
+                alert('الاتصال بالخادم مفقود، جاري إعادة المحاولة...')
+            }
         }
-
-        setMessageText('')
-        setFile(null)
-        setAudioBlob(null)
-        // DO NOT reset privateTarget here — keep TA in private chat mode
-
-        const tk = sessionStorage.getItem('spy_token') || localStorage.getItem('access_token');
-        await fetch(API + '/api/interactions/group-chat/', {
-            method: 'POST',
-            headers: { 'Authorization': `Bearer ${tk}` },
-            body: fd
-        })
-        // No fetchMessages call because WebSocket will push it!
     }
 
     return (
