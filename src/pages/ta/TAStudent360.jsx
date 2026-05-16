@@ -4,8 +4,9 @@ import { API } from '../../config'
 import { HiOutlineArrowRight, HiOutlineBookOpen, HiOutlineChartBar, HiOutlineCheckCircle, HiOutlineDocumentText, HiOutlineClipboardDocumentCheck } from 'react-icons/hi2'
 import '../hq/Admin.css'
 
-export const TAStudent360 = () => {
-    const { id } = useParams()
+export const TAStudent360 = ({ studentIdProp, onClose }) => {
+    const params = useParams()
+    const id = studentIdProp || params.id
     const navigate = useNavigate()
     const [data, setData] = useState(null)
     const [loading, setLoading] = useState(true)
@@ -41,7 +42,7 @@ export const TAStudent360 = () => {
         <div className="hq-form-wrap" style={{ maxWidth: '1400px', margin: '0 auto', padding: '20px' }}>
             <div className="hq-page-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: '20px', borderBottom: '1px solid var(--hq-border)', marginBottom: '20px' }}>
                 <div style={{ display: 'flex', alignItems: 'flex-start', gap: '15px' }}>
-                    <button className="hq-back-btn" onClick={() => navigate(`/ta`)} style={{ marginTop: '5px', background: 'transparent', border: 'none', color: 'var(--hq-primary)', cursor: 'pointer', fontSize: '24px' }}>
+                    <button className="hq-back-btn" onClick={() => onClose ? onClose() : navigate(window.location.pathname.startsWith('/teacher') ? '/teacher' : `/ta`)} style={{ marginTop: '5px', background: 'transparent', border: 'none', color: 'var(--hq-primary)', cursor: 'pointer', fontSize: '24px' }}>
                         <HiOutlineArrowRight />
                     </button>
                     <div>

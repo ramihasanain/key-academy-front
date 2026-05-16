@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { API } from '../../config'
 import { HiOutlinePaperClip, HiOutlinePaperAirplane, HiOutlineMicrophone, HiOutlineStop, HiOutlineTrash, HiOutlineNoSymbol, HiOutlineChatBubbleOvalLeftEllipsis, HiOutlinePhoto } from 'react-icons/hi2'
+import { TAStudent360 } from './TAStudent360'
 
 export const TAGroups = () => {
     const [courses, setCourses] = useState([])
+    const [showStudentProfile, setShowStudentProfile] = useState(null)
     const [groups, setGroups] = useState([])
     const [activeCourseId, setActiveCourseId] = useState(null)
     const [activeGroupId, setActiveGroupId] = useState(null)
@@ -29,6 +31,10 @@ export const TAGroups = () => {
 
     // 1. Fetch available courses on mount
     useEffect(() => {
+        if ('Notification' in window && Notification.permission !== 'granted' && Notification.permission !== 'denied') {
+            Notification.requestPermission();
+        }
+        
         const fetchCourses = async () => {
             const tk = sessionStorage.getItem('spy_token') || localStorage.getItem('access_token');
             const res = await fetch(API + '/api/hq/courses/', {
@@ -66,6 +72,23 @@ export const TAGroups = () => {
         const wsUrl = `${wsBaseUrl}/ws/chat/${courseId}/${groupId}/?token=${tk}`;
         const ws = new WebSocket(wsUrl);
 
+        const playNotificationSound = () => {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const gainNode = ctx.createGain();
+                osc.connect(gainNode);
+                gainNode.connect(ctx.destination);
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(880, ctx.currentTime); // A5
+                osc.frequency.exponentialRampToValueAtTime(1760, ctx.currentTime + 0.1); // A6
+                gainNode.gain.setValueAtTime(0.3, ctx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1);
+                osc.start(ctx.currentTime);
+                osc.stop(ctx.currentTime + 0.1);
+            } catch (e) { console.error('Audio Notification failed', e); }
+        };
+
         ws.onmessage = (e) => {
             const data = JSON.parse(e.data);
             if (data.message) {
@@ -73,6 +96,17 @@ export const TAGroups = () => {
                     if (prev.find(m => m.id === data.message.id)) return prev;
                     return [...prev, data.message];
                 });
+
+                // Notify if it's from a student
+                if (data.message.sender_role === 'student' || data.message.sender_role === 'user') {
+                    playNotificationSound();
+                    if ('Notification' in window && Notification.permission === 'granted') {
+                        new Notification('رسالة جديدة - أكاديمية مفتاح', { 
+                            body: data.message.content || 'يوجد مرفق جديد'
+                        });
+                    }
+                }
+
                 // Update inbox unread counts for private messages
                 if (data.message.is_private && data.message.sender) {
                     setInboxContacts(prev => {
@@ -386,9 +420,7 @@ export const TAGroups = () => {
                                             <span 
                                                 onClick={() => {
                                                     if (m.sender_role === 'student' || !m.sender_role) {
-                                                        const isTeacher = window.location.pathname.startsWith('/teacher');
-                                                        const url = isTeacher ? `/teacher/students/${m.sender.id}/360` : `/ta/student/${m.sender.id}/360`;
-                                                        window.open(url, '_blank', 'width=1000,height=800');
+                                                        setShowStudentProfile(m.sender.id);
                                                     }
                                                 }}
                                                 style={{ 
@@ -575,6 +607,17 @@ export const TAGroups = () => {
                             {dialog.type !== 'alert' && (
                                 <button onClick={dialog.onCancel} style={{ background: 'transparent', color: 'var(--hq-text-muted)', border: '1px solid var(--hq-text-muted)', padding: '10px 20px', borderRadius: '8px', cursor: 'pointer' }}>إلغاء</button>
                             )}
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {showStudentProfile && (
+                <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(0,0,0,0.6)', zIndex: 9999, display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '40px' }}>
+                    <div style={{ background: 'var(--hq-bg)', width: '100%', maxWidth: '1400px', height: '100%', borderRadius: '16px', overflow: 'hidden', position: 'relative', boxShadow: '0 10px 40px rgba(0,0,0,0.2)' }}>
+                        <button onClick={() => setShowStudentProfile(null)} style={{ position: 'absolute', top: '15px', right: '15px', background: 'var(--hq-primary)', color: 'white', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', zIndex: 100, fontWeight: 'bold' }}>إغلاق الملف</button>
+                        <div style={{ width: '100%', height: '100%', overflowY: 'auto' }}>
+                            <TAStudent360 studentIdProp={showStudentProfile} onClose={() => setShowStudentProfile(null)} />
                         </div>
                     </div>
                 </div>
