@@ -388,11 +388,15 @@ export const TAGroups = () => {
                                             {m.sender_role === 'assistant' && <span style={{ background: '#10b981', color: 'white', padding: '2px 6px', borderRadius: '12px', fontSize: '10px' }}>مساعد</span>}
                                             {m.is_hidden && <span style={{ color: '#ef4444', fontSize: '11px' }}>(رسالة محذوفة)</span>}
                                         </div>
-                                        {(!m.is_teacher && !m.is_hidden && !sessionStorage.getItem('spy_token')) && (
+                                        {(!m.is_hidden && !sessionStorage.getItem('spy_token')) && (
                                             <div style={{ display: 'flex', gap: '10px', marginRight: '20px' }}>
-                                                <button onClick={() => setPrivateTarget({ id: m.sender.id, name: m.sender.full_name || m.sender.username })} style={{ background: 'transparent', border: 'none', color: '#10b981', cursor: 'pointer', fontSize: '13px', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '4px' }}><HiOutlineChatBubbleOvalLeftEllipsis size={16} /> رد خاص</button>
-                                                <button onClick={() => handleMute(m.sender.id, m.sender.full_name)} style={{ background: 'transparent', border: 'none', color: '#ef4444', cursor: 'pointer', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '4px' }}><HiOutlineNoSymbol size={16} /> كتم مؤقت</button>
-                                                <button onClick={() => handleHide(m.id)} style={{ background: 'transparent', border: 'none', color: '#ef4444', cursor: 'pointer', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '4px' }}><HiOutlineTrash size={16} /> حذف</button>
+                                                {(m.sender_role !== 'teacher' && m.sender_role !== 'assistant') && (
+                                                    <>
+                                                        <button onClick={() => setPrivateTarget({ id: m.sender.id, name: m.sender.full_name || m.sender.username })} style={{ background: 'transparent', border: 'none', color: '#10b981', cursor: 'pointer', fontSize: '13px', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '4px' }}><HiOutlineChatBubbleOvalLeftEllipsis size={16} /> رد خاص</button>
+                                                        <button onClick={() => handleMute(m.sender.id, m.sender.full_name)} style={{ background: 'transparent', border: 'none', color: '#ef4444', cursor: 'pointer', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '4px' }}><HiOutlineNoSymbol size={16} /> كتم مؤقت</button>
+                                                    </>
+                                                )}
+                                                <button onClick={() => handleHide(m.id)} style={{ background: 'transparent', border: 'none', color: '#ef4444', cursor: 'pointer', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '4px' }}><HiOutlineTrash size={16} /> إخفاء</button>
                                             </div>
                                         )}
                                     </div>
