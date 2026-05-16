@@ -60,6 +60,11 @@ const AdminModerationHistory = lazy(() =>
     default: m.AdminModerationHistory,
   })),
 );
+const TAManagerDashboard = lazy(() =>
+  import("./pages/hq/TAManagerDashboard").then((m) => ({
+    default: m.TAManagerDashboard,
+  })),
+);
 const TwoFactorSetup = lazy(() => import("./pages/hq/TwoFactorSetup"));
 const AdminQuickFillCourses = lazy(() =>
   import("./pages/hq/AdminQuickFillCourses").then((m) => ({
@@ -281,6 +286,7 @@ function App() {
               />
               <Route path=":model" element={<AdminModelGrid />} />
               <Route path="students/:id/360" element={<Student360View />} />
+              <Route path="ta-manager" element={<TAManagerDashboard />} />
               <Route path="teachers/:id/360" element={<Teacher360View />} />
               <Route path="teacherassistants/:id/360" element={<TA360View />} />
               <Route path="quick-courses" element={<AdminQuickFillCourses />} />

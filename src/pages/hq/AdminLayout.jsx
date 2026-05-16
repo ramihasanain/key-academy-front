@@ -57,6 +57,12 @@ export const AdminLayout = () => {
     const hasViewPerm = (modelPath) => {
         if (!profile) return false
         if (profile.is_superuser) return true
+        
+        if (profile.role === 'ta_manager') {
+            const allowedForTAManager = ['ta-manager', '', 'teacherassistants', 'coursegroups', 'teachers']
+            return allowedForTAManager.includes(modelPath)
+        }
+
         if (modelPath === '') return true // Dashboard accessible by all staff
 
         // Remove trailing s if needed or map dynamically. Standard: content.view_course
@@ -68,12 +74,13 @@ export const AdminLayout = () => {
             'teachers': 'view_teacher', 'enrollments': 'view_enrollment',
             'contactmessages': 'view_contactmessage', 'faqs': 'view_faqitem',
             'muted-students': 'view_user',
-            'moderation-history': 'view_user'
+            'moderation-history': 'view_user',
+            'ta-manager': 'view_teacherassistant'
         }
         const needed = pathMap[modelPath]
         if (!needed) return true // default open if not strictly mapped
 
-        return profile.permissions.some(p => p.endsWith(`.${needed}`))
+        return profile.permissions?.some(p => p.endsWith(`.${needed}`))
     }
 
     const navItems = [
@@ -87,6 +94,7 @@ export const AdminLayout = () => {
         { path: 'quick-courses', icon: <HiOutlineBookOpen />, label: 'التعبئة السريعة (Excel)' },
         { path: 'teachers', icon: <HiOutlineAcademicCap />, label: 'الأساتذة' },
         { path: 'teacherassistants', icon: <HiOutlineBriefcase />, label: 'مساعدي الأساتذة' },
+        { path: 'ta-manager', icon: <HiOutlineUserGroup />, label: 'أداء المساعدين (تقييم)' },
         { path: 'coursegroups', icon: <HiOutlineUserGroup />, label: 'المجموعات (للمساعدين)' },
         { path: 'enrollments', icon: <HiOutlineDocumentText />, label: 'الاشتراكات الفعالة' },
         { path: 'muted-students', icon: <HiOutlineNoSymbol />, label: 'الطلاب المحظورين' },
