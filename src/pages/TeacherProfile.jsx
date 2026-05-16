@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
+import { Helmet } from 'react-helmet-async'
 import { motion } from 'framer-motion'
 import { FaBriefcase, FaTrophy, FaChalkboardTeacher } from 'react-icons/fa'
 import { HiOutlineDocumentText } from 'react-icons/hi2'
@@ -121,6 +122,13 @@ const TeacherProfile = () => {
 
     return (
         <div className="page-transition profile-page">
+            <Helmet>
+                <title>الأستاذ {teacher.name} | منصة كي التعليمية</title>
+                <meta name="description" content={teacher.subtitle || `أقوى الشروحات مع الأستاذ ${teacher.name} في منصة كي التعليمية`} />
+                <meta property="og:title" content={`الأستاذ ${teacher.name} | منصة كي التعليمية`} />
+                <meta property="og:description" content={teacher.subtitle || `أقوى الشروحات مع الأستاذ ${teacher.name} في منصة كي التعليمية`} />
+                {teacher.image && <meta property="og:image" content={teacher.image} />}
+            </Helmet>
             <section className="profile-hero-bg">
                 <ParticleBackground />
             </section>

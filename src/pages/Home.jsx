@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
+import { Helmet } from 'react-helmet-async'
 import { API } from '../config'
 import { motion } from 'framer-motion'
 import { Swiper, SwiperSlide } from 'swiper/react'
@@ -86,6 +87,12 @@ const Home = () => {
 
     return (
         <div className="page-transition">
+            <Helmet>
+                <title>منصة كي التعليمية | أقوى المنصات العراقية</title>
+                <meta name="description" content="أول منصة عراقية تجمع عمالقة التدريس مع الذكاء الاصطناعي لتقديم تجربة دراسية متطورة لطلاب السادس الإعدادي والثالث المتوسط." />
+                <meta property="og:title" content="منصة كي التعليمية | أقوى المنصات العراقية" />
+                <meta property="og:description" content="أول منصة عراقية تجمع عمالقة التدريس مع الذكاء الاصطناعي لتقديم تجربة دراسية متطورة لطلاب السادس الإعدادي والثالث المتوسط." />
+            </Helmet>
             {/* ===== HERO ===== */}
             <section className="hero">
                 <div className="hero-container">
