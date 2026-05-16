@@ -24,11 +24,11 @@ export const TAStudentStats = () => {
         // Fire API to dismiss
         const tk = sessionStorage.getItem('spy_token') || localStorage.getItem('access_token');
         try {
-            await fetch(${API}/api/interactions/activities/dismiss/, {
+            await fetch(`${API}/api/interactions/activities/dismiss/`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': Bearer 
+                    'Authorization': `Bearer ${tk}`
                 },
                 body: JSON.stringify({ activity_type: act.type, object_id: act.id })
             });
@@ -36,13 +36,13 @@ export const TAStudentStats = () => {
 
         // Navigate based on type
         if (act.type === 'lesson_progress' || act.type === 'exam_submission') {
-            navigate(/ta/students//360);
+            navigate(`/ta/students/${act.student_id}/360`);
         } else if (act.type === 'qa_comment' || act.type === 'qa_post') {
-            navigate(/ta/qa);
+            navigate(`/ta/qa`);
         } else if (act.type === 'note') {
-            navigate(/ta/notes);
+            navigate(`/ta/notes`);
         } else if (act.type === 'group_message') {
-            navigate(/ta/groups);
+            navigate(`/ta/groups`);
         }
     };
 
