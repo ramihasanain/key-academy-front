@@ -6,36 +6,7 @@ import '../hq/Admin.css'
 export const AdminMutedStudents = () => {
     const [muted, setMuted] = useState([])
     const [loading, setLoading] = useState(true)
-    const [filters, setFilters] = useState({
-        search: '',
-        course: '',
-        teacher: '',
-        moderator: '',
-        type: '',
-        date: ''
-    })
-
-    const filteredMuted = muted.filter(item => {
-        if (filters.search) {
-            const term = filters.search.toLowerCase()
-            if (!item.full_name.toLowerCase().includes(term) && !item.username.toLowerCase().includes(term)) return false
-        }
-        if (filters.course && item.course_name !== filters.course) return false
-        if (filters.teacher && item.teacher_name !== filters.teacher) return false
-        if (filters.moderator && item.moderator !== filters.moderator) return false
-        if (filters.type && item.mute_type !== filters.type) return false
-        if (filters.date) {
-            const d1 = item.created_at ? item.created_at.split('T')[0] : '';
-            const d2 = item.muted_until ? item.muted_until.split('T')[0] : '';
-            if (d1 !== filters.date && d2 !== filters.date) return false;
-        }
-        return true
-    })
-
-    const uniqueCourses = [...new Set(muted.map(m => m.course_name))].filter(Boolean)
-    const uniqueTeachers = [...new Set(muted.map(m => m.teacher_name))].filter(Boolean)
-    const uniqueModerators = [...new Set(muted.map(m => m.moderator))].filter(Boolean)
-    const uniqueTypes = [...new Set(muted.map(m => m.mute_type))].filter(Boolean)
+    const filteredMuted = muted
 
     const fetchMuted = async () => {
         const tk = localStorage.getItem('access_token')
@@ -107,46 +78,6 @@ export const AdminMutedStudents = () => {
                     <h2 style={{ margin: 0, color: 'var(--hq-primary-text)' }}>إدارة الطلاب المحظورين</h2>
                     <p style={{ margin: '5px 0 0', color: 'var(--hq-text-muted)', fontSize: '0.9rem' }}>المراقبة المركزية لكافة القيود المفروضة على الطلاب من قبل الإدارة والمساعدين.</p>
                 </div>
-            </div>
-
-            <div className="hq-filters-bar" style={{ display: 'flex', flexWrap: 'wrap', gap: '15px', marginBottom: '20px', background: '#1e293b', padding: '20px', borderRadius: '16px', border: '1px solid var(--hq-border)' }}>
-                <input 
-                    className="hq-input" 
-                    placeholder="بحث باسم الطالب أو اليوزر..." 
-                    value={filters.search} 
-                    onChange={e => setFilters({...filters, search: e.target.value})}
-                    style={{ flex: '1 1 200px', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '10px 15px', color: 'white' }}
-                />
-                
-                <select className="hq-input" value={filters.course} onChange={e => setFilters({...filters, course: e.target.value})} style={{ flex: '1 1 150px', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '10px 15px', color: 'white' }}>
-                    <option value="">كل الدورات</option>
-                    {uniqueCourses.map(c => <option key={c} value={c}>{c}</option>)}
-                </select>
-
-                <select className="hq-input" value={filters.teacher} onChange={e => setFilters({...filters, teacher: e.target.value})} style={{ flex: '1 1 150px', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '10px 15px', color: 'white' }}>
-                    <option value="">كل الأساتذة</option>
-                    {uniqueTeachers.map(t => <option key={t} value={t}>{t}</option>)}
-                </select>
-
-                <select className="hq-input" value={filters.moderator} onChange={e => setFilters({...filters, moderator: e.target.value})} style={{ flex: '1 1 130px', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '10px 15px', color: 'white' }}>
-                    <option value="">كل المسؤولين (المراقبين)</option>
-                    {uniqueModerators.map(m => <option key={m} value={m}>{m}</option>)}
-                </select>
-
-                <select className="hq-input" value={filters.type} onChange={e => setFilters({...filters, type: e.target.value})} style={{ flex: '1 1 130px', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '10px 15px', color: 'white' }}>
-                    <option value="">نوع الحظر (الكل)</option>
-                    {uniqueTypes.map(t => <option key={t} value={t}>{t}</option>)}
-                </select>
-
-                <input 
-                    type="date"
-                    className="hq-input" 
-                    value={filters.date} 
-                    onChange={e => setFilters({...filters, date: e.target.value})}
-                    style={{ flex: '1 1 150px', background: '#0f172a', border: '1px solid #334155', borderRadius: '8px', padding: '10px 15px', color: 'white', colorScheme: 'dark' }}
-                />
-
-                <button onClick={() => setFilters({search:'', course:'', teacher:'', moderator:'', type:'', date:''})} style={{ padding: '10px 20px', background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', border: '1px solid rgba(239, 68, 68, 0.2)', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}>تفريغ الفلاتر</button>
             </div>
 
             <div className="hq-table-card" style={{ overflow: 'hidden' }}>

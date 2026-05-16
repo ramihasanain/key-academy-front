@@ -6,12 +6,30 @@ export const TAQA = () => {
     const [posts, setPosts] = useState([])
     const [replyText, setReplyText] = useState('')
     const [activePost, setActivePost] = useState(null)
-    const [tab, setTab] = useState('pending') // pending, answered
+    const [tab, setTab] = useState('pending') // pending, answered, resolved, deleted, studentView
     const [dialog, setDialog] = useState(null) // { type, message, options?, onConfirm, onCancel }
+
+    // Student View States
+    const [courseTree, setCourseTree] = useState([])
+    const [selectedCourse, setSelectedCourse] = useState('')
+    const [selectedModule, setSelectedModule] = useState('')
+    const [selectedLesson, setSelectedLesson] = useState('')
 
     useEffect(() => {
         fetchPosts()
+        fetchCourseTree()
     }, [])
+
+    const fetchCourseTree = async () => {
+        const tk = sessionStorage.getItem('spy_token') || localStorage.getItem('access_token');
+        const res = await fetch(API + '/api/interactions/ta-course-tree/', {
+            headers: { 'Authorization': `Bearer ${tk}` }
+        })
+        if (res.ok) {
+            const data = await res.json()
+            setCourseTree(data)
+        }
+    }
 
     const fetchPosts = async () => {
         const tk = sessionStorage.getItem('spy_token') || localStorage.getItem('access_token');
@@ -52,8 +70,9 @@ export const TAQA = () => {
     const answeredPosts = posts.filter(p => !p.is_hidden && !p.is_resolved && lastActiveComment(p)?.is_teacher)
     const resolvedPosts = posts.filter(p => !p.is_hidden && p.is_resolved)
     const deletedPosts = posts.filter(p => p.is_hidden)
+    const studentViewPosts = posts.filter(p => p.lesson === parseInt(selectedLesson))
 
-    const displayPosts = tab === 'pending' ? pendingPosts : tab === 'answered' ? answeredPosts : tab === 'resolved' ? resolvedPosts : deletedPosts
+    const displayPosts = tab === 'pending' ? pendingPosts : tab === 'answered' ? answeredPosts : tab === 'resolved' ? resolvedPosts : tab === 'studentView' ? studentViewPosts : deletedPosts
 
     const handleHide = (modelType, id, isHidden) => {
         setDialog({
@@ -73,6 +92,23 @@ export const TAQA = () => {
             onCancel: () => setDialog(null)
         })
     }
+
+    const handlePin = async (commentId) => {
+        const tk = sessionStorage.getItem('spy_token') || localStorage.getItem('access_token');
+        try {
+            const res = await fetch(`${API}/api/interactions/moderate/qa/comment/${commentId}/pin/`, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${tk}` }
+            });
+            if (res.ok) {
+                fetchPosts();
+            }
+        } catch (e) {
+            console.error(e);
+        }
+    }
+
+
 
     const handleResolve = (id, isResolved) => {
         setDialog({
@@ -172,9 +208,41 @@ export const TAQA = () => {
                 >
                     المحذوفة ({deletedPosts.length})
                 </button>
+                <button
+                    onClick={() => setTab('studentView')}
+                    style={{ background: 'transparent', color: tab === 'studentView' ? '#8b5cf6' : 'var(--hq-text-muted)', border: 'none', fontSize: '15px', fontWeight: tab === 'studentView' ? 'bold' : 'normal', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px' }}
+                >
+                    🎓 رؤية الطالب
+                </button>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', gap: '20px' }}>
+            {tab === 'studentView' && (
+                <div style={{ marginBottom: '20px', padding: '20px', background: 'var(--hq-surface)', borderRadius: '16px', border: '1px solid var(--hq-border)', display: 'flex', gap: '15px', flexWrap: 'wrap' }}>
+                    <div style={{ flex: '1 1 200px' }}>
+                        <label style={{ display: 'block', marginBottom: '8px', color: 'var(--hq-text-muted)', fontSize: '13px' }}>الدورة:</label>
+                        <select className="hq-input" value={selectedCourse} onChange={e => { setSelectedCourse(e.target.value); setSelectedModule(''); setSelectedLesson(''); }} style={{ width: '100%', background: 'var(--hq-bg)' }}>
+                            <option value="">-- اختر الدورة --</option>
+                            {courseTree.map(c => <option key={c.id} value={c.id}>{c.title}</option>)}
+                        </select>
+                    </div>
+                    <div style={{ flex: '1 1 200px' }}>
+                        <label style={{ display: 'block', marginBottom: '8px', color: 'var(--hq-text-muted)', fontSize: '13px' }}>الوحدة:</label>
+                        <select className="hq-input" value={selectedModule} onChange={e => { setSelectedModule(e.target.value); setSelectedLesson(''); }} disabled={!selectedCourse} style={{ width: '100%', background: 'var(--hq-bg)' }}>
+                            <option value="">-- اختر الوحدة --</option>
+                            {courseTree.find(c => c.id === parseInt(selectedCourse))?.modules.map(m => <option key={m.id} value={m.id}>{m.title}</option>)}
+                        </select>
+                    </div>
+                    <div style={{ flex: '1 1 200px' }}>
+                        <label style={{ display: 'block', marginBottom: '8px', color: 'var(--hq-text-muted)', fontSize: '13px' }}>الدرس:</label>
+                        <select className="hq-input" value={selectedLesson} onChange={e => setSelectedLesson(e.target.value)} disabled={!selectedModule} style={{ width: '100%', background: 'var(--hq-bg)' }}>
+                            <option value="">-- اختر الدرس --</option>
+                            {courseTree.find(c => c.id === parseInt(selectedCourse))?.modules.find(m => m.id === parseInt(selectedModule))?.lessons.map(l => <option key={l.id} value={l.id}>{l.title}</option>)}
+                        </select>
+                    </div>
+                </div>
+            )}
+
+            <div style={{ display: 'grid', gridTemplateColumns: tab === 'studentView' ? '1fr' : 'repeat(auto-fill, minmax(350px, 1fr))', gap: '20px' }}>
                 {displayPosts.map(p => (
                     <div key={p.id} style={{
                         background: 'var(--hq-surface)',
@@ -234,28 +302,34 @@ export const TAQA = () => {
                             <div style={{ marginBottom: '16px', padding: '15px', background: 'var(--hq-bg)', borderRadius: '12px', border: '1px solid var(--hq-border)', display: 'flex', flexDirection: 'column', gap: '10px' }}>
                                 <strong style={{ color: 'var(--hq-primary)', display: 'flex', alignItems: 'center', gap: '5px', fontSize: '13px', marginBottom: '4px' }}>💬 سلسلة الردود:</strong>
                                 {p.comments.slice().sort((a, b) => {
-                                    if (a.author_role === 'teacher' && b.author_role !== 'teacher') return -1;
-                                    if (b.author_role === 'teacher' && a.author_role !== 'teacher') return 1;
-                                    if (a.is_teacher && !b.is_teacher) return -1;
-                                    if (b.is_teacher && !a.is_teacher) return 1;
+                                    if (a.is_pinned && !b.is_pinned) return -1;
+                                    if (b.is_pinned && !a.is_pinned) return 1;
                                     return new Date(a.created_at) - new Date(b.created_at);
                                 }).map(c => (
                                     <div key={c.id} style={{
                                         padding: '12px', borderRadius: '10px',
-                                        background: c.author_role === 'teacher' ? 'rgba(245, 158, 11, 0.05)' : (c.is_teacher ? 'rgba(16, 185, 129, 0.05)' : 'rgba(131, 42, 150, 0.03)'),
-                                        borderRight: c.author_role === 'teacher' ? '3px solid #f59e0b' : (c.is_teacher ? '3px solid #10b981' : '3px solid var(--purple)')
+                                        background: c.is_pinned ? 'rgba(59, 130, 246, 0.05)' : (c.author_role === 'teacher' ? 'rgba(245, 158, 11, 0.05)' : (c.is_teacher ? 'rgba(16, 185, 129, 0.05)' : 'rgba(131, 42, 150, 0.03)')),
+                                        borderRight: c.is_pinned ? '3px solid #3b82f6' : (c.author_role === 'teacher' ? '3px solid #f59e0b' : (c.is_teacher ? '3px solid #10b981' : '3px solid var(--purple)'))
                                     }}>
                                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '6px' }}>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
                                                 <span style={{ fontSize: '13px', fontWeight: 'bold', color: c.is_hidden ? 'var(--hq-text-muted)' : (c.author_role === 'teacher' ? '#f59e0b' : (c.is_teacher ? '#10b981' : 'var(--purple)')) }}>
                                                     {c.author?.first_name || c.author?.username}
                                                 </span>
                                                 {c.author_role === 'teacher' ? <span style={{ background: '#f59e0b', color: 'white', padding: '2px 6px', borderRadius: '12px', fontSize: '10px', fontWeight: 'bold' }}>أستاذ المادة</span> :
                                                     c.is_teacher ? <span style={{ background: '#10b981', color: 'white', padding: '2px 6px', borderRadius: '12px', fontSize: '10px', fontWeight: 'bold' }}>مساعد</span> :
                                                         <span style={{ background: 'rgba(131, 42, 150, 0.1)', color: 'var(--purple)', padding: '2px 6px', borderRadius: '12px', fontSize: '10px', fontWeight: 'bold' }}>طالب</span>}
+                                                {c.is_pinned && <span style={{ background: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6', padding: '2px 6px', borderRadius: '12px', fontSize: '10px', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '3px' }}>📌 مُثبت</span>}
                                             </div>
                                             {!sessionStorage.getItem('spy_token') && (
-                                                <button onClick={() => handleHide('qacomment', c.id, c.is_hidden)} style={{ background: c.is_hidden ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)', border: 'none', color: c.is_hidden ? '#10b981' : '#ef4444', cursor: 'pointer', fontSize: '11px', fontWeight: 'bold', padding: '4px 8px', borderRadius: '6px' }}>{c.is_hidden ? '🔙 استرجاع' : '🗑️ حذف'}</button>
+                                                <div style={{ display: 'flex', gap: '5px' }}>
+                                                    {(c.author_role === 'teacher' || c.is_teacher) && (
+                                                        <button onClick={() => handlePin(c.id)} style={{ background: c.is_pinned ? 'rgba(59, 130, 246, 0.1)' : 'rgba(148, 163, 184, 0.1)', border: 'none', color: c.is_pinned ? '#3b82f6' : '#64748b', cursor: 'pointer', fontSize: '11px', fontWeight: 'bold', padding: '4px 8px', borderRadius: '6px' }}>
+                                                            {c.is_pinned ? '📌 فك التثبيت' : '📌 تثبيت'}
+                                                        </button>
+                                                    )}
+                                                    <button onClick={() => handleHide('qacomment', c.id, c.is_hidden)} style={{ background: c.is_hidden ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)', border: 'none', color: c.is_hidden ? '#10b981' : '#ef4444', cursor: 'pointer', fontSize: '11px', fontWeight: 'bold', padding: '4px 8px', borderRadius: '6px' }}>{c.is_hidden ? '🔙 استرجاع' : '🗑️ حذف'}</button>
+                                                </div>
                                             )}
                                         </div>
                                         <div style={{ fontSize: '14px', lineHeight: '1.6', color: c.is_hidden ? 'var(--hq-text-muted)' : 'var(--hq-text-main)', textDecoration: c.is_hidden ? 'line-through' : 'none' }}>
