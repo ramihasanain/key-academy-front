@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { API } from '../../config'
-import { HiOutlinePaperClip, HiOutlinePaperAirplane, HiOutlineMicrophone, HiOutlineStop, HiOutlineTrash, HiOutlineNoSymbol, HiOutlineChatBubbleOvalLeftEllipsis, HiOutlinePhoto, HiOutlineArrowDownTray } from 'react-icons/hi2'
+import { HiOutlinePaperClip, HiOutlinePaperAirplane, HiOutlineMicrophone, HiOutlineStop, HiOutlineTrash, HiOutlineNoSymbol, HiOutlineChatBubbleOvalLeftEllipsis, HiOutlinePhoto, HiOutlineArrowDownTray, HiOutlineXMark } from 'react-icons/hi2'
 import { TAStudent360 } from './TAStudent360'
 
 export const TAGroups = () => {
@@ -13,6 +13,9 @@ export const TAGroups = () => {
     const [messageText, setMessageText] = useState('')
     const [file, setFile] = useState(null)
     const [dialog, setDialog] = useState(null) // { type, message, options?, onConfirm, onCancel }
+    const [fullScreenImage, setFullScreenImage] = useState(null)
+    const [offset, setOffset] = useState(0)
+    const [hasMore, setHasMore] = useState(true)
     const fileInputRef = useRef(null)
     const endOfMessagesRef = useRef(null)
 
@@ -95,6 +98,13 @@ export const TAGroups = () => {
                     }
                     return m;
                 }));
+            } else if (data.type === 'message_pinned') {
+                setMessages(prev => prev.map(m => {
+                    if (m.id === data.message_id) {
+                        return { ...m, is_pinned: data.is_pinned };
+                    }
+                    return m;
+                }));
             } else if (data.message) {
                 setMessages(prev => {
                     if (prev.find(m => m.id === data.message.id)) return prev;
@@ -121,13 +131,35 @@ export const TAGroups = () => {
     }
 
     const fetchMessages = async (courseId, groupId) => {
+        setOffset(0)
+        setHasMore(true)
         const tk = sessionStorage.getItem('spy_token') || localStorage.getItem('access_token');
-        const res = await fetch(`${API}/api/interactions/group-chat/?course=${courseId}&group=${groupId}&type=all`, {
+        const res = await fetch(`${API}/api/interactions/group-chat/?course=${courseId}&group=${groupId}&type=all&offset=0&limit=50`, {
             headers: { 'Authorization': `Bearer ${tk}` }
         })
         if (res.ok) {
             const data = await res.json()
+            if (data.length < 50) setHasMore(false)
             setMessages(data)
+        }
+    }
+
+    const loadMoreMessages = async () => {
+        if (!hasMore) return;
+        const newOffset = offset + 50;
+        const tk = sessionStorage.getItem('spy_token') || localStorage.getItem('access_token');
+        try {
+            const res = await fetch(`${API}/api/interactions/group-chat/?course=${activeCourseId}&group=${activeGroupId}&type=all&offset=${newOffset}&limit=50`, {
+                headers: { 'Authorization': `Bearer ${tk}` }
+            });
+            if (res.ok) {
+                const data = await res.json();
+                if (data.length < 50) setHasMore(false);
+                setMessages(prev => [...data, ...prev]);
+                setOffset(newOffset);
+            }
+        } catch (err) {
+            console.error('Failed to load more messages', err);
         }
     }
 
@@ -163,6 +195,18 @@ export const TAGroups = () => {
             },
             onCancel: () => setDialog(null)
         })
+    }
+
+    const handlePin = async (msgId) => {
+        const tk = sessionStorage.getItem('spy_token') || localStorage.getItem('access_token');
+        try {
+            await fetch(`${API}/api/interactions/moderate/pin/groupmessage/${msgId}/`, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${tk}` }
+            });
+        } catch (e) {
+            console.error("Failed to pin message", e);
+        }
     }
 
     const handleMute = (studentId, studentName) => {
@@ -240,7 +284,8 @@ export const TAGroups = () => {
             };
 
             mediaRecorder.onstop = () => {
-                const blob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+                const mimeType = mediaRecorder.mimeType || 'audio/webm';
+                const blob = new Blob(audioChunksRef.current, { type: mimeType });
                 setAudioBlob(blob);
                 stream.getTracks().forEach(track => track.stop());
             };
@@ -277,7 +322,8 @@ export const TAGroups = () => {
             if (file) {
                 fd.append('attachment', file)
             } else if (audioBlob) {
-                fd.append('attachment', new File([audioBlob], 'voice-message.webm', { type: 'audio/webm' }))
+                const ext = audioBlob.type.includes('mp4') ? 'mp4' : (audioBlob.type.includes('ogg') ? 'ogg' : 'webm');
+                fd.append('attachment', new File([audioBlob], `voice-message.${ext}`, { type: audioBlob.type }))
             }
 
             setMessageText('')
@@ -368,10 +414,34 @@ export const TAGroups = () => {
                         </div>
 
                         <div style={{ flex: 1, overflowY: 'auto', padding: '20px', display: 'flex', flexDirection: 'column', gap: '15px' }}>
-                            {messages.filter(m => {
-                                if (!privateTarget) return !m.is_private; // In global room, show only public messages
-                                return m.is_private && (m.sender?.id === privateTarget.id || m.recipient_id === privateTarget.id);
-                            }).map(m => (
+                            {hasMore && (
+                                <div style={{ textAlign: 'center', marginBottom: '10px' }}>
+                                    <button onClick={loadMoreMessages} style={{ background: 'var(--hq-surface-light, rgba(255,255,255,0.05))', border: '1px solid var(--hq-border)', borderRadius: '20px', padding: '6px 16px', color: 'var(--hq-text-muted)', cursor: 'pointer', fontSize: '0.9rem', transition: 'all 0.2s' }} onMouseOver={e => e.target.style.color = 'var(--hq-primary)'} onMouseOut={e => e.target.style.color = 'var(--hq-text-muted)'}>
+                                        تحميل المزيد من الرسائل السابقة
+                                    </button>
+                                </div>
+                            )}
+                            
+                            {(() => {
+                                const dispMsgs = messages.filter(m => {
+                                    if (!privateTarget) return !m.is_private;
+                                    return m.is_private && (m.sender?.id === privateTarget.id || m.recipient_id === privateTarget.id);
+                                });
+                                const pinnedMsgs = dispMsgs.filter(m => m.is_pinned);
+                                const latestPinned = pinnedMsgs.length > 0 ? pinnedMsgs[pinnedMsgs.length - 1] : null;
+                                
+                                return (
+                                    <>
+                                        {latestPinned && !privateTarget && (
+                                            <div style={{ padding: '10px 15px', background: 'rgba(236, 54, 101, 0.05)', border: '1px solid rgba(236, 54, 101, 0.2)', borderRadius: '12px', display: 'flex', alignItems: 'flex-start', gap: '10px', flexShrink: 0, marginBottom: '10px' }}>
+                                                <div style={{ color: '#ec3665', marginTop: '2px' }}>📌</div>
+                                                <div style={{ flex: 1, overflow: 'hidden' }}>
+                                                    <div style={{ fontSize: '0.8rem', fontWeight: 'bold', color: '#ec3665', marginBottom: '4px' }}>رسالة مثبتة من {latestPinned.sender?.full_name || latestPinned.sender?.username || 'الإدارة'}</div>
+                                                    <div style={{ fontSize: '0.9rem', color: 'var(--hq-text-main)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{latestPinned.content}</div>
+                                                </div>
+                                            </div>
+                                        )}
+                                        {dispMsgs.map(m => (
                                 <div key={m.id} style={{
                                     background: m.is_hidden ? 'rgba(239, 68, 68, 0.05)' : (m.sender_role === 'teacher' ? 'rgba(245, 158, 11, 0.08)' : (m.sender_role === 'assistant' ? 'rgba(16, 185, 129, 0.08)' : 'rgba(0,0,0,0.02)')),
                                     padding: '15px',
@@ -401,6 +471,9 @@ export const TAGroups = () => {
                                         </div>
                                         {(!m.is_hidden && !sessionStorage.getItem('spy_token')) && (
                                             <div style={{ display: 'flex', gap: '10px', marginRight: '20px' }}>
+                                                {(!privateTarget) && (
+                                                    <button onClick={() => handlePin(m.id)} style={{ background: 'transparent', border: 'none', color: m.is_pinned ? '#ec3665' : 'var(--hq-text-muted)', cursor: 'pointer', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '4px' }}>📌 {m.is_pinned ? 'إلغاء التثبيت' : 'تثبيت'}</button>
+                                                )}
                                                 {(m.sender_role !== 'teacher' && m.sender_role !== 'assistant') && (
                                                     <>
                                                         <button onClick={() => setPrivateTarget({ id: m.sender.id, name: m.sender.full_name || m.sender.username })} style={{ background: 'transparent', border: 'none', color: '#10b981', cursor: 'pointer', fontSize: '13px', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '4px' }}><HiOutlineChatBubbleOvalLeftEllipsis size={16} /> رد خاص</button>
@@ -419,12 +492,9 @@ export const TAGroups = () => {
                                         <div style={{ marginTop: '10px' }}>
                                             {m.attachment.match(/\.(jpeg|jpg|gif|png|webp)(\?|$)/i) ? (
                                                 <div style={{ position: 'relative', display: 'inline-block' }}>
-                                                    <a href={m.attachment} target="_blank" rel="noreferrer" style={{ display: 'block' }}>
+                                                    <div onClick={() => setFullScreenImage(m.attachment)} style={{ display: 'block', cursor: 'zoom-in' }}>
                                                         <img src={m.attachment} alt="attachment" style={{ maxWidth: '100%', borderRadius: '8px', maxHeight: '250px', border: '1px solid var(--hq-border)', display: 'block' }} />
-                                                    </a>
-                                                    <a href={m.attachment} download target="_blank" rel="noreferrer" style={{ position: 'absolute', bottom: '8px', right: '8px', background: 'rgba(0,0,0,0.6)', color: 'white', padding: '6px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none' }} title="تحميل أو عرض الصورة كاملة">
-                                                        <HiOutlineArrowDownTray size={16} />
-                                                    </a>
+                                                    </div>
                                                 </div>
                                             ) : m.attachment.match(/\.(webm|mp3|ogg|wav)(\?|$)/i) || m.attachment.includes('voice-message') ? (
                                                 <audio controls src={m.attachment} style={{ height: '40px', maxWidth: '100%' }} />
@@ -448,6 +518,9 @@ export const TAGroups = () => {
                                     </div>
                                 </div>
                             ))}
+                            </>
+                            );
+                        })()}
                             <div ref={endOfMessagesRef} />
                         </div>
 
@@ -605,6 +678,20 @@ export const TAGroups = () => {
                             <TAStudent360 studentIdProp={showStudentProfile} onClose={() => setShowStudentProfile(null)} />
                         </div>
                     </div>
+                </div>
+            )}
+
+            {/* Image Viewer Popup */}
+            {fullScreenImage && (
+                <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(15, 23, 42, 0.9)', backdropFilter: 'blur(8px)', zIndex: 99999, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+                    <button onClick={() => setFullScreenImage(null)} style={{ position: 'absolute', top: '20px', right: '20px', background: 'transparent', border: 'none', color: 'white', cursor: 'pointer', padding: '10px' }}>
+                        <HiOutlineXMark size={36} />
+                    </button>
+                    <img src={fullScreenImage} style={{ maxWidth: '100%', maxHeight: '75vh', objectFit: 'contain', borderRadius: '12px', boxShadow: '0 20px 40px rgba(0,0,0,0.5)' }} />
+                    <a href={fullScreenImage} download target="_blank" rel="noreferrer" style={{ marginTop: '24px', background: 'var(--hq-primary)', color: 'white', padding: '12px 28px', borderRadius: '24px', textDecoration: 'none', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '1.1rem', boxShadow: '0 10px 20px rgba(131, 42, 150, 0.3)' }}>
+                        <HiOutlineArrowDownTray size={22} />
+                        تنزيل الصورة
+                    </a>
                 </div>
             )}
         </div>

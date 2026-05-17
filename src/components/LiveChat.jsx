@@ -28,6 +28,7 @@ const LiveChat = ({ courseId, userData, lessonId = null }) => {
     const [file, setFile] = useState(null)
     const [isRecording, setIsRecording] = useState(false)
     const [audioBlob, setAudioBlob] = useState(null)
+    const [fullScreenImage, setFullScreenImage] = useState(null)
     const fileInputRef = useRef(null)
     const mediaRecorderRef = useRef(null)
     const audioChunksRef = useRef([])
@@ -37,6 +38,8 @@ const LiveChat = ({ courseId, userData, lessonId = null }) => {
     const [privateUnread, setPrivateUnread] = useState(0)
     const [publicUnread, setPublicUnread] = useState(0)
     const chatTypeRef = useRef(chatType)
+    const [offset, setOffset] = useState(0)
+    const [hasMore, setHasMore] = useState(true)
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
@@ -49,20 +52,23 @@ const LiveChat = ({ courseId, userData, lessonId = null }) => {
     // Load initial history when chatType changes
     useEffect(() => {
         setLoading(true)
+        setOffset(0)
+        setHasMore(true)
         const t = localStorage.getItem('access_token')
         if (!t || !courseId) {
             setLoading(false)
             return
         }
         let isActive = true
-        const requestKey = `${courseId}:${chatType}:${t}`
+        const requestKey = `${courseId}:${chatType}:${t}:0` // Append offset to key
         fetchGroupChatOnce(
             requestKey,
-            `${API}/api/interactions/group-chat/?course=${courseId}&type=${chatType}`,
+            `${API}/api/interactions/group-chat/?course=${courseId}&type=${chatType}&offset=0&limit=50`,
             { headers: { 'Authorization': `Bearer ${t}` } }
         )
             .then(d => {
                 if (!isActive) return
+                if (d.length < 50) setHasMore(false)
                 setMessages(d)
                 setLoading(false)
             })
@@ -92,6 +98,13 @@ const LiveChat = ({ courseId, userData, lessonId = null }) => {
                 setMessages(prev => prev.map(m => {
                     if (data.message_ids.includes(m.id)) {
                         return { ...m, read_by_student: data.read_by_student }
+                    }
+                    return m
+                }))
+            } else if (data.type === 'message_pinned') {
+                setMessages(prev => prev.map(m => {
+                    if (m.id === data.message_id) {
+                        return { ...m, is_pinned: data.is_pinned }
                     }
                     return m
                 }))
@@ -126,7 +139,8 @@ const LiveChat = ({ courseId, userData, lessonId = null }) => {
             };
 
             mediaRecorder.onstop = () => {
-                const blob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+                const mimeType = mediaRecorder.mimeType || 'audio/webm';
+                const blob = new Blob(audioChunksRef.current, { type: mimeType });
                 setAudioBlob(blob);
                 stream.getTracks().forEach(track => track.stop());
             };
@@ -135,6 +149,25 @@ const LiveChat = ({ courseId, userData, lessonId = null }) => {
             setIsRecording(true);
         } catch (err) {
             alert("يرجى السماح باستخدام الميكروفون لتسجيل الصوت.");
+        }
+    };
+
+    const loadMoreMessages = async () => {
+        if (!hasMore) return;
+        const newOffset = offset + 50;
+        const tk = localStorage.getItem('access_token');
+        try {
+            const res = await fetch(`${API}/api/interactions/group-chat/?course=${courseId}&type=all&offset=${newOffset}&limit=50`, {
+                headers: { 'Authorization': `Bearer ${tk}` }
+            });
+            if (res.ok) {
+                const data = await res.json();
+                if (data.length < 50) setHasMore(false);
+                setMessages(prev => [...data, ...prev]);
+                setOffset(newOffset);
+            }
+        } catch (err) {
+            console.error('Failed to load more messages', err);
         }
     };
 
@@ -158,7 +191,8 @@ const LiveChat = ({ courseId, userData, lessonId = null }) => {
             if (file) {
                 fd.append('attachment', file)
             } else if (audioBlob) {
-                fd.append('attachment', new File([audioBlob], 'voice-message.webm', { type: 'audio/webm' }))
+                const ext = audioBlob.type.includes('mp4') ? 'mp4' : (audioBlob.type.includes('ogg') ? 'ogg' : 'webm');
+                fd.append('attachment', new File([audioBlob], `voice-message.${ext}`, { type: audioBlob.type }))
             }
 
             setInput('')
@@ -200,6 +234,9 @@ const LiveChat = ({ courseId, userData, lessonId = null }) => {
         return chatType === 'private' ? isMsgPrivate : !isMsgPrivate
     })
 
+    const pinnedMessages = displayedMessages.filter(m => m.is_pinned)
+    const latestPinned = pinnedMessages.length > 0 ? pinnedMessages[pinnedMessages.length - 1] : null
+
     return (
         <div className="lv-tab-pane lv-fade" style={{ flex: 1, display: 'flex', flexDirection: 'column', background: 'transparent', height: '100%', overflow: 'hidden' }}>
             <div className="lv-chat-tabs" style={{ display: 'flex', gap: '10px', marginBottom: '10px', padding: '15px 15px 0 15px', flexShrink: 0 }}>
@@ -223,10 +260,28 @@ const LiveChat = ({ courseId, userData, lessonId = null }) => {
                 </div>
             </div>
 
+            {latestPinned && chatType === 'public' && (
+                <div style={{ margin: '10px 15px 0', padding: '10px 15px', background: 'linear-gradient(90deg, rgba(236, 54, 101, 0.1), rgba(131, 42, 150, 0.05))', border: '1px solid var(--border-glow)', borderRadius: '12px', display: 'flex', alignItems: 'flex-start', gap: '10px', flexShrink: 0, boxShadow: '0 4px 15px rgba(131, 42, 150, 0.05)' }}>
+                    <div style={{ color: 'var(--pink)', marginTop: '2px' }}>📌</div>
+                    <div style={{ flex: 1, overflow: 'hidden' }}>
+                        <div style={{ fontSize: '0.8rem', fontWeight: 'bold', color: 'var(--purple)', marginBottom: '4px' }}>رسالة مثبتة من {latestPinned.sender?.full_name || latestPinned.sender?.username || 'الإدارة'}</div>
+                        <div style={{ fontSize: '0.9rem', color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{latestPinned.content}</div>
+                    </div>
+                </div>
+            )}
+
             <div className="lv-gc-msgs" style={{ flex: 1, overflowY: 'auto', padding: '10px 15px', minHeight: '200px' }}>
                 {loading ? <p style={{ textAlign: 'center', color: '#94a3b8' }}>جاري التحميل...</p> :
                     displayedMessages.length === 0 ? <p style={{ color: '#94a3b8', textAlign: 'center', marginTop: '20px' }}>لا توجد رسائل سابقة. كن أول من يرسل!</p> :
-                        displayedMessages.map(m => {
+                        <>
+                            {hasMore && (
+                                <div style={{ textAlign: 'center', marginBottom: '15px' }}>
+                                    <button onClick={loadMoreMessages} style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-glass)', borderRadius: '20px', padding: '6px 16px', color: 'var(--text-secondary)', cursor: 'pointer', fontSize: '0.9rem', transition: 'all 0.2s' }} onMouseOver={e => e.target.style.color = 'var(--primary)'} onMouseOut={e => e.target.style.color = 'var(--text-secondary)'}>
+                                        تحميل المزيد من الرسائل السابقة
+                                    </button>
+                                </div>
+                            )}
+                            {displayedMessages.map(m => {
                             const isTeacher = m.sender_role === 'teacher' || m.sender?.role === 'teacher';
                             const isAssist = !isTeacher && (m.sender_role === 'assistant' || m.sender?.role === 'assistant' || m.is_ta || m.sender?.is_ta);
                             return (
@@ -248,12 +303,9 @@ const LiveChat = ({ courseId, userData, lessonId = null }) => {
                                         <div style={{ marginTop: '10px' }}>
                                             {m.attachment.match(/\.(jpeg|jpg|gif|png|webp)(\?|$)/i) ? (
                                                 <div style={{ position: 'relative', display: 'inline-block' }}>
-                                                    <a href={m.attachment} target="_blank" rel="noreferrer" style={{ display: 'block' }}>
+                                                    <div onClick={() => setFullScreenImage(m.attachment)} style={{ display: 'block', cursor: 'zoom-in' }}>
                                                         <img src={m.attachment} alt="مرفق" style={{ maxWidth: '100%', borderRadius: '8px', maxHeight: '250px', border: '1px solid var(--border-glass)', display: 'block' }} />
-                                                    </a>
-                                                    <a href={m.attachment} download target="_blank" rel="noreferrer" style={{ position: 'absolute', bottom: '8px', right: '8px', background: 'rgba(0,0,0,0.6)', color: 'white', padding: '6px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none' }} title="تحميل أو عرض الصورة كاملة">
-                                                        <HiOutlineArrowDownTray size={16} />
-                                                    </a>
+                                                    </div>
                                                 </div>
                                             ) : m.attachment.match(/\.(webm|mp3|ogg|wav|mp4)(\?|$)/i) || m.attachment.includes('voice-message') ? (
                                                 <audio controls src={m.attachment} style={{ height: '40px', width: '100%', maxWidth: '250px' }} />
@@ -340,10 +392,24 @@ const LiveChat = ({ courseId, userData, lessonId = null }) => {
                             disabled={isRecording}
                             style={{ flex: 1, padding: '10px 15px', borderRadius: '20px', border: '1px solid var(--border-glass)', background: '#fff' }}
                         />
-                        <button className="lv-gc-send-btn" onClick={handleSend} style={{ background: 'var(--primary)', color: '#fff', border: 'none', width: '40px', height: '40px', borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                            <HiOutlinePaperAirplane style={{ transform: 'rotate(-45deg)', marginLeft: '2px' }} />
+                        <button className="lv-gc-send-btn" onClick={handleSend} style={{ background: 'var(--gradient-brand)', color: '#fff', border: 'none', width: '40px', height: '40px', borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, boxShadow: '0 4px 15px rgba(236, 54, 101, 0.3)' }}>
+                            <HiOutlinePaperAirplane style={{ transform: 'rotate(-45deg)', marginLeft: '2px', marginTop: '-2px' }} size={18} />
                         </button>
                     </div>
+                </div>
+            )}
+            
+            {/* Image Viewer Popup */}
+            {fullScreenImage && (
+                <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(15, 23, 42, 0.9)', backdropFilter: 'blur(8px)', zIndex: 99999, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+                    <button onClick={() => setFullScreenImage(null)} style={{ position: 'absolute', top: '20px', right: '20px', background: 'transparent', border: 'none', color: 'white', cursor: 'pointer', padding: '10px' }}>
+                        <HiOutlineXMark size={36} />
+                    </button>
+                    <img src={fullScreenImage} style={{ maxWidth: '100%', maxHeight: '75vh', objectFit: 'contain', borderRadius: '12px', boxShadow: '0 20px 40px rgba(0,0,0,0.5)' }} />
+                    <a href={fullScreenImage} download target="_blank" rel="noreferrer" style={{ marginTop: '24px', background: 'var(--gradient-brand)', color: 'white', padding: '12px 28px', borderRadius: '24px', textDecoration: 'none', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '1.1rem', boxShadow: '0 10px 20px rgba(236, 54, 101, 0.3)' }}>
+                        <HiOutlineArrowDownTray size={22} />
+                        تنزيل الصورة
+                    </a>
                 </div>
             )}
         </div>
