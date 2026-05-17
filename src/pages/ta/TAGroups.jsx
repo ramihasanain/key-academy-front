@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { API } from '../../config'
-import { HiOutlinePaperClip, HiOutlinePaperAirplane, HiOutlineMicrophone, HiOutlineStop, HiOutlineTrash, HiOutlineNoSymbol, HiOutlineChatBubbleOvalLeftEllipsis, HiOutlinePhoto, HiOutlineArrowDownTray, HiOutlineXMark, HiOutlineEye } from 'react-icons/hi2'
+import { HiOutlinePaperClip, HiOutlinePaperAirplane, HiOutlineMicrophone, HiOutlineStop, HiOutlineTrash, HiOutlineNoSymbol, HiOutlineChatBubbleOvalLeftEllipsis, HiOutlinePhoto, HiOutlineArrowDownTray, HiOutlineXMark, HiOutlineEye, HiOutlineArrowUturnLeft } from 'react-icons/hi2'
 import { TAStudent360 } from './TAStudent360'
 
 export const TAGroups = () => {
@@ -37,6 +37,7 @@ export const TAGroups = () => {
     const [readReceiptPopup, setReadReceiptPopup] = useState(null)
     const [readReceiptData, setReadReceiptData] = useState(null)
     const [readReceiptLoading, setReadReceiptLoading] = useState(false)
+    const [replyingTo, setReplyingTo] = useState(null)
 
     // 1. Fetch available courses on mount
     useEffect(() => {
@@ -358,7 +359,8 @@ export const TAGroups = () => {
             const fd = new FormData()
             fd.append('course', activeCourseId)
             fd.append('group', activeGroupId)
-            if (finalContent) fd.append('content', finalContent)
+            if (messageText.trim()) fd.append('content', messageText.trim())
+            if (replyingTo) fd.append('reply_to_id', replyingTo.id)
 
             if (file) {
                 fd.append('attachment', file)
@@ -370,7 +372,8 @@ export const TAGroups = () => {
             setMessageText('')
             setFile(null)
             setAudioBlob(null)
-
+            setReplyingTo(null)
+            
             const tk = sessionStorage.getItem('spy_token') || localStorage.getItem('access_token');
             await fetch(API + '/api/interactions/group-chat/', {
                 method: 'POST',
@@ -380,12 +383,15 @@ export const TAGroups = () => {
         } else {
             // For text-only messages, use WebSocket for instant delivery
             if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
-                wsRef.current.send(JSON.stringify({
+                const payload = {
                     content: messageText,
-                    is_private: !!privateTarget,
-                    recipient_id: privateTarget ? privateTarget.id : 0
-                }))
+                    is_private: privateTarget !== null,
+                    recipient_id: privateTarget ? privateTarget.id : null,
+                    reply_to_id: replyingTo ? replyingTo.id : null
+                }
+                wsRef.current.send(JSON.stringify(payload))
                 setMessageText('')
+                setReplyingTo(null)
             } else {
                 alert('الاتصال بالخادم مفقود، جاري إعادة المحاولة...')
             }
@@ -534,17 +540,38 @@ export const TAGroups = () => {
                                                 {(m.sender_role !== 'teacher' && m.sender_role !== 'assistant') && (
                                                     <>
                                                         {!privateTarget && (
-                                                            <button onClick={() => setPrivateTarget({ id: m.sender.id, name: m.sender.full_name || m.sender.username })} style={{ background: 'transparent', border: 'none', color: '#10b981', cursor: 'pointer', fontSize: '13px', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '4px' }}><HiOutlineChatBubbleOvalLeftEllipsis size={16} /> رد خاص</button>
+                                                            <button onClick={() => {
+                                                                setPrivateTarget({ id: m.sender.id, name: m.sender.full_name || m.sender.username });
+                                                                setReplyingTo(m);
+                                                            }} style={{ background: 'transparent', border: 'none', color: '#10b981', cursor: 'pointer', fontSize: '13px', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '4px' }}><HiOutlineChatBubbleOvalLeftEllipsis size={16} /> رد خاص</button>
                                                         )}
                                                         <button onClick={() => handleMute(m.sender.id, m.sender.full_name)} style={{ background: 'transparent', border: 'none', color: '#ef4444', cursor: 'pointer', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '4px' }}><HiOutlineNoSymbol size={16} /> كتم مؤقت</button>
                                                     </>
                                                 )}
+                                                <button onClick={() => setReplyingTo(m)} style={{ background: 'transparent', border: 'none', color: 'var(--hq-primary)', cursor: 'pointer', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '4px' }}><HiOutlineArrowUturnLeft size={16} /> رد</button>
                                                 <button onClick={() => handleHide(m.id)} style={{ background: 'transparent', border: 'none', color: '#ef4444', cursor: 'pointer', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '4px' }}><HiOutlineTrash size={16} /> إخفاء</button>
                                             </div>
                                         )}
                                     </div>
+                                    {m.replied_to && (
+                                        <div 
+                                            onClick={() => {
+                                                const msgEl = document.getElementById(`ta-msg-${m.replied_to.id}`);
+                                                if (msgEl) {
+                                                    msgEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                                    const oldBg = msgEl.style.background;
+                                                    msgEl.style.transition = 'background 0.5s ease';
+                                                    msgEl.style.background = 'rgba(131, 42, 150, 0.15)';
+                                                    setTimeout(() => { msgEl.style.background = oldBg }, 1500);
+                                                }
+                                            }}
+                                            style={{ background: 'rgba(0,0,0,0.05)', padding: '8px 12px', borderRadius: '8px', borderRight: '3px solid var(--hq-primary)', marginBottom: '8px', fontSize: '0.85rem', cursor: 'pointer', opacity: 0.9 }}
+                                        >
+                                            <div style={{ color: 'var(--hq-primary)', fontWeight: 'bold', marginBottom: '4px' }}>{m.replied_to.sender_name}</div>
+                                            <div style={{ color: 'var(--hq-text-main)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{m.replied_to.content || (m.replied_to.has_attachment ? 'مرفق 📎' : '')}</div>
+                                        </div>
+                                    )}
                                     {m.content && <div style={{ color: m.is_hidden ? 'var(--hq-text-muted)' : (m.is_private ? '#10b981' : 'var(--hq-text-main)'), lineHeight: '1.5', textDecoration: m.is_hidden ? 'line-through' : 'none', fontWeight: m.is_private ? 'bold' : 'normal' }}>
-                                        {m.is_private && <span>(رسالة خاصة) </span>}
                                         {m.content}
                                     </div>}
                                     {m.attachment && (
@@ -588,7 +615,17 @@ export const TAGroups = () => {
                                 {privateTarget && (
                                     <div style={{ background: 'rgba(16, 185, 129, 0.1)', padding: '8px 15px', borderRadius: '8px', color: '#10b981', fontSize: '13px', display: 'flex', justifyContent: 'space-between' }}>
                                         <span>أنت الآن في وضع الرد الخاص 🕵️ على: <strong>{privateTarget.name}</strong></span>
-                                        <button onClick={() => setPrivateTarget(null)} style={{ background: 'transparent', border: 'none', color: '#10b981', cursor: 'pointer' }}>إلغاء ×</button>
+                                        <button onClick={() => { setPrivateTarget(null); setReplyingTo(null); }} style={{ background: 'transparent', border: 'none', color: '#10b981', cursor: 'pointer' }}>إلغاء ×</button>
+                                    </div>
+                                )}
+                                
+                                {replyingTo && (
+                                    <div style={{ background: 'rgba(131, 42, 150, 0.05)', border: '1px solid rgba(131, 42, 150, 0.2)', padding: '8px 15px', borderRadius: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '13px', borderRight: '4px solid var(--hq-primary)' }}>
+                                        <div style={{ overflow: 'hidden' }}>
+                                            <div style={{ color: 'var(--hq-primary)', fontWeight: 'bold', marginBottom: '2px' }}>الرد على {replyingTo.sender?.full_name || replyingTo.sender?.username}</div>
+                                            <div style={{ color: 'var(--hq-text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{replyingTo.content || (replyingTo.attachment ? 'مرفق 📎' : '')}</div>
+                                        </div>
+                                        <button onClick={() => setReplyingTo(null)} style={{ background: 'transparent', border: 'none', color: '#ef4444', cursor: 'pointer', padding: '4px' }}><HiOutlineXMark size={18} /></button>
                                     </div>
                                 )}
 

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { API } from '../config'
-import { HiOutlineUserGroup, HiOutlineXMark, HiOutlinePaperAirplane, HiOutlinePaperClip, HiOutlineMicrophone, HiOutlineStop, HiOutlinePhoto, HiOutlineArrowDownTray, HiOutlineEye } from 'react-icons/hi2'
+import { HiOutlineUserGroup, HiOutlineXMark, HiOutlinePaperAirplane, HiOutlinePaperClip, HiOutlineMicrophone, HiOutlineStop, HiOutlinePhoto, HiOutlineArrowDownTray, HiOutlineEye, HiOutlineArrowUturnLeft } from 'react-icons/hi2'
 import '../pages/LessonViewer.css' // Reuse the same CSS
 
 const groupChatHistoryCache = new Map()
@@ -46,6 +46,7 @@ const LiveChat = ({ courseId, userData, lessonId = null }) => {
     const [readReceiptPopup, setReadReceiptPopup] = useState(null)
     const [readReceiptData, setReadReceiptData] = useState(null)
     const [readReceiptLoading, setReadReceiptLoading] = useState(false)
+    const [replyingTo, setReplyingTo] = useState(null)
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
@@ -208,6 +209,7 @@ const LiveChat = ({ courseId, userData, lessonId = null }) => {
             fd.append('is_private', chatType === 'private')
             if (lessonId) fd.append('lesson_id', lessonId)
             if (input.trim()) fd.append('content', input.trim())
+            if (replyingTo) fd.append('reply_to_id', replyingTo.id)
 
             if (file) {
                 fd.append('attachment', file)
@@ -219,6 +221,7 @@ const LiveChat = ({ courseId, userData, lessonId = null }) => {
             setInput('')
             setFile(null)
             setAudioBlob(null)
+            setReplyingTo(null)
 
             const tk = localStorage.getItem('access_token')
             await fetch(API + '/api/interactions/group-chat/', {
@@ -229,8 +232,10 @@ const LiveChat = ({ courseId, userData, lessonId = null }) => {
         } else {
             if (!socket) return
             const payload = { content: input, is_private: chatType === 'private', lesson_id: lessonId }
+            if (replyingTo) payload.reply_to_id = replyingTo.id
             socket.send(JSON.stringify(payload))
             setInput('')
+            setReplyingTo(null)
         }
     }
 
@@ -344,55 +349,84 @@ const LiveChat = ({ courseId, userData, lessonId = null }) => {
                                 </div>
                             )}
                             {displayedMessages.map(m => {
-                            const isTeacher = m.sender_role === 'teacher' || m.sender?.role === 'teacher';
-                            const isAssist = !isTeacher && (m.sender_role === 'assistant' || m.sender?.role === 'assistant' || m.is_ta || m.sender?.is_ta);
-                            return (
-                                <div id={`msg-${m.id}`} key={m.id || Math.random()} className={`lv-gc-msg ${isTeacher ? 'prof' : (isAssist ? 'assist' : '')}`} style={{
-                                    display: 'flex', flexDirection: 'column',
-                                    background: isTeacher ? 'rgba(245, 158, 11, 0.08)' : undefined,
-                                    borderColor: isTeacher ? 'rgba(245, 158, 11, 0.3)' : undefined
-                                }}>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-                                        <strong style={{ display: 'flex', alignItems: 'center', gap: '6px', color: isTeacher ? '#b45309' : undefined }}>
-                                            {(isTeacher || isAssist) ? (m.sender?.full_name || m.sender?.first_name || m.sender_name || 'مساعد') : (m.sender?.username || m.sender_username || 'طالب')}
-                                            {isTeacher && <span style={{ background: 'linear-gradient(90deg, #f59e0b, #d97706)', color: 'white', padding: '2px 8px', borderRadius: '12px', fontSize: '11px', fontWeight: 'bold' }}>أستاذ المادة</span>}
-                                            {isAssist && <span style={{ background: '#10b981', color: 'white', padding: '2px 8px', borderRadius: '12px', fontSize: '11px', fontWeight: 'bold' }}>مساعد</span>}
-                                        </strong>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                            {(isTeacher || isAssist) && chatType === 'public' && userData && userData.role !== 'student' && (
-                                                <button 
-                                                    onClick={() => openReadReceipts(m.id)}
-                                                    style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--primary)', padding: '2px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                                                    title="تفاصيل القراءة"
-                                                >
-                                                    <HiOutlineEye size={16} />
-                                                </button>
-                                            )}
-                                            <span style={{ fontSize: '0.75rem', color: (isAssist || isTeacher) ? 'var(--text-muted)' : '#64748b', opacity: 0.8 }}>{new Date(m.created_at).toLocaleTimeString('ar-IQ', { hour: '2-digit', minute: '2-digit' })}</span>
+                                const isTeacher = m.sender_role === 'teacher' || m.sender?.role === 'teacher';
+                                const isAssist = !isTeacher && (m.sender_role === 'assistant' || m.sender?.role === 'assistant' || m.is_ta || m.sender?.is_ta);
+                                const isStaffMessage = isTeacher || isAssist;
+                                return (
+                                    <div id={`msg-${m.id}`} key={m.id || Math.random()} className={`lv-gc-msg ${isTeacher ? 'prof' : (isAssist ? 'assist' : '')}`} style={{
+                                        display: 'flex', flexDirection: 'column',
+                                        background: isTeacher ? 'rgba(245, 158, 11, 0.08)' : undefined,
+                                        borderColor: isTeacher ? 'rgba(245, 158, 11, 0.3)' : undefined
+                                    }}>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                                            <strong style={{ display: 'flex', alignItems: 'center', gap: '6px', color: isTeacher ? '#b45309' : undefined }}>
+                                                {isStaffMessage ? (m.sender?.full_name || m.sender?.first_name || m.sender_name || 'مساعد') : (m.sender?.username || m.sender_username || 'طالب')}
+                                                {isTeacher && <span style={{ background: 'linear-gradient(90deg, #f59e0b, #d97706)', color: 'white', padding: '2px 8px', borderRadius: '12px', fontSize: '11px', fontWeight: 'bold' }}>أستاذ المادة</span>}
+                                                {isAssist && <span style={{ background: '#10b981', color: 'white', padding: '2px 8px', borderRadius: '12px', fontSize: '11px', fontWeight: 'bold' }}>مساعد</span>}
+                                            </strong>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                {chatType === 'public' && (
+                                                    <button onClick={() => setReplyingTo(m)} style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '2px' }} title="رد">
+                                                        <HiOutlineArrowUturnLeft size={14} />
+                                                    </button>
+                                                )}
+                                                {isStaffMessage && chatType === 'public' && userData && userData.role !== 'student' && (
+                                                    <button 
+                                                        onClick={() => openReadReceipts(m.id)}
+                                                        style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--primary)', padding: '2px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                                                        title="تفاصيل القراءة"
+                                                    >
+                                                        <HiOutlineEye size={16} />
+                                                    </button>
+                                                )}
+                                                <span style={{ fontSize: '0.75rem', color: isStaffMessage ? 'var(--text-muted)' : '#64748b', opacity: 0.8 }}>{new Date(m.created_at).toLocaleTimeString('ar-IQ', { hour: '2-digit', minute: '2-digit' })}</span>
+                                            </div>
                                         </div>
-                                    </div>
-                                    <span>{m.content}</span>
-                                    {m.attachment && (
-                                        <div style={{ marginTop: '10px' }}>
-                                            {m.attachment.match(/\.(jpeg|jpg|gif|png|webp)(\?|$)/i) ? (
-                                                <div style={{ position: 'relative', display: 'inline-block' }}>
-                                                    <div onClick={() => setFullScreenImage(m.attachment)} style={{ display: 'block', cursor: 'zoom-in' }}>
-                                                        <img src={m.attachment} alt="مرفق" style={{ maxWidth: '100%', borderRadius: '8px', maxHeight: '250px', border: '1px solid var(--border-glass)', display: 'block' }} />
+                                        
+                                        {m.replied_to && (
+                                            <div 
+                                                onClick={() => {
+                                                    const msgEl = document.getElementById(`msg-${m.replied_to.id}`);
+                                                    if (msgEl) {
+                                                        msgEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                                        const oldBg = msgEl.style.background;
+                                                        msgEl.style.transition = 'background 0.5s ease';
+                                                        msgEl.style.background = 'rgba(131, 42, 150, 0.15)';
+                                                        setTimeout(() => { msgEl.style.background = oldBg }, 1500);
+                                                    }
+                                                }}
+                                                style={{ background: 'rgba(0,0,0,0.05)', padding: '6px 10px', borderRadius: '8px', borderRight: '3px solid var(--primary)', marginBottom: '8px', fontSize: '0.85rem', cursor: 'pointer', opacity: 0.8 }}
+                                            >
+                                                <div style={{ color: 'var(--primary)', fontWeight: 'bold', marginBottom: '2px' }}>{m.replied_to.sender_name}</div>
+                                                <div style={{ color: 'var(--text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{m.replied_to.content || (m.replied_to.has_attachment ? 'مرفق 📎' : '')}</div>
+                                            </div>
+                                        )}
+                                        
+                                        {m.content && <div style={{ color: isTeacher ? '#92400e' : (isAssist ? '#065f46' : 'var(--text-primary)'), lineHeight: '1.5', whiteSpace: 'pre-wrap' }}>
+                                            {m.content}
+                                        </div>}
+                                        
+                                        {m.attachment && (
+                                            <div style={{ marginTop: '10px' }}>
+                                                {m.attachment.match(/\.(jpeg|jpg|gif|png|webp)(\?|$)/i) ? (
+                                                    <div style={{ position: 'relative', display: 'inline-block' }}>
+                                                        <div onClick={() => setFullScreenImage(m.attachment)} style={{ display: 'block', cursor: 'zoom-in' }}>
+                                                            <img src={m.attachment} alt="مرفق" style={{ maxWidth: '100%', borderRadius: '8px', maxHeight: '250px', border: '1px solid var(--border-glass)', display: 'block' }} />
+                                                        </div>
                                                     </div>
-                                                </div>
-                                            ) : m.attachment.match(/\.(webm|mp3|ogg|wav|mp4)(\?|$)/i) || m.attachment.includes('voice-message') ? (
-                                                <audio controls src={m.attachment} style={{ height: '40px', width: '100%', maxWidth: '250px' }} />
-                                            ) : (
-                                                <a href={m.attachment} download target="_blank" rel="noreferrer" style={{ color: 'var(--primary)', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(0,0,0,0.05)', padding: '8px 12px', borderRadius: '8px', width: 'fit-content', fontWeight: 'bold' }}>
-                                                    <HiOutlineArrowDownTray size={18} />
-                                                    تحميل المُرفق
-                                                </a>
-                                            )}
-                                        </div>
-                                    )}
-                                </div>
-                            )
-                        })}
+                                                ) : m.attachment.match(/\.(webm|mp3|ogg|wav|mp4)(\?|$)/i) || m.attachment.includes('voice-message') ? (
+                                                    <audio controls src={m.attachment} style={{ height: '40px', width: '100%', maxWidth: '250px' }} />
+                                                ) : (
+                                                    <a href={m.attachment} download target="_blank" rel="noreferrer" style={{ color: 'var(--primary)', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(0,0,0,0.05)', padding: '8px 12px', borderRadius: '8px', width: 'fit-content', fontWeight: 'bold' }}>
+                                                        <HiOutlineArrowDownTray size={18} />
+                                                        تحميل المُرفق
+                                                    </a>
+                                                )}
+                                            </div>
+                                        )}
+                                    </div>
+                                )
+                            })}
                             <div ref={messagesEndRef} />
                         </>
                 }
@@ -404,6 +438,15 @@ const LiveChat = ({ courseId, userData, lessonId = null }) => {
                 </div>
             ) : (
                 <div style={{ padding: '15px', borderTop: '1px solid #e2e8f0', background: '#f8fafc', flexShrink: 0, display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                    {replyingTo && (
+                        <div style={{ background: 'rgba(131, 42, 150, 0.05)', border: '1px solid rgba(131, 42, 150, 0.2)', padding: '8px 12px', borderRadius: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '13px', borderRight: '4px solid var(--primary)' }}>
+                            <div style={{ overflow: 'hidden' }}>
+                                <div style={{ color: 'var(--primary)', fontWeight: 'bold', marginBottom: '2px' }}>الرد على {replyingTo.sender?.full_name || replyingTo.sender?.username}</div>
+                                <div style={{ color: 'var(--text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{replyingTo.content || (replyingTo.attachment ? 'مرفق 📎' : '')}</div>
+                            </div>
+                            <button onClick={() => setReplyingTo(null)} style={{ background: 'transparent', border: 'none', color: '#ef4444', cursor: 'pointer', padding: '4px' }}><HiOutlineXMark size={18} /></button>
+                        </div>
+                    )}
                     {(file || audioBlob) && (
                         <div style={{ background: 'rgba(16, 185, 129, 0.1)', border: '1px solid #10b981', padding: '8px 12px', borderRadius: '8px', color: '#10b981', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '13px' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 'bold' }}>
