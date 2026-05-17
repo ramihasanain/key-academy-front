@@ -41,6 +41,7 @@ const LiveChat = ({ courseId, userData, lessonId = null }) => {
     const [offset, setOffset] = useState(0)
     const [hasMore, setHasMore] = useState(true)
     const markedReadRef = useRef(new Set())
+    const isHistoryLoadRef = useRef(false)
 
     const [readReceiptPopup, setReadReceiptPopup] = useState(null)
     const [readReceiptData, setReadReceiptData] = useState(null)
@@ -51,7 +52,10 @@ const LiveChat = ({ courseId, userData, lessonId = null }) => {
     }
 
     useEffect(() => {
-        scrollToBottom()
+        if (!isHistoryLoadRef.current) {
+            scrollToBottom()
+        }
+        isHistoryLoadRef.current = false
     }, [messages])
 
     // Load initial history when chatType changes
@@ -162,14 +166,26 @@ const LiveChat = ({ courseId, userData, lessonId = null }) => {
         const newOffset = offset + 50;
         const tk = localStorage.getItem('access_token');
         try {
+            const container = document.querySelector('.lv-gc-msgs');
+            const oldScrollHeight = container ? container.scrollHeight : 0;
+
             const res = await fetch(`${API}/api/interactions/group-chat/?course=${courseId}&type=all&offset=${newOffset}&limit=50`, {
                 headers: { 'Authorization': `Bearer ${tk}` }
             });
             if (res.ok) {
                 const data = await res.json();
                 if (data.length < 50) setHasMore(false);
+                
+                isHistoryLoadRef.current = true;
                 setMessages(prev => [...data, ...prev]);
                 setOffset(newOffset);
+
+                setTimeout(() => {
+                    const newContainer = document.querySelector('.lv-gc-msgs');
+                    if (newContainer && oldScrollHeight > 0) {
+                        newContainer.scrollTop = newContainer.scrollHeight - oldScrollHeight;
+                    }
+                }, 50);
             }
         } catch (err) {
             console.error('Failed to load more messages', err);
@@ -296,11 +312,22 @@ const LiveChat = ({ courseId, userData, lessonId = null }) => {
             </div>
 
             {latestPinned && chatType === 'public' && (
-                <div style={{ margin: '10px 15px 0', padding: '10px 15px', background: 'linear-gradient(90deg, rgba(236, 54, 101, 0.1), rgba(131, 42, 150, 0.05))', border: '1px solid var(--border-glow)', borderRadius: '12px', display: 'flex', alignItems: 'flex-start', gap: '10px', flexShrink: 0, boxShadow: '0 4px 15px rgba(131, 42, 150, 0.05)' }}>
+                <div 
+                    onClick={() => {
+                        const msgEl = document.getElementById(`msg-${latestPinned.id}`);
+                        if (msgEl) {
+                            msgEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            const oldBg = msgEl.style.background;
+                            msgEl.style.transition = 'background 0.5s ease';
+                            msgEl.style.background = 'rgba(236, 54, 101, 0.15)';
+                            setTimeout(() => { msgEl.style.background = oldBg }, 1500);
+                        }
+                    }}
+                    style={{ margin: '10px 15px 0', padding: '10px 15px', background: 'linear-gradient(90deg, rgba(236, 54, 101, 0.1), rgba(131, 42, 150, 0.05))', border: '1px solid var(--border-glow)', borderRadius: '12px', display: 'flex', alignItems: 'flex-start', gap: '10px', flexShrink: 0, boxShadow: '0 4px 15px rgba(131, 42, 150, 0.05)', cursor: 'pointer' }}>
                     <div style={{ color: 'var(--pink)', marginTop: '2px' }}>📌</div>
                     <div style={{ flex: 1, overflow: 'hidden' }}>
                         <div style={{ fontSize: '0.8rem', fontWeight: 'bold', color: 'var(--purple)', marginBottom: '4px' }}>رسالة مثبتة من {latestPinned.sender?.full_name || latestPinned.sender?.username || 'الإدارة'}</div>
-                        <div style={{ fontSize: '0.9rem', color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{latestPinned.content}</div>
+                        <div style={{ fontSize: '0.9rem', color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{latestPinned.content || (latestPinned.attachment ? 'مرفق 📎' : 'رسالة')}</div>
                     </div>
                 </div>
             )}
@@ -320,7 +347,7 @@ const LiveChat = ({ courseId, userData, lessonId = null }) => {
                             const isTeacher = m.sender_role === 'teacher' || m.sender?.role === 'teacher';
                             const isAssist = !isTeacher && (m.sender_role === 'assistant' || m.sender?.role === 'assistant' || m.is_ta || m.sender?.is_ta);
                             return (
-                                <div key={m.id || Math.random()} className={`lv-gc-msg ${isTeacher ? 'prof' : (isAssist ? 'assist' : '')}`} style={{
+                                <div id={`msg-${m.id}`} key={m.id || Math.random()} className={`lv-gc-msg ${isTeacher ? 'prof' : (isAssist ? 'assist' : '')}`} style={{
                                     display: 'flex', flexDirection: 'column',
                                     background: isTeacher ? 'rgba(245, 158, 11, 0.08)' : undefined,
                                     borderColor: isTeacher ? 'rgba(245, 158, 11, 0.3)' : undefined

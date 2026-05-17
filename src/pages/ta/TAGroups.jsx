@@ -18,6 +18,7 @@ export const TAGroups = () => {
     const [hasMore, setHasMore] = useState(true)
     const fileInputRef = useRef(null)
     const endOfMessagesRef = useRef(null)
+    const isHistoryLoadRef = useRef(false)
 
     // Audio Recorder
     const [isRecording, setIsRecording] = useState(false)
@@ -149,14 +150,26 @@ export const TAGroups = () => {
         const newOffset = offset + 50;
         const tk = sessionStorage.getItem('spy_token') || localStorage.getItem('access_token');
         try {
+            const container = document.getElementById('ta-chat-msgs');
+            const oldScrollHeight = container ? container.scrollHeight : 0;
+
             const res = await fetch(`${API}/api/interactions/group-chat/?course=${activeCourseId}&group=${activeGroupId}&type=all&offset=${newOffset}&limit=50`, {
                 headers: { 'Authorization': `Bearer ${tk}` }
             });
             if (res.ok) {
                 const data = await res.json();
                 if (data.length < 50) setHasMore(false);
+                
+                isHistoryLoadRef.current = true;
                 setMessages(prev => [...data, ...prev]);
                 setOffset(newOffset);
+
+                setTimeout(() => {
+                    const newContainer = document.getElementById('ta-chat-msgs');
+                    if (newContainer && oldScrollHeight > 0) {
+                        newContainer.scrollTop = newContainer.scrollHeight - oldScrollHeight;
+                    }
+                }, 50);
             }
         } catch (err) {
             console.error('Failed to load more messages', err);
@@ -175,7 +188,10 @@ export const TAGroups = () => {
 
     // Scroll to bottom when messages update
     useEffect(() => {
-        endOfMessagesRef.current?.scrollIntoView({ behavior: 'smooth' })
+        if (!isHistoryLoadRef.current) {
+            endOfMessagesRef.current?.scrollIntoView({ behavior: 'smooth' })
+        }
+        isHistoryLoadRef.current = false
     }, [messages])
 
     const handleHide = (msgId) => {
@@ -413,7 +429,7 @@ export const TAGroups = () => {
                             )}
                         </div>
 
-                        <div style={{ flex: 1, overflowY: 'auto', padding: '20px', display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                        <div id="ta-chat-msgs" style={{ flex: 1, overflowY: 'auto', padding: '20px', display: 'flex', flexDirection: 'column', gap: '15px' }}>
                             {hasMore && (
                                 <div style={{ textAlign: 'center', marginBottom: '10px' }}>
                                     <button onClick={loadMoreMessages} style={{ background: 'var(--hq-surface-light, rgba(255,255,255,0.05))', border: '1px solid var(--hq-border)', borderRadius: '20px', padding: '6px 16px', color: 'var(--hq-text-muted)', cursor: 'pointer', fontSize: '0.9rem', transition: 'all 0.2s' }} onMouseOver={e => e.target.style.color = 'var(--hq-primary)'} onMouseOut={e => e.target.style.color = 'var(--hq-text-muted)'}>
@@ -433,16 +449,27 @@ export const TAGroups = () => {
                                 return (
                                     <>
                                         {latestPinned && !privateTarget && (
-                                            <div style={{ padding: '10px 15px', background: 'rgba(236, 54, 101, 0.05)', border: '1px solid rgba(236, 54, 101, 0.2)', borderRadius: '12px', display: 'flex', alignItems: 'flex-start', gap: '10px', flexShrink: 0, marginBottom: '10px' }}>
+                                            <div 
+                                                onClick={() => {
+                                                    const msgEl = document.getElementById(`ta-msg-${latestPinned.id}`);
+                                                    if (msgEl) {
+                                                        msgEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                                        const oldBg = msgEl.style.background;
+                                                        msgEl.style.transition = 'background 0.5s ease';
+                                                        msgEl.style.background = 'rgba(236, 54, 101, 0.15)';
+                                                        setTimeout(() => { msgEl.style.background = oldBg }, 1500);
+                                                    }
+                                                }}
+                                                style={{ padding: '10px 15px', background: 'rgba(236, 54, 101, 0.05)', border: '1px solid rgba(236, 54, 101, 0.2)', borderRadius: '12px', display: 'flex', alignItems: 'flex-start', gap: '10px', flexShrink: 0, marginBottom: '10px', cursor: 'pointer' }}>
                                                 <div style={{ color: '#ec3665', marginTop: '2px' }}>📌</div>
                                                 <div style={{ flex: 1, overflow: 'hidden' }}>
                                                     <div style={{ fontSize: '0.8rem', fontWeight: 'bold', color: '#ec3665', marginBottom: '4px' }}>رسالة مثبتة من {latestPinned.sender?.full_name || latestPinned.sender?.username || 'الإدارة'}</div>
-                                                    <div style={{ fontSize: '0.9rem', color: 'var(--hq-text-main)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{latestPinned.content}</div>
+                                                    <div style={{ fontSize: '0.9rem', color: 'var(--hq-text-main)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{latestPinned.content || (latestPinned.attachment ? 'مرفق 📎' : 'رسالة')}</div>
                                                 </div>
                                             </div>
                                         )}
                                         {dispMsgs.map(m => (
-                                <div key={m.id} style={{
+                                <div id={`ta-msg-${m.id}`} key={m.id} style={{
                                     background: m.is_hidden ? 'rgba(239, 68, 68, 0.05)' : (m.sender_role === 'teacher' ? 'rgba(245, 158, 11, 0.08)' : (m.sender_role === 'assistant' ? 'rgba(16, 185, 129, 0.08)' : 'rgba(0,0,0,0.02)')),
                                     padding: '15px',
                                     borderRadius: '12px',
