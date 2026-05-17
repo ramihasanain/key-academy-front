@@ -132,16 +132,29 @@ export const TAQA = () => {
         })
     }
 
-    const handleMute = (studentId, studentName) => {
+    const handleMute = (studentId, studentName, mutedUntil) => {
+        const isMuted = mutedUntil && new Date(mutedUntil) > new Date();
+
+        let options = [];
+        if (isMuted) {
+            options = [
+                { label: 'فك الحظر (unmute)', value: 'unmute' },
+                { label: 'تمديد ليوم واحد (24h)', value: '24h' },
+                { label: 'تمديد لأسبوع (week)', value: 'week' },
+                { label: 'تمديد للأبد (forever)', value: 'forever' }
+            ];
+        } else {
+            options = [
+                { label: 'ليوم واحد (24h)', value: '24h' },
+                { label: 'لأسبوع (week)', value: 'week' },
+                { label: 'للأبد (forever)', value: 'forever' }
+            ];
+        }
+
         setDialog({
             type: 'prompt',
             message: `أدخل مدة تقييد الطالب [${studentName}]:`,
-            options: [
-                { label: 'ليوم واحد (24h)', value: '24h' },
-                { label: 'لأسبوع (week)', value: 'week' },
-                { label: 'للأبد (forever)', value: 'forever' },
-                { label: 'فك الحظر (unmute)', value: 'unmute' }
-            ],
+            options: options,
             onConfirm: async (val) => {
                 if (!val) { setDialog(null); return; }
 
@@ -303,7 +316,7 @@ export const TAQA = () => {
                                 <button className="lv-post-reply-toggle" style={{ margin: 0 }}><HiOutlineChatBubbleLeftRight /> {p.comments?.filter(c => !c.is_hidden)?.length || 0} تعليقات</button>
                                 {!sessionStorage.getItem('spy_token') && (
                                     <>
-                                        <button onClick={() => handleMute(p.student.id, p.student.full_name)} style={{ background: 'transparent', border: 'none', color: '#ef4444', cursor: 'pointer', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '4px', fontWeight: 'bold' }}>🚫 كتم</button>
+                                        <button onClick={() => handleMute(p.student.id, p.student.full_name, p.student.muted_until)} style={{ background: 'transparent', border: 'none', color: '#ef4444', cursor: 'pointer', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '4px', fontWeight: 'bold' }}>🚫 كتم</button>
                                         <button onClick={() => handleHide('qapost', p.id, p.is_hidden)} style={{ background: 'transparent', border: 'none', color: p.is_hidden ? '#10b981' : '#ef4444', cursor: 'pointer', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '4px', fontWeight: 'bold' }}>{p.is_hidden ? '🔙 استرجاع' : '🗑️ حذف'}</button>
                                         <button onClick={() => handleResolve(p.id, p.is_resolved)} style={{ background: 'transparent', border: 'none', color: p.is_resolved ? '#10b981' : '#f59e0b', cursor: 'pointer', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '4px', fontWeight: 'bold' }}>{p.is_resolved ? '🔙 لم تحل' : '✨ حُلّت'}</button>
                                     </>
@@ -428,7 +441,7 @@ export const TAQA = () => {
 
                         {!sessionStorage.getItem('spy_token') && (
                             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '20px', paddingBottom: '16px', borderBottom: '1px solid var(--hq-border)' }}>
-                                <button onClick={() => handleMute(p.student.id, p.student.full_name)} style={{ background: 'var(--hq-bg)', border: '1px solid var(--hq-border)', color: '#ef4444', cursor: 'pointer', fontSize: '12px', padding: '6px 12px', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '4px', fontWeight: 'bold', transition: '0.2s' }}>🚫 كتم</button>
+                                <button onClick={() => handleMute(p.student.id, p.student.full_name, p.student.muted_until)} style={{ background: 'var(--hq-bg)', border: '1px solid var(--hq-border)', color: '#ef4444', cursor: 'pointer', fontSize: '12px', padding: '6px 12px', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '4px', fontWeight: 'bold', transition: '0.2s' }}>🚫 كتم</button>
                                 <button onClick={() => handleHide('qapost', p.id, p.is_hidden)} style={{ background: 'var(--hq-bg)', border: '1px solid var(--hq-border)', color: p.is_hidden ? '#10b981' : '#ef4444', cursor: 'pointer', fontSize: '12px', padding: '6px 12px', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '4px', fontWeight: 'bold', transition: '0.2s' }}>{p.is_hidden ? '🔙 استرجاع' : '🗑️ حذف'}</button>
                                 <button onClick={() => handleResolve(p.id, p.is_resolved)} style={{ background: 'var(--hq-bg)', border: '1px solid var(--hq-border)', color: p.is_resolved ? '#10b981' : '#f59e0b', cursor: 'pointer', fontSize: '12px', padding: '6px 12px', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '4px', fontWeight: 'bold', transition: '0.2s' }}>{p.is_resolved ? '🔙 لم تحل' : '✨ حُلّت'}</button>
                             </div>
