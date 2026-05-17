@@ -320,7 +320,9 @@ const LiveChat = ({ courseId, userData, lessonId = null }) => {
                                 </div>
                             )
                         })}
-                <div ref={messagesEndRef} />
+                            <div ref={messagesEndRef} />
+                        </>
+                }
             </div>
 
             {isMuted && chatType === 'public' ? (
