@@ -87,13 +87,19 @@ export const TAGroups = () => {
 
         ws.onmessage = (e) => {
             const data = JSON.parse(e.data);
-            if (data.message) {
+            
+            if (data.type === 'messages_read') {
+                setMessages(prev => prev.map(m => {
+                    if (data.message_ids.includes(m.id)) {
+                        return { ...m, read_by_student: data.read_by_student };
+                    }
+                    return m;
+                }));
+            } else if (data.message) {
                 setMessages(prev => {
                     if (prev.find(m => m.id === data.message.id)) return prev;
                     return [...prev, data.message];
                 });
-
-
 
                 // Update inbox unread counts for private messages
                 if (data.message.is_private && data.message.sender) {

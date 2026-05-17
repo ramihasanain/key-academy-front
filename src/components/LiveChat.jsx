@@ -88,7 +88,14 @@ const LiveChat = ({ courseId, userData, lessonId = null }) => {
 
         ws.onmessage = (e) => {
             const data = JSON.parse(e.data)
-            if (data.message) {
+            if (data.type === 'messages_read') {
+                setMessages(prev => prev.map(m => {
+                    if (data.message_ids.includes(m.id)) {
+                        return { ...m, read_by_student: data.read_by_student }
+                    }
+                    return m
+                }))
+            } else if (data.message) {
                 setMessages(prev => {
                     return [...prev.filter(m => m.id !== data.message.id), data.message]
                 })
