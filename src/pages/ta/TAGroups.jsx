@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { API } from '../../config'
-import { HiOutlinePaperClip, HiOutlinePaperAirplane, HiOutlineMicrophone, HiOutlineStop, HiOutlineTrash, HiOutlineNoSymbol, HiOutlineChatBubbleOvalLeftEllipsis, HiOutlinePhoto, HiOutlineArrowDownTray, HiOutlineXMark } from 'react-icons/hi2'
+import { HiOutlinePaperClip, HiOutlinePaperAirplane, HiOutlineMicrophone, HiOutlineStop, HiOutlineTrash, HiOutlineNoSymbol, HiOutlineChatBubbleOvalLeftEllipsis, HiOutlinePhoto, HiOutlineArrowDownTray, HiOutlineXMark, HiOutlineEye } from 'react-icons/hi2'
 import { TAStudent360 } from './TAStudent360'
 
 export const TAGroups = () => {
@@ -32,6 +32,11 @@ export const TAGroups = () => {
 
     // WS reference
     const wsRef = useRef(null)
+
+    // Read Receipts Popup
+    const [readReceiptPopup, setReadReceiptPopup] = useState(null)
+    const [readReceiptData, setReadReceiptData] = useState(null)
+    const [readReceiptLoading, setReadReceiptLoading] = useState(false)
 
     // 1. Fetch available courses on mount
     useEffect(() => {
@@ -142,6 +147,26 @@ export const TAGroups = () => {
             const data = await res.json()
             if (data.length < 50) setHasMore(false)
             setMessages(data)
+        }
+    }
+
+    const openReadReceipts = async (msgId) => {
+        setReadReceiptPopup(msgId)
+        setReadReceiptLoading(true)
+        setReadReceiptData(null)
+        try {
+            const tk = sessionStorage.getItem('spy_token') || localStorage.getItem('access_token');
+            const res = await fetch(`${API}/api/interactions/group-chat/${msgId}/read-receipts/`, {
+                headers: { 'Authorization': `Bearer ${tk}` }
+            })
+            if (res.ok) {
+                const data = await res.json()
+                setReadReceiptData(data)
+            }
+        } catch (e) {
+            console.error(e)
+        } finally {
+            setReadReceiptLoading(false)
         }
     }
 
@@ -368,7 +393,7 @@ export const TAGroups = () => {
     }
 
     return (
-        <div style={{ display: 'flex', height: '80vh', gap: '20px' }}>
+        <div style={{ display: 'flex', height: 'calc(100vh - 100px)', gap: '20px' }}>
             {/* Left Sidebar: Select Course & Group */}
             <div style={{ width: '250px', background: 'var(--hq-surface)', border: '1px solid var(--hq-border)', borderRadius: '12px', padding: '15px', overflowY: 'auto' }}>
                 <h3 style={{ color: 'var(--hq-primary)', margin: '0 0 20px 0', fontSize: '16px' }}>قائمة الدردشة</h3>
@@ -498,12 +523,19 @@ export const TAGroups = () => {
                                         </div>
                                         {(!m.is_hidden && !sessionStorage.getItem('spy_token')) && (
                                             <div style={{ display: 'flex', gap: '10px', marginRight: '20px' }}>
+                                                {(!privateTarget && (m.sender_role === 'teacher' || m.sender_role === 'assistant')) && (
+                                                    <button onClick={() => openReadReceipts(m.id)} style={{ background: 'transparent', border: 'none', color: '#10b981', cursor: 'pointer', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '4px' }} title="تفاصيل القراءة">
+                                                        <HiOutlineEye size={16} /> المشاهدات
+                                                    </button>
+                                                )}
                                                 {(!privateTarget) && (
                                                     <button onClick={() => handlePin(m.id)} style={{ background: 'transparent', border: 'none', color: m.is_pinned ? '#ec3665' : 'var(--hq-text-muted)', cursor: 'pointer', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '4px' }}>📌 {m.is_pinned ? 'إلغاء التثبيت' : 'تثبيت'}</button>
                                                 )}
                                                 {(m.sender_role !== 'teacher' && m.sender_role !== 'assistant') && (
                                                     <>
-                                                        <button onClick={() => setPrivateTarget({ id: m.sender.id, name: m.sender.full_name || m.sender.username })} style={{ background: 'transparent', border: 'none', color: '#10b981', cursor: 'pointer', fontSize: '13px', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '4px' }}><HiOutlineChatBubbleOvalLeftEllipsis size={16} /> رد خاص</button>
+                                                        {!privateTarget && (
+                                                            <button onClick={() => setPrivateTarget({ id: m.sender.id, name: m.sender.full_name || m.sender.username })} style={{ background: 'transparent', border: 'none', color: '#10b981', cursor: 'pointer', fontSize: '13px', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '4px' }}><HiOutlineChatBubbleOvalLeftEllipsis size={16} /> رد خاص</button>
+                                                        )}
                                                         <button onClick={() => handleMute(m.sender.id, m.sender.full_name)} style={{ background: 'transparent', border: 'none', color: '#ef4444', cursor: 'pointer', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '4px' }}><HiOutlineNoSymbol size={16} /> كتم مؤقت</button>
                                                     </>
                                                 )}
@@ -719,6 +751,72 @@ export const TAGroups = () => {
                         <HiOutlineArrowDownTray size={22} />
                         تنزيل الصورة
                     </a>
+                </div>
+            )}
+
+            {/* Read Receipts Popup */}
+            {readReceiptPopup && (
+                <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(15, 23, 42, 0.6)', backdropFilter: 'blur(4px)', zIndex: 99999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+                    <div style={{ background: 'var(--hq-surface)', width: '100%', maxWidth: '500px', borderRadius: '16px', overflow: 'hidden', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)', display: 'flex', flexDirection: 'column', maxHeight: '80vh' }}>
+                        <div style={{ padding: '20px', borderBottom: '1px solid var(--hq-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--hq-surface)' }}>
+                            <h3 style={{ margin: 0, color: 'var(--hq-text-main)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <HiOutlineEye color="var(--hq-primary)" /> تفاصيل مشاهدة الرسالة
+                            </h3>
+                            <button onClick={() => setReadReceiptPopup(null)} style={{ background: 'transparent', border: 'none', color: 'var(--hq-text-muted)', cursor: 'pointer', display: 'flex' }}>
+                                <HiOutlineXMark size={24} />
+                            </button>
+                        </div>
+                        <div style={{ padding: '20px', overflowY: 'auto', flex: 1 }}>
+                            {readReceiptLoading ? (
+                                <p style={{ textAlign: 'center', color: 'var(--hq-text-muted)', padding: '20px' }}>جاري تحميل البيانات...</p>
+                            ) : readReceiptData ? (
+                                <div style={{ display: 'flex', gap: '20px', flexDirection: 'column' }}>
+                                    <div>
+                                        <h4 style={{ margin: '0 0 10px 0', color: '#10b981', display: 'flex', justifyContent: 'space-between' }}>
+                                            <span>👀 شاهدوا الرسالة</span>
+                                            <span style={{ background: 'rgba(16, 185, 129, 0.1)', padding: '2px 8px', borderRadius: '12px', fontSize: '0.8rem' }}>{readReceiptData.read_by.length}</span>
+                                        </h4>
+                                        <div style={{ background: 'var(--hq-primary-bg)', borderRadius: '12px', border: '1px solid var(--hq-border)', padding: '10px', maxHeight: '200px', overflowY: 'auto' }}>
+                                            {readReceiptData.read_by.length === 0 ? (
+                                                <p style={{ margin: 0, color: 'var(--hq-text-muted)', textAlign: 'center', fontSize: '0.9rem' }}>لم يقم أحد برؤية الرسالة بعد</p>
+                                            ) : (
+                                                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                                    {readReceiptData.read_by.map(s => (
+                                                        <div key={s.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px', background: 'var(--hq-surface)', borderRadius: '8px' }}>
+                                                            <strong style={{ fontSize: '0.9rem', color: 'var(--hq-text-main)' }}>{s.name}</strong>
+                                                            <span style={{ fontSize: '0.8rem', color: 'var(--hq-text-muted)' }}>@{s.username}</span>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <h4 style={{ margin: '0 0 10px 0', color: '#ef4444', display: 'flex', justifyContent: 'space-between' }}>
+                                            <span>🙈 لم يشاهدوا الرسالة</span>
+                                            <span style={{ background: 'rgba(239, 68, 68, 0.1)', padding: '2px 8px', borderRadius: '12px', fontSize: '0.8rem' }}>{readReceiptData.unread_by.length}</span>
+                                        </h4>
+                                        <div style={{ background: 'var(--hq-primary-bg)', borderRadius: '12px', border: '1px solid var(--hq-border)', padding: '10px', maxHeight: '200px', overflowY: 'auto' }}>
+                                            {readReceiptData.unread_by.length === 0 ? (
+                                                <p style={{ margin: 0, color: 'var(--hq-text-muted)', textAlign: 'center', fontSize: '0.9rem' }}>الجميع شاهد الرسالة!</p>
+                                            ) : (
+                                                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                                    {readReceiptData.unread_by.map(s => (
+                                                        <div key={s.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px', background: 'var(--hq-surface)', borderRadius: '8px' }}>
+                                                            <strong style={{ fontSize: '0.9rem', color: 'var(--hq-text-main)' }}>{s.name}</strong>
+                                                            <span style={{ fontSize: '0.8rem', color: 'var(--hq-text-muted)' }}>@{s.username}</span>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+                            ) : (
+                                <p style={{ textAlign: 'center', color: '#ef4444' }}>حدث خطأ أثناء تحميل البيانات.</p>
+                            )}
+                        </div>
+                    </div>
                 </div>
             )}
         </div>
