@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { API } from '../config'
-import { HiOutlineUserGroup, HiOutlineXMark, HiOutlinePaperAirplane, HiOutlinePaperClip, HiOutlineMicrophone, HiOutlineStop, HiOutlinePhoto, HiOutlineArrowDownTray } from 'react-icons/hi2'
+import { HiOutlineUserGroup, HiOutlineXMark, HiOutlinePaperAirplane, HiOutlinePaperClip, HiOutlineMicrophone, HiOutlineStop, HiOutlinePhoto, HiOutlineArrowDownTray, HiOutlineEye } from 'react-icons/hi2'
 import '../pages/LessonViewer.css' // Reuse the same CSS
 
 const groupChatHistoryCache = new Map()
@@ -40,6 +40,11 @@ const LiveChat = ({ courseId, userData, lessonId = null }) => {
     const chatTypeRef = useRef(chatType)
     const [offset, setOffset] = useState(0)
     const [hasMore, setHasMore] = useState(true)
+    const markedReadRef = useRef(new Set())
+
+    const [readReceiptPopup, setReadReceiptPopup] = useState(null)
+    const [readReceiptData, setReadReceiptData] = useState(null)
+    const [readReceiptLoading, setReadReceiptLoading] = useState(false)
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
@@ -215,18 +220,48 @@ const LiveChat = ({ courseId, userData, lessonId = null }) => {
 
     // Mark as read logic
     useEffect(() => {
+        let unreadIds = []
         if (chatType === 'private') {
-            const unreadMessages = displayedMessages.filter(m => (m.sender_role === 'teacher' || m.sender_role === 'assistant') && !m.is_read && !m.read_by_student);
-            if (unreadMessages.length > 0) {
-                const tk = localStorage.getItem('access_token')
-                fetch(API + '/api/interactions/group-chat/mark-read/', {
-                    method: 'POST',
-                    headers: { 'Authorization': `Bearer ${tk}`, 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ message_ids: unreadMessages.map(m => m.id) })
-                }).catch(() => {}) // Ignore errors if endpoint doesn't exist
-            }
+            const unreadPrivate = displayedMessages.filter(m => (m.sender_role === 'teacher' || m.sender_role === 'assistant') && !m.is_read && !m.read_by_student);
+            unreadIds = unreadPrivate.map(m => m.id);
+        } else if (chatType === 'public' && userData?.role === 'student') {
+            const unreadPublic = displayedMessages.filter(m => {
+                const isStaff = m.sender_role === 'teacher' || m.sender_role === 'assistant' || m.is_ta || m.sender?.role === 'teacher' || m.sender?.role === 'assistant' || m.sender?.is_ta;
+                return isStaff && !markedReadRef.current.has(m.id);
+            });
+            unreadIds = unreadPublic.map(m => m.id);
+            unreadIds.forEach(id => markedReadRef.current.add(id));
         }
-    }, [messages, chatType])
+
+        if (unreadIds.length > 0) {
+            const tk = localStorage.getItem('access_token')
+            fetch(API + '/api/interactions/group-chat/mark-read/', {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${tk}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message_ids: unreadIds })
+            }).catch(() => {}) // Ignore errors if endpoint doesn't exist
+        }
+    }, [messages, chatType, userData])
+
+    const openReadReceipts = async (msgId) => {
+        setReadReceiptPopup(msgId)
+        setReadReceiptLoading(true)
+        setReadReceiptData(null)
+        try {
+            const tk = localStorage.getItem('access_token')
+            const res = await fetch(`${API}/api/interactions/group-chat/${msgId}/read-receipts/`, {
+                headers: { 'Authorization': `Bearer ${tk}` }
+            })
+            if (res.ok) {
+                const data = await res.json()
+                setReadReceiptData(data)
+            }
+        } catch (e) {
+            console.error(e)
+        } finally {
+            setReadReceiptLoading(false)
+        }
+    }
 
     // Filter messages to strictly enforce what we see
     const displayedMessages = messages.filter(m => {
@@ -296,7 +331,18 @@ const LiveChat = ({ courseId, userData, lessonId = null }) => {
                                             {isTeacher && <span style={{ background: 'linear-gradient(90deg, #f59e0b, #d97706)', color: 'white', padding: '2px 8px', borderRadius: '12px', fontSize: '11px', fontWeight: 'bold' }}>أستاذ المادة</span>}
                                             {isAssist && <span style={{ background: '#10b981', color: 'white', padding: '2px 8px', borderRadius: '12px', fontSize: '11px', fontWeight: 'bold' }}>مساعد</span>}
                                         </strong>
-                                        <span style={{ fontSize: '0.75rem', color: (isAssist || isTeacher) ? 'var(--text-muted)' : '#64748b', opacity: 0.8 }}>{new Date(m.created_at).toLocaleTimeString('ar-IQ', { hour: '2-digit', minute: '2-digit' })}</span>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                            {(isTeacher || isAssist) && chatType === 'public' && userData && userData.role !== 'student' && (
+                                                <button 
+                                                    onClick={() => openReadReceipts(m.id)}
+                                                    style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--primary)', padding: '2px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                                                    title="تفاصيل القراءة"
+                                                >
+                                                    <HiOutlineEye size={16} />
+                                                </button>
+                                            )}
+                                            <span style={{ fontSize: '0.75rem', color: (isAssist || isTeacher) ? 'var(--text-muted)' : '#64748b', opacity: 0.8 }}>{new Date(m.created_at).toLocaleTimeString('ar-IQ', { hour: '2-digit', minute: '2-digit' })}</span>
+                                        </div>
                                     </div>
                                     <span>{m.content}</span>
                                     {m.attachment && (
@@ -412,6 +458,72 @@ const LiveChat = ({ courseId, userData, lessonId = null }) => {
                         <HiOutlineArrowDownTray size={22} />
                         تنزيل الصورة
                     </a>
+                </div>
+            )}
+
+            {/* Read Receipts Popup */}
+            {readReceiptPopup && (
+                <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(15, 23, 42, 0.6)', backdropFilter: 'blur(4px)', zIndex: 99999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+                    <div style={{ background: 'var(--bg-secondary)', width: '100%', maxWidth: '500px', borderRadius: '16px', overflow: 'hidden', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)', display: 'flex', flexDirection: 'column', maxHeight: '80vh' }}>
+                        <div style={{ padding: '20px', borderBottom: '1px solid var(--border-glass)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--bg-primary)' }}>
+                            <h3 style={{ margin: 0, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <HiOutlineEye color="var(--primary)" /> تفاصيل مشاهدة الرسالة
+                            </h3>
+                            <button onClick={() => setReadReceiptPopup(null)} style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', display: 'flex' }}>
+                                <HiOutlineXMark size={24} />
+                            </button>
+                        </div>
+                        <div style={{ padding: '20px', overflowY: 'auto', flex: 1 }}>
+                            {readReceiptLoading ? (
+                                <p style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '20px' }}>جاري تحميل البيانات...</p>
+                            ) : readReceiptData ? (
+                                <div style={{ display: 'flex', gap: '20px', flexDirection: 'column' }}>
+                                    <div>
+                                        <h4 style={{ margin: '0 0 10px 0', color: '#10b981', display: 'flex', justifyContent: 'space-between' }}>
+                                            <span>👀 شاهدوا الرسالة</span>
+                                            <span style={{ background: 'rgba(16, 185, 129, 0.1)', padding: '2px 8px', borderRadius: '12px', fontSize: '0.8rem' }}>{readReceiptData.read_by.length}</span>
+                                        </h4>
+                                        <div style={{ background: 'var(--bg-primary)', borderRadius: '12px', border: '1px solid var(--border-glass)', padding: '10px', maxHeight: '200px', overflowY: 'auto' }}>
+                                            {readReceiptData.read_by.length === 0 ? (
+                                                <p style={{ margin: 0, color: 'var(--text-muted)', textAlign: 'center', fontSize: '0.9rem' }}>لم يقم أحد برؤية الرسالة بعد</p>
+                                            ) : (
+                                                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                                    {readReceiptData.read_by.map(s => (
+                                                        <div key={s.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px', background: 'var(--bg-secondary)', borderRadius: '8px' }}>
+                                                            <strong style={{ fontSize: '0.9rem', color: 'var(--text-primary)' }}>{s.name}</strong>
+                                                            <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>@{s.username}</span>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <h4 style={{ margin: '0 0 10px 0', color: '#ef4444', display: 'flex', justifyContent: 'space-between' }}>
+                                            <span>🙈 لم يشاهدوا الرسالة</span>
+                                            <span style={{ background: 'rgba(239, 68, 68, 0.1)', padding: '2px 8px', borderRadius: '12px', fontSize: '0.8rem' }}>{readReceiptData.unread_by.length}</span>
+                                        </h4>
+                                        <div style={{ background: 'var(--bg-primary)', borderRadius: '12px', border: '1px solid var(--border-glass)', padding: '10px', maxHeight: '200px', overflowY: 'auto' }}>
+                                            {readReceiptData.unread_by.length === 0 ? (
+                                                <p style={{ margin: 0, color: 'var(--text-muted)', textAlign: 'center', fontSize: '0.9rem' }}>الجميع شاهد الرسالة!</p>
+                                            ) : (
+                                                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                                    {readReceiptData.unread_by.map(s => (
+                                                        <div key={s.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px', background: 'var(--bg-secondary)', borderRadius: '8px' }}>
+                                                            <strong style={{ fontSize: '0.9rem', color: 'var(--text-primary)' }}>{s.name}</strong>
+                                                            <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>@{s.username}</span>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+                            ) : (
+                                <p style={{ textAlign: 'center', color: '#ef4444' }}>حدث خطأ أثناء تحميل البيانات.</p>
+                            )}
+                        </div>
+                    </div>
                 </div>
             )}
         </div>
