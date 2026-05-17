@@ -114,10 +114,13 @@ const LiveChat = ({ courseId, userData, lessonId = null }) => {
             } else if (data.type === 'message_pinned') {
                 setMessages(prev => prev.map(m => {
                     if (m.id === data.message_id) {
-                        return { ...m, is_pinned: data.is_pinned }
+                        return { ...m, is_pinned: data.is_pinned };
                     }
-                    return m
-                }))
+                    if (data.is_pinned) {
+                        return { ...m, is_pinned: false };
+                    }
+                    return m;
+                }));
             } else if (data.message) {
                 setMessages(prev => {
                     return [...prev.filter(m => m.id !== data.message.id), data.message]
@@ -337,7 +340,7 @@ const LiveChat = ({ courseId, userData, lessonId = null }) => {
                 </div>
             )}
 
-            <div className="lv-gc-msgs" style={{ flex: 1, overflowY: 'auto', padding: '10px 15px', minHeight: '200px' }}>
+            <div className="lv-gc-msgs" style={{ flex: 1, overflowY: 'auto', padding: '10px 15px', minHeight: 0 }}>
                 {loading ? <p style={{ textAlign: 'center', color: '#94a3b8' }}>جاري التحميل...</p> :
                     displayedMessages.length === 0 ? <p style={{ color: '#94a3b8', textAlign: 'center', marginTop: '20px' }}>لا توجد رسائل سابقة. كن أول من يرسل!</p> :
                         <>

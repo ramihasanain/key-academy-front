@@ -110,6 +110,9 @@ export const TAGroups = () => {
                     if (m.id === data.message_id) {
                         return { ...m, is_pinned: data.is_pinned };
                     }
+                    if (data.is_pinned) {
+                        return { ...m, is_pinned: false };
+                    }
                     return m;
                 }));
             } else if (data.message) {
@@ -535,7 +538,7 @@ export const TAGroups = () => {
                                                     </button>
                                                 )}
                                                 {(!privateTarget) && (
-                                                    <button onClick={() => handlePin(m.id)} style={{ background: 'transparent', border: 'none', color: m.is_pinned ? '#ec3665' : 'var(--hq-text-muted)', cursor: 'pointer', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '4px' }}>📌 {m.is_pinned ? 'إلغاء التثبيت' : 'تثبيت'}</button>
+                                                    <button onClick={() => handlePin(m.id)} style={{ background: 'transparent', border: 'none', color: m.is_pinned ? '#ec3665' : 'var(--hq-text-muted)', cursor: 'pointer', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '4px' }}>📌 {m.is_pinned ? 'مثبتة' : 'تثبيت'}</button>
                                                 )}
                                                 {(m.sender_role !== 'teacher' && m.sender_role !== 'assistant') && (
                                                     <>

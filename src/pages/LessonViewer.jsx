@@ -979,7 +979,7 @@ const LessonViewer = () => {
                                 <TabQA lessonId={lessonId} userData={userData} />
                             )}
                             {activeTab === 'group' && (
-                                <div style={{ height: '500px' }}>
+                                <div style={{ height: '700px', display: 'flex', flexDirection: 'column' }}>
                                 <LiveChat courseId={courseId} userData={userData} lessonId={lessonId} />
                                 </div>
                             )}
