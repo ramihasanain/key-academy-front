@@ -243,6 +243,13 @@ export const TAGroups = () => {
     }
 
     const handlePin = async (msgId) => {
+        const isCurrentlyPinned = messages.find(m => m.id === msgId)?.is_pinned;
+        setMessages(prev => prev.map(m => {
+            if (m.id === msgId) return { ...m, is_pinned: !isCurrentlyPinned };
+            if (!isCurrentlyPinned) return { ...m, is_pinned: false };
+            return m;
+        }));
+
         const tk = sessionStorage.getItem('spy_token') || localStorage.getItem('access_token');
         try {
             await fetch(`${API}/api/interactions/moderate/pin/groupmessage/${msgId}/`, {
@@ -452,15 +459,21 @@ export const TAGroups = () => {
             <div style={{ flex: 1, background: 'var(--hq-surface)', border: '1px solid var(--hq-border)', borderRadius: '12px', display: 'flex', flexDirection: 'column' }}>
                 {activeCourseId ? (
                     <>
-                        <div style={{ padding: '15px', borderBottom: '1px solid var(--hq-border)', color: 'var(--hq-text-main)', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                            {privateTarget ? (
-                                <>
-                                    <div style={{ width: '30px', height: '30px', borderRadius: '50%', background: '#10b981', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white' }}>{(privateTarget.name || 'ط')[0]}</div>
-                                    <span>محادثة خاصة: {privateTarget.name}</span>
-                                </>
-                            ) : (
-                                <span>مجموعة ({groups.find(g => g.id === activeGroupId)?.index})</span>
-                            )}
+                        <div style={{ padding: '15px', borderBottom: '1px solid var(--hq-border)', color: 'var(--hq-text-main)', fontWeight: 'bold', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '10px' }}>
+                            <img src="/new-logo.png" alt="Logo" style={{ height: '35px', objectFit: 'contain' }} />
+                            
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flex: 1, justifyContent: 'center' }}>
+                                {privateTarget ? (
+                                    <>
+                                        <div style={{ width: '30px', height: '30px', borderRadius: '50%', background: '#10b981', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white' }}>{(privateTarget.name || 'ط')[0]}</div>
+                                        <span>محادثة خاصة: {privateTarget.name}</span>
+                                    </>
+                                ) : (
+                                    <span>مجموعة ({groups.find(g => g.id === activeGroupId)?.index})</span>
+                                )}
+                            </div>
+
+                            <img src="/key-icon-logo.png" alt="Key Logo" style={{ height: '35px', objectFit: 'contain' }} />
                         </div>
 
                         <div id="ta-chat-msgs" style={{ flex: 1, overflowY: 'auto', padding: '20px', display: 'flex', flexDirection: 'column', gap: '15px' }}>
@@ -504,12 +517,12 @@ export const TAGroups = () => {
                                         )}
                                         {dispMsgs.map(m => (
                                 <div id={`ta-msg-${m.id}`} key={m.id} style={{
-                                    background: m.is_hidden ? 'rgba(239, 68, 68, 0.05)' : (m.sender_role === 'teacher' ? 'rgba(245, 158, 11, 0.08)' : (m.sender_role === 'assistant' ? 'rgba(16, 185, 129, 0.08)' : 'rgba(0,0,0,0.02)')),
+                                    background: m.is_pinned ? 'rgba(236, 54, 101, 0.05)' : (m.is_hidden ? 'rgba(239, 68, 68, 0.05)' : (m.sender_role === 'teacher' ? 'rgba(245, 158, 11, 0.08)' : (m.sender_role === 'assistant' ? 'rgba(16, 185, 129, 0.08)' : 'rgba(0,0,0,0.02)'))),
                                     padding: '15px',
                                     borderRadius: '12px',
                                     width: 'fit-content',
                                     maxWidth: '80%',
-                                    border: m.is_hidden ? '1px dashed #ef4444' : (m.sender_role === 'teacher' ? '1px solid rgba(245, 158, 11, 0.3)' : (m.sender_role === 'assistant' ? '1px solid rgba(16, 185, 129, 0.3)' : '1px solid var(--hq-border)'))
+                                    border: m.is_pinned ? '1px solid #ec3665' : (m.is_hidden ? '1px dashed #ef4444' : (m.sender_role === 'teacher' ? '1px solid rgba(245, 158, 11, 0.3)' : (m.sender_role === 'assistant' ? '1px solid rgba(16, 185, 129, 0.3)' : '1px solid var(--hq-border)')))
                                 }}>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '5px' }}>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: m.sender_role === 'teacher' ? '#f59e0b' : (m.sender_role === 'assistant' ? '#10b981' : 'var(--hq-primary)'), fontSize: '13px', fontWeight: 'bold' }}>
@@ -538,7 +551,7 @@ export const TAGroups = () => {
                                                     </button>
                                                 )}
                                                 {(!privateTarget) && (
-                                                    <button onClick={() => handlePin(m.id)} style={{ background: 'transparent', border: 'none', color: m.is_pinned ? '#ec3665' : 'var(--hq-text-muted)', cursor: 'pointer', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '4px' }}>📌 {m.is_pinned ? 'مثبتة' : 'تثبيت'}</button>
+                                                    <button onClick={() => handlePin(m.id)} style={{ background: 'transparent', border: 'none', color: m.is_pinned ? '#ec3665' : 'var(--hq-text-muted)', cursor: 'pointer', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '4px' }}>📌 {m.is_pinned ? 'إلغاء التثبيت' : 'تثبيت'}</button>
                                                 )}
                                                 {(m.sender_role !== 'teacher' && m.sender_role !== 'assistant') && (
                                                     <>
