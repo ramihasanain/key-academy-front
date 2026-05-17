@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { API } from '../config'
-import { HiOutlineUserGroup, HiOutlineXMark, HiOutlinePaperAirplane, HiOutlinePaperClip, HiOutlineMicrophone, HiOutlineStop, HiOutlinePhoto } from 'react-icons/hi2'
+import { HiOutlineUserGroup, HiOutlineXMark, HiOutlinePaperAirplane, HiOutlinePaperClip, HiOutlineMicrophone, HiOutlineStop, HiOutlinePhoto, HiOutlineArrowDownTray } from 'react-icons/hi2'
 import '../pages/LessonViewer.css' // Reuse the same CSS
 
 const groupChatHistoryCache = new Map()
@@ -247,11 +247,21 @@ const LiveChat = ({ courseId, userData, lessonId = null }) => {
                                     {m.attachment && (
                                         <div style={{ marginTop: '10px' }}>
                                             {m.attachment.match(/\.(jpeg|jpg|gif|png|webp)(\?|$)/i) ? (
-                                                <img src={m.attachment} alt="مرفق" style={{ maxWidth: '100%', borderRadius: '8px', maxHeight: '250px', border: '1px solid var(--border-glass)' }} />
+                                                <div style={{ position: 'relative', display: 'inline-block' }}>
+                                                    <a href={m.attachment} target="_blank" rel="noreferrer" style={{ display: 'block' }}>
+                                                        <img src={m.attachment} alt="مرفق" style={{ maxWidth: '100%', borderRadius: '8px', maxHeight: '250px', border: '1px solid var(--border-glass)', display: 'block' }} />
+                                                    </a>
+                                                    <a href={m.attachment} download target="_blank" rel="noreferrer" style={{ position: 'absolute', bottom: '8px', right: '8px', background: 'rgba(0,0,0,0.6)', color: 'white', padding: '6px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none' }} title="تحميل أو عرض الصورة كاملة">
+                                                        <HiOutlineArrowDownTray size={16} />
+                                                    </a>
+                                                </div>
                                             ) : m.attachment.match(/\.(webm|mp3|ogg|wav|mp4)(\?|$)/i) || m.attachment.includes('voice-message') ? (
                                                 <audio controls src={m.attachment} style={{ height: '40px', width: '100%', maxWidth: '250px' }} />
                                             ) : (
-                                                <a href={m.attachment} target="_blank" rel="noreferrer" style={{ color: 'var(--primary)', textDecoration: 'underline', display: 'flex', alignItems: 'center', gap: '5px' }}>📄 عرض المُرفق</a>
+                                                <a href={m.attachment} download target="_blank" rel="noreferrer" style={{ color: 'var(--primary)', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(0,0,0,0.05)', padding: '8px 12px', borderRadius: '8px', width: 'fit-content', fontWeight: 'bold' }}>
+                                                    <HiOutlineArrowDownTray size={18} />
+                                                    تحميل المُرفق
+                                                </a>
                                             )}
                                         </div>
                                     )}
