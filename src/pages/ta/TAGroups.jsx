@@ -261,16 +261,29 @@ export const TAGroups = () => {
         }
     }
 
-    const handleMute = (studentId, studentName) => {
+    const handleMute = (studentId, studentName, mutedUntil) => {
+        const isMuted = mutedUntil && new Date(mutedUntil) > new Date();
+
+        let options = [];
+        if (isMuted) {
+            options = [
+                { label: 'فك الحظر (unmute)', value: 'unmute' },
+                { label: 'تمديد ليوم واحد (24h)', value: '24h' },
+                { label: 'تمديد لأسبوع (week)', value: 'week' },
+                { label: 'تمديد للأبد (forever)', value: 'forever' }
+            ];
+        } else {
+            options = [
+                { label: 'ليوم واحد (24h)', value: '24h' },
+                { label: 'لأسبوع (week)', value: 'week' },
+                { label: 'للأبد (forever)', value: 'forever' }
+            ];
+        }
+
         setDialog({
             type: 'prompt',
             message: `أدخل مدة تقييد الطالب [${studentName}]:`,
-            options: [
-                { label: 'ليوم واحد (24h)', value: '24h' },
-                { label: 'لأسبوع (week)', value: 'week' },
-                { label: 'للأبد (forever)', value: 'forever' },
-                { label: 'فك الحظر (unmute)', value: 'unmute' }
-            ],
+            options: options,
             onConfirm: async (val) => {
                 if (!val) { setDialog(null); return; }
 
@@ -561,7 +574,7 @@ export const TAGroups = () => {
                                                                 setReplyingTo(m);
                                                             }} style={{ background: 'transparent', border: 'none', color: '#10b981', cursor: 'pointer', fontSize: '13px', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '4px' }}><HiOutlineChatBubbleOvalLeftEllipsis size={16} /> رد خاص</button>
                                                         )}
-                                                        <button onClick={() => handleMute(m.sender.id, m.sender.full_name)} style={{ background: 'transparent', border: 'none', color: '#ef4444', cursor: 'pointer', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '4px' }}><HiOutlineNoSymbol size={16} /> كتم مؤقت</button>
+                                                        <button onClick={() => handleMute(m.sender.id, m.sender.full_name, m.sender.muted_until)} style={{ background: 'transparent', border: 'none', color: '#ef4444', cursor: 'pointer', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '4px' }}><HiOutlineNoSymbol size={16} /> كتم مؤقت</button>
                                                     </>
                                                 )}
                                                 <button onClick={() => setReplyingTo(m)} style={{ background: 'transparent', border: 'none', color: 'var(--hq-primary)', cursor: 'pointer', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '4px' }}><HiOutlineArrowUturnLeft size={16} /> رد</button>
