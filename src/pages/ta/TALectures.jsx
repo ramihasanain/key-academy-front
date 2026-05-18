@@ -72,11 +72,8 @@ export const TALectures = () => {
             <div style={{ marginBottom: '30px', background: 'var(--hq-primary)', color: 'white', padding: '20px', borderRadius: '12px', boxShadow: '0 4px 15px rgba(131, 42, 150, 0.2)' }}>
                 <h2 style={{ margin: '0 0 10px 0', display: 'flex', alignItems: 'center', gap: '10px' }}>
                     <HiOutlineVideoCamera /> 
-                    محاضرات المنهج المسندة
+                    محاضرات المنهاج المسندة
                 </h2>
-                <p style={{ margin: 0, opacity: 0.9 }}>
-                    يمكنك استعراض الفيديوهات الخاصة بالمناهج المسندة إليك عبر تطبيق سطح المكتب وبنفس طبقات الحماية.
-                </p>
             </div>
 
             {courses.length === 0 ? (

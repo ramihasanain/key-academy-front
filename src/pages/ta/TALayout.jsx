@@ -130,7 +130,7 @@ export const TALayout = () => {
         { path: 'groups', icon: <HiOutlineUsers />, label: 'إدارة مجموعات الدردشة' },
         { path: 'notes', icon: <HiOutlinePencilSquare />, label: 'دفتر المهام والملاحظات' },
         { path: 'exams', icon: <HiOutlineClipboardDocumentCheck />, label: 'الامتحانات الأسبوعية' },
-        { path: 'lectures', icon: <HiOutlineVideoCamera />, label: 'محاضرات المنهج' },
+        { path: 'lectures', icon: <HiOutlineVideoCamera />, label: 'محاضرات المنهاج' },
         { path: 'muted', icon: <HiOutlineNoSymbol />, label: 'قائمة الطلاب المحظورين' },
         { path: 'moderation-history', icon: <HiOutlineClock />, label: 'سجل الرقابة' },
     ]
@@ -217,25 +217,26 @@ export const TALayout = () => {
 
             {/* Password Change Modal */}
             {showPwdModal && (
-                <div className="hq-modal-overlay" onClick={() => setShowPwdModal(false)}>
-                    <div className="hq-modal-content" onClick={e => e.stopPropagation()}>
-                        <div className="hq-modal-header">
-                            <h3>تغيير كلمة المرور الخاصة بك</h3>
-                            <button onClick={() => setShowPwdModal(false)} className="hq-modal-close">&times;</button>
+                <div className="hq-modal-overlay" onClick={() => setShowPwdModal(false)} style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999 }}>
+                    <div className="hq-modal-content" onClick={e => e.stopPropagation()} style={{ background: 'white', padding: '30px', borderRadius: '12px', width: '90%', maxWidth: '400px', boxShadow: '0 10px 25px rgba(0,0,0,0.2)' }}>
+                        <div className="hq-modal-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', borderBottom: '1px solid #eee', paddingBottom: '15px' }}>
+                            <h3 style={{ margin: 0, color: 'var(--hq-primary)', fontSize: '18px' }}>تغيير كلمة المرور الخاصة بك</h3>
+                            <button onClick={() => setShowPwdModal(false)} className="hq-modal-close" style={{ background: 'none', border: 'none', fontSize: '24px', cursor: 'pointer', color: '#888' }}>&times;</button>
                         </div>
-                        <div className="hq-modal-body">
-                            <label className="hq-label">كلمة المرور الجديدة</label>
+                        <div className="hq-modal-body" style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '20px' }}>
+                            <label className="hq-label" style={{ fontWeight: 'bold', fontSize: '14px', color: '#555', textAlign: 'right' }}>كلمة المرور الجديدة</label>
                             <input
                                 type="text"
                                 className="hq-input"
                                 value={newPwd}
                                 onChange={e => setNewPwd(e.target.value)}
                                 placeholder="اكتب كلمة المرور..."
+                                style={{ padding: '12px', borderRadius: '8px', border: '1px solid #ccc', outline: 'none', width: '100%', boxSizing: 'border-box', fontFamily: 'inherit' }}
                             />
-                            {pwdMsg && <div style={{ marginTop: '10px', color: pwdMsg.includes('بنجاح') ? '#10b981' : '#ef4444' }}>{pwdMsg}</div>}
+                            {pwdMsg && <div style={{ marginTop: '10px', color: pwdMsg.includes('بنجاح') ? '#10b981' : '#ef4444', fontSize: '14px', textAlign: 'right' }}>{pwdMsg}</div>}
                         </div>
-                        <div className="hq-modal-footer">
-                            <button className="hq-btn primary" onClick={handleChangePwd}>حفظ التغيير</button>
+                        <div className="hq-modal-footer" style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                            <button className="hq-btn primary" onClick={handleChangePwd} style={{ background: 'var(--hq-primary)', color: 'white', padding: '10px 20px', borderRadius: '8px', border: 'none', cursor: 'pointer', fontWeight: 'bold', fontFamily: 'inherit' }}>حفظ التغيير</button>
                         </div>
                     </div>
                 </div>
