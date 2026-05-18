@@ -115,6 +115,9 @@ const TAStudent360 = lazy(() =>
 const TANotebook = lazy(() =>
   import("./pages/ta/TANotebook").then((m) => ({ default: m.TANotebook })),
 );
+const TALectures = lazy(() =>
+  import("./pages/ta/TALectures").then((m) => ({ default: m.TALectures })),
+);
 
 const TASpyLogin = lazy(() =>
   import("./pages/hq/TASpyLogin").then((m) => ({ default: m.TASpyLogin })),
@@ -317,6 +320,7 @@ function App() {
                 element={<TAModerationHistory />}
               />
               <Route path="student/:id/360" element={<TAStudent360 />} />
+              <Route path="lectures" element={<TALectures />} />
             </Route>
 
             {/* Teacher Premium Dashboard Routes */}
