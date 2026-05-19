@@ -104,21 +104,22 @@ const Contact = () => {
                                     <div className="info-icon"><HiOutlineMapPin /></div>
                                     <div className="info-text">
                                         <h4>العنوان</h4>
-                                        <p>بغداد، العراق، شارع المنصور الرئيسي</p>
+                                        <p>بغداد، العراق</p>
                                     </div>
                                 </div>
                                 <div className="info-item">
                                     <div className="info-icon"><HiOutlinePhone /></div>
                                     <div className="info-text">
                                         <h4>رقم الهاتف</h4>
-                                        <p dir="ltr" style={{ textAlign: 'right' }}>+964 770 000 0000</p>
+                                        <p dir="ltr" style={{ textAlign: 'right' }}>07777007006</p>
+                                        <p dir="ltr" style={{ textAlign: 'right' }}>07877007006</p>
                                     </div>
                                 </div>
                                 <div className="info-item">
                                     <div className="info-icon"><HiOutlineEnvelope /></div>
                                     <div className="info-text">
                                         <h4>البريد الإلكتروني</h4>
-                                        <p>info@keyacademy.iq</p>
+                                        <p>info@key.academy</p>
                                     </div>
                                 </div>
                             </div>
