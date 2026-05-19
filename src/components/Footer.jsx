@@ -25,6 +25,9 @@ const Footer = () => {
               منصة تعليمية رائدة في العراق، مدعومة بالذكاء الاصطناعي لتقديم
               تجربة تعليمية فريدة ومتطورة تناسب جيل السرعة والتكنولوجيا.
             </p>
+            <p style={{ fontSize: '0.85rem', marginTop: '10px', color: 'var(--text-secondary)', direction: 'ltr', textAlign: 'left' }}>
+              Key Academy is a leading AI-powered educational platform in Iraq, designed to provide students with the best learning experience.
+            </p>
             <div className="footer-socials">
               <a
                 href="https://www.facebook.com/profile.php?id=61583561625436"
