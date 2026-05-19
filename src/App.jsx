@@ -143,6 +143,11 @@ const TeacherCourses = lazy(() =>
     default: m.TeacherCourses,
   })),
 );
+const TeacherLectures = lazy(() =>
+  import("./pages/teacher/TeacherLectures").then((m) => ({
+    default: m.TeacherLectures,
+  })),
+);
 const TeacherAssistants = lazy(() =>
   import("./pages/teacher/TeacherAssistants").then((m) => ({
     default: m.TeacherAssistants,
@@ -339,6 +344,7 @@ function App() {
                 element={<TAStudentStats />}
               />
               <Route path="assistants" element={<TeacherAssistants />} />
+              <Route path="lectures" element={<TeacherLectures />} />
               <Route path="qa" element={<TAQA />} />
               <Route path="groups" element={<TAGroups />} />
               <Route path="students" element={<TAStudentStats />} />

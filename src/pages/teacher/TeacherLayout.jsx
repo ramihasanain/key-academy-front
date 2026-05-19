@@ -10,7 +10,8 @@ import {
     HiOutlineUserGroup,
     HiOutlineIdentification,
     HiOutlineNoSymbol,
-    HiOutlineClock
+    HiOutlineClock,
+    HiOutlineVideoCamera
 } from 'react-icons/hi2'
 import '../hq/Admin.css'
 
@@ -81,6 +82,7 @@ export const TeacherLayout = () => {
         { path: 'students', icon: <HiOutlineIdentification />, label: 'بيانات الطلاب وتقييمهم' },
         { path: 'qa', icon: <HiOutlineChatBubbleLeftRight />, label: 'الأسئلة والنقاشات' },
         { path: 'groups', icon: <HiOutlineUserGroup />, label: 'مجموعات الدردشة' },
+        { path: 'lectures', icon: <HiOutlineVideoCamera />, label: 'محاضرات المنهاج' },
         { path: 'muted', icon: <HiOutlineNoSymbol />, label: 'قائمة الحظر للطلاب' },
         { path: 'moderation-history', icon: <HiOutlineClock />, label: 'سجل الرقابة' },
     ]
