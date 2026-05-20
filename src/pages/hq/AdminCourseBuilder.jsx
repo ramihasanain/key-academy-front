@@ -437,6 +437,46 @@ export const AdminCourseBuilder = ({ id }) => {
         alert('تم لخبطة خيارات جميع أسئلة هذا الاختبار بنجاح!');
     };
 
+    const handleShuffleSingleSurprise = (mIndex, lIndex, qzIdx) => {
+        const newMods = [...modules];
+        const quiz = newMods[mIndex].lessons[lIndex].json_data.in_video_quizzes[qzIdx];
+        if (quiz.options && quiz.options.length > 0) {
+            let indices = quiz.options.map((_, i) => i);
+            for (let i = indices.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [indices[i], indices[j]] = [indices[j], indices[i]];
+            }
+            const newOptions = indices.map(i => quiz.options[i]);
+            const newExplanations = quiz.explanations ? indices.map(i => quiz.explanations[i]) : [];
+            const newCorrectIndex = indices.indexOf(quiz.correct);
+            
+            quiz.options = newOptions;
+            quiz.explanations = newExplanations;
+            quiz.correct = newCorrectIndex;
+            setModules(newMods);
+        }
+    };
+
+    const handleShuffleSingleSmart = (mIndex, lIndex, qzIndex, qsIndex) => {
+        const newMods = [...modules];
+        const qs = newMods[mIndex].lessons[lIndex].quizzes[qzIndex].questions[qsIndex];
+        if ((!qs.question_type || qs.question_type === 'MCQ') && qs.options && qs.options.length > 0) {
+            let indices = qs.options.map((_, i) => i);
+            for (let i = indices.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [indices[i], indices[j]] = [indices[j], indices[i]];
+            }
+            const newOptions = indices.map(i => qs.options[i]);
+            const newExplanations = qs.options_explanations ? indices.map(i => qs.options_explanations[i]) : [];
+            const newCorrectIndex = indices.indexOf(qs.correct_index);
+            
+            qs.options = newOptions;
+            qs.options_explanations = newExplanations;
+            qs.correct_index = newCorrectIndex;
+            setModules(newMods);
+        }
+    };
+
 
     // --- In-Video Logic (JSON Data) ---
     const addInVideoQuiz = (mIndex, lIndex) => {
@@ -984,7 +1024,12 @@ export const AdminCourseBuilder = ({ id }) => {
                                                                     
                                                                     return (
                                                                     <div key={`ivq-${ivqIdx}`} style={{ background: 'white', border: '1px solid #bfdbfe', borderRadius: '10px', padding: '15px', position: 'relative' }}>
-                                                                        <div style={{ fontSize: '1rem', fontWeight: 'bold', color: '#2563eb', marginBottom: '10px' }}>{quizLabels[ivqIdx]}</div>
+                                                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                                                                            <div style={{ fontSize: '1rem', fontWeight: 'bold', color: '#2563eb' }}>{quizLabels[ivqIdx]}</div>
+                                                                            <button onClick={() => handleShuffleSingleSurprise(mIndex, lIndex, ivqIdx)} style={{ background: '#f1f5f9', border: '1px solid #cbd5e1', padding: '4px 10px', borderRadius: '6px', fontSize: '0.75rem', color: '#475569', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                                                                <HiOutlineSparkles /> لخبطة هذا السؤال
+                                                                            </button>
+                                                                        </div>
                                                                         
                                                                         <div style={{ display: 'flex', gap: '15px', marginBottom: '15px' }}>
                                                                             <div style={{ flex: 1.5 }}>
@@ -1038,7 +1083,12 @@ export const AdminCourseBuilder = ({ id }) => {
                                                                         <div style={{ padding: '25px', background: 'white', borderRadius: '10px', boxShadow: '0 5px 25px rgba(0,0,0,0.04)', border: '1px solid #e2e8f0' }}>
                                                                             {qz.questions.map((qs, qsIndex) => (
                                                                                 <div key={qs.localId} style={{ display: 'flex', flexDirection: 'column', gap: '10px', padding: '20px', borderBottom: '1px dashed #e2e8f0', position: 'relative', background: '#fafafa', borderRadius: '10px', marginBottom: '15px' }}>
-                                                                                    <button onClick={() => removeQuestion(mIndex, lIndex, qzIndex, qsIndex)} style={{ position: 'absolute', left: '15px', top: '20px', background: 'white', padding: '5px', border: '1px solid #ffccd5', borderRadius: '6px', color: '#ef4444', cursor: 'pointer' }} title="حذف السؤال"><HiOutlineTrash size={18} /></button>
+                                                                                    <div style={{ position: 'absolute', left: '15px', top: '20px', display: 'flex', gap: '8px' }}>
+                                                                                        {(!qs.question_type || qs.question_type === 'MCQ') && (
+                                                                                            <button onClick={() => handleShuffleSingleSmart(mIndex, lIndex, qzIndex, qsIndex)} style={{ background: 'white', padding: '5px 10px', border: '1px solid #cbd5e1', borderRadius: '6px', color: '#475569', cursor: 'pointer', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '4px' }} title="لخبطة الخيارات"><HiOutlineSparkles size={14} /> لخبطة</button>
+                                                                                        )}
+                                                                                        <button onClick={() => removeQuestion(mIndex, lIndex, qzIndex, qsIndex)} style={{ background: 'white', padding: '5px', border: '1px solid #ffccd5', borderRadius: '6px', color: '#ef4444', cursor: 'pointer' }} title="حذف السؤال"><HiOutlineTrash size={18} /></button>
+                                                                                    </div>
                                                                                     <div style={{ display: 'flex', alignItems: 'flex-start', gap: '15px' }}>
                                                                                         <span style={{ background: 'var(--hq-primary)', color: 'white', width: '30px', height: '30px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '8px', fontSize: '0.9rem', fontWeight: 'bold' }}>{qsIndex + 1}</span>
                                                                                         <div style={{ flex: 1 }}>
