@@ -389,6 +389,55 @@ export const AdminCourseBuilder = ({ id }) => {
     };
 
 
+    const handleShuffleSurpriseQuizzes = (mIndex, lIndex) => {
+        const newMods = [...modules];
+        const quizzes = newMods[mIndex].lessons[lIndex].json_data?.in_video_quizzes || [];
+        
+        quizzes.forEach(quiz => {
+            if (quiz.options && quiz.options.length > 0) {
+                let indices = quiz.options.map((_, i) => i);
+                for (let i = indices.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [indices[i], indices[j]] = [indices[j], indices[i]];
+                }
+                const newOptions = indices.map(i => quiz.options[i]);
+                const newExplanations = quiz.explanations ? indices.map(i => quiz.explanations[i]) : [];
+                const newCorrectIndex = indices.indexOf(quiz.correct);
+                
+                quiz.options = newOptions;
+                quiz.explanations = newExplanations;
+                quiz.correct = newCorrectIndex;
+            }
+        });
+        setModules(newMods);
+        alert('تم لخبطة الخيارات بنجاح!');
+    };
+
+    const handleShuffleSmartQuiz = (mIndex, lIndex, qzIndex) => {
+        const newMods = [...modules];
+        const quiz = newMods[mIndex].lessons[lIndex].quizzes[qzIndex];
+        
+        quiz.questions.forEach(qs => {
+            if ((!qs.question_type || qs.question_type === 'MCQ') && qs.options && qs.options.length > 0) {
+                let indices = qs.options.map((_, i) => i);
+                for (let i = indices.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [indices[i], indices[j]] = [indices[j], indices[i]];
+                }
+                const newOptions = indices.map(i => qs.options[i]);
+                const newExplanations = qs.options_explanations ? indices.map(i => qs.options_explanations[i]) : [];
+                const newCorrectIndex = indices.indexOf(qs.correct_index);
+                
+                qs.options = newOptions;
+                qs.options_explanations = newExplanations;
+                qs.correct_index = newCorrectIndex;
+            }
+        });
+        setModules(newMods);
+        alert('تم لخبطة خيارات جميع أسئلة هذا الاختبار بنجاح!');
+    };
+
+
     // --- In-Video Logic (JSON Data) ---
     const addInVideoQuiz = (mIndex, lIndex) => {
         // Obsolete, we now enforce 3 quizzes.
@@ -915,7 +964,10 @@ export const AdminCourseBuilder = ({ id }) => {
 
                                                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
                                                                 <span style={{ fontSize: '0.9rem', fontWeight: 'bold', color: '#1e40af' }}>الأسئلة المفاجئة بمنتصف الفيديو (تظهر تلقائياً بنسب 25%، 50%، 75%)</span>
-                                                                <button className="hq-btn-primary" onClick={() => handleGenerateSurpriseQuestions(mIndex, lIndex)} style={{ padding: '6px 12px', borderRadius: '6px', fontSize: '0.8rem', background: '#8b5cf6', borderColor: '#8b5cf6' }}><HiOutlineSparkles style={{ display: 'inline', marginRight: '4px' }} /> توليد الأسئلة الـ 3 بالذكاء الاصطناعي</button>
+                                                                <div style={{ display: 'flex', gap: '8px' }}>
+                                                                    <button className="hq-btn-secondary" onClick={() => handleShuffleSurpriseQuizzes(mIndex, lIndex)} style={{ padding: '6px 12px', borderRadius: '6px', fontSize: '0.8rem', background: '#f1f5f9', color: '#475569', borderColor: '#cbd5e1' }}>لخبطة الخيارات</button>
+                                                                    <button className="hq-btn-primary" onClick={() => handleGenerateSurpriseQuestions(mIndex, lIndex)} style={{ padding: '6px 12px', borderRadius: '6px', fontSize: '0.8rem', background: '#8b5cf6', borderColor: '#8b5cf6' }}><HiOutlineSparkles style={{ display: 'inline', marginRight: '4px' }} /> توليد الأسئلة الـ 3 بالذكاء الاصطناعي</button>
+                                                                </div>
                                                             </div>
                                                             
                                                             <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
@@ -1041,7 +1093,10 @@ export const AdminCourseBuilder = ({ id }) => {
                                                                                     style={{ width: '100%', height: '120px', padding: '15px', borderRadius: '8px', border: '1px solid #d1d5db', resize: 'vertical', outline: 'none', fontFamily: 'inherit' }}
                                                                                 />
                                                                                 <div style={{ textAlign: 'right', marginTop: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                                                                    <button className="hq-btn-secondary" onClick={() => addQuestion(mIndex, lIndex, qzIndex)} style={{ background: '#eff6ff', color: '#3b82f6', borderColor: '#3b82f6', padding: '8px 20px', borderRadius: '8px', fontSize: '0.9rem', fontWeight: 'bold' }}>+ سؤال يدوي واحد</button>
+                                                                                    <div style={{ display: 'flex', gap: '8px' }}>
+                                                                                        <button className="hq-btn-secondary" onClick={() => addQuestion(mIndex, lIndex, qzIndex)} style={{ background: '#eff6ff', color: '#3b82f6', borderColor: '#3b82f6', padding: '8px 20px', borderRadius: '8px', fontSize: '0.9rem', fontWeight: 'bold' }}>+ سؤال يدوي واحد</button>
+                                                                                        <button className="hq-btn-secondary" onClick={() => handleShuffleSmartQuiz(mIndex, lIndex, qzIndex)} style={{ background: '#f1f5f9', color: '#475569', borderColor: '#cbd5e1', padding: '8px 20px', borderRadius: '8px', fontSize: '0.9rem', fontWeight: 'bold' }}>لخبطة كل الخيارات</button>
+                                                                                    </div>
                                                                                     <div style={{ display: 'flex', gap: '10px' }}>
                                                                                         <button className="hq-btn-primary" onClick={() => handleGenerateTextQuestions(mIndex, lIndex, qzIndex)} style={{ padding: '8px 20px', borderRadius: '8px', fontSize: '0.9rem', background: '#8b5cf6', borderColor: '#8b5cf6' }}><HiOutlineSparkles style={{ display: 'inline', marginRight: '4px' }} /> توليد 100 سؤال من النص (AI)</button>
                                                                                         <button className="hq-btn-primary" onClick={() => {
