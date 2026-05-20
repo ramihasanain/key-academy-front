@@ -300,6 +300,95 @@ export const AdminCourseBuilder = ({ id }) => {
         }
     }
 
+    const handleGenerateSurpriseQuestions = async (mIndex, lIndex) => {
+        const less = modules[mIndex].lessons[lIndex];
+        if (!less.lesson_text || less.lesson_text.trim() === '') {
+            alert('يجب إضافة نص للدرس أولاً لتتمكن من توليد الأسئلة.');
+            return;
+        }
+        
+        const confirmGen = window.confirm('سيتم توليد 3 أسئلة فجائية باستخدام الذكاء الاصطناعي وسيتم مسح الأسئلة الفجائية الحالية. هل أنت متأكد؟');
+        if (!confirmGen) return;
+
+        try {
+            const tk = localStorage.getItem('access_token');
+            const res = await fetch(`${API}/api/hq/generate-ai-questions/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${tk}`
+                },
+                body: JSON.stringify({ lesson_text: less.lesson_text, type: 'surprise' })
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || 'Network error');
+            if (data.success && data.questions) {
+                const newMods = [...modules];
+                if(!newMods[mIndex].lessons[lIndex].json_data) newMods[mIndex].lessons[lIndex].json_data = {};
+                newMods[mIndex].lessons[lIndex].json_data.in_video_quizzes = data.questions.map(q => ({
+                    time: 0,
+                    question: q.question,
+                    hint: q.hint,
+                    options: q.options,
+                    correct: q.correct_index,
+                    explanations: q.explanations
+                }));
+                setModules(newMods);
+                alert('تم توليد الأسئلة الفجائية بنجاح!');
+            }
+        } catch (error) {
+            console.error(error);
+            alert('حدث خطأ أثناء التوليد: ' + error.message);
+        }
+    };
+
+    const handleGenerateTextQuestions = async (mIndex, lIndex, qzIndex) => {
+        const less = modules[mIndex].lessons[lIndex];
+        if (!less.lesson_text || less.lesson_text.trim() === '') {
+            alert('يجب إضافة نص للدرس أولاً لتتمكن من توليد الأسئلة.');
+            return;
+        }
+        
+        const confirmGen = window.confirm('سيتم توليد ما يصل إلى 100 سؤال ذكاء اصطناعي بناءً على النص وإضافتها للاختبار الحالي. هل أنت متأكد؟');
+        if (!confirmGen) return;
+
+        try {
+            const tk = localStorage.getItem('access_token');
+            const res = await fetch(`${API}/api/hq/generate-ai-questions/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${tk}`
+                },
+                body: JSON.stringify({ lesson_text: less.lesson_text, type: 'text_100' })
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || 'Network error');
+            if (data.success && data.questions) {
+                const newMods = [...modules];
+                const quiz = newMods[mIndex].lessons[lIndex].quizzes[qzIndex];
+                data.questions.forEach(q => {
+                    quiz.questions.push({
+                        localId: Date.now() + Math.random(),
+                        text: q.text,
+                        question_type: 'MCQ',
+                        options: q.options,
+                        correct_index: q.correct_index,
+                        options_explanations: q.options_explanations,
+                        model_answer: '',
+                        keywords: []
+                    });
+                });
+                setModules(newMods);
+                alert(`تم توليد ${data.questions.length} سؤال بنجاح!`);
+            }
+        } catch (error) {
+            console.error(error);
+            alert('حدث خطأ أثناء التوليد: ' + error.message);
+        }
+    };
+
+
     // --- In-Video Logic (JSON Data) ---
     const addInVideoQuiz = (mIndex, lIndex) => {
         // Obsolete, we now enforce 3 quizzes.
@@ -826,6 +915,7 @@ export const AdminCourseBuilder = ({ id }) => {
 
                                                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
                                                                 <span style={{ fontSize: '0.9rem', fontWeight: 'bold', color: '#1e40af' }}>الأسئلة المفاجئة بمنتصف الفيديو (تظهر تلقائياً بنسب 25%، 50%، 75%)</span>
+                                                                <button className="hq-btn-primary" onClick={() => handleGenerateSurpriseQuestions(mIndex, lIndex)} style={{ padding: '6px 12px', borderRadius: '6px', fontSize: '0.8rem', background: '#8b5cf6', borderColor: '#8b5cf6' }}><HiOutlineSparkles style={{ display: 'inline', marginRight: '4px' }} /> توليد الأسئلة الـ 3 بالذكاء الاصطناعي</button>
                                                             </div>
                                                             
                                                             <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
@@ -950,13 +1040,16 @@ export const AdminCourseBuilder = ({ id }) => {
                                                                                     placeholder="مثال:&#10;ماهي عاصمة العراق؟&#10;* بغداد (مركز الدولة)&#10;- الموصل (محافظة عادية)&#10;- البصرة"
                                                                                     style={{ width: '100%', height: '120px', padding: '15px', borderRadius: '8px', border: '1px solid #d1d5db', resize: 'vertical', outline: 'none', fontFamily: 'inherit' }}
                                                                                 />
-                                                                                <div style={{ textAlign: 'right', marginTop: '10px', display: 'flex', justifyContent: 'space-between' }}>
+                                                                                <div style={{ textAlign: 'right', marginTop: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                                                                     <button className="hq-btn-secondary" onClick={() => addQuestion(mIndex, lIndex, qzIndex)} style={{ background: '#eff6ff', color: '#3b82f6', borderColor: '#3b82f6', padding: '8px 20px', borderRadius: '8px', fontSize: '0.9rem', fontWeight: 'bold' }}>+ سؤال يدوي واحد</button>
-                                                                                    <button className="hq-btn-primary" onClick={() => {
-                                                                                        const val = document.getElementById(`bulk-${qz.localId}`).value;
-                                                                                        handleBulkQuestions(mIndex, lIndex, qzIndex, val);
-                                                                                        document.getElementById(`bulk-${qz.localId}`).value = '';
-                                                                                    }} style={{ padding: '8px 20px', borderRadius: '8px', fontSize: '0.9rem' }}>توليد الأسئلة سحرياً سับ</button>
+                                                                                    <div style={{ display: 'flex', gap: '10px' }}>
+                                                                                        <button className="hq-btn-primary" onClick={() => handleGenerateTextQuestions(mIndex, lIndex, qzIndex)} style={{ padding: '8px 20px', borderRadius: '8px', fontSize: '0.9rem', background: '#8b5cf6', borderColor: '#8b5cf6' }}><HiOutlineSparkles style={{ display: 'inline', marginRight: '4px' }} /> توليد 100 سؤال من النص (AI)</button>
+                                                                                        <button className="hq-btn-primary" onClick={() => {
+                                                                                            const val = document.getElementById(`bulk-${qz.localId}`).value;
+                                                                                            handleBulkQuestions(mIndex, lIndex, qzIndex, val);
+                                                                                            document.getElementById(`bulk-${qz.localId}`).value = '';
+                                                                                        }} style={{ padding: '8px 20px', borderRadius: '8px', fontSize: '0.9rem' }}>توليد الأسئلة سحرياً سับ</button>
+                                                                                    </div>
                                                                                 </div>
                                                                             </div>
                                                                         </div>
