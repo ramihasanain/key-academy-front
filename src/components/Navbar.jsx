@@ -121,13 +121,13 @@ const Navbar = () => {
               <span></span>
               <span></span>
             </button>
-            <div
-              className={`nav-overlay ${menuOpen ? "show" : ""}`}
-              onClick={() => setMenuOpen(false)}
-            ></div>
           </div>
         </div>
       </nav>
+      <div
+        className={`nav-overlay ${menuOpen ? "show" : ""}`}
+        onClick={() => setMenuOpen(false)}
+      ></div>
     </>
   );
 };
