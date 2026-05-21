@@ -22,6 +22,11 @@ export const TALayout = () => {
     const [showPwdModal, setShowPwdModal] = useState(false)
     const [newPwd, setNewPwd] = useState('')
     const [pwdMsg, setPwdMsg] = useState('')
+    const [isMobileOpen, setIsMobileOpen] = useState(false)
+
+    useEffect(() => {
+        setIsMobileOpen(false)
+    }, [location.pathname])
 
     useEffect(() => {
         if ('Notification' in window && Notification.permission !== 'granted' && Notification.permission !== 'denied') {
@@ -146,7 +151,7 @@ export const TALayout = () => {
             '--blue-main': '#832a96'
         }}>
             {/* Sidebar */}
-            <aside className="hq-sidebar open">
+            <aside className={`hq-sidebar ${isMobileOpen ? 'mobile-open open' : 'open'}`}>
                 <div className="hq-sb-logo" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <img src="/new-logo.png" alt="Key Academy" style={{ height: '40px', objectFit: 'contain' }} />
                 </div>
@@ -176,11 +181,13 @@ export const TALayout = () => {
                     <span className="hq-version">إصدار المساعد v1.0</span>
                 </div>
             </aside>
+            <div className={`hq-mobile-overlay ${isMobileOpen ? 'mobile-open' : ''}`} onClick={() => setIsMobileOpen(false)}></div>
 
             {/* Main Content */}
             <div className="hq-main">
                 <header className="hq-topbar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '15px 30px' }}>
                     <div className="hq-tb-left" style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+                        <button className="hq-mobile-toggle" onClick={() => setIsMobileOpen(!isMobileOpen)}>☰</button>
                         {profile?.ta_info?.teacher_image ? (
                             <img
                                 src={profile.ta_info.teacher_image}

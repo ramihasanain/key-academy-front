@@ -23,6 +23,11 @@ export const TeacherLayout = () => {
     const [showPwdModal, setShowPwdModal] = useState(false)
     const [newPwd, setNewPwd] = useState('')
     const [pwdMsg, setPwdMsg] = useState('')
+    const [isMobileOpen, setIsMobileOpen] = useState(false)
+
+    useEffect(() => {
+        setIsMobileOpen(false)
+    }, [location.pathname])
 
     useEffect(() => {
         const fetchProfile = async () => {
@@ -96,7 +101,7 @@ export const TeacherLayout = () => {
             '--hq-primary-bg': 'rgba(30, 58, 138, 0.08)',
         }}>
             {/* Sidebar */}
-            <aside className="hq-sidebar open">
+            <aside className={`hq-sidebar ${isMobileOpen ? 'mobile-open open' : 'open'}`}>
                 <div className="hq-sb-logo" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <img src="/new-logo.png" alt="Key Academy" style={{ height: '40px', objectFit: 'contain' }} />
                 </div>
@@ -126,11 +131,13 @@ export const TeacherLayout = () => {
                     <span className="hq-version">بوابة الأستاذ v1.0</span>
                 </div>
             </aside>
+            <div className={`hq-mobile-overlay ${isMobileOpen ? 'mobile-open' : ''}`} onClick={() => setIsMobileOpen(false)}></div>
 
             {/* Main Content */}
             <div className="hq-main">
                 <header className="hq-topbar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '15px 30px' }}>
                     <div className="hq-tb-left" style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+                        <button className="hq-mobile-toggle" onClick={() => setIsMobileOpen(!isMobileOpen)}>☰</button>
                         <div>
                             <h2 style={{ fontSize: '18px', margin: 0, color: 'var(--hq-primary)' }}>أهلاً بالأستاذ {profile?.teacher_name || profile?.first_name || profile?.username}</h2>
                             <p style={{ margin: 0, color: 'var(--hq-text-muted)', fontSize: '13px' }}>إدارة شاملة للمحتوى والمساعدين</p>
