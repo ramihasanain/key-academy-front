@@ -58,6 +58,12 @@ export const AdminCourseBuilder = ({ id }) => {
     const [modules, setModules] = useState([])
     const [teachers, setTeachers] = useState([])
 
+    // Copy Content State
+    const [copyModalOpen, setCopyModalOpen] = useState(false)
+    const [allCourses, setAllCourses] = useState([])
+    const [sourceCourseId, setSourceCourseId] = useState('')
+    const [copying, setCopying] = useState(false)
+
     // Trash Memory for intelligent deletion
     const [deletedItems, setDeletedItems] = useState({
         modules: [], lessons: [], quizzes: [], questions: [], ministerialdocs: [], weeklyexams: []
@@ -66,6 +72,42 @@ export const AdminCourseBuilder = ({ id }) => {
     const trackDelete = (type, dbId) => {
         if (!dbId) return
         setDeletedItems(prev => ({ ...prev, [type]: [...prev[type], dbId] }))
+    }
+
+    const openCopyModal = async () => {
+        const tk = localStorage.getItem('access_token')
+        const headers = { 'Authorization': `Bearer ${tk}` }
+        try {
+            const crsRes = await fetch(`${API}/api/hq/courses/?page_size=1000`, { headers })
+            if (crsRes.ok) {
+                const data = await crsRes.json()
+                setAllCourses((data.results || data).filter(c => c.id != id))
+                setCopyModalOpen(true)
+            }
+        } catch (e) { console.error("Error fetching courses", e) }
+    }
+
+    const handleCopyContent = async () => {
+        if (!sourceCourseId) return alert('يرجى اختيار الدورة المراد النسخ منها.')
+        if (!window.confirm('تنبيه: هذا الإجراء سيقوم بحذف جميع المحتويات الحالية (الفصول، الدروس، الامتحانات) للدورة الحالية واستبدالها بمحتويات الدورة المحددة. هل أنت متأكد؟')) return
+
+        setCopying(true)
+        const tk = localStorage.getItem('access_token')
+        try {
+            const res = await fetch(`${API}/api/hq/courses/${id}/copy-content/`, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${tk}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ source_course_id: sourceCourseId })
+            })
+            const data = await res.json()
+            if (!res.ok) throw new Error(data.error || 'فشل النسخ')
+            alert('تم نسخ المحتويات بنجاح!')
+            window.location.reload()
+        } catch (err) {
+            console.error(err)
+            alert('حدث خطأ: ' + err.message)
+            setCopying(false)
+        }
     }
 
     useEffect(() => {
@@ -749,6 +791,11 @@ export const AdminCourseBuilder = ({ id }) => {
                             <label htmlFor="crs-pub"></label>
                         </div>
                     </div>
+                    {!isNew && (
+                        <button className="hq-btn-secondary" onClick={openCopyModal} style={{ background: '#3b82f6', color: 'white', border: 'none', padding: '12px 20px', borderRadius: '10px', fontSize: '1.05rem', boxShadow: '0 4px 6px rgba(59, 130, 246, 0.3)' }}>
+                            نسخ محتوى دورة
+                        </button>
+                    )}
                     <button className="hq-btn-primary" onClick={handleSaveTree} disabled={saving} style={{ padding: '12px 25px', fontSize: '1.05rem', boxShadow: '0 5px 15px rgba(99, 102, 241, 0.4)' }}>
                         <HiOutlineCheckCircle /> {saving ? 'جاري الرفع والضخ...' : 'الحفظ والنشر الشامل'}
                     </button>
@@ -1214,6 +1261,33 @@ export const AdminCourseBuilder = ({ id }) => {
             </div>
 
             <div style={{ height: '50px' }}></div>
+
+            {/* Copy Course Modal */}
+            {copyModalOpen && (
+                <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 99999 }}>
+                    <div style={{ background: 'white', borderRadius: '16px', padding: '30px', width: '90%', maxWidth: '500px', boxShadow: '0 20px 40px rgba(0,0,0,0.2)' }}>
+                        <h3 style={{ margin: '0 0 20px 0', fontSize: '1.3rem', color: '#1e293b' }}>استنساخ محتويات من دورة أخرى</h3>
+                        <p style={{ color: '#ef4444', fontSize: '0.9rem', marginBottom: '20px', fontWeight: 'bold' }}>تنبيه: سيتم مسح جميع المحتويات (دروس، امتحانات، ملفات) الحالية الخاصة بهذه الدورة واستبدالها بنسخة من الدورة المختارة أدناه.</p>
+                        
+                        <div style={{ marginBottom: '25px' }}>
+                            <label style={{ display: 'block', marginBottom: '10px', fontWeight: 'bold', color: '#475569' }}>اختر الدورة المصدر:</label>
+                            <select value={sourceCourseId} onChange={e => setSourceCourseId(e.target.value)} style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid #cbd5e1', outline: 'none', fontSize: '1rem' }}>
+                                <option value="">-- يرجى اختيار الدورة --</option>
+                                {allCourses.map(c => (
+                                    <option key={c.id} value={c.id}>{c.title}</option>
+                                ))}
+                            </select>
+                        </div>
+
+                        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+                            <button onClick={() => setCopyModalOpen(false)} style={{ padding: '10px 20px', borderRadius: '8px', border: '1px solid #cbd5e1', background: 'white', color: '#64748b', cursor: 'pointer' }}>إلغاء</button>
+                            <button onClick={handleCopyContent} disabled={copying || !sourceCourseId} style={{ padding: '10px 20px', borderRadius: '8px', border: 'none', background: '#ef4444', color: 'white', fontWeight: 'bold', cursor: (copying || !sourceCourseId) ? 'not-allowed' : 'pointer' }}>
+                                {copying ? 'جاري الاستنساخ...' : 'موافق، ابدأ الاستنساخ'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     )
 }
