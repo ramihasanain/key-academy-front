@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react'
 import { API } from '../../config'
 import { HiOutlinePaperClip, HiOutlinePaperAirplane, HiOutlineMicrophone, HiOutlineStop, HiOutlineTrash, HiOutlineNoSymbol, HiOutlineChatBubbleOvalLeftEllipsis, HiOutlinePhoto, HiOutlineArrowDownTray, HiOutlineXMark, HiOutlineEye, HiOutlineArrowUturnLeft } from 'react-icons/hi2'
 import { TAStudent360 } from './TAStudent360'
+import './TAGroups.css'
 
 export const TAGroups = () => {
     const [courses, setCourses] = useState([])
@@ -29,6 +30,7 @@ export const TAGroups = () => {
     // Private Messaging Target
     const [privateTarget, setPrivateTarget] = useState(null) // { id, name }
     const [inboxContacts, setInboxContacts] = useState([])
+    const [mobileView, setMobileView] = useState('list')
 
     // WS reference
     const wsRef = useRef(null)
@@ -335,6 +337,7 @@ export const TAGroups = () => {
         setInboxContacts([])
         fetchInbox(courseId, groupId)
         startPolling(courseId, groupId)
+        setMobileView('chat')
     }
 
     const startRecording = async () => {
@@ -422,9 +425,9 @@ export const TAGroups = () => {
     }
 
     return (
-        <div style={{ display: 'flex', height: 'calc(100vh - 100px)', gap: '20px' }}>
+        <div className="ta-chat-layout" style={{ display: 'flex', height: 'calc(100vh - 100px)', gap: '20px' }}>
             {/* Left Sidebar: Select Course & Group */}
-            <div style={{ width: '250px', background: 'var(--hq-surface)', border: '1px solid var(--hq-border)', borderRadius: '12px', padding: '15px', overflowY: 'auto' }}>
+            <div className={`ta-chat-sidebar ${mobileView === 'chat' ? 'hidden-mobile' : ''}`} style={{ width: '250px', background: 'var(--hq-surface)', border: '1px solid var(--hq-border)', borderRadius: '12px', padding: '15px', overflowY: 'auto' }}>
                 <h3 style={{ color: 'var(--hq-primary)', margin: '0 0 20px 0', fontSize: '16px' }}>قائمة الدردشة</h3>
                 
                 {groups.length === 0 ? (
@@ -433,7 +436,7 @@ export const TAGroups = () => {
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
                         {/* Global Chat */}
                         <div
-                            onClick={() => setPrivateTarget(null)}
+                            onClick={() => { setPrivateTarget(null); setMobileView('chat'); }}
                             style={{ padding: '10px', cursor: 'pointer', fontSize: '14px', background: privateTarget === null ? 'rgba(131, 42, 150, 0.1)' : 'transparent', color: privateTarget === null ? 'var(--hq-primary)' : 'var(--hq-text-main)', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '8px', fontWeight: privateTarget === null ? 'bold' : 'normal' }}
                         >
                             🌍 مجموعة الدورة العامة
@@ -448,6 +451,7 @@ export const TAGroups = () => {
                                 onClick={() => {
                                     setPrivateTarget(contact);
                                     setInboxContacts(prev => prev.map(c => c.id === contact.id ? { ...c, unread_count: 0 } : c));
+                                    setMobileView('chat');
                                 }}
                                 style={{ padding: '10px', cursor: 'pointer', fontSize: '13px', background: privateTarget?.id === contact.id ? 'rgba(16, 185, 129, 0.1)' : 'transparent', color: privateTarget?.id === contact.id ? '#10b981' : 'var(--hq-text-main)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontWeight: privateTarget?.id === contact.id ? 'bold' : 'normal' }}
                             >
@@ -469,10 +473,13 @@ export const TAGroups = () => {
             </div>
 
             {/* Right Side: Chat Box */}
-            <div style={{ flex: 1, background: 'var(--hq-surface)', border: '1px solid var(--hq-border)', borderRadius: '12px', display: 'flex', flexDirection: 'column' }}>
+            <div className={`ta-chat-main ${mobileView === 'list' ? 'hidden-mobile' : ''}`} style={{ flex: 1, background: 'var(--hq-surface)', border: '1px solid var(--hq-border)', borderRadius: '12px', display: 'flex', flexDirection: 'column' }}>
                 {activeCourseId ? (
                     <>
-                        <div style={{ padding: '15px', borderBottom: '1px solid var(--hq-border)', color: 'var(--hq-text-main)', fontWeight: 'bold', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '10px' }}>
+                        <div className="ta-chat-header" style={{ padding: '15px', borderBottom: '1px solid var(--hq-border)', color: 'var(--hq-text-main)', fontWeight: 'bold', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '10px' }}>
+                            <button className="ta-chat-back-btn" onClick={() => setMobileView('list')} style={{ display: 'none', border: 'none', cursor: 'pointer' }}>
+                                <HiOutlineArrowUturnLeft size={20} />
+                            </button>
                             <img src="/new-logo.png" alt="Logo" style={{ height: '35px', objectFit: 'contain' }} />
                             
                             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flex: 1, justifyContent: 'center' }}>
@@ -552,12 +559,12 @@ export const TAGroups = () => {
                                             >
                                                 {m.sender?.full_name || m.sender?.username}
                                             </span>
-                                            {m.sender_role === 'teacher' && <span style={{ background: '#f59e0b', color: 'white', padding: '2px 6px', borderRadius: '12px', fontSize: '10px' }}>أستاذ المادة</span>}
-                                            {m.sender_role === 'assistant' && <span style={{ background: '#10b981', color: 'white', padding: '2px 6px', borderRadius: '12px', fontSize: '10px' }}>مساعد</span>}
+                                            {m.sender_role === 'teacher' && <span className="ta-role-badge" style={{ background: '#f59e0b', color: 'white', padding: '2px 6px', borderRadius: '12px', fontSize: '10px' }}>أستاذ المادة</span>}
+                                            {m.sender_role === 'assistant' && <span className="ta-role-badge" style={{ background: '#10b981', color: 'white', padding: '2px 6px', borderRadius: '12px', fontSize: '10px' }}>مساعد</span>}
                                             {m.is_hidden && <span style={{ color: '#ef4444', fontSize: '11px' }}>(رسالة محذوفة)</span>}
                                         </div>
                                         {(!m.is_hidden && !sessionStorage.getItem('spy_token')) && (
-                                            <div style={{ display: 'flex', gap: '10px', marginRight: '20px' }}>
+                                            <div className="ta-msg-actions" style={{ display: 'flex', gap: '10px', marginRight: '20px' }}>
                                                 {(!privateTarget && (m.sender_role === 'teacher' || m.sender_role === 'assistant')) && (
                                                     <button onClick={() => openReadReceipts(m.id)} style={{ background: 'transparent', border: 'none', color: '#10b981', cursor: 'pointer', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '4px' }} title="تفاصيل القراءة">
                                                         <HiOutlineEye size={16} /> المشاهدات
@@ -640,7 +647,7 @@ export const TAGroups = () => {
                         </div>
 
                         {!sessionStorage.getItem('spy_token') ? (
-                            <div style={{ padding: '15px', borderTop: '1px solid var(--hq-border)', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                            <div className="ta-chat-input-area" style={{ padding: '15px', borderTop: '1px solid var(--hq-border)', display: 'flex', flexDirection: 'column', gap: '10px' }}>
                                 {privateTarget && (
                                     <div style={{ background: 'rgba(16, 185, 129, 0.1)', padding: '8px 15px', borderRadius: '8px', color: '#10b981', fontSize: '13px', display: 'flex', justifyContent: 'space-between' }}>
                                         <span>أنت الآن في وضع الرد الخاص 🕵️ على: <strong>{privateTarget.name}</strong></span>
@@ -711,6 +718,7 @@ export const TAGroups = () => {
 
                                     <input
                                         type="text"
+                                        className="ta-chat-input-field"
                                         value={messageText}
                                         onChange={e => setMessageText(e.target.value)}
                                         placeholder={file ? `تم أختيار مرفق: ${file.name}` : (audioBlob ? "تم التقاط بصمة صوتية 🎵" : (isRecording ? "جاري التسجيل أستاذي..." : "اكتب رسالة توجيهية للطلاب هنا..."))}

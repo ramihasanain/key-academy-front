@@ -1,0 +1,126 @@
+/* ===== TA CHAT GROUPS MODERN MOBILE DESIGN ===== */
+
+.ta-chat-layout {
+    position: relative;
+    overflow: hidden;
+    background: var(--hq-bg);
+}
+
+.ta-chat-sidebar {
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+}
+
+.ta-chat-main {
+    transition: all 0.3s ease;
+    background: #f0f2f5 !important; /* WhatsApp like web background */
+    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+}
+
+/* Chat Header */
+.ta-chat-header {
+    background: var(--hq-surface) !important;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+    z-index: 10;
+}
+
+/* Chat Messages Background */
+#ta-chat-msgs {
+    background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23832a96' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    background-color: #e5ddd5; /* Classic chat background */
+}
+
+/* Input Area */
+.ta-chat-input-area {
+    background: var(--hq-surface) !important;
+    padding: 15px !important;
+    border-radius: 0 0 12px 12px !important;
+    box-shadow: 0 -2px 10px rgba(0,0,0,0.02);
+}
+
+.ta-chat-input-field {
+    border-radius: 24px !important;
+    padding: 12px 20px !important;
+    border: 1px solid #ddd !important;
+    background: #f8f9fa !important;
+    font-size: 0.95rem !important;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.02) !important;
+}
+.ta-chat-input-field:focus {
+    border-color: var(--hq-primary) !important;
+    background: white !important;
+    box-shadow: 0 0 0 3px rgba(131, 42, 150, 0.1) !important;
+}
+
+/* Chat Bubbles Modernization */
+#ta-chat-msgs > div[id^="ta-msg-"] {
+    position: relative;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    margin-bottom: 8px !important;
+    padding: 10px 14px !important;
+}
+
+/* Outgoing/Admin/TA Messages (Left side in RTL) */
+#ta-chat-msgs > div[id^="ta-msg-"]:has(.ta-role-badge) {
+    margin-right: auto !important; /* Push to left in RTL */
+    margin-left: 0 !important;
+    background: #dcf8c6 !important; /* WhatsApp outgoing green */
+    border: none !important;
+    border-radius: 16px 16px 0 16px !important;
+}
+
+/* Incoming/Student Messages (Right side in RTL) */
+#ta-chat-msgs > div[id^="ta-msg-"]:not(:has(.ta-role-badge)) {
+    margin-left: auto !important; /* Push to right in RTL */
+    margin-right: 0 !important;
+    background: #ffffff !important;
+    border: none !important;
+    border-radius: 16px 16px 16px 0 !important;
+}
+
+/* Action Buttons inside chat */
+.ta-msg-actions button {
+    opacity: 0.6;
+}
+.ta-msg-actions button:hover {
+    opacity: 1;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+    .ta-chat-layout {
+        height: calc(100vh - 80px) !important;
+        gap: 0 !important;
+    }
+    .ta-chat-sidebar, .ta-chat-main {
+        width: 100% !important;
+        border-radius: 0 !important;
+        border-left: none !important;
+        border-right: none !important;
+        height: 100% !important;
+    }
+    .ta-chat-sidebar.hidden-mobile {
+        display: none !important;
+    }
+    .ta-chat-main.hidden-mobile {
+        display: none !important;
+    }
+    .ta-chat-back-btn {
+        display: flex !important;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        background: rgba(131, 42, 150, 0.1) !important;
+        border-radius: 50%;
+        color: var(--hq-primary) !important;
+        margin-left: 10px;
+    }
+    #ta-chat-msgs {
+        padding: 10px !important;
+    }
+    #ta-chat-msgs > div[id^="ta-msg-"] {
+        max-width: 90% !important;
+    }
+}
