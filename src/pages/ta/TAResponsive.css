@@ -32,6 +32,14 @@
     backdrop-filter: blur(12px);
 }
 
+/* مهم: الشريط العلوي للمساعد يلتف لعدة أسطر، فيجب أن يكبر بدل الارتفاع الثابت
+   (الافتراضي height:70px يسبب طفحان المحتوى وتداخل النصوص على الموبايل) */
+.ta-layout .ta-topbar {
+    height: auto !important;
+    min-height: var(--hq-topbar-h);
+    flex-shrink: 0;
+}
+
 /* حاوية تمرير أفقي قياسية للجداول */
 .ta-layout .ta-table-wrap,
 .ta-layout .table-responsive {
@@ -69,25 +77,39 @@
     /* الشريط العلوي للمساعد */
     .ta-layout .ta-topbar .hq-tb-left {
         gap: 10px !important;
+        flex: 1 1 auto;
+        min-width: 0;
+        flex-wrap: wrap;
+    }
+    .ta-layout .ta-topbar .hq-tb-right {
+        flex-shrink: 0;
+    }
+    /* صندوق اسم الأستاذ يأخذ المساحة المتبقية ويلتف بدل الطفحان */
+    .ta-layout .ta-topbar .ta-teacher-meta {
         flex: 1;
         min-width: 0;
     }
-    .ta-layout .ta-topbar .hq-tb-left h2 {
-        font-size: 14px !important;
+    .ta-layout .ta-topbar .ta-teacher-meta h2 {
+        font-size: 15px !important;
+        line-height: 1.3;
+        word-break: break-word;
     }
-    .ta-layout .ta-topbar .hq-tb-left p {
+    .ta-layout .ta-topbar .ta-teacher-meta p {
         font-size: 11px !important;
     }
-    /* تصغير صورة الأستاذ على الموبايل */
-    .ta-layout .ta-topbar .hq-tb-left > img,
-    .ta-layout .ta-topbar .hq-tb-left > div:first-of-type {
-        width: 38px !important;
-        height: 38px !important;
+    /* تصغير صورة/أفاتار الأستاذ على الموبايل (العنصر الذي يلي زر القائمة مباشرة فقط) */
+    .ta-layout .ta-topbar .hq-mobile-toggle + img,
+    .ta-layout .ta-topbar .hq-mobile-toggle + div {
+        width: 40px !important;
+        height: 40px !important;
+        min-width: 40px;
         font-size: 16px !important;
+        flex-shrink: 0;
     }
     .ta-layout .ta-group-select {
         min-width: 0 !important;
         width: 100%;
+        flex: 1 1 100%;
         order: 3;
     }
     .ta-layout .hq-ap-info {

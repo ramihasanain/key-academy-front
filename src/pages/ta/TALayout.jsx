@@ -162,7 +162,7 @@ const TALayoutShell = ({ profile }) => {
                         ) : (
                             <div style={{ width: '50px', height: '50px', borderRadius: '50%', background: 'var(--hq-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px', fontWeight: 'bold', color: '#fff' }}>👨‍🏫</div>
                         )}
-                        <div>
+                        <div className="ta-teacher-meta">
                             <h2 style={{ fontSize: '18px', margin: 0, color: 'var(--hq-primary)' }}>
                                 مساعدي: {headerTeacher}{headerGroup ? ` — ${headerGroup}` : ''}
                             </h2>
