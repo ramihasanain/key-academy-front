@@ -602,7 +602,7 @@ export const TAQA = () => {
             {selectedStudentId && (
                 <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(15, 23, 42, 0.75)', backdropFilter: 'blur(8px)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'auto' }}>
                     <div style={{ background: 'var(--hq-surface, #ffffff)', borderRadius: '16px', width: '90%', maxWidth: '1400px', maxHeight: '90vh', overflowY: 'auto', position: 'relative', boxShadow: '0 20px 40px rgba(0,0,0,0.5)' }}>
-                        <TAStudent360 studentIdProp={selectedStudentId} onClose={() => setSelectedStudentId(null)} />
+                        <TAStudent360 studentIdProp={selectedStudentId} groupId={activeGroupId} onClose={() => setSelectedStudentId(null)} />
                     </div>
                 </div>
             )}

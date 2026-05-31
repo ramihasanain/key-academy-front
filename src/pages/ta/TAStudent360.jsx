@@ -4,7 +4,7 @@ import { API } from '../../config'
 import { HiOutlineArrowRight, HiOutlineBookOpen, HiOutlineChartBar, HiOutlineCheckCircle, HiOutlineDocumentText, HiOutlineClipboardDocumentCheck } from 'react-icons/hi2'
 import '../hq/Admin.css'
 
-export const TAStudent360 = ({ studentIdProp, onClose }) => {
+export const TAStudent360 = ({ studentIdProp, groupId, onClose }) => {
     const params = useParams()
     const id = studentIdProp || params.id
     const navigate = useNavigate()
@@ -14,15 +14,17 @@ export const TAStudent360 = ({ studentIdProp, onClose }) => {
     useEffect(() => {
         const fetchData = async () => {
             const tk = sessionStorage.getItem('spy_token') || localStorage.getItem('access_token')
+            const groupQs = groupId ? `?group_id=${groupId}` : ''
             try {
-                const res = await fetch(`${API}/api/interactions/ta-students/${id}/360/`, {
+                const res = await fetch(`${API}/api/interactions/ta-students/${id}/360/${groupQs}`, {
                     headers: { 'Authorization': `Bearer ${tk}` }
                 })
                 if (res.ok) {
                     setData(await res.json())
                 } else {
                     alert('لا تملك صلاحية الوصول إلى بيانات هذا الطالب (خارج مجموعتك).')
-                    navigate('/ta')
+                    if (onClose) onClose()
+                    else navigate('/ta')
                 }
             } catch (e) {
                 console.error(e)
@@ -31,7 +33,7 @@ export const TAStudent360 = ({ studentIdProp, onClose }) => {
             }
         }
         fetchData()
-    }, [id, navigate])
+    }, [id, groupId, navigate, onClose])
 
     if (loading) return <div className="hq-loading" style={{ padding: '50px' }}>جاري تحميل ملف الطالب...</div>
     if (!data) return <div className="hq-loading" style={{ color: 'red' }}>لم يتم العثور على الطالب.</div>

@@ -882,7 +882,7 @@ export const TAGroups = () => {
                     <div style={{ background: 'var(--hq-bg)', width: '100%', maxWidth: '1400px', height: '100%', borderRadius: '16px', overflow: 'hidden', position: 'relative', boxShadow: '0 10px 40px rgba(0,0,0,0.2)' }}>
                         <button onClick={() => setShowStudentProfile(null)} style={{ position: 'absolute', top: '15px', right: '15px', background: 'var(--hq-primary)', color: 'white', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', zIndex: 100, fontWeight: 'bold' }}>إغلاق الملف</button>
                         <div style={{ width: '100%', height: '100%', overflowY: 'auto' }}>
-                            <TAStudent360 studentIdProp={showStudentProfile} onClose={() => setShowStudentProfile(null)} />
+                            <TAStudent360 studentIdProp={showStudentProfile} groupId={assistantGroupId} onClose={() => setShowStudentProfile(null)} />
                         </div>
                     </div>
                 </div>
