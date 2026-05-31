@@ -58,16 +58,13 @@ export const TAGroups = () => {
                 const data = await res.json()
                 setCourses(data.results || data)
             }
-            const resGr = await fetch(API + '/api/hq/coursegroups/?page_size=5000', {
-                headers: { 'Authorization': `Bearer ${tk}` }
-            })
+            const resGr = await fetch(
+                API + `/api/hq/coursegroups/?page_size=5000${assistantGroupId ? `&group_id=${assistantGroupId}` : ''}`,
+                { headers: { 'Authorization': `Bearer ${tk}` } }
+            )
             if (resGr.ok) {
                 const dataGr = await resGr.json()
-                let fetchedGroups = dataGr.results || dataGr
-                if (assistantGroup?.chat_shard_ids?.length) {
-                    const shardSet = new Set(assistantGroup.chat_shard_ids)
-                    fetchedGroups = fetchedGroups.filter(g => shardSet.has(g.id))
-                }
+                const fetchedGroups = dataGr.results || dataGr
                 setGroups(fetchedGroups)
                 if (fetchedGroups.length > 0) {
                      const first = fetchedGroups[0];
