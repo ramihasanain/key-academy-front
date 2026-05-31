@@ -123,7 +123,8 @@ const LiveChat = ({ courseId, userData, lessonId = null }) => {
                 }));
             } else if (data.message) {
                 setMessages(prev => {
-                    return [...prev.filter(m => m.id !== data.message.id), data.message]
+                    const withoutTemps = prev.filter(m => !String(m.id).startsWith('temp-'))
+                    return [...withoutTemps.filter(m => m.id !== data.message.id), data.message]
                 })
                 // Track unread notifications for the tab that's NOT active
                 const isMsgPrivate = data.message.is_private === true
@@ -203,6 +204,14 @@ const LiveChat = ({ courseId, userData, lessonId = null }) => {
         }
     };
 
+    const appendMessage = (msg) => {
+        setMessages(prev => {
+            const withoutTemps = prev.filter(m => !String(m.id).startsWith('temp-'))
+            if (withoutTemps.find(m => m.id === msg.id)) return withoutTemps
+            return [...withoutTemps, msg]
+        })
+    }
+
     const handleSend = async () => {
         if (!input.trim() && !file && !audioBlob) return
 
@@ -227,14 +236,33 @@ const LiveChat = ({ courseId, userData, lessonId = null }) => {
             setReplyingTo(null)
 
             const tk = localStorage.getItem('access_token')
-            await fetch(API + '/api/interactions/group-chat/', {
+            const res = await fetch(API + '/api/interactions/group-chat/', {
                 method: 'POST',
                 headers: { 'Authorization': `Bearer ${tk}` },
                 body: fd
             })
+            if (res.ok) {
+                const msg = await res.json()
+                appendMessage(msg)
+            }
         } else {
-            if (!socket) return
-            const payload = { content: input, is_private: chatType === 'private', lesson_id: lessonId }
+            if (!socket || socket.readyState !== WebSocket.OPEN) return
+            const trimmed = input.trim()
+            const tempMsg = {
+                id: `temp-${Date.now()}`,
+                content: trimmed,
+                sender: {
+                    id: userData?.id,
+                    full_name: userData?.full_name || userData?.first_name || 'أنت',
+                    username: userData?.username || '',
+                    role: userData?.role || 'student',
+                },
+                sender_role: userData?.role || 'student',
+                is_private: chatType === 'private',
+                created_at: new Date().toISOString(),
+            }
+            appendMessage(tempMsg)
+            const payload = { content: trimmed, is_private: chatType === 'private', lesson_id: lessonId }
             if (replyingTo) payload.reply_to_id = replyingTo.id
             socket.send(JSON.stringify(payload))
             setInput('')

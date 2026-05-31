@@ -126,8 +126,9 @@ export const TAGroups = () => {
                 }));
             } else if (data.message) {
                 setMessages(prev => {
-                    if (prev.find(m => m.id === data.message.id)) return prev;
-                    return [...prev, data.message];
+                    const withoutTemps = prev.filter(m => !String(m.id).startsWith('temp-'))
+                    if (withoutTemps.find(m => m.id === data.message.id)) return withoutTemps
+                    return [...withoutTemps, data.message]
                 });
 
                 // Update inbox unread counts for private messages
@@ -379,6 +380,14 @@ export const TAGroups = () => {
         }
     };
 
+    const appendMessage = (msg) => {
+        setMessages(prev => {
+            const withoutTemps = prev.filter(m => !String(m.id).startsWith('temp-'))
+            if (withoutTemps.find(m => m.id === msg.id)) return withoutTemps
+            return [...withoutTemps, msg]
+        })
+    }
+
     const sendMessage = async () => {
         if (!messageText.trim() && !file && !audioBlob) return
 
@@ -408,16 +417,35 @@ export const TAGroups = () => {
             setReplyingTo(null)
             
             const tk = sessionStorage.getItem('spy_token') || localStorage.getItem('access_token');
-            await fetch(API + '/api/interactions/group-chat/', {
+            const res = await fetch(API + '/api/interactions/group-chat/', {
                 method: 'POST',
                 headers: { 'Authorization': `Bearer ${tk}` },
                 body: fd
             })
+            if (res.ok) {
+                appendMessage(await res.json())
+            }
         } else {
             // For text-only messages, use WebSocket for instant delivery
             if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+                const trimmed = messageText
+                const tempMsg = {
+                    id: `temp-${Date.now()}`,
+                    content: trimmed,
+                    sender: {
+                        id: null,
+                        full_name: 'مساعد المادة',
+                        username: 'assistant',
+                        role: 'assistant',
+                    },
+                    sender_role: 'assistant',
+                    is_private: privateTarget !== null,
+                    recipient_id: privateTarget ? privateTarget.id : 0,
+                    created_at: new Date().toISOString(),
+                }
+                appendMessage(tempMsg)
                 const payload = {
-                    content: messageText,
+                    content: trimmed,
                     is_private: privateTarget !== null,
                     recipient_id: privateTarget ? privateTarget.id : null,
                     reply_to_id: replyingTo ? replyingTo.id : null
