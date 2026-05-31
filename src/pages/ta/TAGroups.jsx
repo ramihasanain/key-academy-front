@@ -486,7 +486,7 @@ export const TAGroups = () => {
                                     fontWeight: !privateTarget && activeGroupId === g.id ? 'bold' : 'normal',
                                 }}
                             >
-                                💬 {g.course_title || courses.find(c => c.id === g.course)?.title || 'دورة'} — مجموعة {g.index}
+                                💬 {g.label || `دردشة ${g.course_title || 'الأستاذ'} — مجموعة ${g.index}`}
                                 {g.students_count != null && (
                                     <span style={{ fontSize: '11px', color: 'var(--hq-text-muted)', marginRight: '6px' }}>({g.students_count})</span>
                                 )}
