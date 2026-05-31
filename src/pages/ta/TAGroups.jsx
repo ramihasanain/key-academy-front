@@ -51,21 +51,20 @@ export const TAGroups = () => {
         
         const fetchCourses = async () => {
             const tk = sessionStorage.getItem('spy_token') || localStorage.getItem('access_token');
-            const coursesQs = assistantGroupId ? `?group_id=${assistantGroupId}` : ''
-            const res = await fetch(API + `/api/hq/courses/${coursesQs}`, {
+            const groupQs = assistantGroupId ? `?group_id=${assistantGroupId}` : ''
+            const res = await fetch(API + `/api/hq/courses${groupQs}`, {
                 headers: { 'Authorization': `Bearer ${tk}` }
             })
             if (res.ok) {
                 const data = await res.json()
                 setCourses(data.results || data)
             }
-            const resGr = await fetch(
-                API + `/api/hq/coursegroups/?page_size=5000${assistantGroupId ? `&group_id=${assistantGroupId}` : ''}`,
-                { headers: { 'Authorization': `Bearer ${tk}` } }
-            )
+            const resGr = await fetch(API + `/api/interactions/ta-chat-rooms${groupQs}`, {
+                headers: { 'Authorization': `Bearer ${tk}` }
+            })
             if (resGr.ok) {
                 const dataGr = await resGr.json()
-                const fetchedGroups = dataGr.results || dataGr
+                const fetchedGroups = dataGr.rooms || []
                 setGroups(fetchedGroups)
                 if (fetchedGroups.length > 0) {
                      const first = fetchedGroups[0];
@@ -469,17 +468,31 @@ export const TAGroups = () => {
                 <h3 style={{ color: 'var(--hq-primary)', margin: '0 0 20px 0', fontSize: '16px' }}>قائمة الدردشة</h3>
                 
                 {groups.length === 0 ? (
-                    <div style={{ color: 'var(--hq-text-muted)', fontSize: '0.8rem', paddingRight: '10px' }}>لا توجد لك مجموعات محددة مسندة لك</div>
+                    <div style={{ color: 'var(--hq-text-muted)', fontSize: '0.8rem', paddingRight: '10px' }}>لا توجد مجموعات دردشة لطلاب هذه المجموعة. تأكد من تسجيل الطلاب في دورات الأستاذ.</div>
                 ) : (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                        {/* Global Chat */}
-                        <div
-                            onClick={() => { setPrivateTarget(null); setMobileView('chat'); }}
-                            style={{ padding: '10px', cursor: 'pointer', fontSize: '14px', background: privateTarget === null ? 'rgba(131, 42, 150, 0.1)' : 'transparent', color: privateTarget === null ? 'var(--hq-primary)' : 'var(--hq-text-main)', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '8px', fontWeight: privateTarget === null ? 'bold' : 'normal' }}
-                        >
-                            🌍 مجموعة الدورة العامة
-                        </div>
-                        
+                        <div style={{ margin: '0 0 8px 0', fontSize: '12px', color: 'var(--hq-text-muted)', fontWeight: 'bold' }}>مجموعات الدردشة</div>
+                        {groups.map(g => (
+                            <div
+                                key={g.id}
+                                onClick={() => handleSelectGroup(g.course, g.id)}
+                                style={{
+                                    padding: '10px',
+                                    cursor: 'pointer',
+                                    fontSize: '13px',
+                                    background: !privateTarget && activeGroupId === g.id ? 'rgba(131, 42, 150, 0.12)' : 'transparent',
+                                    color: !privateTarget && activeGroupId === g.id ? 'var(--hq-primary)' : 'var(--hq-text-main)',
+                                    borderRadius: '8px',
+                                    fontWeight: !privateTarget && activeGroupId === g.id ? 'bold' : 'normal',
+                                }}
+                            >
+                                💬 {g.course_title || courses.find(c => c.id === g.course)?.title || 'دورة'} — مجموعة {g.index}
+                                {g.students_count != null && (
+                                    <span style={{ fontSize: '11px', color: 'var(--hq-text-muted)', marginRight: '6px' }}>({g.students_count})</span>
+                                )}
+                            </div>
+                        ))}
+
                         <div style={{ margin: '15px 0 5px 0', fontSize: '12px', color: 'var(--hq-text-muted)', fontWeight: 'bold' }}>رسائل الطلاب الخاصة</div>
 
                         {/* Private Inbox Contacts */}
