@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { API } from '../../config'
+import { useTAActiveGroup } from '../../contexts/TAActiveGroupContext'
 import { HiOutlineArrowRight, HiOutlineBookOpen, HiOutlineChartBar, HiOutlineCheckCircle, HiOutlineDocumentText, HiOutlineClipboardDocumentCheck } from 'react-icons/hi2'
 import '../hq/Admin.css'
 
@@ -8,13 +9,15 @@ export const TAStudent360 = ({ studentIdProp, groupId, onClose }) => {
     const params = useParams()
     const id = studentIdProp || params.id
     const navigate = useNavigate()
+    const { activeGroupId } = useTAActiveGroup()
+    const effectiveGroupId = groupId ?? activeGroupId
     const [data, setData] = useState(null)
     const [loading, setLoading] = useState(true)
 
     useEffect(() => {
         const fetchData = async () => {
             const tk = sessionStorage.getItem('spy_token') || localStorage.getItem('access_token')
-            const groupQs = groupId ? `?group_id=${groupId}` : ''
+            const groupQs = effectiveGroupId ? `?group_id=${effectiveGroupId}` : ''
             try {
                 const res = await fetch(`${API}/api/interactions/ta-students/${id}/360/${groupQs}`, {
                     headers: { 'Authorization': `Bearer ${tk}` }
@@ -33,7 +36,7 @@ export const TAStudent360 = ({ studentIdProp, groupId, onClose }) => {
             }
         }
         fetchData()
-    }, [id, groupId, navigate, onClose])
+    }, [id, effectiveGroupId, navigate, onClose])
 
     if (loading) return <div className="hq-loading" style={{ padding: '50px' }}>جاري تحميل ملف الطالب...</div>
     if (!data) return <div className="hq-loading" style={{ color: 'red' }}>لم يتم العثور على الطالب.</div>
