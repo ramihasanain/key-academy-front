@@ -75,7 +75,7 @@ export const AdminLayout = () => {
             'contactmessages': 'view_contactmessage', 'faqs': 'view_faqitem',
             'muted-students': 'view_user',
             'moderation-history': 'view_user',
-            'ta-manager': 'view_teacherassistant'
+            'ta-manager': 'view_ta_performance'
         }
         const needed = pathMap[modelPath]
         if (!needed) return true // default open if not strictly mapped

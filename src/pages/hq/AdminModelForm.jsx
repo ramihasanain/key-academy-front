@@ -238,6 +238,10 @@ export const AdminModelForm = () => {
         { action: 'view', label: 'عرض' }
     ]
 
+    const FEATURE_PERMISSIONS = [
+        { code: 'teachers.view_ta_performance', label: 'أداء المساعدين (تقييم)' },
+    ]
+
     const handlePermToggle = (permCode) => {
         setFormData(prev => {
             const list = prev.permissions_list || []
@@ -453,6 +457,34 @@ export const AdminModelForm = () => {
                                         ))}
                                     </tbody>
                                 </table>
+
+                                <h4 style={{ marginTop: '24px', marginBottom: '12px', color: 'var(--hq-primary)' }}>صلاحيات الصفحات الخاصة</h4>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                    {FEATURE_PERMISSIONS.map((feat) => (
+                                        <label
+                                            key={feat.code}
+                                            style={{
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: '10px',
+                                                padding: '12px 14px',
+                                                borderRadius: '10px',
+                                                border: '1px solid var(--hq-border)',
+                                                background: 'var(--hq-bg)',
+                                                cursor: 'pointer',
+                                                fontWeight: 600,
+                                            }}
+                                        >
+                                            <input
+                                                type="checkbox"
+                                                checked={hasPerm(feat.code)}
+                                                onChange={() => handlePermToggle(feat.code)}
+                                                style={{ width: '18px', height: '18px', cursor: 'pointer', accentColor: 'var(--hq-primary)' }}
+                                            />
+                                            {feat.label}
+                                        </label>
+                                    ))}
+                                </div>
                             </div>
                         )}
 
