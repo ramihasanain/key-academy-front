@@ -79,7 +79,7 @@ export const TAExams = () => {
     if (loading) return <div className="ta-loading">جاري جلب قائمة الامتحانات...</div>
 
     return (
-        <div style={{ padding: '20px' }}>
+        <div className="ta-page" style={{ padding: '20px' }}>
             <h2 style={{ marginBottom: '20px', color: '#0f172a' }}>الامتحانات الأسبوعية - التصحيح والمتابعة</h2>
 
             <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap' }}>
@@ -104,7 +104,7 @@ export const TAExams = () => {
                 <div style={{ marginTop: '40px', background: 'white', borderRadius: '16px', padding: '20px', boxShadow: '0 4px 15px rgba(0,0,0,0.05)' }}>
                     <h3 style={{ marginBottom: '20px', color: '#1e293b' }}>تفاصيل وإحصائيات التسليم - {selectedExam.title}</h3>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px', marginBottom: '30px' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 200px), 1fr))', gap: '20px', marginBottom: '30px' }}>
                         <div style={{ background: '#f8fafc', padding: '20px', borderRadius: '12px', border: '1px solid #e2e8f0', textAlign: 'center' }}>
                             <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#3b82f6' }}>{selectedExam.total_students || 0}</div>
                             <div style={{ color: '#64748b', fontSize: '0.95rem', marginTop: '5px', fontWeight: 'bold' }}>إجمالي الطلاب المسجلين</div>
@@ -126,6 +126,7 @@ export const TAExams = () => {
                     <h3 style={{ marginBottom: '20px', color: '#1e293b', borderTop: '1px dashed #e2e8f0', paddingTop: '20px' }}>أوراق طلابك للتصحيح</h3>
                     
                     {submissions.length > 0 ? (
+                        <div className="ta-table-wrap">
                         <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'right' }}>
                             <thead>
                                 <tr style={{ borderBottom: '2px solid #f1f5f9', background: '#f8fafc' }}>
@@ -178,6 +179,7 @@ export const TAExams = () => {
                                 ))}
                             </tbody>
                         </table>
+                        </div>
                     ) : (
                         <p style={{ textAlign: 'center', color: '#64748b' }}>لا يوجد أي تسليم من طلاب مجموعتك لهذا الامتحان بعد.</p>
                     )}

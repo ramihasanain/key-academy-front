@@ -485,7 +485,7 @@ export const TAGroups = () => {
     }
 
     return (
-        <div className="ta-chat-layout" style={{ display: 'flex', height: 'calc(100vh - 100px)', gap: '20px' }}>
+        <div className="ta-chat-layout" style={{ display: 'flex', gap: '20px' }}>
             {/* Left Sidebar: Select Course & Group */}
             <div className={`ta-chat-sidebar ${mobileView === 'chat' ? 'hidden-mobile' : ''}`} style={{ width: '250px', background: 'var(--hq-surface)', border: '1px solid var(--hq-border)', borderRadius: '12px', padding: '15px', overflowY: 'auto' }}>
                 <h3 style={{ color: 'var(--hq-primary)', margin: '0 0 20px 0', fontSize: '16px' }}>قائمة الدردشة</h3>
@@ -878,8 +878,8 @@ export const TAGroups = () => {
             )}
 
             {showStudentProfile && (
-                <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(0,0,0,0.6)', zIndex: 9999, display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '40px' }}>
-                    <div style={{ background: 'var(--hq-bg)', width: '100%', maxWidth: '1400px', height: '100%', borderRadius: '16px', overflow: 'hidden', position: 'relative', boxShadow: '0 10px 40px rgba(0,0,0,0.2)' }}>
+                <div className="ta-modal-overlay" style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(0,0,0,0.6)', zIndex: 9999, display: 'flex', justifyContent: 'center', alignItems: 'center', padding: 'clamp(0px, 4vw, 40px)' }}>
+                    <div className="ta-modal-fullscreen" style={{ background: 'var(--hq-bg)', width: '100%', maxWidth: '1400px', height: '100%', borderRadius: '16px', overflow: 'hidden', position: 'relative', boxShadow: '0 10px 40px rgba(0,0,0,0.2)' }}>
                         <button onClick={() => setShowStudentProfile(null)} style={{ position: 'absolute', top: '15px', right: '15px', background: 'var(--hq-primary)', color: 'white', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', zIndex: 100, fontWeight: 'bold' }}>إغلاق الملف</button>
                         <div style={{ width: '100%', height: '100%', overflowY: 'auto' }}>
                             <TAStudent360 studentIdProp={showStudentProfile} groupId={assistantGroupId} onClose={() => setShowStudentProfile(null)} />

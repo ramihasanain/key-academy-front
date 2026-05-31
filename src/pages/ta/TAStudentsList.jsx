@@ -39,7 +39,7 @@ export const TAStudentsList = () => {
     }
 
     return (
-        <div style={{ padding: '20px 30px', maxWidth: '1400px', margin: '0 auto' }}>
+        <div className="ta-page" style={{ padding: '20px 30px', maxWidth: '1400px', margin: '0 auto' }}>
             <div style={{ marginBottom: '30px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '20px' }}>
                 <div>
                     <h1 style={{ fontSize: '24px', margin: 0, color: 'var(--hq-primary-text)', display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -75,7 +75,7 @@ export const TAStudentsList = () => {
                 ) : students.length === 0 ? (
                     <div style={{ padding: '50px', textAlign: 'center', color: 'var(--hq-text-muted)' }}>لا يوجد طلاب يتطابقون مع بحثك.</div>
                 ) : (
-                    <div className="table-responsive">
+                    <div className="table-responsive ta-table-wrap">
                         <table style={{ width: '100%', textAlign: 'right', borderCollapse: 'collapse' }}>
                             <thead style={{ background: 'rgba(255,255,255,0.02)', borderBottom: '1px solid var(--hq-border)' }}>
                                 <tr>

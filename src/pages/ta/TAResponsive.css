@@ -1,0 +1,175 @@
+/* =====================================================================
+   TA (المساعدين) MOBILE RESPONSIVE — Cross-browser (Safari iOS + Chrome)
+   كل القواعد محصورة داخل .ta-layout حتى لا تتأثر لوحة الإدارة (HQ).
+   ===================================================================== */
+
+/* ---- إصلاح ارتفاع الشاشة على iOS Safari (شريط العنوان يقص المحتوى) ---- */
+.hq-layout.ta-layout {
+    height: 100vh;
+    height: 100dvh;
+    overflow-x: hidden;
+    max-width: 100vw;
+}
+@supports (-webkit-touch-callout: none) {
+    .hq-layout.ta-layout {
+        height: -webkit-fill-available;
+    }
+}
+
+/* منع أي عنصر مرن من توسيع العرض وكسر التخطيط */
+.ta-layout .hq-main {
+    min-width: 0;
+    max-width: 100%;
+}
+.ta-layout .hq-content {
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* بادئة Safari للـ backdrop-filter في الـ topbar */
+.ta-layout .hq-topbar {
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+}
+
+/* حاوية تمرير أفقي قياسية للجداول */
+.ta-layout .ta-table-wrap,
+.ta-layout .table-responsive {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* القائمة المنسدلة للمجموعات */
+.ta-layout .ta-group-select {
+    max-width: 100%;
+}
+
+/* ============================ TABLET (≤1024px) ============================ */
+@media (max-width: 1024px) {
+    .ta-layout .hq-content {
+        padding: 20px;
+    }
+}
+
+/* ============================ MOBILE (≤768px) ============================ */
+@media (max-width: 768px) {
+    /* مساحة آمنة لنوتش الآيفون */
+    .ta-layout .hq-topbar {
+        padding: 12px 15px !important;
+        padding-right: max(15px, env(safe-area-inset-right)) !important;
+        padding-left: max(15px, env(safe-area-inset-left)) !important;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    .ta-layout .hq-sb-footer {
+        padding-bottom: max(20px, env(safe-area-inset-bottom));
+    }
+
+    /* الشريط العلوي للمساعد */
+    .ta-layout .ta-topbar .hq-tb-left {
+        gap: 10px !important;
+        flex: 1;
+        min-width: 0;
+    }
+    .ta-layout .ta-topbar .hq-tb-left h2 {
+        font-size: 14px !important;
+    }
+    .ta-layout .ta-topbar .hq-tb-left p {
+        font-size: 11px !important;
+    }
+    /* تصغير صورة الأستاذ على الموبايل */
+    .ta-layout .ta-topbar .hq-tb-left > img,
+    .ta-layout .ta-topbar .hq-tb-left > div:first-of-type {
+        width: 38px !important;
+        height: 38px !important;
+        font-size: 16px !important;
+    }
+    .ta-layout .ta-group-select {
+        min-width: 0 !important;
+        width: 100%;
+        order: 3;
+    }
+    .ta-layout .hq-ap-info {
+        display: none;
+    }
+
+    /* المحتوى */
+    .ta-layout .hq-content {
+        padding: 14px;
+    }
+    .ta-layout .ta-page {
+        padding: 14px !important;
+        max-width: 100% !important;
+    }
+    .ta-layout .ta-page h1 {
+        font-size: 20px !important;
+    }
+
+    /* الجداول: تمرير أفقي سلس بدل الفيضان */
+    .ta-layout .ta-table-wrap > table,
+    .ta-layout .table-responsive > table,
+    .ta-layout .ta-page table {
+        display: block;
+        width: 100%;
+        overflow-x: auto;
+        white-space: nowrap;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* أهداف لمس أكبر */
+    .ta-layout .hq-nav-link {
+        padding: 14px 16px;
+    }
+    .ta-layout button,
+    .ta-layout .hq-nav-link {
+        min-height: 40px;
+    }
+
+    /* المودالات تملأ الشاشة على الموبايل */
+    .ta-layout .ta-modal-overlay {
+        padding: 0 !important;
+    }
+    .ta-layout .ta-modal-fullscreen {
+        width: 100% !important;
+        height: 100% !important;
+        max-width: 100% !important;
+        max-height: 100% !important;
+        border-radius: 0 !important;
+    }
+
+    /* ملف الطالب 360: عمود واحد على الموبايل */
+    .ta-layout .ta-360-grid {
+        grid-template-columns: 1fr !important;
+    }
+    .ta-layout .hq-form-wrap {
+        padding: 14px !important;
+    }
+}
+
+/* ============================ SMALL PHONES (≤480px) ============================ */
+@media (max-width: 480px) {
+    .ta-layout .hq-content {
+        padding: 10px;
+    }
+    .ta-layout .ta-page {
+        padding: 10px !important;
+    }
+    .ta-layout .ta-page h1 {
+        font-size: 18px !important;
+    }
+    /* بطاقات الإحصائيات والشبكات لعمود واحد */
+    .ta-layout .ta-grid-cards,
+    .ta-layout .ta-grid-two {
+        grid-template-columns: 1fr !important;
+        gap: 14px !important;
+    }
+    .ta-layout .hq-sidebar {
+        width: 85vw !important;
+        max-width: 320px;
+    }
+    /* تصغير الشعار في الشريط العلوي */
+    .ta-layout .ta-topbar .hq-tb-left h2 {
+        font-size: 13px !important;
+    }
+}

@@ -79,7 +79,7 @@ export const TAMutedStudents = () => {
     if (isLoading) return <div className="hq-loading">جاري تحميل قائمة المحظورين...</div>
 
     return (
-        <div style={{ padding: '20px' }}>
+        <div className="ta-page" style={{ padding: '20px' }}>
             <div style={{ marginBottom: '30px' }}>
                 <h1 style={{ fontSize: '24px', margin: 0, fontWeight: '800', color: 'var(--hq-primary)', display: 'flex', alignItems: 'center', gap: '10px' }}>
                     <HiOutlineNoSymbol /> قائمة الطلاب المحظورين
@@ -96,6 +96,7 @@ export const TAMutedStudents = () => {
                 </div>
             ) : (
                 <div className="hq-card" style={{ padding: 0, overflow: 'hidden', border: '1px solid var(--hq-border)' }}>
+                    <div className="ta-table-wrap">
                     <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'right' }}>
                         <thead>
                         <tr style={{ background: 'rgba(0,0,0,0.2)', borderBottom: '1px solid var(--hq-border)' }}>
@@ -165,6 +166,7 @@ export const TAMutedStudents = () => {
                             ))}
                         </tbody>
                     </table>
+                    </div>
                 </div>
             )}
 

@@ -70,7 +70,7 @@ export const TAStudent360 = ({ studentIdProp, groupId, onClose }) => {
             </div>
 
             {/* KPIs */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px', marginBottom: '30px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 200px), 1fr))', gap: '15px', marginBottom: '30px' }}>
                 <div className="hq-stat-card" style={{ padding: '15px' }}>
                     <div className="hq-sc-icon" style={{ background: 'rgba(251, 191, 36, 0.1)', color: '#fbbf24', width: '40px', height: '40px' }}><HiOutlineChartBar size={20} /></div>
                     <div className="hq-sc-info">
@@ -97,7 +97,7 @@ export const TAStudent360 = ({ studentIdProp, groupId, onClose }) => {
             </div>
 
             {/* Main Layout 2 Columns */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: '20px', alignItems: 'start' }}>
+            <div className="ta-360-grid" style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: '20px', alignItems: 'start' }}>
 
                 {/* Left Column: Progress & Watch History */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>

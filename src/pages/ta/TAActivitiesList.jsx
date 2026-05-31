@@ -63,7 +63,7 @@ export const TAActivitiesList = () => {
     if (loading) return <div className="hq-loading">جاري تحميل الأنشطة...</div>
 
     return (
-        <div style={{ padding: '20px 30px', maxWidth: '1000px', margin: '0 auto' }}>
+        <div className="ta-page" style={{ padding: '20px 30px', maxWidth: '1000px', margin: '0 auto' }}>
             <div style={{ marginBottom: '35px', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '20px', display: 'flex', alignItems: 'center', gap: '15px' }}>
                 <button onClick={() => navigate(-1)} style={{ background: 'rgba(255,255,255,0.05)', border: 'none', color: 'white', padding: '10px', borderRadius: '10px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <HiOutlineArrowRight size={20} />

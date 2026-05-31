@@ -32,7 +32,7 @@ export const TAModerationHistory = () => {
     if (loading) return <div className="hq-loading">جاري تحميل سجل الرقابة...</div>
 
     return (
-        <div style={{ padding: '20px' }}>
+        <div className="ta-page" style={{ padding: '20px' }}>
             <div style={{ marginBottom: '30px' }}>
                 <h1 style={{ fontSize: '24px', margin: 0, fontWeight: '800', color: 'var(--hq-primary)', display: 'flex', alignItems: 'center', gap: '10px' }}>
                     <HiOutlineClock /> سجل الرقابة والعقوبات (طلاب مجموعتك)
@@ -41,6 +41,7 @@ export const TAModerationHistory = () => {
             </div>
 
             <div className="hq-card" style={{ padding: 0, overflow: 'hidden', border: '1px solid var(--hq-border)' }}>
+                <div className="ta-table-wrap">
                 <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'right' }}>
                     <thead>
                         <tr style={{ background: 'rgba(0,0,0,0.2)', borderBottom: '1px solid var(--hq-border)' }}>
@@ -93,6 +94,7 @@ export const TAModerationHistory = () => {
                         ))}
                     </tbody>
                 </table>
+                </div>
             </div>
         </div>
     )

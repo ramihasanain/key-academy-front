@@ -141,7 +141,7 @@ export const TANotebook = () => {
     }
 
     return (
-        <div style={{ padding: '20px', minHeight: '100%', color: 'var(--hq-text-main)' }}>
+        <div className="ta-page" style={{ padding: '20px', minHeight: '100%', color: 'var(--hq-text-main)' }}>
             {/* Header Area */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
                 <div>
@@ -185,7 +185,7 @@ export const TANotebook = () => {
                     <p>ابدأ بكتابة خطتك أو قائمة المهام اليومية للمتابعة.</p>
                 </div>
             ) : (
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '20px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 300px), 1fr))', gap: '20px' }}>
                     {filteredNotes.map(n => (
                         <div
                             key={n.id}

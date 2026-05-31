@@ -75,7 +75,7 @@ export const TAStudentStats = () => {
     if (loading) return <div className="hq-loading">جاري تحليل الأداء...</div>
 
     return (
-        <div style={{ padding: '20px 30px', maxWidth: '1400px', margin: '0 auto' }}>
+        <div className="ta-page" style={{ padding: '20px 30px', maxWidth: '1400px', margin: '0 auto' }}>
             <div style={{ marginBottom: '35px', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '20px' }}>
                 <h1 style={{
                     fontSize: '28px', margin: 0, fontWeight: '900',
@@ -92,7 +92,7 @@ export const TAStudentStats = () => {
             </div>
 
             {/* Top Stat Cards */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px', marginBottom: '35px' }}>
+            <div className="ta-grid-cards" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 280px), 1fr))', gap: '20px', marginBottom: '35px' }}>
                 <div style={{
                     background: 'linear-gradient(135deg, rgba(56, 189, 248, 0.1), rgba(56, 189, 248, 0.02))',
                     border: '1px solid rgba(56, 189, 248, 0.2)',
@@ -142,7 +142,7 @@ export const TAStudentStats = () => {
                 </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '30px' }}>
+            <div className="ta-grid-two" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 400px), 1fr))', gap: '30px' }}>
                 {/* Left Column: Leaderboard */}
                 <div>
                     <div className="hq-card" style={{ padding: 0, overflow: 'hidden', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '20px' }}>
@@ -152,6 +152,7 @@ export const TAStudentStats = () => {
                                 لوحة الشرف (أفضل 10 طلاب)
                             </h3>
                         </div>
+                        <div className="ta-table-wrap">
                         <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'right' }}>
                             <tbody>
                                 {(!stats?.leaderboard || stats.leaderboard.length === 0) ? (
@@ -181,6 +182,7 @@ export const TAStudentStats = () => {
                                 ))}
                             </tbody>
                         </table>
+                        </div>
                     </div>
                 </div>
 
@@ -264,7 +266,7 @@ export const TAStudentStats = () => {
                         القائمة الشاملة للطلاب
                     </h3>
                 </div>
-                <div style={{ overflowX: 'auto' }}>
+                <div className="ta-table-wrap" style={{ overflowX: 'auto' }}>
                     <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'right' }}>
                         <thead>
                             <tr style={{ background: 'rgba(255,255,255,0.02)', borderBottom: '1px solid rgba(255,255,255,0.06)', color: 'var(--hq-text-muted)' }}>

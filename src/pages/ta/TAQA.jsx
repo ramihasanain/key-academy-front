@@ -208,7 +208,7 @@ export const TAQA = () => {
     const nextLessonId = currentLessonIndex !== -1 && currentLessonIndex < lessonsList.length - 1 ? lessonsList[currentLessonIndex + 1].id : null
 
     return (
-        <div style={{ padding: '20px' }}>
+        <div className="ta-page" style={{ padding: '20px' }}>
             <div style={{ display: 'flex', gap: '20px', marginBottom: '20px', borderBottom: '1px solid var(--hq-border)', paddingBottom: '15px' }}>
                 <button
                     onClick={() => setTab('pending')}
@@ -390,7 +390,7 @@ export const TAQA = () => {
                     ))}
                 </div>
             ) : (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', gap: '20px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 350px), 1fr))', gap: '20px' }}>
                 {displayPosts.map(p => (
                     <div key={p.id} style={{
                         background: 'var(--hq-surface)',
@@ -600,8 +600,8 @@ export const TAQA = () => {
                 </div>
             )}
             {selectedStudentId && (
-                <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(15, 23, 42, 0.75)', backdropFilter: 'blur(8px)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'auto' }}>
-                    <div style={{ background: 'var(--hq-surface, #ffffff)', borderRadius: '16px', width: '90%', maxWidth: '1400px', maxHeight: '90vh', overflowY: 'auto', position: 'relative', boxShadow: '0 20px 40px rgba(0,0,0,0.5)' }}>
+                <div className="ta-modal-overlay" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(15, 23, 42, 0.75)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'auto' }}>
+                    <div className="ta-modal-fullscreen" style={{ background: 'var(--hq-surface, #ffffff)', borderRadius: '16px', width: '90%', maxWidth: '1400px', maxHeight: '90vh', overflowY: 'auto', position: 'relative', boxShadow: '0 20px 40px rgba(0,0,0,0.5)' }}>
                         <TAStudent360 studentIdProp={selectedStudentId} groupId={activeGroupId} onClose={() => setSelectedStudentId(null)} />
                     </div>
                 </div>

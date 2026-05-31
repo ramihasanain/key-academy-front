@@ -14,6 +14,7 @@ import {
     HiOutlineVideoCamera
 } from 'react-icons/hi2'
 import '../hq/Admin.css'
+import './TAResponsive.css'
 
 const TALayoutShell = ({ profile }) => {
     const navigate = useNavigate()
@@ -153,7 +154,7 @@ const TALayoutShell = ({ profile }) => {
             <div className={`hq-mobile-overlay ${isMobileOpen ? 'mobile-open' : ''}`} onClick={() => setIsMobileOpen(false)}></div>
 
             <div className="hq-main">
-                <header className="hq-topbar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '15px 30px', flexWrap: 'wrap', gap: '12px' }}>
+                <header className="hq-topbar ta-topbar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '15px 30px', flexWrap: 'wrap', gap: '12px' }}>
                     <div className="hq-tb-left" style={{ display: 'flex', alignItems: 'center', gap: '20px', flexWrap: 'wrap' }}>
                         <button className="hq-mobile-toggle" onClick={() => setIsMobileOpen(!isMobileOpen)}>☰</button>
                         {profile?.ta_info?.teacher_image ? (
@@ -169,6 +170,7 @@ const TALayoutShell = ({ profile }) => {
                         </div>
                         {groups.length > 1 && (
                             <select
+                                className="ta-group-select"
                                 value={activeGroupId || ''}
                                 onChange={e => setActiveGroupId(parseInt(e.target.value, 10))}
                                 style={{
