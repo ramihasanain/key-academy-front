@@ -127,7 +127,7 @@ export const TAExams = () => {
                     
                     {submissions.length > 0 ? (
                         <div className="ta-table-wrap">
-                        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'right' }}>
+                        <table className="ta-wide-table" style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'right' }}>
                             <thead>
                                 <tr style={{ borderBottom: '2px solid #f1f5f9', background: '#f8fafc' }}>
                                     <th style={{ padding: '15px' }}>الطالب</th>

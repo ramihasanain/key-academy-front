@@ -267,7 +267,7 @@ export const TAStudentStats = () => {
                     </h3>
                 </div>
                 <div className="ta-table-wrap" style={{ overflowX: 'auto' }}>
-                    <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'right' }}>
+                    <table className="ta-wide-table" style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'right' }}>
                         <thead>
                             <tr style={{ background: 'rgba(255,255,255,0.02)', borderBottom: '1px solid rgba(255,255,255,0.06)', color: 'var(--hq-text-muted)' }}>
                                 <th style={{ padding: '15px' }}>اسم الطالب</th>

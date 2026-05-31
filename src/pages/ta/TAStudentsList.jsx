@@ -76,7 +76,7 @@ export const TAStudentsList = () => {
                     <div style={{ padding: '50px', textAlign: 'center', color: 'var(--hq-text-muted)' }}>لا يوجد طلاب يتطابقون مع بحثك.</div>
                 ) : (
                     <div className="table-responsive ta-table-wrap">
-                        <table style={{ width: '100%', textAlign: 'right', borderCollapse: 'collapse' }}>
+                        <table className="ta-wide-table" style={{ width: '100%', textAlign: 'right', borderCollapse: 'collapse' }}>
                             <thead style={{ background: 'rgba(255,255,255,0.02)', borderBottom: '1px solid var(--hq-border)' }}>
                                 <tr>
                                     <th style={{ padding: '15px 20px', color: 'var(--hq-text-muted)', fontWeight: 'bold' }}>الطالب</th>

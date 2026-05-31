@@ -26,6 +26,20 @@
     -webkit-overflow-scrolling: touch;
 }
 
+/* صفحة الدردشة فقط: اجعل المحتوى عموداً مرناً حتى تملأ الدردشة المساحة المتبقية
+   تحت الشريط العلوي مهما كان ارتفاعه (يلتف لعدة أسطر على الموبايل)، بدل ارتفاع
+   ثابت مفترض. باقي الصفحات تبقى تدفقاً عادياً بكامل العرض. */
+.ta-layout .hq-content:has(> .ta-chat-layout) {
+    display: flex;
+    flex-direction: column;
+}
+
+/* منع المحتوى العريض (جداول nowrap) من توسيع أعمدة الشبكة وقص باقي البطاقات */
+.ta-layout .ta-grid-cards > *,
+.ta-layout .ta-grid-two > * {
+    min-width: 0;
+}
+
 /* بادئة Safari للـ backdrop-filter في الـ topbar */
 .ta-layout .hq-topbar {
     -webkit-backdrop-filter: blur(12px);
@@ -120,6 +134,10 @@
     .ta-layout .hq-content {
         padding: 14px;
     }
+    /* صفحة الدردشة تملأ الشاشة من الحافة للحافة على الموبايل */
+    .ta-layout .hq-content:has(> .ta-chat-layout) {
+        padding: 0 !important;
+    }
     .ta-layout .ta-page {
         padding: 14px !important;
         max-width: 100% !important;
@@ -128,15 +146,28 @@
         font-size: 20px !important;
     }
 
-    /* الجداول: تمرير أفقي سلس بدل الفيضان */
-    .ta-layout .ta-table-wrap > table,
-    .ta-layout .table-responsive > table,
+    /* الجداول العادية (مثل لوحة الشرف): تتلاءم مع العرض وتلتف بدل القص */
     .ta-layout .ta-page table {
-        display: block;
         width: 100%;
-        overflow-x: auto;
+        max-width: 100%;
+        table-layout: auto;
+    }
+    .ta-layout .ta-page th,
+    .ta-layout .ta-page td {
+        padding: 12px 10px !important;
+        white-space: normal;
+        word-break: break-word;
+    }
+
+    /* الجداول العريضة فقط (تحمل كلاس ta-wide-table): تمرير أفقي داخل حاويتها */
+    .ta-layout .ta-wide-table {
+        width: max-content;
+        min-width: 100%;
+    }
+    .ta-layout .ta-wide-table th,
+    .ta-layout .ta-wide-table td {
         white-space: nowrap;
-        -webkit-overflow-scrolling: touch;
+        word-break: normal;
     }
 
     /* أهداف لمس أكبر */

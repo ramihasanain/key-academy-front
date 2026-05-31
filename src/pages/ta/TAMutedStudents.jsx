@@ -97,7 +97,7 @@ export const TAMutedStudents = () => {
             ) : (
                 <div className="hq-card" style={{ padding: 0, overflow: 'hidden', border: '1px solid var(--hq-border)' }}>
                     <div className="ta-table-wrap">
-                    <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'right' }}>
+                    <table className="ta-wide-table" style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'right' }}>
                         <thead>
                         <tr style={{ background: 'rgba(0,0,0,0.2)', borderBottom: '1px solid var(--hq-border)' }}>
                                 <th style={{ padding: '15px' }}>الطالب</th>

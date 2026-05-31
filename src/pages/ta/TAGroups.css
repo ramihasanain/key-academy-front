@@ -4,13 +4,10 @@
     position: relative;
     overflow: hidden;
     background: var(--hq-bg);
-    height: calc(100vh - 100px);
-    height: calc(100dvh - 100px);
-}
-@supports (-webkit-touch-callout: none) {
-    .ta-chat-layout {
-        height: calc(-webkit-fill-available - 100px);
-    }
+    /* تملأ المساحة المتبقية داخل .hq-content (الذي هو عمود مرن)،
+       فيُحسب الارتفاع تلقائياً مهما كان ارتفاع الشريط العلوي */
+    flex: 1 1 auto;
+    min-height: 0;
 }
 
 .ta-chat-sidebar {
@@ -97,8 +94,6 @@
 /* Mobile Responsiveness */
 @media (max-width: 768px) {
     .ta-chat-layout {
-        height: calc(100vh - 80px) !important;
-        height: calc(100dvh - 80px) !important;
         gap: 0 !important;
     }
     .ta-chat-sidebar, .ta-chat-main {
