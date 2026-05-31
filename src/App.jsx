@@ -122,6 +122,11 @@ const TALectures = lazy(() =>
 const TASpyLogin = lazy(() =>
   import("./pages/hq/TASpyLogin").then((m) => ({ default: m.TASpyLogin })),
 );
+const AssistantWizard = lazy(() =>
+  import("./pages/hq/AssistantWizard").then((m) => ({
+    default: m.AssistantWizard,
+  })),
+);
 const WeeklyExamPortal = lazy(() =>
   import("./pages/student/WeeklyExamPortal").then((m) => ({
     default: m.WeeklyExamPortal,
@@ -296,6 +301,7 @@ function App() {
               <Route path="students/:id/360" element={<Student360View />} />
               <Route path="ta-manager" element={<TAManagerDashboard />} />
               <Route path="teachers/:id/360" element={<Teacher360View />} />
+              <Route path="teacherassistants/new" element={<AssistantWizard />} />
               <Route path="teacherassistants/:id/360" element={<TA360View />} />
               <Route path="quick-courses" element={<AdminQuickFillCourses />} />
               <Route path=":model/:id" element={<AdminModelForm />} />

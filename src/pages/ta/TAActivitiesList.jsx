@@ -1,18 +1,20 @@
 import React, { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useOutletContext } from 'react-router-dom'
 import { API } from '../../config'
 import { HiOutlineClock, HiOutlineArrowRight } from 'react-icons/hi2'
 import '../hq/Admin.css'
 
 export const TAActivitiesList = () => {
     const navigate = useNavigate()
+    const { activeGroupId } = useOutletContext() || {}
     const [activities, setActivities] = useState([])
     const [loading, setLoading] = useState(true)
 
     const fetchActivities = async () => {
         const tk = sessionStorage.getItem('spy_token') || localStorage.getItem('access_token')
         try {
-            const res = await fetch(`${API}/api/interactions/activities/all/`, {
+            const groupQs = activeGroupId ? `?group_id=${activeGroupId}` : ''
+            const res = await fetch(`${API}/api/interactions/activities/all${groupQs}`, {
                 headers: { 'Authorization': `Bearer ${tk}` }
             })
             if (res.ok) {
@@ -27,7 +29,7 @@ export const TAActivitiesList = () => {
 
     useEffect(() => {
         fetchActivities()
-    }, [])
+    }, [activeGroupId])
 
     const handleActivityClick = async (act) => {
         // Optimistic UI update

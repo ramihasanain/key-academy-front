@@ -68,8 +68,7 @@ const SCHEMAS = {
             { key: 'name', label: 'اسم المساعد الكامل', type: 'text', required: true },
             { key: 'phone', label: 'رقم الهاتف (سيكون اسم المستخدم للدخول)', type: 'text', required: true },
             { key: 'creation_password', label: 'كلمة المرور (دخول لوحة التحكم)', type: 'text' },
-            { key: 'teacher', label: 'تعيين ضمن أستاذ', type: 'select', endpoint: 'teachers', labelField: 'name', valueField: 'id', required: true },
-            { key: 'courses', label: 'الصلاحية على دورات محددة (إلزامي)', type: 'multiselect', endpoint: 'courses', labelField: 'title', valueField: 'id', required: true },
+            { key: 'teachers', label: 'الأساتذة المعيّنين', type: 'multiselect', endpoint: 'teachers', labelField: 'name', valueField: 'id' },
             { key: 'is_active', label: 'فعال', type: 'boolean' }
         ]
     },

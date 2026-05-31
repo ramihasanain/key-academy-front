@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react'
+import { useOutletContext } from 'react-router-dom'
 import { API } from '../../config'
 import { HiOutlineChatBubbleOvalLeftEllipsis, HiOutlineCheckBadge, HiOutlinePaperAirplane, HiOutlineNoSymbol, HiOutlineChevronRight, HiOutlineChevronLeft, HiOutlineChatBubbleLeftRight } from 'react-icons/hi2'
 import '../../pages/LessonViewer.css'
 import { TAStudent360 } from './TAStudent360'
 
 export const TAQA = () => {
+    const { activeGroupId } = useOutletContext() || {}
     const [posts, setPosts] = useState([])
     const [replyText, setReplyText] = useState('')
     const [activePost, setActivePost] = useState(null)
@@ -21,11 +23,13 @@ export const TAQA = () => {
     useEffect(() => {
         fetchPosts()
         fetchCourseTree()
-    }, [])
+    }, [activeGroupId])
+
+    const groupQs = activeGroupId ? `?group_id=${activeGroupId}` : ''
 
     const fetchCourseTree = async () => {
         const tk = sessionStorage.getItem('spy_token') || localStorage.getItem('access_token');
-        const res = await fetch(API + '/api/interactions/ta-course-tree/', {
+        const res = await fetch(API + '/api/interactions/ta-course-tree/' + groupQs, {
             headers: { 'Authorization': `Bearer ${tk}` }
         })
         if (res.ok) {
@@ -36,7 +40,7 @@ export const TAQA = () => {
 
     const fetchPosts = async () => {
         const tk = sessionStorage.getItem('spy_token') || localStorage.getItem('access_token');
-        const res = await fetch(API + '/api/interactions/qa/', {
+        const res = await fetch(API + '/api/interactions/qa/' + groupQs, {
             headers: { 'Authorization': `Bearer ${tk}` }
         })
         if (res.ok) {

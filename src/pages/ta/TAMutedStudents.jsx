@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react'
+import { useOutletContext } from 'react-router-dom'
 import { API } from '../../config'
 import { HiOutlineUserMinus, HiOutlineClock, HiOutlineChatBubbleBottomCenterText, HiOutlineNoSymbol, HiOutlineShieldCheck, HiOutlineArrowUturnLeft } from 'react-icons/hi2'
 
 export const TAMutedStudents = () => {
+    const { activeGroupId } = useOutletContext() || {}
     const [mutedStudents, setMutedStudents] = useState([])
     const [isLoading, setIsLoading] = useState(true)
     const [filters, setFilters] = useState({
@@ -19,7 +21,8 @@ export const TAMutedStudents = () => {
     const fetchMuted = async () => {
         const tk = sessionStorage.getItem('spy_token') || localStorage.getItem('access_token')
         try {
-            const res = await fetch(API + '/api/interactions/moderate/muted-students/', {
+            const groupQs = activeGroupId ? `?group_id=${activeGroupId}` : ''
+            const res = await fetch(API + '/api/interactions/moderate/muted-students/' + groupQs, {
                 headers: { 'Authorization': `Bearer ${tk}` }
             })
             if (res.ok) {
@@ -33,7 +36,7 @@ export const TAMutedStudents = () => {
         }
     }
 
-    useEffect(() => { fetchMuted() }, [])
+    useEffect(() => { fetchMuted() }, [activeGroupId])
 
     const [dialog, setDialog] = useState(null) // { type: 'confirm'|'reason'|'result', studentId: null, reason: '' }
 

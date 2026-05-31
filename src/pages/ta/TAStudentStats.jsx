@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams, useOutletContext } from 'react-router-dom'
 import { API } from '../../config'
 import {
     HiOutlineAcademicCap, HiOutlineUsers, HiOutlineChatBubbleLeftRight,
@@ -11,6 +11,7 @@ import '../hq/Admin.css'
 export const TAStudentStats = () => {
     const navigate = useNavigate()
     const { courseId } = useParams()
+    const { activeGroupId } = useOutletContext() || {}
     const [stats, setStats] = useState(null)
     const [loading, setLoading] = useState(true)
 
@@ -48,9 +49,10 @@ export const TAStudentStats = () => {
 
     const fetchStats = async () => {
         const tk = sessionStorage.getItem('spy_token') || localStorage.getItem('access_token')
+        const groupParam = activeGroupId ? `group_id=${activeGroupId}` : ''
         const url = courseId
-            ? `${API}/api/interactions/ta-stats/?course_id=${courseId}`
-            : API + '/api/interactions/ta-stats/'
+            ? `${API}/api/interactions/ta-stats/?course_id=${courseId}${groupParam ? '&' + groupParam : ''}`
+            : `${API}/api/interactions/ta-stats/${groupParam ? '?' + groupParam : ''}`
         try {
             const res = await fetch(url, {
                 headers: { 'Authorization': `Bearer ${tk}` }
@@ -66,8 +68,9 @@ export const TAStudentStats = () => {
     }
 
     useEffect(() => {
+        setLoading(true)
         fetchStats()
-    }, [])
+    }, [activeGroupId, courseId])
 
     if (loading) return <div className="hq-loading">جاري تحليل الأداء...</div>
 

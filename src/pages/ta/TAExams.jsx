@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react'
+import { useOutletContext } from 'react-router-dom'
 import { API } from '../../config'
 import { HiOutlineDocumentText, HiOutlineArrowDownTray, HiOutlineCheck, HiOutlinePencilSquare } from 'react-icons/hi2'
 
 export const TAExams = () => {
+    const { activeGroupId } = useOutletContext() || {}
     const [exams, setExams] = useState([])
     const [loading, setLoading] = useState(true)
     const [selectedExam, setSelectedExam] = useState(null)
@@ -13,8 +15,9 @@ export const TAExams = () => {
     useEffect(() => {
         const fetchExams = async () => {
             const tk = sessionStorage.getItem('spy_token') || localStorage.getItem('access_token')
+            const groupQs = activeGroupId ? `?group_id=${activeGroupId}` : ''
             try {
-                const res = await fetch(API + '/api/interactions/exams/ta-list/', {
+                const res = await fetch(API + '/api/interactions/exams/ta-list/' + groupQs, {
                     headers: { 'Authorization': `Bearer ${tk}` }
                 })
                 if (res.ok) {
@@ -28,7 +31,7 @@ export const TAExams = () => {
             }
         }
         fetchExams()
-    }, [])
+    }, [activeGroupId])
 
     const fetchSubmissions = async (examId) => {
         setLoadingSubs(true)

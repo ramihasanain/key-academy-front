@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useOutletContext } from 'react-router-dom'
 import { API } from '../../config'
 import { HiOutlineUsers, HiOutlineMagnifyingGlass, HiOutlineArrowLeft, HiOutlineNoSymbol } from 'react-icons/hi2'
 import '../hq/Admin.css'
 
 export const TAStudentsList = () => {
     const navigate = useNavigate()
+    const { activeGroupId } = useOutletContext() || {}
     const [students, setStudents] = useState([])
     const [loading, setLoading] = useState(true)
     const [searchQuery, setSearchQuery] = useState('')
@@ -14,7 +15,8 @@ export const TAStudentsList = () => {
         setLoading(true)
         const tk = sessionStorage.getItem('spy_token') || localStorage.getItem('access_token')
         try {
-            const res = await fetch(`${API}/api/interactions/ta-students/?q=${q}`, {
+            const groupParam = activeGroupId ? `&group_id=${activeGroupId}` : ''
+            const res = await fetch(`${API}/api/interactions/ta-students/?q=${q}${groupParam}`, {
                 headers: { 'Authorization': `Bearer ${tk}` }
             })
             if (res.ok) {
@@ -29,7 +31,7 @@ export const TAStudentsList = () => {
 
     useEffect(() => {
         fetchStudents()
-    }, [])
+    }, [activeGroupId])
 
     const handleSearch = (e) => {
         e.preventDefault()

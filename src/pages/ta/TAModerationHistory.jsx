@@ -1,15 +1,18 @@
 import React, { useState, useEffect } from 'react'
+import { useOutletContext } from 'react-router-dom'
 import { API } from '../../config'
 import { HiOutlineClock, HiOutlineUser, HiOutlineShieldCheck, HiOutlineChatBubbleBottomCenterText, HiOutlineNoSymbol, HiOutlineCheckCircle, HiOutlineXCircle } from 'react-icons/hi2'
 
 export const TAModerationHistory = () => {
+    const { activeGroupId } = useOutletContext() || {}
     const [history, setHistory] = useState([])
     const [loading, setLoading] = useState(true)
 
     const fetchHistory = async () => {
         const tk = sessionStorage.getItem('spy_token') || localStorage.getItem('access_token')
         try {
-            const res = await fetch(API + '/api/interactions/moderate/mute-history/', {
+            const groupQs = activeGroupId ? `?group_id=${activeGroupId}` : ''
+            const res = await fetch(API + '/api/interactions/moderate/mute-history/' + groupQs, {
                 headers: { 'Authorization': `Bearer ${tk}` }
             })
             if (res.ok) {
@@ -24,7 +27,7 @@ export const TAModerationHistory = () => {
 
     useEffect(() => {
         fetchHistory()
-    }, [])
+    }, [activeGroupId])
 
     if (loading) return <div className="hq-loading">جاري تحميل سجل الرقابة...</div>
 

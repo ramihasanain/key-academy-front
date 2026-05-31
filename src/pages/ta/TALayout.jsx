@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom'
 import { API } from '../../config'
+import { TAActiveGroupProvider, useTAActiveGroup } from '../../contexts/TAActiveGroupContext'
 import {
     HiOutlineChatBubbleLeftRight,
     HiOutlineUsers,
@@ -14,15 +15,14 @@ import {
 } from 'react-icons/hi2'
 import '../hq/Admin.css'
 
-export const TALayout = () => {
+const TALayoutShell = ({ profile }) => {
     const navigate = useNavigate()
     const location = useLocation()
-    const [profile, setProfile] = useState(null)
-    const [isLoading, setIsLoading] = useState(true)
     const [showPwdModal, setShowPwdModal] = useState(false)
     const [newPwd, setNewPwd] = useState('')
     const [pwdMsg, setPwdMsg] = useState('')
     const [isMobileOpen, setIsMobileOpen] = useState(false)
+    const { groups, activeGroupId, activeGroup, setActiveGroupId } = useTAActiveGroup()
 
     useEffect(() => {
         setIsMobileOpen(false)
@@ -30,78 +30,53 @@ export const TALayout = () => {
 
     useEffect(() => {
         if ('Notification' in window && Notification.permission !== 'granted' && Notification.permission !== 'denied') {
-            Notification.requestPermission();
+            Notification.requestPermission()
         }
 
-        const tk = sessionStorage.getItem('spy_token') || localStorage.getItem('access_token');
+        const tk = sessionStorage.getItem('spy_token') || localStorage.getItem('access_token')
         if (tk) {
-            const wsUrl = API.replace(/^http/, 'ws');
-            const baseUrl = wsUrl.endsWith('/') ? wsUrl.slice(0, -1) : wsUrl;
-            const ws = new WebSocket(`${baseUrl}/ws/ta-notifications/?token=${tk}`);
-            
+            const wsUrl = API.replace(/^http/, 'ws')
+            const baseUrl = wsUrl.endsWith('/') ? wsUrl.slice(0, -1) : wsUrl
+            const ws = new WebSocket(`${baseUrl}/ws/ta-notifications/?token=${tk}`)
+
             const playNotificationSound = () => {
                 try {
-                    const ctx = new (window.AudioContext || window.webkitAudioContext)();
-                    const osc = ctx.createOscillator();
-                    const gainNode = ctx.createGain();
-                    osc.connect(gainNode);
-                    gainNode.connect(ctx.destination);
-                    osc.type = 'sine';
-                    osc.frequency.setValueAtTime(880, ctx.currentTime);
-                    osc.frequency.exponentialRampToValueAtTime(1760, ctx.currentTime + 0.1);
-                    gainNode.gain.setValueAtTime(0.3, ctx.currentTime);
-                    gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1);
-                    osc.start(ctx.currentTime);
-                    osc.stop(ctx.currentTime + 0.1);
-                } catch (e) { console.error('Audio Notification failed', e); }
-            };
+                    const ctx = new (window.AudioContext || window.webkitAudioContext)()
+                    const osc = ctx.createOscillator()
+                    const gainNode = ctx.createGain()
+                    osc.connect(gainNode)
+                    gainNode.connect(ctx.destination)
+                    osc.type = 'sine'
+                    osc.frequency.setValueAtTime(880, ctx.currentTime)
+                    osc.frequency.exponentialRampToValueAtTime(1760, ctx.currentTime + 0.1)
+                    gainNode.gain.setValueAtTime(0.3, ctx.currentTime)
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1)
+                    osc.start(ctx.currentTime)
+                    osc.stop(ctx.currentTime + 0.1)
+                } catch (e) { console.error('Audio Notification failed', e) }
+            }
 
             ws.onmessage = (e) => {
-                const data = JSON.parse(e.data);
+                const data = JSON.parse(e.data)
                 if (data.message && (data.message.sender_role === 'student' || data.message.sender_role === 'user')) {
-                    playNotificationSound();
+                    playNotificationSound()
                     if ('Notification' in window && Notification.permission === 'granted') {
-                        new Notification('رسالة جديدة - أكاديمية مفتاح', { 
+                        new Notification('رسالة جديدة - أكاديمية مفتاح', {
                             body: data.message.content || 'يوجد مرفق جديد'
-                        });
+                        })
                     }
                 }
-            };
-            
-            return () => {
-                ws.close();
-            };
-        }
-    }, []);
-
-    useEffect(() => {
-        const fetchProfile = async () => {
-            const tk = sessionStorage.getItem('spy_token') || localStorage.getItem('access_token')
-            try {
-                // For simplicity, using the HQ profile endpoint. If they are staff, they can access it.
-                const res = await fetch(API + '/api/hq/me/', {
-                    headers: { 'Authorization': `Bearer ${tk}` }
-                })
-                if (res.ok) {
-                    const data = await res.json()
-                    setProfile(data)
-                } else {
-                    navigate('/login')
-                }
-            } catch (err) {
-                console.error(err)
-            } finally {
-                setIsLoading(false)
             }
+
+            return () => ws.close()
         }
-        fetchProfile()
-    }, [navigate])
+    }, [])
 
     const handleLogout = () => {
         if (sessionStorage.getItem('spy_token')) {
             sessionStorage.removeItem('spy_token')
-            window.close() // Close the spy tab if possible
-            navigate('/') // Or fallback to home
+            window.close()
+            navigate('/')
             return
         }
         localStorage.removeItem('access_token')
@@ -140,7 +115,8 @@ export const TALayout = () => {
         { path: 'moderation-history', icon: <HiOutlineClock />, label: 'سجل الرقابة' },
     ]
 
-    if (isLoading) return <div className="hq-loading">جاري مصادقة الدخول...</div>
+    const headerTeacher = activeGroup?.teacher_name || profile?.ta_info?.teacher_name || '...'
+    const headerGroup = activeGroup?.name || ''
 
     return (
         <div className="hq-layout ta-layout" style={{
@@ -150,7 +126,6 @@ export const TALayout = () => {
             '--pink-main': '#ec3665',
             '--blue-main': '#832a96'
         }}>
-            {/* Sidebar */}
             <aside className={`hq-sidebar ${isMobileOpen ? 'mobile-open open' : 'open'}`}>
                 <div className="hq-sb-logo" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <img src="/new-logo.png" alt="Key Academy" style={{ height: '40px', objectFit: 'contain' }} />
@@ -160,14 +135,8 @@ export const TALayout = () => {
                         const isActive = item.path === ''
                             ? location.pathname === '/ta'
                             : location.pathname.startsWith(`/ta/${item.path}`)
-
                         return (
-                            <NavLink
-                                key={item.path}
-                                end={item.path === ''}
-                                to={item.path}
-                                className={`hq-nav-link ${isActive ? 'active' : ''}`}
-                            >
+                            <NavLink key={item.path} end={item.path === ''} to={item.path} className={`hq-nav-link ${isActive ? 'active' : ''}`}>
                                 <span className="hq-icon">{item.icon}</span>
                                 <span className="hq-label">{item.label}</span>
                             </NavLink>
@@ -178,31 +147,42 @@ export const TALayout = () => {
                     <button className="hq-logout-btn" onClick={handleLogout}>
                         <HiOutlineArrowRightOnRectangle /> تسجيل الخروج
                     </button>
-                    <span className="hq-version">إصدار المساعد v1.0</span>
+                    <span className="hq-version">إصدار المساعد v2.0</span>
                 </div>
             </aside>
             <div className={`hq-mobile-overlay ${isMobileOpen ? 'mobile-open' : ''}`} onClick={() => setIsMobileOpen(false)}></div>
 
-            {/* Main Content */}
             <div className="hq-main">
-                <header className="hq-topbar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '15px 30px' }}>
-                    <div className="hq-tb-left" style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+                <header className="hq-topbar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '15px 30px', flexWrap: 'wrap', gap: '12px' }}>
+                    <div className="hq-tb-left" style={{ display: 'flex', alignItems: 'center', gap: '20px', flexWrap: 'wrap' }}>
                         <button className="hq-mobile-toggle" onClick={() => setIsMobileOpen(!isMobileOpen)}>☰</button>
                         {profile?.ta_info?.teacher_image ? (
-                            <img
-                                src={profile.ta_info.teacher_image}
-                                alt="Teacher"
-                                style={{ width: '50px', height: '50px', borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--hq-primary)' }}
-                            />
+                            <img src={profile.ta_info.teacher_image} alt="Teacher" style={{ width: '50px', height: '50px', borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--hq-primary)' }} />
                         ) : (
-                            <div style={{ width: '50px', height: '50px', borderRadius: '50%', background: 'var(--hq-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px', fontWeight: 'bold', color: '#fff' }}>
-                                👨‍🏫
-                            </div>
+                            <div style={{ width: '50px', height: '50px', borderRadius: '50%', background: 'var(--hq-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px', fontWeight: 'bold', color: '#fff' }}>👨‍🏫</div>
                         )}
                         <div>
-                            <h2 style={{ fontSize: '18px', margin: 0, color: 'var(--hq-primary)' }}>مساعدي : {profile?.ta_info?.teacher_name || '...'}</h2>
+                            <h2 style={{ fontSize: '18px', margin: 0, color: 'var(--hq-primary)' }}>
+                                مساعدي: {headerTeacher}{headerGroup ? ` — ${headerGroup}` : ''}
+                            </h2>
                             <p style={{ margin: 0, color: 'var(--hq-text-muted)', fontSize: '13px' }}>كادر المتابعة والتقييم</p>
                         </div>
+                        {groups.length > 1 && (
+                            <select
+                                value={activeGroupId || ''}
+                                onChange={e => setActiveGroupId(parseInt(e.target.value, 10))}
+                                style={{
+                                    padding: '8px 12px', borderRadius: '8px', border: '2px solid var(--hq-primary)',
+                                    fontWeight: '600', minWidth: '220px', background: 'white',
+                                }}
+                            >
+                                {groups.map(g => (
+                                    <option key={g.id} value={g.id}>
+                                        {g.name} ({g.students_count} طالب)
+                                    </option>
+                                ))}
+                            </select>
+                        )}
                     </div>
                     <div className="hq-tb-right">
                         <div className="hq-admin-profile" style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
@@ -218,11 +198,10 @@ export const TALayout = () => {
                 </header>
 
                 <div className="hq-content">
-                    <Outlet context={{ profile }} />
+                    <Outlet context={{ profile, activeGroupId, activeGroup }} key={activeGroupId || 'all'} />
                 </div>
             </div>
 
-            {/* Password Change Modal */}
             {showPwdModal && (
                 <div className="hq-modal-overlay" onClick={() => setShowPwdModal(false)} style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999 }}>
                     <div className="hq-modal-content" onClick={e => e.stopPropagation()} style={{ background: 'white', padding: '30px', borderRadius: '12px', width: '90%', maxWidth: '400px', boxShadow: '0 10px 25px rgba(0,0,0,0.2)' }}>
@@ -232,14 +211,7 @@ export const TALayout = () => {
                         </div>
                         <div className="hq-modal-body" style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '20px' }}>
                             <label className="hq-label" style={{ fontWeight: 'bold', fontSize: '14px', color: '#555', textAlign: 'right' }}>كلمة المرور الجديدة</label>
-                            <input
-                                type="text"
-                                className="hq-input"
-                                value={newPwd}
-                                onChange={e => setNewPwd(e.target.value)}
-                                placeholder="اكتب كلمة المرور..."
-                                style={{ padding: '12px', borderRadius: '8px', border: '1px solid #ccc', outline: 'none', width: '100%', boxSizing: 'border-box', fontFamily: 'inherit' }}
-                            />
+                            <input type="text" className="hq-input" value={newPwd} onChange={e => setNewPwd(e.target.value)} placeholder="اكتب كلمة المرور..." style={{ padding: '12px', borderRadius: '8px', border: '1px solid #ccc', outline: 'none', width: '100%', boxSizing: 'border-box', fontFamily: 'inherit' }} />
                             {pwdMsg && <div style={{ marginTop: '10px', color: pwdMsg.includes('بنجاح') ? '#10b981' : '#ef4444', fontSize: '14px', textAlign: 'right' }}>{pwdMsg}</div>}
                         </div>
                         <div className="hq-modal-footer" style={{ display: 'flex', justifyContent: 'flex-end' }}>
@@ -249,5 +221,40 @@ export const TALayout = () => {
                 </div>
             )}
         </div>
+    )
+}
+
+export const TALayout = () => {
+    const navigate = useNavigate()
+    const [profile, setProfile] = useState(null)
+    const [isLoading, setIsLoading] = useState(true)
+
+    useEffect(() => {
+        const fetchProfile = async () => {
+            const tk = sessionStorage.getItem('spy_token') || localStorage.getItem('access_token')
+            try {
+                const res = await fetch(API + '/api/hq/me/', {
+                    headers: { Authorization: `Bearer ${tk}` }
+                })
+                if (res.ok) {
+                    setProfile(await res.json())
+                } else {
+                    navigate('/login')
+                }
+            } catch (err) {
+                console.error(err)
+            } finally {
+                setIsLoading(false)
+            }
+        }
+        fetchProfile()
+    }, [navigate])
+
+    if (isLoading) return <div className="hq-loading">جاري مصادقة الدخول...</div>
+
+    return (
+        <TAActiveGroupProvider initialGroups={profile?.ta_info?.groups || []}>
+            <TALayoutShell profile={profile} />
+        </TAActiveGroupProvider>
     )
 }

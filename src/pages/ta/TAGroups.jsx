@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react'
+import { useOutletContext } from 'react-router-dom'
 import { API } from '../../config'
 import { HiOutlinePaperClip, HiOutlinePaperAirplane, HiOutlineMicrophone, HiOutlineStop, HiOutlineTrash, HiOutlineNoSymbol, HiOutlineChatBubbleOvalLeftEllipsis, HiOutlinePhoto, HiOutlineArrowDownTray, HiOutlineXMark, HiOutlineEye, HiOutlineArrowUturnLeft } from 'react-icons/hi2'
 import { TAStudent360 } from './TAStudent360'
 import './TAGroups.css'
 
 export const TAGroups = () => {
+    const { activeGroupId: assistantGroupId, activeGroup: assistantGroup } = useOutletContext() || {}
     const [courses, setCourses] = useState([])
     const [showStudentProfile, setShowStudentProfile] = useState(null)
     const [groups, setGroups] = useState([])
@@ -61,9 +63,13 @@ export const TAGroups = () => {
             })
             if (resGr.ok) {
                 const dataGr = await resGr.json()
-                const fetchedGroups = dataGr.results || dataGr
+                let fetchedGroups = dataGr.results || dataGr
+                if (assistantGroup?.chat_shard_ids?.length) {
+                    const shardSet = new Set(assistantGroup.chat_shard_ids)
+                    fetchedGroups = fetchedGroups.filter(g => shardSet.has(g.id))
+                }
                 setGroups(fetchedGroups)
-                if (fetchedGroups.length > 0 && !activeGroupId) {
+                if (fetchedGroups.length > 0) {
                      const first = fetchedGroups[0];
                      setActiveCourseId(first.course);
                      setActiveGroupId(first.id);
@@ -72,12 +78,16 @@ export const TAGroups = () => {
                      setInboxContacts([]);
                      fetchInbox(first.course, first.id);
                      startPolling(first.course, first.id);
+                } else {
+                     setActiveCourseId(null);
+                     setActiveGroupId(null);
+                     setMessages([]);
                 }
             }
         }
         fetchCourses()
         return () => stopPolling()
-    }, [])
+    }, [assistantGroupId, assistantGroup])
 
     const stopPolling = () => {
         if (wsRef.current) {
