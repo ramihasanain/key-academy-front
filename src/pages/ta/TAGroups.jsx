@@ -51,7 +51,8 @@ export const TAGroups = () => {
         
         const fetchCourses = async () => {
             const tk = sessionStorage.getItem('spy_token') || localStorage.getItem('access_token');
-            const res = await fetch(API + '/api/hq/courses/', {
+            const coursesQs = assistantGroupId ? `?group_id=${assistantGroupId}` : ''
+            const res = await fetch(API + `/api/hq/courses/${coursesQs}`, {
                 headers: { 'Authorization': `Bearer ${tk}` }
             })
             if (res.ok) {
@@ -154,7 +155,8 @@ export const TAGroups = () => {
         setOffset(0)
         setHasMore(true)
         const tk = sessionStorage.getItem('spy_token') || localStorage.getItem('access_token');
-        const res = await fetch(`${API}/api/interactions/group-chat/?course=${courseId}&group=${groupId}&type=all&offset=0&limit=50`, {
+        const agQs = assistantGroupId ? `&group_id=${assistantGroupId}` : ''
+        const res = await fetch(`${API}/api/interactions/group-chat/?course=${courseId}&group=${groupId}&type=all&offset=0&limit=50${agQs}`, {
             headers: { 'Authorization': `Bearer ${tk}` }
         })
         if (res.ok) {
@@ -192,7 +194,8 @@ export const TAGroups = () => {
             const container = document.getElementById('ta-chat-msgs');
             const oldScrollHeight = container ? container.scrollHeight : 0;
 
-            const res = await fetch(`${API}/api/interactions/group-chat/?course=${activeCourseId}&group=${activeGroupId}&type=all&offset=${newOffset}&limit=50`, {
+            const agQs = assistantGroupId ? `&group_id=${assistantGroupId}` : ''
+            const res = await fetch(`${API}/api/interactions/group-chat/?course=${activeCourseId}&group=${activeGroupId}&type=all&offset=${newOffset}&limit=50${agQs}`, {
                 headers: { 'Authorization': `Bearer ${tk}` }
             });
             if (res.ok) {

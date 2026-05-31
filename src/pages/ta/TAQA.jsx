@@ -103,7 +103,7 @@ export const TAQA = () => {
     const handlePin = async (commentId) => {
         const tk = sessionStorage.getItem('spy_token') || localStorage.getItem('access_token');
         try {
-            const res = await fetch(`${API}/api/interactions/moderate/qa/comment/${commentId}/pin/`, {
+            const res = await fetch(`${API}/api/interactions/moderate/qa/comment/${commentId}/pin/${groupQs}`, {
                 method: 'POST',
                 headers: { 'Authorization': `Bearer ${tk}` }
             });
