@@ -36,6 +36,8 @@ export const TAGroups = () => {
 
     // WS reference
     const wsRef = useRef(null)
+    const privateTargetRef = useRef(null)
+    useEffect(() => { privateTargetRef.current = privateTarget }, [privateTarget])
 
     // Read Receipts Popup
     const [readReceiptPopup, setReadReceiptPopup] = useState(null)
@@ -131,17 +133,37 @@ export const TAGroups = () => {
                     return [...withoutTemps, data.message]
                 });
 
-                // Update inbox unread counts for private messages
-                if (data.message.is_private && data.message.sender) {
-                    setInboxContacts(prev => {
-                        const senderId = data.message.sender.id;
-                        const exists = prev.find(c => c.id === senderId);
-                        if (exists) {
-                            return prev.map(c => c.id === senderId ? { ...c, unread_count: (c.unread_count || 0) + 1 } : c);
-                        } else {
-                            return [...prev, { id: senderId, name: data.message.sender.full_name || data.message.sender.username, username: data.message.sender.username, unread_count: 1 }];
+                if (data.message.is_private) {
+                    const isFromStudent = data.message.sender_role === 'student'
+                        || data.message.sender?.role === 'student';
+                    const studentId = isFromStudent
+                        ? data.message.sender?.id
+                        : (data.message.recipient_id || 0);
+                    if (studentId) {
+                        setInboxContacts(prev => {
+                            const exists = prev.find(c => c.id === studentId);
+                            if (exists) {
+                                return prev.map(c => c.id === studentId
+                                    ? { ...c, unread_count: isFromStudent ? (c.unread_count || 0) + 1 : c.unread_count }
+                                    : c);
+                            }
+                            return [...prev, {
+                                id: studentId,
+                                name: isFromStudent
+                                    ? (data.message.sender?.full_name || data.message.sender?.username || 'طالب')
+                                    : 'طالب',
+                                username: isFromStudent ? data.message.sender?.username : '',
+                                unread_count: isFromStudent ? 1 : 0,
+                            }];
+                        });
+                        if (isFromStudent && privateTargetRef.current?.id === studentId) {
+                            setMessages(prev => {
+                                const withoutTemps = prev.filter(m => !String(m.id).startsWith('temp-'));
+                                if (withoutTemps.find(m => m.id === data.message.id)) return withoutTemps;
+                                return [...withoutTemps, data.message];
+                            });
                         }
-                    });
+                    }
                 }
                 fetchInbox(courseId, groupId);
             }
@@ -219,7 +241,8 @@ export const TAGroups = () => {
 
     const fetchInbox = async (courseId, groupId) => {
         const tk = sessionStorage.getItem('spy_token') || localStorage.getItem('access_token');
-        const res = await fetch(`${API}/api/interactions/ta-inbox/?course=${courseId}&group=${groupId}`, {
+        const agQs = assistantGroupId ? `&group_id=${assistantGroupId}` : ''
+        const res = await fetch(`${API}/api/interactions/ta-inbox/?course=${courseId}&group=${groupId}${agQs}`, {
             headers: { 'Authorization': `Bearer ${tk}` }
         })
         if (res.ok) {
