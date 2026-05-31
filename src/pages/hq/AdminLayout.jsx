@@ -25,18 +25,27 @@ export const AdminLayout = () => {
                     headers: { 'Authorization': `Bearer ${tk}` }
                 })
                 if (res.ok) {
-                    setProfile(await res.json())
+                    const data = await res.json()
+                    setProfile(data)
+
+                    const taPerfOnly = !data.is_superuser &&
+                        data.role !== 'ta_manager' &&
+                        (data.permissions || []).some(p => p.endsWith('.view_ta_performance')) &&
+                        (data.permissions || []).every(
+                            p => p.endsWith('.view_ta_performance') || p === 'teachers.view_ta_performance'
+                        )
+
+                    if (!taPerfOnly) {
+                        const contactRes = await fetch(API + '/api/hq/contactmessages/?is_read=false', {
+                            headers: { 'Authorization': `Bearer ${tk}` }
+                        })
+                        if (contactRes.ok) {
+                            const contactData = await contactRes.json()
+                            setUnresolvedContacts(contactData.count || contactData.length || 0)
+                        }
+                    }
                 } else {
                     handleLogout()
-                }
-
-                // Fetch Unresolved Contact Messages
-                const contactRes = await fetch(API + '/api/hq/contactmessages/?is_read=false', {
-                    headers: { 'Authorization': `Bearer ${tk}` }
-                });
-                if (contactRes.ok) {
-                    const contactData = await contactRes.json();
-                    setUnresolvedContacts(contactData.count || contactData.length || 0);
                 }
 
             } catch (err) {
@@ -54,9 +63,30 @@ export const AdminLayout = () => {
         navigate('/login')
     }
 
+    const hasPerm = (suffix) => {
+        if (!profile?.permissions) return false
+        return profile.permissions.some(p => p.endsWith(`.${suffix}`) || p === suffix)
+    }
+
+    /** موظف مكلّف بصفحة تقييم المساعدين فقط — بدون أي صلاحيات أخرى */
+    const isTaPerformanceOnlyStaff = () => {
+        if (!profile || profile.is_superuser || profile.role === 'ta_manager') return false
+        if (!hasPerm('view_ta_performance')) return false
+        const otherPerms = (profile.permissions || []).filter(
+            p => !p.endsWith('.view_ta_performance') && p !== 'teachers.view_ta_performance'
+        )
+        return otherPerms.length === 0
+    }
+
+    const restrictedTaPerformance = isTaPerformanceOnlyStaff()
+
     const hasViewPerm = (modelPath) => {
         if (!profile) return false
         if (profile.is_superuser) return true
+
+        if (restrictedTaPerformance) {
+            return modelPath === 'ta-manager'
+        }
         
         if (profile.role === 'ta_manager') {
             const allowedForTAManager = ['ta-manager', '', 'teacherassistants', 'coursegroups', 'teachers']
@@ -65,9 +95,6 @@ export const AdminLayout = () => {
 
         if (modelPath === '') return true // Dashboard accessible by all staff
 
-        // Remove trailing s if needed or map dynamically. Standard: content.view_course
-        // Actually, our API paths: courses, teachers, users
-        // Let's just do a simple check. If permission list contains 'view_course', 'view_user', etc.
         const pathMap = {
             'users': 'view_user', 'students': 'view_user', 'courses': 'view_course',
             'quick-courses': 'add_course',
@@ -80,8 +107,16 @@ export const AdminLayout = () => {
         const needed = pathMap[modelPath]
         if (!needed) return true // default open if not strictly mapped
 
-        return profile.permissions?.some(p => p.endsWith(`.${needed}`))
+        return hasPerm(needed)
     }
+
+    useEffect(() => {
+        if (!profile || isLoading || !restrictedTaPerformance) return
+        const path = location.pathname
+        if (path === '/hq' || path === '/hq/' || !path.startsWith('/hq/ta-manager')) {
+            navigate('/hq/ta-manager', { replace: true })
+        }
+    }, [profile, isLoading, restrictedTaPerformance, location.pathname, navigate])
 
     const navItems = [
         { path: '', icon: <HiOutlineHome />, label: 'اللوحة الرئيسية (Overview)' },
@@ -151,14 +186,16 @@ export const AdminLayout = () => {
                         <button className="hq-toggle-btn" onClick={() => setSidebarOpen(!sidebarOpen)}>
                             <HiOutlineBars3 />
                         </button>
-                        <h2 className="hq-page-title">إدارة النظام (HQ)</h2>
+                        <h2 className="hq-page-title">
+                            {restrictedTaPerformance ? 'أداء المساعدين (تقييم)' : 'إدارة النظام (HQ)'}
+                        </h2>
                     </div>
                     <div className="hq-tb-right">
                         <button className="hq-tb-icon"><HiOutlineBell /><span className="hq-badge">3</span></button>
                         <div className="hq-admin-profile">
                             <div className="hq-ap-info">
                                 <strong>{profile ? (profile.full_name || profile.username) : 'جاري التحميل...'}</strong>
-                                <span>{profile?.role === 'admin' ? 'صلاحية مطلقة' : 'إدارة النظام'}</span>
+                                <span>{restrictedTaPerformance ? 'مقيّم المساعدين' : (profile?.role === 'admin' ? 'صلاحية مطلقة' : 'إدارة النظام')}</span>
                             </div>
                             <div className="hq-ap-av">A</div>
                         </div>
