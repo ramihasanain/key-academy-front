@@ -275,3 +275,153 @@
     border-radius: 50%;
     margin-top: 4px;
 }
+
+/* ---- مودال تغيير كلمة المرور (طبقة فوق كل المحتوى) ---- */
+.teacher-pwd-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: max(16px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right))
+        max(16px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+    background: rgba(15, 23, 42, 0.55);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    box-sizing: border-box;
+}
+
+.teacher-pwd-modal {
+    width: 100%;
+    max-width: 400px;
+    max-height: min(90vh, 100%);
+    overflow-y: auto;
+    background: var(--hq-surface, #fff);
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+.teacher-pwd-modal-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--hq-border, #e2e8f0);
+}
+
+.teacher-pwd-modal-header h3 {
+    margin: 0;
+    flex: 1;
+    min-width: 0;
+    font-size: 17px;
+    font-weight: 800;
+    color: var(--hq-primary);
+    line-height: 1.4;
+    text-align: right;
+}
+
+.teacher-pwd-modal-close {
+    flex-shrink: 0;
+    background: none;
+    border: none;
+    font-size: 28px;
+    line-height: 1;
+    cursor: pointer;
+    color: var(--hq-text-muted, #64748b);
+    padding: 0 4px;
+}
+
+.teacher-pwd-modal-body {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.teacher-pwd-label {
+    font-weight: 700;
+    font-size: 14px;
+    color: var(--hq-text-main, #1e293b);
+    text-align: right;
+}
+
+.teacher-pwd-input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 12px 14px;
+    border-radius: 10px;
+    border: 1px solid var(--hq-border, #cbd5e1);
+    font-family: inherit;
+    font-size: 16px;
+    color: var(--hq-text-main, #1e293b);
+    background: #fff;
+    outline: none;
+}
+
+.teacher-pwd-input:focus {
+    border-color: var(--hq-primary);
+    box-shadow: 0 0 0 3px var(--hq-primary-bg);
+}
+
+.teacher-pwd-msg {
+    margin: 4px 0 0;
+    font-size: 14px;
+    text-align: right;
+}
+
+.teacher-pwd-msg.is-success {
+    color: #10b981;
+}
+
+.teacher-pwd-msg.is-error {
+    color: #ef4444;
+}
+
+.teacher-pwd-modal-footer {
+    display: flex;
+    justify-content: stretch;
+}
+
+.teacher-pwd-submit {
+    width: 100%;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 10px;
+    background: var(--hq-primary);
+    color: #fff;
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.teacher-pwd-submit:active {
+    opacity: 0.9;
+}
+
+@media (max-width: 768px) {
+    .teacher-pwd-overlay {
+        align-items: flex-end;
+        padding: 0;
+    }
+
+    .teacher-pwd-modal {
+        max-width: 100%;
+        max-height: 92vh;
+        border-radius: 20px 20px 0 0;
+        padding: 20px max(20px, env(safe-area-inset-right)) max(24px, env(safe-area-inset-bottom))
+            max(20px, env(safe-area-inset-left));
+    }
+
+    .teacher-pwd-modal-header h3 {
+        font-size: 16px;
+    }
+}

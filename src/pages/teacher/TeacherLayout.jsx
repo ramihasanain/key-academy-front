@@ -163,25 +163,34 @@ export const TeacherLayout = () => {
 
             {/* Password Change Modal */}
             {showPwdModal && (
-                <div className="hq-modal-overlay" onClick={() => setShowPwdModal(false)}>
-                    <div className="hq-modal-content" onClick={e => e.stopPropagation()}>
-                        <div className="hq-modal-header">
-                            <h3>تغيير كلمة المرور الخاصة بك</h3>
-                            <button onClick={() => setShowPwdModal(false)} className="hq-modal-close">&times;</button>
+                <div className="teacher-pwd-overlay" onClick={() => setShowPwdModal(false)} role="presentation">
+                    <div
+                        className="teacher-pwd-modal"
+                        onClick={e => e.stopPropagation()}
+                        role="dialog"
+                        aria-labelledby="teacher-pwd-title"
+                    >
+                        <div className="teacher-pwd-modal-header">
+                            <h3 id="teacher-pwd-title">تغيير كلمة المرور الخاصة بك</h3>
+                            <button type="button" onClick={() => setShowPwdModal(false)} className="teacher-pwd-modal-close" aria-label="إغلاق">&times;</button>
                         </div>
-                        <div className="hq-modal-body">
-                            <label className="hq-label">كلمة المرور الجديدة</label>
+                        <div className="teacher-pwd-modal-body">
+                            <label className="teacher-pwd-label" htmlFor="teacher-new-pwd">كلمة المرور الجديدة</label>
                             <input
-                                type="text"
-                                className="hq-input"
+                                id="teacher-new-pwd"
+                                type="password"
+                                autoComplete="new-password"
+                                className="teacher-pwd-input"
                                 value={newPwd}
                                 onChange={e => setNewPwd(e.target.value)}
                                 placeholder="اكتب كلمة المرور..."
                             />
-                            {pwdMsg && <div style={{ marginTop: '10px', color: pwdMsg.includes('بنجاح') ? '#10b981' : '#ef4444' }}>{pwdMsg}</div>}
+                            {pwdMsg && (
+                                <p className={`teacher-pwd-msg ${pwdMsg.includes('بنجاح') ? 'is-success' : 'is-error'}`}>{pwdMsg}</p>
+                            )}
                         </div>
-                        <div className="hq-modal-footer">
-                            <button className="hq-btn primary" onClick={handleChangePwd}>حفظ التغيير</button>
+                        <div className="teacher-pwd-modal-footer">
+                            <button type="button" className="teacher-pwd-submit" onClick={handleChangePwd}>حفظ التغيير</button>
                         </div>
                     </div>
                 </div>
