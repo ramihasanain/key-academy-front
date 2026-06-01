@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react'
-import { motion } from 'framer-motion'
 import { API } from '../../config'
 import {
     AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer,
@@ -9,7 +8,6 @@ import {
 import {
     HiOutlineAcademicCap,
     HiOutlineUsers,
-    HiOutlineChatBubbleLeftRight,
     HiOutlinePresentationChartLine,
     HiOutlineCheckCircle
 } from 'react-icons/hi2'
@@ -46,14 +44,17 @@ export const TeacherOverview = () => {
     const { charts } = stats;
 
     return (
-        <div style={{ padding: '0 20px', maxWidth: '1400px', margin: '0 auto', paddingBottom: '50px' }}>
-            <div style={{ marginBottom: '30px', textAlign: 'right' }}>
-                <h1 style={{ fontSize: '24px', color: 'var(--hq-primary-text)', marginBottom: '5px' }}>💎 مركز القيادة والتحليلات البيانية</h1>
-                <p style={{ color: 'var(--hq-text-muted)', margin: 0 }}>مراقبة تفصيلية وعميقة لأداء الدورات، الطلاب، وكادر العمل عبر المخططات.</p>
+        <div className="teacher-overview-page ta-page">
+            <div className="hq-page-header" style={{ marginBottom: '24px' }}>
+                <h1 style={{ fontSize: '1.5rem', color: 'var(--hq-text-main)', marginBottom: '5px', fontWeight: 900 }}>
+                    💎 مركز القيادة والتحليلات البيانية
+                </h1>
+                <p style={{ color: 'var(--hq-text-muted)', margin: 0 }}>
+                    مراقبة تفصيلية وعميقة لأداء الدورات، الطلاب، وكادر العمل عبر المخططات.
+                </p>
             </div>
 
-            {/* Top Cards */}
-            <div className="hq-stats-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', marginBottom: '30px' }}>
+            <div className="hq-stats-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 200px), 1fr))', marginBottom: '30px' }}>
                 <div className="hq-stat-card">
                     <div className="hq-sc-icon" style={{ background: 'rgba(30, 58, 138, 0.1)', color: '#1e3a8a' }}><HiOutlinePresentationChartLine size={24} /></div>
                     <div className="hq-sc-info">
@@ -84,13 +85,14 @@ export const TeacherOverview = () => {
                 </div>
             </div>
 
-            {/* Middle Section: Main Charts */}
-            <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '20px', marginBottom: '20px' }}>
-                <div className="hq-card" style={{ height: '400px', display: 'flex', flexDirection: 'column' }}>
-                    <h3 className="hq-card-title">📈 معدل انضمام الطلاب (آخر 6 أشهر)</h3>
-                    <div style={{ flex: 1, width: '100%' }}>
+            <div className="teacher-overview-charts hq-charts-section">
+                <div className="hq-chart-box teacher-chart-panel">
+                    <div className="hq-cb-head">
+                        <h3>📈 معدل انضمام الطلاب (آخر 6 أشهر)</h3>
+                    </div>
+                    <div className="teacher-chart-body">
                         <ResponsiveContainer width="100%" height="100%">
-                            <AreaChart data={charts?.enrollments || []} margin={{ top: 20, right: 30, left: 0, bottom: 0 }}>
+                            <AreaChart data={charts?.enrollments || []} margin={{ top: 20, right: 10, left: 0, bottom: 0 }}>
                                 <defs>
                                     <linearGradient id="colorEnroll" x1="0" y1="0" x2="0" y2="1">
                                         <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.4} />
@@ -98,8 +100,8 @@ export const TeacherOverview = () => {
                                     </linearGradient>
                                 </defs>
                                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
-                                <XAxis dataKey="name" stroke="var(--hq-text-muted)" fontSize={12} tickLine={false} axisLine={false} />
-                                <YAxis stroke="var(--hq-text-muted)" fontSize={12} tickLine={false} axisLine={false} />
+                                <XAxis dataKey="name" stroke="var(--hq-text-muted)" fontSize={11} tickLine={false} axisLine={false} />
+                                <YAxis stroke="var(--hq-text-muted)" fontSize={11} tickLine={false} axisLine={false} width={36} />
                                 <RechartsTooltip
                                     contentStyle={{ background: 'var(--hq-bg)', border: '1px solid var(--hq-border)', borderRadius: '10px', textAlign: 'right' }}
                                     itemStyle={{ color: 'var(--hq-primary-text)' }}
@@ -110,9 +112,11 @@ export const TeacherOverview = () => {
                     </div>
                 </div>
 
-                <div className="hq-card" style={{ height: '400px', display: 'flex', flexDirection: 'column' }}>
-                    <h3 className="hq-card-title">📊 توزيع الطلاب على الدورات</h3>
-                    <div style={{ flex: 1, width: '100%', position: 'relative' }}>
+                <div className="hq-chart-box teacher-chart-panel">
+                    <div className="hq-cb-head">
+                        <h3>📊 توزيع الطلاب على الدورات</h3>
+                    </div>
+                    <div className="teacher-chart-body">
                         {(!charts?.distribution || charts.distribution.length === 0) ? (
                             <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--hq-text-muted)' }}>لا توجد بيانات كافية</div>
                         ) : (
@@ -121,9 +125,9 @@ export const TeacherOverview = () => {
                                     <Pie
                                         data={charts.distribution}
                                         cx="50%"
-                                        cy="50%"
-                                        innerRadius={60}
-                                        outerRadius={90}
+                                        cy="45%"
+                                        innerRadius={50}
+                                        outerRadius={75}
                                         paddingAngle={5}
                                         dataKey="value"
                                     >
@@ -135,7 +139,7 @@ export const TeacherOverview = () => {
                                         contentStyle={{ background: 'var(--hq-bg)', border: '1px solid var(--hq-border)', borderRadius: '10px' }}
                                         itemStyle={{ color: 'var(--hq-primary-text)' }}
                                     />
-                                    <Legend iconType="circle" wrapperStyle={{ fontSize: '13px' }} />
+                                    <Legend iconType="circle" wrapperStyle={{ fontSize: '12px', lineHeight: '1.4' }} />
                                 </PieChart>
                             </ResponsiveContainer>
                         )}
@@ -143,22 +147,23 @@ export const TeacherOverview = () => {
                 </div>
             </div>
 
-            {/* Bottom Row: Activity Chart & Leaderboards */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1.5fr', gap: '20px' }}>
-                <div className="hq-card">
-                    <h3 className="hq-card-title">🔥 النشاط التفاعلي (الأسئلة والدردشة - آخر 7 أيام)</h3>
-                    <div style={{ height: '300px', width: '100%', marginTop: '20px' }}>
+            <div className="teacher-overview-bottom">
+                <div className="hq-chart-box">
+                    <div className="hq-cb-head">
+                        <h3>🔥 النشاط التفاعلي (الأسئلة والدردشة - آخر 7 أيام)</h3>
+                    </div>
+                    <div className="teacher-chart-body teacher-chart-body--bar">
                         <ResponsiveContainer width="100%" height="100%">
-                            <BarChart data={charts?.activity || []} margin={{ top: 5, right: 30, left: 0, bottom: 5 }}>
+                            <BarChart data={charts?.activity || []} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
                                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
-                                <XAxis dataKey="date" stroke="var(--hq-text-muted)" fontSize={12} tickLine={false} axisLine={false} />
-                                <YAxis stroke="var(--hq-text-muted)" fontSize={12} tickLine={false} axisLine={false} />
+                                <XAxis dataKey="date" stroke="var(--hq-text-muted)" fontSize={11} tickLine={false} axisLine={false} />
+                                <YAxis stroke="var(--hq-text-muted)" fontSize={11} tickLine={false} axisLine={false} width={36} />
                                 <RechartsTooltip
                                     cursor={{ fill: 'rgba(0,0,0,0.05)' }}
                                     contentStyle={{ background: 'var(--hq-bg)', border: '1px solid var(--hq-border)', borderRadius: '10px' }}
                                     itemStyle={{ color: 'var(--hq-primary-text)' }}
                                 />
-                                <Legend iconType="circle" />
+                                <Legend iconType="circle" wrapperStyle={{ fontSize: '12px' }} />
                                 <Bar dataKey="qa" name="أسئلة" fill="#ec4899" radius={[4, 4, 0, 0]} />
                                 <Bar dataKey="chat" name="رسائل مجموعة" fill="#3b82f6" radius={[4, 4, 0, 0]} />
                             </BarChart>
@@ -166,38 +171,41 @@ export const TeacherOverview = () => {
                     </div>
                 </div>
 
-                <div className="hq-card">
-                    <h3 className="hq-card-title">👨‍💻 سرعة وأداء المساعدين</h3>
-                    <table className="hq-table" style={{ marginTop: '10px' }}>
-                        <thead>
-                            <tr>
-                                <th>اسم المساعد</th>
-                                <th>الردود / الرسائل</th>
-                                <th>السرعة</th>
-                                <th>الحالة</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {stats.assistants && stats.assistants.length > 0 ? stats.assistants.map(ta => (
-                                <tr key={ta.id}>
-                                    <td style={{ fontWeight: 'bold', color: 'var(--hq-primary-text)' }}>{ta.name}</td>
-                                    <td>
-                                        <div style={{ display: 'flex', gap: '5px' }}>
-                                            <span className="hq-badge-blue">{ta.qa_replies}</span>
-                                            <span className="hq-badge-purple">{ta.chat_messages}</span>
-                                        </div>
-                                    </td>
-                                    <td>{ta.avg_response_min > 0 ? `${ta.avg_response_min} د` : 'سريع⚡'}</td>
-                                    <td>{ta.is_active ? <span style={{ color: '#10b981' }}>●</span> : <span style={{ color: '#ef4444' }}>●</span>}</td>
+                <div className="hq-chart-box">
+                    <div className="hq-cb-head">
+                        <h3>👨‍💻 سرعة وأداء المساعدين</h3>
+                    </div>
+                    <div className="hq-table-container ta-table-wrap">
+                        <table className="hq-table ta-wide-table">
+                            <thead>
+                                <tr>
+                                    <th>اسم المساعد</th>
+                                    <th>الردود / الرسائل</th>
+                                    <th>السرعة</th>
+                                    <th>الحالة</th>
                                 </tr>
-                            )) : (
-                                <tr><td colSpan="4" style={{ textAlign: 'center', padding: '20px' }}>لا يوجد مساعدين.</td></tr>
-                            )}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                {stats.assistants && stats.assistants.length > 0 ? stats.assistants.map(ta => (
+                                    <tr key={ta.id}>
+                                        <td style={{ fontWeight: 'bold', color: 'var(--hq-primary-text)' }}>{ta.name}</td>
+                                        <td>
+                                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px' }}>
+                                                <span className="hq-badge-blue">{ta.qa_replies}</span>
+                                                <span className="hq-badge-purple">{ta.chat_messages}</span>
+                                            </div>
+                                        </td>
+                                        <td>{ta.avg_response_min > 0 ? `${ta.avg_response_min} د` : 'سريع⚡'}</td>
+                                        <td>{ta.is_active ? <span style={{ color: '#10b981' }}>●</span> : <span style={{ color: '#ef4444' }}>●</span>}</td>
+                                    </tr>
+                                )) : (
+                                    <tr><td colSpan="4" style={{ textAlign: 'center', padding: '20px' }}>لا يوجد مساعدين.</td></tr>
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
-
         </div>
     )
 }

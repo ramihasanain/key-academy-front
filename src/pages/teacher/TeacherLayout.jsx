@@ -14,6 +14,8 @@ import {
     HiOutlineVideoCamera
 } from 'react-icons/hi2'
 import '../hq/Admin.css'
+import '../ta/TAResponsive.css'
+import './TeacherResponsive.css'
 
 export const TeacherLayout = () => {
     const navigate = useNavigate()
@@ -95,7 +97,7 @@ export const TeacherLayout = () => {
     if (isLoading) return <div className="hq-loading">جاري المصادقة كأستاذ...</div>
 
     return (
-        <div className="hq-layout ta-layout" style={{
+        <div className="hq-layout ta-layout teacher-layout" style={{
             '--hq-primary': '#1e3a8a',
             '--hq-primary-hover': '#1e40af',
             '--hq-primary-bg': 'rgba(30, 58, 138, 0.08)',
@@ -135,8 +137,8 @@ export const TeacherLayout = () => {
 
             {/* Main Content */}
             <div className="hq-main">
-                <header className="hq-topbar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '15px 30px' }}>
-                    <div className="hq-tb-left" style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+                <header className="hq-topbar ta-topbar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '15px 30px', flexWrap: 'wrap', gap: '12px' }}>
+                    <div className="hq-tb-left" style={{ display: 'flex', alignItems: 'center', gap: '20px', flexWrap: 'wrap', minWidth: 0 }}>
                         <button className="hq-mobile-toggle" onClick={() => setIsMobileOpen(!isMobileOpen)}>☰</button>
                         <div>
                             <h2 style={{ fontSize: '18px', margin: 0, color: 'var(--hq-primary)' }}>أهلاً بالأستاذ {profile?.teacher_name || profile?.first_name || profile?.username}</h2>
