@@ -137,21 +137,21 @@ export const TeacherLayout = () => {
 
             {/* Main Content */}
             <div className="hq-main">
-                <header className="hq-topbar ta-topbar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '15px 30px', flexWrap: 'wrap', gap: '12px' }}>
-                    <div className="hq-tb-left" style={{ display: 'flex', alignItems: 'center', gap: '20px', flexWrap: 'wrap', minWidth: 0 }}>
-                        <button className="hq-mobile-toggle" onClick={() => setIsMobileOpen(!isMobileOpen)}>☰</button>
-                        <div>
-                            <h2 style={{ fontSize: '18px', margin: 0, color: 'var(--hq-primary)' }}>أهلاً بالأستاذ {profile?.teacher_name || profile?.first_name || profile?.username}</h2>
-                            <p style={{ margin: 0, color: 'var(--hq-text-muted)', fontSize: '13px' }}>إدارة شاملة للمحتوى والمساعدين</p>
+                <header className="hq-topbar ta-topbar teacher-topbar">
+                    <div className="teacher-topbar-row">
+                        <button type="button" className="hq-mobile-toggle" onClick={() => setIsMobileOpen(!isMobileOpen)} aria-label="فتح القائمة">☰</button>
+                        <div className="teacher-topbar-meta">
+                            <h2>أهلاً بالأستاذ {profile?.teacher_name || profile?.first_name || profile?.username}</h2>
+                            <p className="teacher-topbar-sub">إدارة شاملة للمحتوى والمساعدين</p>
                         </div>
-                    </div>
-                    <div className="hq-tb-right">
-                        <div className="hq-admin-profile" style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-                            <div className="hq-ap-info" style={{ textAlign: 'left' }}>
-                                <strong>{profile ? profile.teacher_name || profile.first_name || profile.username : 'الأستاذ'}</strong>
-                                <span>صلاحية أستاذ مادة</span>
+                        <div className="hq-tb-right teacher-topbar-actions">
+                            <div className="hq-admin-profile">
+                                <div className="hq-ap-info">
+                                    <strong>{profile ? profile.teacher_name || profile.first_name || profile.username : 'الأستاذ'}</strong>
+                                    <span>صلاحية أستاذ مادة</span>
+                                </div>
+                                <div onClick={() => setShowPwdModal(true)} className="hq-ap-av" style={{ background: 'var(--hq-primary)', cursor: 'pointer' }} title="تغيير كلمة المرور" role="button" tabIndex={0}>T</div>
                             </div>
-                            <div onClick={() => setShowPwdModal(true)} className="hq-ap-av" style={{ background: 'var(--hq-primary)', cursor: 'pointer' }} title="تغيير كلمة المرور">T</div>
                         </div>
                     </div>
                 </header>

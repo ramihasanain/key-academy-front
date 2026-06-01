@@ -3,27 +3,74 @@
    Scoped under .teacher-layout (extends .ta-layout shared shell rules)
    ===================================================================== */
 
+.hq-layout.ta-layout.teacher-layout {
+    height: 100vh;
+    height: 100dvh;
+    overflow-x: hidden;
+    max-width: 100vw;
+}
+
 .teacher-layout .hq-main {
     min-width: 0;
     max-width: 100%;
 }
 
-.teacher-layout .hq-topbar {
+.teacher-layout .hq-content {
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* ---- Topbar: صف واحد مرن — يمنع انكسار الحروف عمودياً على الموبايل ---- */
+.teacher-layout .teacher-topbar {
     height: auto !important;
     min-height: var(--hq-topbar-h);
-    flex-wrap: wrap;
+    padding: 12px 16px !important;
+    align-items: stretch;
+}
+
+.teacher-layout .teacher-topbar-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    width: 100%;
+    min-width: 0;
+}
+
+.teacher-layout .teacher-topbar-meta {
+    flex: 1;
+    min-width: 0;
+}
+
+.teacher-layout .teacher-topbar-meta h2 {
+    margin: 0;
+    font-size: 17px;
+    font-weight: 800;
+    color: var(--hq-primary);
+    line-height: 1.35;
+    word-break: normal;
+    overflow-wrap: break-word;
+}
+
+.teacher-layout .teacher-topbar-sub {
+    margin: 4px 0 0;
+    color: var(--hq-text-muted);
+    font-size: 13px;
+    line-height: 1.4;
+}
+
+.teacher-layout .teacher-topbar-actions {
+    flex-shrink: 0;
+}
+
+.teacher-layout .teacher-topbar-actions .hq-admin-profile {
+    display: flex;
+    align-items: center;
     gap: 12px;
 }
 
-.teacher-layout .hq-tb-left {
-    flex: 1 1 auto;
-    min-width: 0;
-    flex-wrap: wrap;
-}
-
-.teacher-layout .hq-tb-left h2 {
-    word-break: break-word;
-    line-height: 1.3;
+.teacher-layout .hq-mobile-toggle {
+    flex-shrink: 0;
+    margin-top: 2px;
 }
 
 /* ---- Overview page ---- */
@@ -76,6 +123,16 @@
     margin-top: 12px;
 }
 
+.teacher-layout .teacher-chart-body--pie {
+    height: auto;
+    min-height: 0;
+}
+
+.teacher-layout .teacher-chart-body--pie .recharts-responsive-container {
+    height: 220px !important;
+    min-height: 220px;
+}
+
 .teacher-layout .teacher-overview-page .hq-stat-card {
     min-width: 0;
 }
@@ -99,22 +156,39 @@
         padding: 14px;
     }
 
-    .teacher-layout .hq-topbar {
-        padding: 12px 15px !important;
+    .teacher-layout .teacher-topbar {
         padding-right: max(15px, env(safe-area-inset-right)) !important;
         padding-left: max(15px, env(safe-area-inset-left)) !important;
     }
 
-    .teacher-layout .hq-tb-left h2 {
+    .teacher-layout .teacher-topbar-meta h2 {
         font-size: 15px !important;
     }
 
-    .teacher-layout .hq-tb-left p {
+    .teacher-layout .teacher-topbar-sub {
         font-size: 11px !important;
     }
 
     .teacher-layout .hq-ap-info {
         display: none;
+    }
+
+    /* صفحات مشتركة مع المساعد (طلاب، دردشة، …) */
+    .teacher-layout .ta-page {
+        padding: 14px !important;
+        max-width: 100% !important;
+    }
+
+    .teacher-layout .ta-page h1 {
+        font-size: 20px !important;
+        flex-wrap: wrap;
+        line-height: 1.3;
+    }
+
+    .teacher-layout .ta-grid-cards,
+    .teacher-layout .ta-grid-two {
+        grid-template-columns: 1fr !important;
+        gap: 14px !important;
     }
 
     .teacher-layout .teacher-overview-page {
@@ -142,13 +216,26 @@
         line-height: 1.4;
     }
 
-    /* Recharts legend: allow wrap on narrow screens */
-    .teacher-layout .recharts-legend-wrapper {
-        max-width: 100% !important;
+    /* مخطط الدائرة: ارتفاع ثابت للرسم + مفتاح HTML أسفله */
+    .teacher-layout .teacher-chart-body--pie .recharts-responsive-container {
+        height: 200px !important;
+        min-height: 200px;
+    }
+
+    .teacher-layout .teacher-chart-body--pie {
+        height: auto !important;
+        min-height: 0;
     }
 }
 
 @media (max-width: 480px) {
+    .teacher-layout .teacher-topbar-sub {
+        display: none;
+    }
+
+    .teacher-layout .teacher-topbar-meta h2 {
+        font-size: 14px !important;
+    }
     .teacher-layout .teacher-overview-page .hq-stats-grid {
         grid-template-columns: 1fr !important;
         gap: 14px;
@@ -158,4 +245,33 @@
         min-height: 200px;
         height: 240px;
     }
+}
+
+/* مفتاح مخطط الدائرة (بديل Legend المتداخل في Recharts) */
+.teacher-layout .teacher-pie-legend {
+    list-style: none;
+    margin: 14px 0 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.teacher-layout .teacher-pie-legend li {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 12px;
+    line-height: 1.45;
+    color: var(--hq-text-main);
+    word-break: normal;
+    overflow-wrap: break-word;
+}
+
+.teacher-layout .teacher-pie-legend-swatch {
+    flex-shrink: 0;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-top: 4px;
 }

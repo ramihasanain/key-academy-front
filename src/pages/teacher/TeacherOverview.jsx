@@ -116,32 +116,42 @@ export const TeacherOverview = () => {
                     <div className="hq-cb-head">
                         <h3>📊 توزيع الطلاب على الدورات</h3>
                     </div>
-                    <div className="teacher-chart-body">
+                    <div className="teacher-chart-body teacher-chart-body--pie">
                         {(!charts?.distribution || charts.distribution.length === 0) ? (
                             <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--hq-text-muted)' }}>لا توجد بيانات كافية</div>
                         ) : (
-                            <ResponsiveContainer width="100%" height="100%">
-                                <PieChart>
-                                    <Pie
-                                        data={charts.distribution}
-                                        cx="50%"
-                                        cy="45%"
-                                        innerRadius={50}
-                                        outerRadius={75}
-                                        paddingAngle={5}
-                                        dataKey="value"
-                                    >
-                                        {charts.distribution.map((entry, index) => (
-                                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                                        ))}
-                                    </Pie>
-                                    <RechartsTooltip
-                                        contentStyle={{ background: 'var(--hq-bg)', border: '1px solid var(--hq-border)', borderRadius: '10px' }}
-                                        itemStyle={{ color: 'var(--hq-primary-text)' }}
-                                    />
-                                    <Legend iconType="circle" wrapperStyle={{ fontSize: '12px', lineHeight: '1.4' }} />
-                                </PieChart>
-                            </ResponsiveContainer>
+                            <>
+                                <ResponsiveContainer width="100%" height={200}>
+                                    <PieChart>
+                                        <Pie
+                                            data={charts.distribution}
+                                            cx="50%"
+                                            cy="50%"
+                                            innerRadius={48}
+                                            outerRadius={72}
+                                            paddingAngle={5}
+                                            dataKey="value"
+                                            nameKey="name"
+                                        >
+                                            {charts.distribution.map((entry, index) => (
+                                                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                            ))}
+                                        </Pie>
+                                        <RechartsTooltip
+                                            contentStyle={{ background: 'var(--hq-bg)', border: '1px solid var(--hq-border)', borderRadius: '10px' }}
+                                            itemStyle={{ color: 'var(--hq-primary-text)' }}
+                                        />
+                                    </PieChart>
+                                </ResponsiveContainer>
+                                <ul className="teacher-pie-legend" aria-label="توزيع الدورات">
+                                    {charts.distribution.map((entry, index) => (
+                                        <li key={`legend-${index}`}>
+                                            <span className="teacher-pie-legend-swatch" style={{ background: COLORS[index % COLORS.length] }} aria-hidden />
+                                            <span>{entry.name}</span>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </>
                         )}
                     </div>
                 </div>
