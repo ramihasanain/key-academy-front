@@ -27,6 +27,8 @@ import {
 } from 'react-icons/hi2'
 import { VirtualLabsData } from '../data/VirtualLabsData'
 import EmptyState from '../components/core/EmptyState'
+import FeatureGate from '../components/FeatureGate'
+import { usePlatformFeatures } from '../contexts/PlatformFeaturesContext'
 const SecurePDFViewer = lazy(() => import('../components/SecurePDFViewer'))
 import LiveChat from '../components/LiveChat'
 import './CourseViewer.css'
@@ -61,7 +63,9 @@ const CourseChatDrawer = ({ courseId, userData, onClose }) => {
                     </button>
                 </div>
                 <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: 'white', overflow: 'hidden' }}>
-                    <LiveChat courseId={courseId} userData={userData} lessonId={null} />
+                    <FeatureGate feature="groups">
+                        <LiveChat courseId={courseId} userData={userData} lessonId={null} />
+                    </FeatureGate>
                 </div>
             </motion.div>
         </motion.div>
@@ -80,6 +84,7 @@ const CourseViewer = () => {
     const [showLoginPrompt, setShowLoginPrompt] = useState(false)
     const [viewedDoc, setViewedDoc] = useState(null) // State for Secure PDF Viewer
     const { userData } = useUser()
+    const { isFeatureEnabled } = usePlatformFeatures()
     const [isChatOpen, setIsChatOpen] = useState(false)
 
     useEffect(() => {
@@ -395,6 +400,7 @@ const CourseViewer = () => {
 
                         {/* 2. DOCUMENTS SECTIONS */}
                         {activeTab === 'documents' && (
+                            <FeatureGate feature="lesson_docs">
                             <motion.div
                                 key="documents-tab"
                                 initial={{ opacity: 0, y: 30 }}
@@ -468,11 +474,13 @@ const CourseViewer = () => {
                                     )}
                                 </div>
                             </motion.div>
+                            </FeatureGate>
                         )}
 
                         {/* 3. MINISTERIAL QUESTIONS */}
                         {activeTab === 'ministerial' && (
-                            courseData.ministerial_docs?.length > 0 ? (
+                            <FeatureGate feature="past_papers">
+                            {courseData.ministerial_docs?.length > 0 ? (
                                 <motion.div
                                     key="ministerial-tab"
                                     initial={{ opacity: 0, y: 30 }}
@@ -514,11 +522,13 @@ const CourseViewer = () => {
                                         className="cv-super-glass"
                                     />
                                 </motion.div>
-                            )
+                            )}
+                            </FeatureGate>
                         )}
 
                         {/* 4. EXAMS TAB (الامتحانات الأسبوعية) */}
                         {activeTab === 'exams' && (
+                            <FeatureGate feature="weekly_exams">
                             <motion.div
                                 key="exams-tab"
                                 initial={{ opacity: 0, y: 30 }}
@@ -596,6 +606,7 @@ const CourseViewer = () => {
                                     </div>
                                 )}
                             </motion.div>
+                            </FeatureGate>
                         )}
 
                     </AnimatePresence>
@@ -693,6 +704,7 @@ const CourseViewer = () => {
             )}
 
             {/* 🌟 FLOATING CHAT BUTTON 🌟 */}
+            {isFeatureEnabled('groups') && (
             <button 
                 className="cv-floating-chat-btn"
                 onClick={() => setIsChatOpen(true)}
@@ -701,6 +713,7 @@ const CourseViewer = () => {
                 <HiOutlineUserGroup className="cv-fc-icon" />
                 <span className="cv-fc-tooltip">المجموعة</span>
             </button>
+            )}
 
             {/* 🌟 CHAT DRAWER PORTAL 🌟 */}
             {createPortal(

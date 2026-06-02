@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { API } from '../config'
+import { fetchPlatformFeatures } from '../utils/platformFeaturesApi'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
     HiOutlinePhone,
@@ -154,6 +155,7 @@ const Signup = () => {
                 localStorage.setItem('access_token', data.access)
                 localStorage.setItem('refresh_token', data.refresh)
                 localStorage.setItem('user', JSON.stringify(data.user))
+                await fetchPlatformFeatures()
                 setStep(3)
                 setTimeout(() => {
                     navigate('/dashboard')
@@ -215,6 +217,7 @@ const Signup = () => {
             localStorage.setItem('access_token', data.access)
             localStorage.setItem('refresh_token', data.refresh)
             localStorage.setItem('user', JSON.stringify(data.user))
+            await fetchPlatformFeatures()
 
             setStep(3)
             setTimeout(() => {

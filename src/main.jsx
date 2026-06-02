@@ -23,6 +23,7 @@ import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
 import { AuthProvider } from './contexts/AuthContext'
+import { PlatformFeaturesProvider } from './contexts/PlatformFeaturesContext'
 import ErrorBoundary from './components/ErrorBoundary'
 import { HelmetProvider } from 'react-helmet-async'
 import App from './App'
@@ -33,9 +34,11 @@ ReactDOM.createRoot(document.getElementById('root')).render(
         <ErrorBoundary>
             <BrowserRouter>
                 <AuthProvider>
-                    <HelmetProvider>
-                        <App />
-                    </HelmetProvider>
+                    <PlatformFeaturesProvider>
+                        <HelmetProvider>
+                            <App />
+                        </HelmetProvider>
+                    </PlatformFeaturesProvider>
                 </AuthProvider>
             </BrowserRouter>
         </ErrorBoundary>

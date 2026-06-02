@@ -55,6 +55,8 @@ import robotVideoWebm from '../assets/robot_website.webm'
 import robotVideoMov from '../assets/native_hevc_alpha.mov'
 import { VirtualLabsData } from '../data/VirtualLabsData'
 import LiveChat from '../components/LiveChat'
+import FeatureGate from '../components/FeatureGate'
+import { usePlatformFeatures } from '../contexts/PlatformFeaturesContext'
 import TabNotes from '../components/LessonViewerTabs/TabNotes'
 import TabQA from '../components/LessonViewerTabs/TabQA'
 import TabDocs from '../components/LessonViewerTabs/TabDocs'
@@ -664,6 +666,7 @@ const LessonViewer = () => {
     const [isLoadingContent, setIsLoadingContent] = useState(false)
     
     const { userData } = useUser()
+    const { isFeatureEnabled } = usePlatformFeatures()
 
     const [activeContent, setActiveContent] = useState('video')
     const [activeTab, setActiveTab] = useState('notes')
@@ -803,6 +806,11 @@ const LessonViewer = () => {
 
     const isPreview = urlParams.get('preview') === 'true'
 
+    const contentFeatureMap = {
+        slides: 'slides',
+        quiz: 'ai_quiz',
+    }
+
     useEffect(() => { window.scrollTo(0, 0) }, [])
 
     const handleContentChange = (id) => {
@@ -879,11 +887,13 @@ const LessonViewer = () => {
                     <div className="lv-sb-items">
                         {CURRENT_LESSON.items.map(item => {
                             const isActive = activeContent === item.id
+                            const featureKey = contentFeatureMap[item.id]
+                            const isFeatureLocked = featureKey && !isFeatureEnabled(featureKey)
                             return (
-                                <div key={item.id} className={`lv-sb-item ${isActive ? 'active' : ''} ${isPreview && item.id !== 'video' ? 'preview-locked' : ''}`} onClick={() => handleContentChange(item.id)}>
+                                <div key={item.id} className={`lv-sb-item ${isActive ? 'active' : ''} ${(isPreview && item.id !== 'video') || isFeatureLocked ? 'preview-locked' : ''}`} onClick={() => handleContentChange(item.id)}>
                                     <span className={`lv-sb-icon ${isActive ? 'active' : ''}`}>{getIcon(item.type, isActive)}</span>
                                     <span className="lv-sb-label">{item.title}</span>
-                                    {isPreview && item.id !== 'video' && <HiOutlineLockClosed className="lv-sb-lock-icn" />}
+                                    {((isPreview && item.id !== 'video') || isFeatureLocked) && <HiOutlineLockClosed className="lv-sb-lock-icn" />}
                                 </div>
                             )
                         })}
@@ -921,16 +931,22 @@ const LessonViewer = () => {
                         <AnimatePresence mode="wait">
                             {activeContent === 'video' && <motion.div key="v" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="lv-portal-inner"><ViewVideo lessonId={lessonId} isCompleted={lessonInfo?.is_completed} onComplete={handleMarkComplete} /></motion.div>}
                             {activeContent === 'slides' && <motion.div key="s" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="lv-portal-inner">
-                                {isLoadingContent ? (
-                                    <div className="lv-screen" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-                                        <div className="lv-qi-badge" style={{ animation: 'aiCharFloat 2s infinite ease-in-out' }}><HiOutlineSparkles /></div>
-                                        <h3 style={{ color: 'var(--purple)', marginTop: '20px' }}>جاري تحميل الملفات التفاعلية...</h3>
-                                    </div>
-                                ) : (
-                                    <ViewSlides lessonInfo={lessonInfo} lessonContent={lessonContent} userData={userData} />
-                                )}
+                                <FeatureGate feature="slides" className="lv-screen">
+                                    {isLoadingContent ? (
+                                        <div className="lv-screen" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                                            <div className="lv-qi-badge" style={{ animation: 'aiCharFloat 2s infinite ease-in-out' }}><HiOutlineSparkles /></div>
+                                            <h3 style={{ color: 'var(--purple)', marginTop: '20px' }}>جاري تحميل الملفات التفاعلية...</h3>
+                                        </div>
+                                    ) : (
+                                        <ViewSlides lessonInfo={lessonInfo} lessonContent={lessonContent} userData={userData} />
+                                    )}
+                                </FeatureGate>
                             </motion.div>}
-                            {activeContent === 'quiz' && <motion.div key="q" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="lv-portal-inner"><ViewQuiz lessonId={lessonId} userData={userData} /></motion.div>}
+                            {activeContent === 'quiz' && <motion.div key="q" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="lv-portal-inner">
+                                <FeatureGate feature="ai_quiz">
+                                    <ViewQuiz lessonId={lessonId} userData={userData} />
+                                </FeatureGate>
+                            </motion.div>}
                         </AnimatePresence>
                     </div>
 
@@ -976,15 +992,21 @@ const LessonViewer = () => {
                                 <TabNotes lessonId={lessonId} />
                             )}
                             {activeTab === 'qa' && (
-                                <TabQA lessonId={lessonId} userData={userData} />
+                                <FeatureGate feature="qa">
+                                    <TabQA lessonId={lessonId} userData={userData} />
+                                </FeatureGate>
                             )}
                             {activeTab === 'group' && (
-                                <div style={{ height: '700px', display: 'flex', flexDirection: 'column' }}>
-                                <LiveChat courseId={courseId} userData={userData} lessonId={lessonId} />
-                                </div>
+                                <FeatureGate feature="groups">
+                                    <div style={{ height: '700px', display: 'flex', flexDirection: 'column' }}>
+                                        <LiveChat courseId={courseId} userData={userData} lessonId={lessonId} />
+                                    </div>
+                                </FeatureGate>
                             )}
                             {activeTab === 'docs' && (
-                                <TabDocs lessonInfo={lessonInfo} courseId={courseId} userData={userData} />
+                                <FeatureGate feature="lesson_docs">
+                                    <TabDocs lessonInfo={lessonInfo} courseId={courseId} userData={userData} />
+                                </FeatureGate>
                             )}
                             {CURRENT_LESSON.hasLab && (
                                 activeTab === 'lab' && <div>
@@ -992,7 +1014,9 @@ const LessonViewer = () => {
                                 </div>
                             )}
                             {activeTab === 'keyai' && (
-                                <TabKeyAI lessonInfo={lessonInfo} userData={userData} />
+                                <FeatureGate feature="ai_chat">
+                                    <TabKeyAI lessonInfo={lessonInfo} userData={userData} />
+                                </FeatureGate>
                             )}
                         </div>
                     </div>

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { API } from '../config'
+import { fetchPlatformFeatures } from '../utils/platformFeaturesApi'
 import { motion } from 'framer-motion'
 import { HiOutlinePhone, HiOutlineLockClosed, HiOutlineArrowLeftOnRectangle } from 'react-icons/hi2'
 import fpPromise from '@fingerprintjs/fingerprintjs'
@@ -96,6 +97,7 @@ const Login = () => {
             localStorage.setItem('access_token', data.access)
             localStorage.setItem('refresh_token', data.refresh)
             localStorage.setItem('user', JSON.stringify(data.user))
+            await fetchPlatformFeatures()
 
             const user = data.user
             const pendingRedirect = localStorage.getItem('pending_course_redirect')

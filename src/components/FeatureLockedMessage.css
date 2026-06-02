@@ -1,0 +1,34 @@
+.feature-locked-message {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: 16px;
+    min-height: 220px;
+    padding: 32px 24px;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.75);
+    border: 1px solid rgba(239, 68, 68, 0.15);
+}
+
+.feature-locked-icon {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    color: #ef4444;
+    background: rgba(239, 68, 68, 0.08);
+}
+
+.feature-locked-message p {
+    margin: 0;
+    max-width: 420px;
+    font-size: 1.05rem;
+    font-weight: 700;
+    line-height: 1.8;
+    color: #64748b;
+}

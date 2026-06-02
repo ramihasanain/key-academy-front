@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { API } from '../config';
+import { clearPlatformFeaturesCache } from '../utils/platformFeaturesApi';
 
 const AuthContext = createContext();
 
@@ -30,6 +31,7 @@ export const AuthProvider = ({ children }) => {
             localStorage.removeItem('access_token');
             localStorage.removeItem('refresh_token');
             localStorage.removeItem('user');
+            clearPlatformFeaturesCache();
             setUserData(null);
         };
         window.addEventListener('auth:logout', handleLogout);
