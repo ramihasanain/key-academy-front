@@ -6,7 +6,12 @@ import { TAStudent360 } from './TAStudent360'
 import './TAGroups.css'
 
 export const TAGroups = () => {
-    const { activeGroupId: assistantGroupId, activeGroup: assistantGroup } = useOutletContext() || {}
+    const { activeGroupId: assistantGroupId, activeGroup: assistantGroup, profile } = useOutletContext() || {}
+    const isTeacherUser = profile?.role === 'teacher'
+    const chatSenderLabel = isTeacherUser
+        ? (profile?.teacher_name || profile?.first_name || profile?.username || 'الأستاذ')
+        : 'مساعد المادة'
+    const chatSenderRole = isTeacherUser ? 'teacher' : 'assistant'
     const [courses, setCourses] = useState([])
     const [showStudentProfile, setShowStudentProfile] = useState(null)
     const [groups, setGroups] = useState([])
@@ -459,11 +464,11 @@ export const TAGroups = () => {
                     content: trimmed,
                     sender: {
                         id: null,
-                        full_name: 'مساعد المادة',
-                        username: 'assistant',
-                        role: 'assistant',
+                        full_name: chatSenderLabel,
+                        username: isTeacherUser ? 'teacher' : 'assistant',
+                        role: chatSenderRole,
                     },
-                    sender_role: 'assistant',
+                    sender_role: chatSenderRole,
                     is_private: privateTarget !== null,
                     recipient_id: privateTarget ? privateTarget.id : 0,
                     created_at: new Date().toISOString(),
