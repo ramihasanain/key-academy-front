@@ -32,6 +32,8 @@
 .ta-layout .hq-content:has(> .ta-chat-layout) {
     display: flex;
     flex-direction: column;
+    overflow: hidden !important;
+    min-height: 0;
 }
 
 /* منع المحتوى العريض (جداول nowrap) من توسيع أعمدة الشبكة وقص باقي البطاقات */
@@ -202,7 +204,7 @@
 
 /* ============================ SMALL PHONES (≤480px) ============================ */
 @media (max-width: 480px) {
-    .ta-layout .hq-content {
+    .ta-layout .hq-content:not(:has(> .ta-chat-layout)) {
         padding: 10px;
     }
     .ta-layout .ta-page {

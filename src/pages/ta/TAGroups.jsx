@@ -5,6 +5,9 @@ import { HiOutlinePaperClip, HiOutlinePaperAirplane, HiOutlineMicrophone, HiOutl
 import { TAStudent360 } from './TAStudent360'
 import './TAGroups.css'
 
+/** FRONTEND-ONLY: غيّر إلى true لإعادة صور/ملفات/صوت في دردشة الأستاذ والمساعد */
+const STAFF_CHAT_MEDIA_ENABLED = false
+
 export const TAGroups = () => {
     const { activeGroupId: assistantGroupId, activeGroup: assistantGroup, profile } = useOutletContext() || {}
     const isTeacherUser = profile?.role === 'teacher'
@@ -419,14 +422,15 @@ export const TAGroups = () => {
     }
 
     const sendMessage = async () => {
-        if (!messageText.trim() && !file && !audioBlob) return
+        const hasMedia = STAFF_CHAT_MEDIA_ENABLED && (file || audioBlob)
+        if (!messageText.trim() && !hasMedia) return
 
         let finalContent = messageText;
         if (privateTarget) {
             finalContent = `__PRIVATE_MSG__[${privateTarget.id}]::${finalContent || ' '}`;
         }
 
-        if (file || audioBlob) {
+        if (hasMedia) {
             // For attachments, we MUST use HTTP POST
             const fd = new FormData()
             fd.append('course', activeCourseId)
@@ -490,9 +494,9 @@ export const TAGroups = () => {
     }
 
     return (
-        <div className="ta-chat-layout" style={{ display: 'flex', gap: '20px' }}>
+        <div className="ta-chat-layout">
             {/* Left Sidebar: Select Course & Group */}
-            <div className={`ta-chat-sidebar ${mobileView === 'chat' ? 'hidden-mobile' : ''}`} style={{ width: '250px', background: 'var(--hq-surface)', border: '1px solid var(--hq-border)', borderRadius: '12px', padding: '15px', overflowY: 'auto' }}>
+            <div className={`ta-chat-sidebar ${mobileView === 'chat' ? 'hidden-mobile' : ''}`}>
                 <h3 style={{ color: 'var(--hq-primary)', margin: '0 0 20px 0', fontSize: '16px' }}>قائمة الدردشة</h3>
                 
                 {groups.length === 0 ? (
@@ -552,7 +556,7 @@ export const TAGroups = () => {
             </div>
 
             {/* Right Side: Chat Box */}
-            <div className={`ta-chat-main ${mobileView === 'list' ? 'hidden-mobile' : ''}`} style={{ flex: 1, background: 'var(--hq-surface)', border: '1px solid var(--hq-border)', borderRadius: '12px', display: 'flex', flexDirection: 'column' }}>
+            <div className={`ta-chat-main ${mobileView === 'list' ? 'hidden-mobile' : ''}`}>
                 {activeCourseId ? (
                     <>
                         <div className="ta-chat-header" style={{ padding: '15px', borderBottom: '1px solid var(--hq-border)', color: 'var(--hq-text-main)', fontWeight: 'bold', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '10px' }}>
@@ -575,7 +579,7 @@ export const TAGroups = () => {
                             <img src="/key-icon-logo.png" alt="Key Logo" style={{ height: '35px', objectFit: 'contain' }} />
                         </div>
 
-                        <div id="ta-chat-msgs" style={{ flex: 1, overflowY: 'auto', padding: '20px', display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                        <div id="ta-chat-msgs" className="ta-chat-msgs-scroll">
                             {hasMore && (
                                 <div style={{ textAlign: 'center', marginBottom: '10px' }}>
                                     <button onClick={loadMoreMessages} style={{ background: 'var(--hq-surface-light, rgba(255,255,255,0.05))', border: '1px solid var(--hq-border)', borderRadius: '20px', padding: '6px 16px', color: 'var(--hq-text-muted)', cursor: 'pointer', fontSize: '0.9rem', transition: 'all 0.2s' }} onMouseOver={e => e.target.style.color = 'var(--hq-primary)'} onMouseOut={e => e.target.style.color = 'var(--hq-text-muted)'}>
@@ -726,7 +730,7 @@ export const TAGroups = () => {
                         </div>
 
                         {!sessionStorage.getItem('spy_token') ? (
-                            <div className="ta-chat-input-area" style={{ padding: '15px', borderTop: '1px solid var(--hq-border)', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                            <div className="ta-chat-input-area">
                                 {privateTarget && (
                                     <div style={{ background: 'rgba(16, 185, 129, 0.1)', padding: '8px 15px', borderRadius: '8px', color: '#10b981', fontSize: '13px', display: 'flex', justifyContent: 'space-between' }}>
                                         <span>أنت الآن في وضع الرد الخاص 🕵️ على: <strong>{privateTarget.name}</strong></span>
@@ -744,55 +748,62 @@ export const TAGroups = () => {
                                     </div>
                                 )}
 
-                                {/* Attachment Preview Badge */}
-                                {(file || audioBlob) && (
-                                    <div style={{ background: 'rgba(16, 185, 129, 0.1)', border: '1px solid #10b981', padding: '10px 15px', borderRadius: '12px', color: '#10b981', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                {STAFF_CHAT_MEDIA_ENABLED && (file || audioBlob) && (
+                                    <div className="ta-chat-attachment-preview">
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontWeight: 'bold' }}>
                                             {audioBlob ? <HiOutlineMicrophone size={18} /> : <HiOutlinePaperClip size={18} />}
                                             <span>{audioBlob ? 'مقطع صوتي مسجل جاهز للإرسال 🎵' : `مرفق جاهز للإرسال: ${file.name}`}</span>
                                         </div>
-                                        <button onClick={() => { setFile(null); setAudioBlob(null); }} style={{ background: 'transparent', border: 'none', color: '#ef4444', cursor: 'pointer', fontWeight: 'bold', fontSize: '14px' }}>إلغاء المرفق ×</button>
+                                        <button type="button" onClick={() => { setFile(null); setAudioBlob(null); }} className="ta-chat-attachment-cancel">إلغاء المرفق ×</button>
                                     </div>
                                 )}
 
-                                <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                                    <button
-                                        onClick={() => fileInputRef.current?.click()}
-                                        style={{ background: 'transparent', color: file ? '#10b981' : 'var(--hq-text-muted)', border: 'none', padding: '8px', borderRadius: '50%', cursor: 'pointer', display: 'flex' }}
-                                        title="إرفاق صورة"
-                                    >
-                                        <HiOutlinePhoto size={24} />
-                                    </button>
-                                    <button
-                                        onClick={() => fileInputRef.current?.click()}
-                                        style={{ background: 'transparent', color: file ? '#10b981' : 'var(--hq-text-muted)', border: 'none', padding: '8px', borderRadius: '50%', cursor: 'pointer', display: 'flex' }}
-                                        title="إرفاق ملف"
-                                    >
-                                        <HiOutlinePaperClip size={24} />
-                                    </button>
-                                    <input
-                                        type="file"
-                                        ref={fileInputRef}
-                                        style={{ display: 'none' }}
-                                        onChange={e => setFile(e.target.files[0])}
-                                    />
+                                <div className="ta-chat-input-row">
+                                    {STAFF_CHAT_MEDIA_ENABLED && (
+                                        <>
+                                            <button
+                                                type="button"
+                                                onClick={() => fileInputRef.current?.click()}
+                                                className="ta-chat-media-btn"
+                                                title="إرفاق صورة"
+                                            >
+                                                <HiOutlinePhoto size={24} />
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() => fileInputRef.current?.click()}
+                                                className="ta-chat-media-btn"
+                                                title="إرفاق ملف"
+                                            >
+                                                <HiOutlinePaperClip size={24} />
+                                            </button>
+                                            <input
+                                                type="file"
+                                                ref={fileInputRef}
+                                                className="ta-chat-file-input"
+                                                onChange={e => setFile(e.target.files[0])}
+                                            />
 
-                                    {!isRecording ? (
-                                        <button
-                                            onClick={startRecording}
-                                            style={{ background: 'transparent', color: 'var(--hq-text-muted)', border: 'none', padding: '10px', borderRadius: '50%', cursor: 'pointer', display: 'flex', fontSize: '18px', alignItems: 'center', justifyContent: 'center' }}
-                                            title="تسجيل رسالة صوتية"
-                                        >
-                                            <HiOutlineMicrophone size={22} />
-                                        </button>
-                                    ) : (
-                                        <button
-                                            onClick={stopRecording}
-                                            style={{ background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', border: 'none', padding: '10px', borderRadius: '50%', cursor: 'pointer', display: 'flex', fontSize: '18px', alignItems: 'center', justifyContent: 'center', animation: 'pulse 1s infinite' }}
-                                            title="إيقاف وحفظ"
-                                        >
-                                            <HiOutlineStop size={22} />
-                                        </button>
+                                            {!isRecording ? (
+                                                <button
+                                                    type="button"
+                                                    onClick={startRecording}
+                                                    className="ta-chat-media-btn"
+                                                    title="تسجيل رسالة صوتية"
+                                                >
+                                                    <HiOutlineMicrophone size={22} />
+                                                </button>
+                                            ) : (
+                                                <button
+                                                    type="button"
+                                                    onClick={stopRecording}
+                                                    className="ta-chat-media-btn ta-chat-media-btn--recording"
+                                                    title="إيقاف وحفظ"
+                                                >
+                                                    <HiOutlineStop size={22} />
+                                                </button>
+                                            )}
+                                        </>
                                     )}
 
                                     <input
@@ -800,16 +811,20 @@ export const TAGroups = () => {
                                         className="ta-chat-input-field"
                                         value={messageText}
                                         onChange={e => setMessageText(e.target.value)}
-                                        placeholder={file ? `تم أختيار مرفق: ${file.name}` : (audioBlob ? "تم التقاط بصمة صوتية 🎵" : (isRecording ? "جاري التسجيل أستاذي..." : "اكتب رسالة توجيهية للطلاب هنا..."))}
-                                        style={{ flex: 1, padding: '12px', borderRadius: '24px', border: privateTarget ? '1px solid #10b981' : '1px solid var(--hq-border)', background: 'var(--hq-surface)', color: 'var(--hq-text-main)' }}
+                                        placeholder={
+                                            STAFF_CHAT_MEDIA_ENABLED && file
+                                                ? `تم أختيار مرفق: ${file.name}`
+                                                : STAFF_CHAT_MEDIA_ENABLED && audioBlob
+                                                    ? 'تم التقاط بصمة صوتية 🎵'
+                                                    : STAFF_CHAT_MEDIA_ENABLED && isRecording
+                                                        ? 'جاري التسجيل...'
+                                                        : 'اكتب رسالة توجيهية للطلاب هنا...'
+                                        }
                                         onKeyDown={e => e.key === 'Enter' && sendMessage()}
-                                        disabled={isRecording}
+                                        disabled={STAFF_CHAT_MEDIA_ENABLED && isRecording}
                                     />
 
-                                    <button
-                                        onClick={sendMessage}
-                                        style={{ background: 'var(--hq-primary)', color: 'white', border: 'none', padding: '12px', borderRadius: '50%', cursor: 'pointer', display: 'flex' }}
-                                    >
+                                    <button type="button" onClick={sendMessage} className="ta-chat-send-btn" aria-label="إرسال">
                                         <HiOutlinePaperAirplane size={20} style={{ transform: 'rotate(-45deg)', marginLeft: '2px', marginTop: '-2px' }} />
                                     </button>
                                 </div>
@@ -821,7 +836,7 @@ export const TAGroups = () => {
                         )}
                     </>
                 ) : (
-                    <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--hq-text-muted)' }}>
+                    <div className="ta-chat-main--empty">
                         رجاءً قم باختيار مجموعة لبدء التتبع والتوجيه المباشر
                     </div>
                 )}

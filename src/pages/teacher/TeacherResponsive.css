@@ -20,6 +20,15 @@
     -webkit-overflow-scrolling: touch;
 }
 
+/* صفحة الدردشة: نفس سلوك المساعد — الرسائل فوق حقل الكتابة */
+.teacher-layout .hq-content:has(> .ta-chat-layout) {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden !important;
+    min-height: 0;
+    flex: 1 1 auto;
+}
+
 /* ---- Topbar: صف واحد مرن — يمنع انكسار الحروف عمودياً على الموبايل ---- */
 .teacher-layout .teacher-topbar {
     height: auto !important;
@@ -152,8 +161,12 @@
 }
 
 @media (max-width: 768px) {
-    .teacher-layout .hq-content {
+    .teacher-layout .hq-content:not(:has(> .ta-chat-layout)) {
         padding: 14px;
+    }
+
+    .teacher-layout .hq-content:has(> .ta-chat-layout) {
+        padding: 0 !important;
     }
 
     .teacher-layout .teacher-topbar {

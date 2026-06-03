@@ -1,114 +1,248 @@
-/* ===== TA CHAT GROUPS MODERN MOBILE DESIGN ===== */
+/* ===== TA / Teacher CHAT GROUPS ===== */
+
+/* صفحة الدردشة: لا تمرّر .hq-content كاملة — الرسائل فقط بين الهيدر والإدخال */
+.ta-layout .hq-content:has(> .ta-chat-layout),
+.teacher-layout .hq-content:has(> .ta-chat-layout) {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden !important;
+    min-height: 0;
+    flex: 1 1 auto;
+}
 
 .ta-chat-layout {
     position: relative;
-    overflow: hidden;
-    background: var(--hq-bg);
-    /* تملأ المساحة المتبقية داخل .hq-content (الذي هو عمود مرن)،
-       فيُحسب الارتفاع تلقائياً مهما كان ارتفاع الشريط العلوي */
+    display: flex;
+    gap: 20px;
     flex: 1 1 auto;
     min-height: 0;
+    overflow: hidden;
+    background: var(--hq-bg);
 }
 
 .ta-chat-sidebar {
+    width: 250px;
+    flex-shrink: 0;
+    background: var(--hq-surface);
+    border: 1px solid var(--hq-border);
+    border-radius: 12px;
+    padding: 15px;
+    overflow-y: auto;
     transition: all 0.3s ease;
     display: flex;
     flex-direction: column;
 }
 
 .ta-chat-main {
+    flex: 1 1 auto;
+    min-height: 0;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: var(--hq-surface);
+    border: 1px solid var(--hq-border);
+    border-radius: 12px;
     transition: all 0.3s ease;
-    background: #f0f2f5 !important; /* WhatsApp like web background */
-    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+}
+
+.ta-chat-main--empty {
+    align-items: center;
+    justify-content: center;
+    color: var(--hq-text-muted);
+    padding: 24px;
+    text-align: center;
 }
 
 /* Chat Header */
 .ta-chat-header {
+    flex-shrink: 0;
     background: var(--hq-surface) !important;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
     z-index: 10;
 }
 
-/* Chat Messages Background */
-#ta-chat-msgs {
-    background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23832a96' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-    background-color: #e5ddd5; /* Classic chat background */
+.ta-chat-back-btn {
+    display: none;
+    border: none;
+    cursor: pointer;
+    background: transparent;
 }
 
-/* Input Area */
+/* منطقة الرسائل — تملأ المساحة بين الهيدر وحقل الكتابة */
+.ta-chat-msgs-scroll,
+#ta-chat-msgs {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23832a96' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    background-color: #e5ddd5;
+}
+
+/* Input Area — ثابت أسفل مربع المحادثة */
 .ta-chat-input-area {
+    flex-shrink: 0;
     background: var(--hq-surface) !important;
     padding: 15px !important;
+    border-top: 1px solid var(--hq-border);
     border-radius: 0 0 12px 12px !important;
-    box-shadow: 0 -2px 10px rgba(0,0,0,0.02);
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.02);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding-bottom: max(15px, env(safe-area-inset-bottom)) !important;
+}
+
+.ta-chat-input-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    min-width: 0;
 }
 
 .ta-chat-input-field {
+    flex: 1 1 auto;
+    min-width: 0;
     border-radius: 24px !important;
     padding: 12px 20px !important;
     border: 1px solid #ddd !important;
     background: #f8f9fa !important;
     font-size: 0.95rem !important;
-    box-shadow: inset 0 2px 4px rgba(0,0,0,0.02) !important;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.02) !important;
+    color: var(--hq-text-main);
 }
+
 .ta-chat-input-field:focus {
     border-color: var(--hq-primary) !important;
     background: white !important;
     box-shadow: 0 0 0 3px rgba(131, 42, 150, 0.1) !important;
+    outline: none;
 }
 
-/* Chat Bubbles Modernization */
+.ta-chat-send-btn {
+    flex-shrink: 0;
+    background: var(--hq-primary);
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.ta-chat-media-btn {
+    flex-shrink: 0;
+    background: transparent;
+    color: var(--hq-text-muted);
+    border: none;
+    padding: 8px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.ta-chat-media-btn--recording {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+    animation: ta-chat-pulse 1s infinite;
+}
+
+.ta-chat-file-input {
+    display: none;
+}
+
+.ta-chat-attachment-preview {
+    background: rgba(16, 185, 129, 0.1);
+    border: 1px solid #10b981;
+    padding: 10px 15px;
+    border-radius: 12px;
+    color: #10b981;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+}
+
+.ta-chat-attachment-cancel {
+    background: transparent;
+    border: none;
+    color: #ef4444;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 14px;
+    flex-shrink: 0;
+}
+
+@keyframes ta-chat-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.65; }
+}
+
+/* Chat Bubbles */
 #ta-chat-msgs > div[id^="ta-msg-"] {
     position: relative;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
     margin-bottom: 8px !important;
     padding: 10px 14px !important;
 }
 
-/* Outgoing/Admin/TA Messages (Left side in RTL) */
 #ta-chat-msgs > div[id^="ta-msg-"]:has(.ta-role-badge) {
-    margin-right: auto !important; /* Push to left in RTL */
+    margin-right: auto !important;
     margin-left: 0 !important;
-    background: #dcf8c6 !important; /* WhatsApp outgoing green */
+    background: #dcf8c6 !important;
     border: none !important;
     border-radius: 16px 16px 0 16px !important;
 }
 
-/* Incoming/Student Messages (Right side in RTL) */
 #ta-chat-msgs > div[id^="ta-msg-"]:not(:has(.ta-role-badge)) {
-    margin-left: auto !important; /* Push to right in RTL */
+    margin-left: auto !important;
     margin-right: 0 !important;
     background: #ffffff !important;
     border: none !important;
     border-radius: 16px 16px 16px 0 !important;
 }
 
-/* Action Buttons inside chat */
 .ta-msg-actions button {
     opacity: 0.6;
 }
+
 .ta-msg-actions button:hover {
     opacity: 1;
 }
 
-/* Mobile Responsiveness */
+/* Mobile */
 @media (max-width: 768px) {
     .ta-chat-layout {
         gap: 0 !important;
+        flex-direction: column;
     }
-    .ta-chat-sidebar, .ta-chat-main {
+
+    .ta-chat-sidebar,
+    .ta-chat-main {
         width: 100% !important;
         border-radius: 0 !important;
         border-left: none !important;
         border-right: none !important;
         height: 100% !important;
+        max-height: 100%;
     }
-    .ta-chat-sidebar.hidden-mobile {
-        display: none !important;
-    }
+
+    .ta-chat-sidebar.hidden-mobile,
     .ta-chat-main.hidden-mobile {
         display: none !important;
     }
+
     .ta-chat-back-btn {
         display: flex !important;
         align-items: center;
@@ -120,10 +254,40 @@
         color: var(--hq-primary) !important;
         margin-left: 10px;
     }
+
+    .ta-chat-msgs-scroll,
     #ta-chat-msgs {
         padding: 10px !important;
     }
+
     #ta-chat-msgs > div[id^="ta-msg-"] {
         max-width: 90% !important;
+    }
+
+    .ta-chat-input-area {
+        padding: 12px !important;
+        padding-bottom: max(12px, env(safe-area-inset-bottom)) !important;
+    }
+
+    .ta-msg-actions {
+        flex-wrap: wrap;
+        gap: 6px !important;
+        margin-right: 0 !important;
+    }
+
+    .ta-msg-actions button {
+        font-size: 11px !important;
+        padding: 4px 2px;
+    }
+}
+
+@media (max-width: 480px) {
+    .ta-layout .hq-content:has(> .ta-chat-layout),
+    .teacher-layout .hq-content:has(> .ta-chat-layout) {
+        padding: 0 !important;
+    }
+
+    .ta-chat-input-field {
+        font-size: 16px !important; /* يمنع zoom تلقائي على iOS */
     }
 }
