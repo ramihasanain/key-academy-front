@@ -4,6 +4,7 @@ import { API } from '../../config'
 import { HiOutlinePaperClip, HiOutlinePaperAirplane, HiOutlineMicrophone, HiOutlineStop, HiOutlineTrash, HiOutlineNoSymbol, HiOutlineChatBubbleOvalLeftEllipsis, HiOutlinePhoto, HiOutlineArrowDownTray, HiOutlineXMark, HiOutlineEye, HiOutlineArrowUturnLeft } from 'react-icons/hi2'
 import { TAStudent360 } from './TAStudent360'
 import './TAGroups.css'
+import { FEATURE_LOCKED_MESSAGE } from '../../constants/platformFeatures'
 
 /** FRONTEND-ONLY: غيّر إلى true لإعادة صور/ملفات/صوت في دردشة الأستاذ والمساعد */
 const STAFF_CHAT_MEDIA_ENABLED = false
@@ -116,6 +117,11 @@ export const TAGroups = () => {
 
         ws.onmessage = (e) => {
             const data = JSON.parse(e.data);
+
+            if (data.error) {
+                showChatBlocked(data.error);
+                return;
+            }
             
             if (data.type === 'messages_read') {
                 setMessages(prev => prev.map(m => {
@@ -413,6 +419,15 @@ export const TAGroups = () => {
         }
     };
 
+    const stripTempMessages = () => {
+        setMessages(prev => prev.filter(m => !String(m.id).startsWith('temp-')))
+    }
+
+    const showChatBlocked = (message) => {
+        stripTempMessages()
+        alert(message || FEATURE_LOCKED_MESSAGE)
+    }
+
     const appendMessage = (msg) => {
         setMessages(prev => {
             const withoutTemps = prev.filter(m => !String(m.id).startsWith('temp-'))
@@ -458,6 +473,13 @@ export const TAGroups = () => {
             })
             if (res.ok) {
                 appendMessage(await res.json())
+            } else {
+                let errMsg = FEATURE_LOCKED_MESSAGE
+                try {
+                    const err = await res.json()
+                    errMsg = err.error || err.detail || errMsg
+                } catch { /* ignore */ }
+                showChatBlocked(errMsg)
             }
         } else {
             // For text-only messages, use WebSocket for instant delivery
@@ -488,7 +510,7 @@ export const TAGroups = () => {
                 setMessageText('')
                 setReplyingTo(null)
             } else {
-                alert('الاتصال بالخادم مفقود، جاري إعادة المحاولة...')
+                showChatBlocked('الاتصال بالخادم مفقود. قد تكون المجموعات معطلة على حسابك.')
             }
         }
     }

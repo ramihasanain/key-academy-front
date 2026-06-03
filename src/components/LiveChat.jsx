@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { API } from '../config'
+import { FEATURE_LOCKED_MESSAGE } from '../constants/platformFeatures'
 import { HiOutlineUserGroup, HiOutlineXMark, HiOutlinePaperAirplane, HiOutlinePaperClip, HiOutlineMicrophone, HiOutlineStop, HiOutlinePhoto, HiOutlineArrowDownTray, HiOutlineEye, HiOutlineArrowUturnLeft } from 'react-icons/hi2'
 import '../pages/LessonViewer.css' // Reuse the same CSS
 
@@ -104,6 +105,10 @@ const LiveChat = ({ courseId, userData, lessonId = null }) => {
 
         ws.onmessage = (e) => {
             const data = JSON.parse(e.data)
+            if (data.error) {
+                showChatBlocked(data.error)
+                return
+            }
             if (data.type === 'messages_read') {
                 setMessages(prev => prev.map(m => {
                     if (data.message_ids.includes(m.id)) {
@@ -204,6 +209,15 @@ const LiveChat = ({ courseId, userData, lessonId = null }) => {
         }
     };
 
+    const stripTempMessages = () => {
+        setMessages(prev => prev.filter(m => !String(m.id).startsWith('temp-')))
+    }
+
+    const showChatBlocked = (message) => {
+        stripTempMessages()
+        alert(message || FEATURE_LOCKED_MESSAGE)
+    }
+
     const appendMessage = (msg) => {
         setMessages(prev => {
             const withoutTemps = prev.filter(m => !String(m.id).startsWith('temp-'))
@@ -244,9 +258,19 @@ const LiveChat = ({ courseId, userData, lessonId = null }) => {
             if (res.ok) {
                 const msg = await res.json()
                 appendMessage(msg)
+            } else {
+                let errMsg = FEATURE_LOCKED_MESSAGE
+                try {
+                    const err = await res.json()
+                    errMsg = err.error || err.detail || errMsg
+                } catch { /* ignore */ }
+                showChatBlocked(errMsg)
             }
         } else {
-            if (!socket || socket.readyState !== WebSocket.OPEN) return
+            if (!socket || socket.readyState !== WebSocket.OPEN) {
+                showChatBlocked('الاتصال بالخادم مفقود. قد تكون المجموعات معطلة على حسابك.')
+                return
+            }
             const trimmed = input.trim()
             const tempMsg = {
                 id: `temp-${Date.now()}`,
