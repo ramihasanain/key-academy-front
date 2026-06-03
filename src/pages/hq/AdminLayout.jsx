@@ -113,6 +113,8 @@ export const AdminLayout = () => {
     useEffect(() => {
         if (!profile || isLoading || !restrictedTaPerformance) return
         const path = location.pathname
+        // لا تعيد التوجيه أثناء إعداد 2FA — كان يسبب حلقة لا نهائية مع ProtectedRoute
+        if (path.includes('/2fa-setup')) return
         if (path === '/hq' || path === '/hq/' || !path.startsWith('/hq/ta-manager')) {
             navigate('/hq/ta-manager', { replace: true })
         }

@@ -282,6 +282,16 @@ function App() {
               element={<WeeklyExamPortal />}
             />
 
+            {/* HQ 2FA — خارج AdminLayout لتجنب حلقة التوجيه والريكوستات المتكررة */}
+            <Route
+              path="/hq/2fa-setup"
+              element={
+                <ProtectedRoute allowedRoles={["admin"]}>
+                  <TwoFactorSetup />
+                </ProtectedRoute>
+              }
+            />
+
             {/* HQ Admin Dashboard Routes */}
             <Route
               path="/hq"
@@ -297,15 +307,14 @@ function App() {
                 path="moderation-history"
                 element={<AdminModerationHistory />}
               />
-              <Route path=":model" element={<AdminModelGrid />} />
               <Route path="students/:id/360" element={<Student360View />} />
               <Route path="ta-manager" element={<TAManagerDashboard />} />
               <Route path="teachers/:id/360" element={<Teacher360View />} />
               <Route path="teacherassistants/new" element={<AssistantWizard />} />
               <Route path="teacherassistants/:id/360" element={<TA360View />} />
               <Route path="quick-courses" element={<AdminQuickFillCourses />} />
+              <Route path=":model" element={<AdminModelGrid />} />
               <Route path=":model/:id" element={<AdminModelForm />} />
-              <Route path="2fa-setup" element={<TwoFactorSetup />} />
             </Route>
 
             {/* Teacher Assistant Dashboard Routes */}

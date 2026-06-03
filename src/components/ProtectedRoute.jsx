@@ -32,8 +32,9 @@ export const ProtectedRoute = ({ children, allowedRoles }) => {
         }
 
         // [MFA ENFORCEMENT] - خاص بالإدارة والموظفين فقط
-        // إذا كان أدمن ولم يفعل الـ MFA، نوجهه لصفحة الإعداد (إلا إذا كان فيها أصلاً)
-        if (user.role === 'admin' && !user.mfa_enabled && location.pathname !== '/hq/2fa-setup') {
+        const is2faSetupPage = location.pathname === '/hq/2fa-setup' ||
+            location.pathname.startsWith('/hq/2fa-setup/')
+        if (user.role === 'admin' && !user.mfa_enabled && !is2faSetupPage) {
             return <Navigate to="/hq/2fa-setup" replace />;
         }
         
