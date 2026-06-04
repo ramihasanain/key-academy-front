@@ -250,7 +250,7 @@ export const TAManagerDashboard = () => {
                             <th style={{ padding: '10px' }}>اسم المساعد</th>
                             <th style={{ padding: '10px' }}>الأستاذ المرتبط به</th>
                             <th style={{ padding: '10px' }}>إجمالي الردود (Q&A)</th>
-                            <th style={{ padding: '10px' }}>رسائل الخاص</th>
+                            <th style={{ padding: '10px' }}>رسائل الدردشة</th>
                             <th style={{ padding: '10px' }}>متوسط وقت الرد</th>
                             <th style={{ padding: '10px' }}>أسئلة عالقة</th>
                             <th style={{ padding: '10px' }}>إجراءات</th>
@@ -265,7 +265,10 @@ export const TAManagerDashboard = () => {
                                 </td>
                                 <td style={{ padding: '12px 10px', color: 'var(--hq-text-main)' }}>{ta.teacher_name}</td>
                                 <td style={{ padding: '12px 10px', color: 'var(--hq-text-main)' }}>{ta.total_replies}</td>
-                                <td style={{ padding: '12px 10px', color: 'var(--hq-text-main)' }}>{ta.total_messages}</td>
+                                <td style={{ padding: '12px 10px', color: 'var(--hq-text-main)' }}>
+                                    <div>{ta.total_public_messages ?? 0} عام</div>
+                                    <div style={{ fontSize: '11px', color: 'var(--hq-text-muted)' }}>{ta.total_private_messages ?? 0} خاص</div>
+                                </td>
                                 <td style={{ padding: '12px 10px', color: 'var(--hq-text-main)' }}>{ta.avg_response_time_min} دقيقة</td>
                                 <td style={{ padding: '12px 10px', color: ta.unanswered_questions > 0 ? '#ef4444' : '#10b981', fontWeight: 'bold' }}>{ta.unanswered_questions}</td>
                                 <td style={{ padding: '12px 10px' }}>
