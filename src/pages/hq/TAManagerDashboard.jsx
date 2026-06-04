@@ -269,12 +269,20 @@ export const TAManagerDashboard = () => {
                                 <td style={{ padding: '12px 10px', color: 'var(--hq-text-main)' }}>{ta.avg_response_time_min} دقيقة</td>
                                 <td style={{ padding: '12px 10px', color: ta.unanswered_questions > 0 ? '#ef4444' : '#10b981', fontWeight: 'bold' }}>{ta.unanswered_questions}</td>
                                 <td style={{ padding: '12px 10px' }}>
-                                    <button
-                                        onClick={() => handleImpersonate(ta.id)}
-                                        style={{ background: 'var(--hq-primary)', color: 'white', border: 'none', padding: '6px 12px', borderRadius: '6px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px' }}
-                                    >
-                                        <HiOutlineEye /> المراقبة الآن
-                                    </button>
+                                    <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                                        <button
+                                            onClick={() => navigate(`/hq/teacherassistants/${ta.id}/360`)}
+                                            style={{ background: 'transparent', color: 'var(--hq-primary)', border: '1px solid var(--hq-primary)', padding: '6px 10px', borderRadius: '6px', cursor: 'pointer', fontSize: '12px' }}
+                                        >
+                                            الملف 360
+                                        </button>
+                                        <button
+                                            onClick={() => handleImpersonate(ta.id)}
+                                            style={{ background: 'var(--hq-primary)', color: 'white', border: 'none', padding: '6px 12px', borderRadius: '6px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px' }}
+                                        >
+                                            <HiOutlineEye /> المراقبة الآن
+                                        </button>
+                                    </div>
                                 </td>
                             </tr>
                         ))}

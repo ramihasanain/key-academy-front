@@ -46,7 +46,7 @@ export const TA360View = ({ id }) => {
     if (loading) return <div className="hq-loading" style={{ padding: '20px' }}>جاري سحب التقرير الاستخباراتي للمساعد... 🕵️‍♂️</div>
     if (!data) return null
 
-    const { profile, stats, recent_qa, recent_chat } = data
+    const { profile, stats, recent_qa, recent_chat, private_monitor } = data
 
     const handleImpersonate = async () => {
         try {
@@ -206,17 +206,55 @@ export const TA360View = ({ id }) => {
                     </h3>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', maxHeight: '400px', overflowY: 'auto' }}>
                         {recent_chat.length === 0 ? <p style={{ color: 'var(--hq-text-muted)', textAlign: 'center' }}>لا توجد نتائج مطابقة.</p> : recent_chat.map((m, i) => (
-                            <div key={i} style={{ background: 'var(--hq-bg)', padding: '15px', borderRadius: '8px', borderRight: '3px solid #ec4899' }}>
-                                {m.content && <p style={{ margin: '0 0 10px', color: 'var(--hq-text)', lineHeight: '1.5' }}>{m.content}</p>}
+                            <div key={i} style={{ background: 'var(--hq-bg)', padding: '15px', borderRadius: '8px', borderRight: `3px solid ${m.is_private ? '#10b981' : '#ec4899'}` }}>
+                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '8px', fontSize: '12px' }}>
+                                    <span style={{ background: m.is_private ? 'rgba(16,185,129,0.12)' : 'rgba(236,72,153,0.12)', color: m.is_private ? '#10b981' : '#ec4899', padding: '2px 8px', borderRadius: '10px' }}>
+                                        {m.is_private ? '💬 خاص' : '👥 عام'}
+                                    </span>
+                                    {m.student_name && (
+                                        <span style={{ color: 'var(--hq-text-muted)' }}>مع الطالب: <strong style={{ color: 'var(--hq-text)' }}>{m.student_name}</strong></span>
+                                    )}
+                                    {m.group_name && <span style={{ color: 'var(--hq-text-muted)' }}>{m.group_name}</span>}
+                                </div>
+                                {m.content && <p style={{ margin: '0 0 10px', color: 'var(--hq-text-main)', lineHeight: '1.5' }}>{m.content}</p>}
                                 {m.attachment && (
                                     <div style={{ marginBottom: '10px' }}>
-                                        <a href={m.attachment} target="_blank" rel="noreferrer" style={{ color: '#ec4899', textDecoration: 'underline', fontSize: '0.85rem' }}>📄 عرض المُرفق الذي أرسله</a>
+                                        <a href={m.attachment} target="_blank" rel="noreferrer" style={{ color: '#ec4899', textDecoration: 'underline', fontSize: '0.85rem' }}>📄 عرض المُرفق</a>
                                     </div>
                                 )}
                                 <div style={{ fontSize: '0.75rem', color: 'var(--hq-text-muted)', textAlign: 'left' }}>{new Date(m.time).toLocaleString('ar-EG')}</div>
                             </div>
                         ))}
                     </div>
+                </div>
+            </div>
+
+            <div className="glass-card" style={{ padding: '25px', borderRadius: '15px', marginTop: '25px' }}>
+                <h3 style={{ margin: '0 0 8px', fontSize: '18px', borderBottom: '1px solid var(--hq-border)', paddingBottom: '10px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <HiOutlineChatBubbleLeftRight style={{ color: '#10b981' }} />
+                    مراقبة الرسائل الخاصة (طالب ↔ مساعد)
+                </h3>
+                <p style={{ margin: '0 0 16px', fontSize: '13px', color: 'var(--hq-text-muted)' }}>
+                    جميع الرسائل الخاصة داخل مجموعات هذا المساعد — من الطالب ومن المساعد.
+                </p>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', maxHeight: '420px', overflowY: 'auto' }}>
+                    {(private_monitor || []).length === 0 ? (
+                        <p style={{ color: 'var(--hq-text-muted)', textAlign: 'center' }}>لا توجد رسائل خاصة مطابقة.</p>
+                    ) : (private_monitor || []).map((m, i) => (
+                        <div key={i} style={{ background: 'var(--hq-bg)', padding: '14px', borderRadius: '8px', borderRight: '3px solid #10b981' }}>
+                            <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', gap: '8px', marginBottom: '8px', fontSize: '12px' }}>
+                                <span style={{ fontWeight: 'bold', color: m.is_from_assistant ? '#8b5cf6' : '#10b981' }}>
+                                    {m.is_from_assistant ? `المساعد: ${m.sender_name}` : `الطالب: ${m.sender_name}`}
+                                </span>
+                                {m.student_name && m.is_from_assistant && (
+                                    <span style={{ color: 'var(--hq-text-muted)' }}>إلى: {m.student_name}</span>
+                                )}
+                                {m.group_name && <span style={{ color: 'var(--hq-text-muted)' }}>{m.group_name}</span>}
+                            </div>
+                            {m.content && <p style={{ margin: '0 0 8px', color: 'var(--hq-text-main)', lineHeight: 1.5 }}>{m.content}</p>}
+                            <div style={{ fontSize: '0.75rem', color: 'var(--hq-text-muted)', textAlign: 'left' }}>{new Date(m.time).toLocaleString('ar-EG')}</div>
+                        </div>
+                    ))}
                 </div>
             </div>
         </div>

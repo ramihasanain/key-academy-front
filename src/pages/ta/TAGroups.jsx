@@ -852,8 +852,11 @@ export const TAGroups = () => {
                                 </div>
                             </div>
                         ) : (
-                            <div style={{ padding: '15px', borderTop: '1px solid var(--hq-border)', textAlign: 'center', color: '#ef4444', fontWeight: 'bold' }}>
-                                لقد قمت بالدخول في وضع المراقبة 🕵️‍♂️ (لا يمكنك إرسال رسائل أو التعديل)
+                            <div style={{ padding: '15px', borderTop: '1px solid var(--hq-border)', textAlign: 'center', color: '#ef4444', fontWeight: 'bold', lineHeight: 1.7 }}>
+                                <div>🕵️‍♂️ وضع المراقبة (الإدارة) — قراءة فقط</div>
+                                <div style={{ fontSize: '12px', color: 'var(--hq-text-muted)', fontWeight: 'normal', marginTop: '6px' }}>
+                                    لمشاهدة الرسائل الخاصة مع الطلاب: اختر الطالب من قسم «رسائل الطلاب الخاصة» على اليسار
+                                </div>
                             </div>
                         )}
                     </>
