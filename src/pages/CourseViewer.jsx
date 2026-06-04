@@ -28,6 +28,7 @@ import {
 import { VirtualLabsData } from '../data/VirtualLabsData'
 import EmptyState from '../components/core/EmptyState'
 import FeatureGate from '../components/FeatureGate'
+import { isViewOnlyCourse } from '../utils/viewOnlyAccess'
 import { usePlatformFeatures } from '../contexts/PlatformFeaturesContext'
 const SecurePDFViewer = lazy(() => import('../components/SecurePDFViewer'))
 import LiveChat from '../components/LiveChat'
@@ -37,7 +38,7 @@ import './LessonViewer.css' // Import styling to make Chat fully identical
 const courseViewerRequestCache = new Map()
 
 /* ======== COURSE WEBSOCKET CHAT ======== */
-const CourseChatDrawer = ({ courseId, userData, onClose }) => {
+const CourseChatDrawer = ({ courseId, userData, onClose, readOnly = false }) => {
     return (
         <motion.div
             style={{ position: 'fixed', inset: 0, zIndex: 100000, display: 'flex', justifyContent: 'flex-start', background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(5px)', direction: 'rtl' }}
@@ -63,9 +64,13 @@ const CourseChatDrawer = ({ courseId, userData, onClose }) => {
                     </button>
                 </div>
                 <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: 'white', overflow: 'hidden' }}>
-                    <FeatureGate feature="groups">
-                        <LiveChat courseId={courseId} userData={userData} lessonId={null} />
-                    </FeatureGate>
+                    {readOnly ? (
+                        <LiveChat courseId={courseId} userData={userData} lessonId={null} readOnly />
+                    ) : (
+                        <FeatureGate feature="groups">
+                            <LiveChat courseId={courseId} userData={userData} lessonId={null} />
+                        </FeatureGate>
+                    )}
                 </div>
             </motion.div>
         </motion.div>
@@ -197,6 +202,8 @@ const CourseViewer = () => {
     const isExamModule = (mod) => mod.title.includes('امتحان') || (mod.weekly_exam && (!mod.lessons || mod.lessons.length === 0));
     const standardModules = courseData?.modules?.filter(m => !isExamModule(m)) || [];
     const allExams = courseData?.modules?.filter(m => m.weekly_exam).map(m => m.weekly_exam) || [];
+    const isViewOnlyRead = isViewOnlyCourse(courseData);
+    const canOpenGroupChat = isViewOnlyRead || isFeatureEnabled('groups');
 
     const computedModuleCount = standardModules.length;
     const computedLessonCount = standardModules.reduce((acc, mod) => acc + (mod.lessons?.length || 0), 0);
@@ -704,7 +711,7 @@ const CourseViewer = () => {
             )}
 
             {/* 🌟 FLOATING CHAT BUTTON 🌟 */}
-            {isFeatureEnabled('groups') && (
+            {canOpenGroupChat && (
             <button 
                 className="cv-floating-chat-btn"
                 onClick={() => setIsChatOpen(true)}
@@ -719,7 +726,7 @@ const CourseViewer = () => {
             {createPortal(
                 <AnimatePresence>
                     {isChatOpen && (
-                        <CourseChatDrawer courseId={courseData?.id} userData={userData} onClose={() => setIsChatOpen(false)} />
+                        <CourseChatDrawer courseId={courseData?.id} userData={userData} onClose={() => setIsChatOpen(false)} readOnly={isViewOnlyRead} />
                     )}
                 </AnimatePresence>,
                 document.body

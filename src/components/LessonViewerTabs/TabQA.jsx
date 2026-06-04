@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { API } from '../../config'
-import { HiOutlineNoSymbol, HiOutlineChatBubbleLeftRight, HiOutlinePaperAirplane } from 'react-icons/hi2'
+import { HiOutlineNoSymbol, HiOutlineChatBubbleLeftRight, HiOutlinePaperAirplane, HiOutlineEye } from 'react-icons/hi2'
+import { VIEW_ONLY_READ_BANNER } from '../../utils/viewOnlyAccess'
 import '../../pages/LessonViewer.css'
 
 const qaRequestCache = new Map()
@@ -17,7 +18,7 @@ const fetchQAOnce = (key, url, options) => {
     return request
 }
 
-const TabQA = ({ lessonId, userData }) => {
+const TabQA = ({ lessonId, userData, readOnly = false }) => {
     const [posts, setPosts] = useState([])
     const [input, setInput] = useState('')
     const [loading, setLoading] = useState(true)
@@ -69,14 +70,20 @@ const TabQA = ({ lessonId, userData }) => {
 
     return (
         <div className="lv-tab-pane lv-fade">
-            {isMuted ? (
+            {readOnly && (
+                <div style={{ background: 'rgba(99, 102, 241, 0.08)', border: '1px solid rgba(99, 102, 241, 0.25)', borderRadius: '12px', padding: '12px 15px', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '10px', color: '#4f46e5', fontSize: '13px' }}>
+                    <HiOutlineEye size={20} style={{ flexShrink: 0 }} />
+                    <span>{VIEW_ONLY_READ_BANNER}</span>
+                </div>
+            )}
+            {!readOnly && isMuted ? (
                 <div style={{ background: 'rgba(239, 68, 68, 0.05)', border: '1px solid rgba(239, 68, 68, 0.2)', borderRadius: '12px', padding: '15px', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '12px', color: '#ef4444' }}>
                     <div style={{ fontSize: '20px' }}><HiOutlineNoSymbol /></div>
                     <div style={{ fontSize: '13px' }}>
                         <b>أنت محظور من طرح الأسئلة حالياً.</b> يفك القيد في <b>{new Date(userData.muted_until).toLocaleString('ar-IQ')}</b>. تواصل مع الإدارة للتفاصيل.
                     </div>
                 </div>
-            ) : (
+            ) : !readOnly ? (
                 <div className="lv-qa-write">
                     <div className="lv-qa-av">أنت</div>
                     <div className="lv-qa-wr-body">
@@ -84,7 +91,7 @@ const TabQA = ({ lessonId, userData }) => {
                         <div className="lv-qa-wr-foot"><button className="premium-btn exact-btn-purple lv-sm-btn" onClick={handlePost}>انشر السؤال</button></div>
                     </div>
                 </div>
-            )}
+            ) : null}
             <h4 className="lv-section-label">أسئلة الطلبة حول الدرس</h4>
             {loading ? <p>جاري التحميل...</p> : posts.length === 0 ? <p style={{ color: '#94a3b8' }}>ماكو أي أسئلة. خليك أول من يسأل!</p> : posts.map(p => (
                 <div key={p.id} className="lv-post-card">
@@ -131,16 +138,16 @@ const TabQA = ({ lessonId, userData }) => {
                                     </div>
                                 </div>
                             ))}
-                            {isMuted ? (
+                            {!readOnly && isMuted ? (
                                 <div style={{ marginTop: '10px', fontSize: '11px', color: 'rgba(239, 68, 68, 0.7)', textAlign: 'center', padding: '10px', border: '1px dashed rgba(239, 68, 68, 0.2)', borderRadius: '8px' }}>
                                     🚫 لا يمكنك التعليق حالياً بسبب تقييد الحساب
                                 </div>
-                            ) : (
+                            ) : !readOnly ? (
                                 <div className="lv-comment-write">
                                     <input type="text" placeholder="اكتب تعليق..." className="lv-comment-input" value={commentInputs[p.id] || ''} onChange={e => setCommentInputs(prev => ({ ...prev, [p.id]: e.target.value }))} onKeyDown={e => { if (e.key === 'Enter') handleComment(p.id) }} />
                                     <button className="lv-comment-send" onClick={() => handleComment(p.id)}><HiOutlinePaperAirplane style={{ transform: 'scaleX(-1)' }} /></button>
                                 </div>
-                            )}
+                            ) : null}
                         </div>
                     )}
                 </div>

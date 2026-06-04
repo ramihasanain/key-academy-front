@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { API } from '../config'
 import { FEATURE_LOCKED_MESSAGE } from '../constants/platformFeatures'
 import { HiOutlineUserGroup, HiOutlineXMark, HiOutlinePaperAirplane, HiOutlinePaperClip, HiOutlineMicrophone, HiOutlineStop, HiOutlinePhoto, HiOutlineArrowDownTray, HiOutlineEye, HiOutlineArrowUturnLeft } from 'react-icons/hi2'
+import { VIEW_ONLY_READ_BANNER } from '../utils/viewOnlyAccess'
 import '../pages/LessonViewer.css' // Reuse the same CSS
 
 const groupChatHistoryCache = new Map()
@@ -18,7 +19,7 @@ const fetchGroupChatOnce = (key, url, options) => {
     return request
 }
 
-const LiveChat = ({ courseId, userData, lessonId = null }) => {
+const LiveChat = ({ courseId, userData, lessonId = null, readOnly = false }) => {
     const [messages, setMessages] = useState([])
     const [input, setInput] = useState('')
     const [chatType, setChatType] = useState('public') // 'public' | 'private'
@@ -92,8 +93,9 @@ const LiveChat = ({ courseId, userData, lessonId = null }) => {
         }
     }, [courseId, chatType])
 
-    // WebSocket Setup
+    // WebSocket Setup (معطّل في وضع الاطلاع فقط)
     useEffect(() => {
+        if (readOnly) return undefined
         const t = localStorage.getItem('access_token')
         if (!t) return
 
@@ -144,7 +146,7 @@ const LiveChat = ({ courseId, userData, lessonId = null }) => {
         ws.onclose = () => console.log('Chat socket closed')
 
         return () => ws.close()
-    }, [courseId])
+    }, [courseId, readOnly])
 
     const startRecording = async () => {
         try {
@@ -227,6 +229,7 @@ const LiveChat = ({ courseId, userData, lessonId = null }) => {
     }
 
     const handleSend = async () => {
+        if (readOnly) return
         if (!input.trim() && !file && !audioBlob) return
 
         if (file || audioBlob) {
@@ -296,6 +299,7 @@ const LiveChat = ({ courseId, userData, lessonId = null }) => {
 
     // Mark as read logic
     useEffect(() => {
+        if (readOnly) return
         let unreadIds = []
         if (chatType === 'private') {
             const unreadPrivate = displayedMessages.filter(m => (m.sender_role === 'teacher' || m.sender_role === 'assistant') && !m.is_read && !m.read_by_student);
@@ -317,7 +321,7 @@ const LiveChat = ({ courseId, userData, lessonId = null }) => {
                 body: JSON.stringify({ message_ids: unreadIds })
             }).catch(() => {}) // Ignore errors if endpoint doesn't exist
         }
-    }, [messages, chatType, userData])
+    }, [messages, chatType, userData, readOnly])
 
     const openReadReceipts = async (msgId) => {
         setReadReceiptPopup(msgId)
@@ -366,7 +370,9 @@ const LiveChat = ({ courseId, userData, lessonId = null }) => {
                     <div className="lv-gc-icon"><HiOutlineUserGroup /></div>
                     <div>
                         <h4>{chatType === 'public' ? 'مجموعة المادة العامة' : 'تواصل مع المساعد المباشر'}</h4>
-                        <p style={{ marginTop: '4px' }}>{chatType === 'public' ? 'شوف رسائل المدرس وباقي الطلاب واسأل بمجموعة الدورة' : 'رسائلك هنا يشوفها الأستاذ والمساعد فقط ويجاوبك بشكل خاص'}</p>
+                        <p style={{ marginTop: '4px' }}>{readOnly
+                            ? (chatType === 'public' ? 'مشاهدة رسائل المجموعة فقط — لا يمكنك الإرسال' : 'مشاهدة المحادثة الخاصة فقط — لا يمكنك الإرسال')
+                            : (chatType === 'public' ? 'شوف رسائل المدرس وباقي الطلاب واسأل بمجموعة الدورة' : 'رسائلك هنا يشوفها الأستاذ والمساعد فقط ويجاوبك بشكل خاص')}</p>
                     </div>
                 </div>
             </div>
@@ -420,7 +426,7 @@ const LiveChat = ({ courseId, userData, lessonId = null }) => {
                                                 {isAssist && <span style={{ background: '#10b981', color: 'white', padding: '2px 8px', borderRadius: '12px', fontSize: '11px', fontWeight: 'bold' }}>مساعد</span>}
                                             </strong>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                                {chatType === 'public' && (
+                                                {chatType === 'public' && !readOnly && (
                                                     <button onClick={() => setReplyingTo(m)} style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '2px' }} title="رد">
                                                         <HiOutlineArrowUturnLeft size={14} />
                                                     </button>
@@ -487,7 +493,11 @@ const LiveChat = ({ courseId, userData, lessonId = null }) => {
                 }
             </div>
 
-            {isMuted && chatType === 'public' ? (
+            {readOnly ? (
+                <div style={{ background: 'rgba(99, 102, 241, 0.08)', borderTop: '1px solid rgba(99, 102, 241, 0.2)', padding: '15px', color: '#4f46e5', textAlign: 'center', fontSize: '13px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', flexShrink: 0 }}>
+                    <HiOutlineEye /> {VIEW_ONLY_READ_BANNER}
+                </div>
+            ) : isMuted && chatType === 'public' ? (
                 <div style={{ background: 'rgba(239, 68, 68, 0.08)', borderTop: '1px solid rgba(239, 68, 68, 0.2)', padding: '15px', color: '#ef4444', textAlign: 'center', fontSize: '13px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', flexShrink: 0 }}>
                     <HiOutlineXMark /> عذراً، أنت محظور من الدردشة العامة حالياً حتى {new Date(userData.muted_until).toLocaleString('ar-IQ')}
                 </div>

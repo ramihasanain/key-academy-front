@@ -56,6 +56,7 @@ import robotVideoMov from '../assets/native_hevc_alpha.mov'
 import { VirtualLabsData } from '../data/VirtualLabsData'
 import LiveChat from '../components/LiveChat'
 import FeatureGate from '../components/FeatureGate'
+import { isViewOnlyCourse } from '../utils/viewOnlyAccess'
 import { usePlatformFeatures } from '../contexts/PlatformFeaturesContext'
 import TabNotes from '../components/LessonViewerTabs/TabNotes'
 import TabQA from '../components/LessonViewerTabs/TabQA'
@@ -662,6 +663,7 @@ const LessonViewer = () => {
     const [lessonInfo, setLessonInfo] = useState(null)
     const [lessonContent, setLessonContent] = useState(null)
     const [lessonList, setLessonList] = useState([])
+    const [courseMeta, setCourseMeta] = useState(null)
     const [isLoading, setIsLoading] = useState(true)
     const [isLoadingContent, setIsLoadingContent] = useState(false)
     
@@ -709,6 +711,7 @@ const LessonViewer = () => {
     // 2. Fetch Sidebar/Playlist (Once per courseId)
     useEffect(() => {
         if (!courseId) return
+        setCourseMeta(null)
         let isActive = true
         const token = localStorage.getItem('access_token')
         const headers = token ? { 'Authorization': `Bearer ${token}` } : {}
@@ -721,6 +724,10 @@ const LessonViewer = () => {
         )
             .then(courseData => {
                 if (!isActive) return
+                setCourseMeta({
+                    access_mode: courseData.access_mode,
+                    can_interact: courseData.can_interact,
+                })
                 const allLessons = []
                 courseData.modules?.forEach(m => {
                     m.lessons?.forEach(l => {
@@ -805,6 +812,7 @@ const LessonViewer = () => {
     }
 
     const isPreview = urlParams.get('preview') === 'true'
+    const isViewOnlyRead = isViewOnlyCourse(courseMeta)
 
     const contentFeatureMap = {
         slides: 'slides',
@@ -992,16 +1000,20 @@ const LessonViewer = () => {
                                 <TabNotes lessonId={lessonId} />
                             )}
                             {activeTab === 'qa' && (
-                                <FeatureGate feature="qa">
-                                    <TabQA lessonId={lessonId} userData={userData} />
-                                </FeatureGate>
+                                isViewOnlyRead || isFeatureEnabled('qa') ? (
+                                    <TabQA lessonId={lessonId} userData={userData} readOnly={isViewOnlyRead} />
+                                ) : (
+                                    <FeatureGate feature="qa" />
+                                )
                             )}
                             {activeTab === 'group' && (
-                                <FeatureGate feature="groups">
+                                isViewOnlyRead || isFeatureEnabled('groups') ? (
                                     <div style={{ height: '700px', display: 'flex', flexDirection: 'column' }}>
-                                        <LiveChat courseId={courseId} userData={userData} lessonId={lessonId} />
+                                        <LiveChat courseId={courseId} userData={userData} lessonId={lessonId} readOnly={isViewOnlyRead} />
                                     </div>
-                                </FeatureGate>
+                                ) : (
+                                    <FeatureGate feature="groups" />
+                                )
                             )}
                             {activeTab === 'docs' && (
                                 <FeatureGate feature="lesson_docs">
