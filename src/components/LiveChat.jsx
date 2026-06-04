@@ -22,7 +22,7 @@ const fetchGroupChatOnce = (key, url, options) => {
 const LiveChat = ({ courseId, userData, lessonId = null, readOnly = false }) => {
     const [messages, setMessages] = useState([])
     const [input, setInput] = useState('')
-    const [chatType, setChatType] = useState('public') // 'public' | 'private'
+    const [chatType, setChatType] = useState('public') // 'public' | 'private' — الاطلاع: عام فقط
     const [socket, setSocket] = useState(null)
     const [loading, setLoading] = useState(true)
 
@@ -61,6 +61,13 @@ const LiveChat = ({ courseId, userData, lessonId = null, readOnly = false }) => 
         isHistoryLoadRef.current = false
     }, [messages])
 
+    useEffect(() => {
+        if (readOnly && chatType !== 'public') {
+            setChatType('public')
+            chatTypeRef.current = 'public'
+        }
+    }, [readOnly, chatType])
+
     // Load initial history when chatType changes
     useEffect(() => {
         setLoading(true)
@@ -72,10 +79,11 @@ const LiveChat = ({ courseId, userData, lessonId = null, readOnly = false }) => 
             return
         }
         let isActive = true
-        const requestKey = `${courseId}:${chatType}:${t}:0` // Append offset to key
+        const effectiveType = readOnly ? 'public' : chatType
+        const requestKey = `${courseId}:${effectiveType}:${t}:0`
         fetchGroupChatOnce(
             requestKey,
-            `${API}/api/interactions/group-chat/?course=${courseId}&type=${chatType}&offset=0&limit=50`,
+            `${API}/api/interactions/group-chat/?course=${courseId}&type=${effectiveType}&offset=0&limit=50`,
             { headers: { 'Authorization': `Bearer ${t}` } }
         )
             .then(d => {
@@ -91,7 +99,7 @@ const LiveChat = ({ courseId, userData, lessonId = null, readOnly = false }) => 
         return () => {
             isActive = false
         }
-    }, [courseId, chatType])
+    }, [courseId, chatType, readOnly])
 
     // WebSocket Setup (معطّل في وضع الاطلاع فقط)
     useEffect(() => {
@@ -181,7 +189,8 @@ const LiveChat = ({ courseId, userData, lessonId = null, readOnly = false }) => 
             const container = document.querySelector('.lv-gc-msgs');
             const oldScrollHeight = container ? container.scrollHeight : 0;
 
-            const res = await fetch(`${API}/api/interactions/group-chat/?course=${courseId}&type=all&offset=${newOffset}&limit=50`, {
+            const loadType = readOnly ? 'public' : 'all'
+            const res = await fetch(`${API}/api/interactions/group-chat/?course=${courseId}&type=${loadType}&offset=${newOffset}&limit=50`, {
                 headers: { 'Authorization': `Bearer ${tk}` }
             });
             if (res.ok) {
@@ -354,6 +363,7 @@ const LiveChat = ({ courseId, userData, lessonId = null, readOnly = false }) => 
 
     return (
         <div className="lv-tab-pane lv-fade" style={{ flex: 1, display: 'flex', flexDirection: 'column', background: 'transparent', height: '100%', overflow: 'hidden' }}>
+            {!readOnly && (
             <div className="lv-chat-tabs" style={{ display: 'flex', gap: '10px', marginBottom: '10px', padding: '15px 15px 0 15px', flexShrink: 0 }}>
                 <button className={`lv-chat-tab ${chatType === 'public' ? 'active' : ''}`} onClick={() => { setChatType('public'); chatTypeRef.current = 'public'; setPublicUnread(0); }} style={{ flex: 1, padding: '10px', borderRadius: '10px', border: '1px solid var(--border-glass)', background: chatType === 'public' ? 'var(--primary-dark)' : 'transparent', color: '#000', position: 'relative' }}>
                     🌐 مجموعة المادة
@@ -364,6 +374,7 @@ const LiveChat = ({ courseId, userData, lessonId = null, readOnly = false }) => 
                     {privateUnread > 0 && <span style={{ position: 'absolute', top: '-6px', left: '10px', background: '#ef4444', color: 'white', borderRadius: '50%', width: '22px', height: '22px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', fontWeight: 'bold', boxShadow: '0 2px 6px rgba(239,68,68,0.5)', animation: 'pulse 1.5s infinite' }}>{privateUnread}</span>}
                 </button>
             </div>
+            )}
 
             <div className="lv-gc-header" style={{ margin: '0 15px', flexShrink: 0 }}>
                 <div className="lv-gc-info">
@@ -400,7 +411,7 @@ const LiveChat = ({ courseId, userData, lessonId = null, readOnly = false }) => 
 
             <div className="lv-gc-msgs" style={{ flex: 1, overflowY: 'auto', padding: '10px 15px', minHeight: 0 }}>
                 {loading ? <p style={{ textAlign: 'center', color: '#94a3b8' }}>جاري التحميل...</p> :
-                    displayedMessages.length === 0 ? <p style={{ color: '#94a3b8', textAlign: 'center', marginTop: '20px' }}>لا توجد رسائل سابقة. كن أول من يرسل!</p> :
+                    displayedMessages.length === 0 ? <p style={{ color: '#94a3b8', textAlign: 'center', marginTop: '20px' }}>{readOnly ? 'لا توجد رسائل عامة في هذه الدورة بعد.' : 'لا توجد رسائل سابقة. كن أول من يرسل!'}</p> :
                         <>
                             {hasMore && (
                                 <div style={{ textAlign: 'center', marginBottom: '15px' }}>
