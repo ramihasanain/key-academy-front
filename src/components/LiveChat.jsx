@@ -101,22 +101,21 @@ const LiveChat = ({ courseId, userData, lessonId = null, readOnly = false }) => 
         }
     }, [courseId, chatType, readOnly])
 
-    // WebSocket Setup (معطّل في وضع الاطلاع فقط)
+    // WebSocket: استقبال مباشر (وضع الاطلاع: قراءة فقط — لا إرسال)
     useEffect(() => {
-        if (readOnly) return undefined
         const t = localStorage.getItem('access_token')
-        if (!t) return
+        if (!t || !courseId) return undefined
 
         const wsUrl = API.replace(/^http/, 'ws')
         const baseUrl = wsUrl.endsWith('/') ? wsUrl.slice(0, -1) : wsUrl
 
         const ws = new WebSocket(`${baseUrl}/ws/chat/${courseId}/?token=${t}`)
-        setSocket(ws)
+        if (!readOnly) setSocket(ws)
 
         ws.onmessage = (e) => {
             const data = JSON.parse(e.data)
             if (data.error) {
-                showChatBlocked(data.error)
+                if (!readOnly) showChatBlocked(data.error)
                 return
             }
             if (data.type === 'messages_read') {
@@ -137,10 +136,12 @@ const LiveChat = ({ courseId, userData, lessonId = null, readOnly = false }) => 
                     return m;
                 }));
             } else if (data.message) {
+                if (readOnly && data.message.is_private) return
                 setMessages(prev => {
                     const withoutTemps = prev.filter(m => !String(m.id).startsWith('temp-'))
                     return [...withoutTemps.filter(m => m.id !== data.message.id), data.message]
                 })
+                if (readOnly) return
                 // Track unread notifications for the tab that's NOT active
                 const isMsgPrivate = data.message.is_private === true
                 if (isMsgPrivate && chatTypeRef.current !== 'private') {
@@ -153,7 +154,10 @@ const LiveChat = ({ courseId, userData, lessonId = null, readOnly = false }) => 
 
         ws.onclose = () => console.log('Chat socket closed')
 
-        return () => ws.close()
+        return () => {
+            ws.close()
+            if (!readOnly) setSocket(null)
+        }
     }, [courseId, readOnly])
 
     const startRecording = async () => {
