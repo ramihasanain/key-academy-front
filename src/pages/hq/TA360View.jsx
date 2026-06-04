@@ -43,7 +43,7 @@ export const TA360View = ({ id }) => {
         return () => clearTimeout(timeoutId)
     }, [finalId, studentFilter, dateFilter])
 
-    if (loading) return <div className="hq-loading" style={{ padding: '20px' }}>جاري سحب التقرير الاستخباراتي للمساعد... 🕵️‍♂️</div>
+    if (loading) return <div className="hq-loading" style={{ padding: '20px' }}>جاري التحميل...</div>
     if (!data) return null
 
     const { profile, stats, recent_qa, recent_chat, private_monitor } = data
