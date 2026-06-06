@@ -63,8 +63,7 @@ const DelayAlertBox = ({ title, icon, items, emptyText, kind }) => {
                         >
                             <div style={{ display: 'flex', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' }}>
                                 <span style={{ color: 'var(--hq-text-main)', fontWeight: '600' }}>
-                                    مادة: {item.course_title}
-                                    {item.teacher_name ? ` (${item.teacher_name})` : ''}
+                                    {item.teacher_name || '—'}
                                 </span>
                                 <span style={{
                                     color: '#dc2626',
