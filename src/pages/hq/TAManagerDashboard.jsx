@@ -107,23 +107,31 @@ const DelayAlertBox = ({ title, icon, items, emptyText, kind }) => {
 
 export const TAManagerDashboard = () => {
     const [stats, setStats] = useState(null);
+    const [alerts, setAlerts] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [alertsLoading, setAlertsLoading] = useState(true);
     const [search, setSearch] = useState('');
     const navigate = useNavigate();
 
     const fetchStats = useCallback(async () => {
         const tk = localStorage.getItem('access_token');
+        const headers = { 'Authorization': `Bearer ${tk}` };
         try {
-            const res = await fetch(API + '/api/hq/ta-manager-stats/', {
-                headers: { 'Authorization': `Bearer ${tk}` }
-            });
-            if (res.ok) {
-                setStats(await res.json());
+            const [statsRes, alertsRes] = await Promise.all([
+                fetch(API + '/api/hq/ta-manager-stats/', { headers }),
+                fetch(API + '/api/hq/ta-manager-delayed-alerts/', { headers }),
+            ]);
+            if (statsRes.ok) {
+                setStats(await statsRes.json());
+            }
+            if (alertsRes.ok) {
+                setAlerts(await alertsRes.json());
             }
         } catch (err) {
             console.error(err);
         } finally {
             setLoading(false);
+            setAlertsLoading(false);
         }
     }, []);
 
@@ -162,8 +170,9 @@ export const TAManagerDashboard = () => {
         ta.teacher_name.toLowerCase().includes(search.toLowerCase())
     ) || [];
 
-    const qaAlerts = stats?.delayed_alerts?.qa || [];
-    const chatAlerts = stats?.delayed_alerts?.chat || [];
+    const qaAlerts = alerts?.delayed_alerts?.qa || [];
+    const chatAlerts = alerts?.delayed_alerts?.chat || [];
+    const delayedTotal = (alerts?.overview?.delayed_qa_count || 0) + (alerts?.overview?.delayed_chat_count || 0);
 
     return (
         <div style={{ padding: '20px' }}>
@@ -172,16 +181,16 @@ export const TAManagerDashboard = () => {
             <DelayAlertBox
                 title="تحذير: أسئلة وأجوبة بلا رد (أكثر من ساعة)"
                 icon={<HiOutlineQuestionMarkCircle />}
-                items={qaAlerts}
-                emptyText="لا توجد أسئلة متأخرة — جميع الأسئلة تم الرد عليها خلال الساعة الماضية."
+                items={alertsLoading ? [] : qaAlerts}
+                emptyText={alertsLoading ? 'جاري تحميل التنبيهات...' : 'لا توجد أسئلة متأخرة — جميع الأسئلة تم الرد عليها خلال الساعة الماضية.'}
                 kind="qa"
             />
 
             <DelayAlertBox
                 title="تحذير: دردشة المجموعات بلا رد (أكثر من ساعة)"
                 icon={<HiOutlineChatBubbleLeftRight />}
-                items={chatAlerts}
-                emptyText="لا توجد دردشات متأخرة — جميع رسائل الطلاب تم الرد عليها خلال الساعة الماضية."
+                items={alertsLoading ? [] : chatAlerts}
+                emptyText={alertsLoading ? 'جاري تحميل التنبيهات...' : 'لا توجد دردشات متأخرة — جميع رسائل الطلاب تم الرد عليها خلال الساعة الماضية.'}
                 kind="chat"
             />
 
@@ -224,7 +233,7 @@ export const TAManagerDashboard = () => {
                         <div>
                             <div style={{ fontSize: '12px', color: 'var(--hq-text-muted)' }}>تأخر الرد (&gt; ساعة)</div>
                             <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#f59e0b' }}>
-                                {(stats.overview.delayed_qa_count || 0) + (stats.overview.delayed_chat_count || 0)}
+                                {alertsLoading ? '...' : delayedTotal}
                             </div>
                         </div>
                     </div>
