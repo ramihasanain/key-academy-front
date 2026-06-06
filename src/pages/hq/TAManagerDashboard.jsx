@@ -117,22 +117,29 @@ export const TAManagerDashboard = () => {
         const tk = localStorage.getItem('access_token');
         const headers = { 'Authorization': `Bearer ${tk}` };
         try {
-            const [statsRes, alertsRes] = await Promise.all([
-                fetch(API + '/api/hq/ta-manager-stats/', { headers }),
-                fetch(API + '/api/hq/ta-manager-delayed-alerts/', { headers }),
-            ]);
+            const statsRes = await fetch(API + '/api/hq/ta-manager-stats/', { headers });
             if (statsRes.ok) {
                 setStats(await statsRes.json());
-            }
-            if (alertsRes.ok) {
-                setAlerts(await alertsRes.json());
             }
         } catch (err) {
             console.error(err);
         } finally {
             setLoading(false);
-            setAlertsLoading(false);
         }
+
+        // التنبيهات منفصلة بعد ثانيتين — ما نضرب السيرفر بطلبين ثقيلين مع بعض
+        setTimeout(async () => {
+            try {
+                const alertsRes = await fetch(API + '/api/hq/ta-manager-delayed-alerts/', { headers });
+                if (alertsRes.ok) {
+                    setAlerts(await alertsRes.json());
+                }
+            } catch (err) {
+                console.error(err);
+            } finally {
+                setAlertsLoading(false);
+            }
+        }, 2000);
     }, []);
 
     useEffect(() => {
@@ -277,8 +284,12 @@ export const TAManagerDashboard = () => {
                                     <div>{ta.total_public_messages ?? 0} عام</div>
                                     <div style={{ fontSize: '11px', color: 'var(--hq-text-muted)' }}>{ta.total_private_messages ?? 0} خاص</div>
                                 </td>
-                                <td style={{ padding: '12px 10px', color: 'var(--hq-text-main)' }}>{ta.avg_response_time_min} دقيقة</td>
-                                <td style={{ padding: '12px 10px', color: ta.unanswered_questions > 0 ? '#ef4444' : '#10b981', fontWeight: 'bold' }}>{ta.unanswered_questions}</td>
+                                <td style={{ padding: '12px 10px', color: 'var(--hq-text-main)' }}>
+                                    {ta.avg_response_time_min != null ? `${ta.avg_response_time_min} دقيقة` : '—'}
+                                </td>
+                                <td style={{ padding: '12px 10px', color: (ta.unanswered_questions ?? 0) > 0 ? '#ef4444' : '#10b981', fontWeight: 'bold' }}>
+                                    {ta.unanswered_questions != null ? ta.unanswered_questions : '—'}
+                                </td>
                                 <td style={{ padding: '12px 10px' }}>
                                     <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
                                         <button
