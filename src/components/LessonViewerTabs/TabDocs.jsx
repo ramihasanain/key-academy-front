@@ -1,48 +1,13 @@
-import { useState, useEffect, Suspense, lazy } from 'react'
+import { useState, Suspense, lazy } from 'react'
 import { createPortal } from 'react-dom'
-import { API } from '../../config'
 import { motion, AnimatePresence } from 'framer-motion'
 import { HiOutlineDocumentText, HiOutlineXMark, HiOutlineBookOpen, HiOutlineEye } from 'react-icons/hi2'
 import '../../pages/LessonViewer.css'
 
 const SecurePDFViewer = lazy(() => import('../SecurePDFViewer'))
 
-const docsRequestCache = new Map()
-
-const fetchCourseDocsOnce = (key, url) => {
-    if (docsRequestCache.has(key)) return docsRequestCache.get(key)
-    const request = fetch(url).then(res => {
-        if (!res.ok) throw new Error(`Failed to load course docs: ${res.status}`)
-        return res.json()
-    }).finally(() => {
-        docsRequestCache.delete(key)
-    })
-    docsRequestCache.set(key, request)
-    return request
-}
-
-const TabDocs = ({ lessonInfo, courseId, userData }) => {
-    const [courseDocs, setCourseDocs] = useState([])
+const TabDocs = ({ lessonInfo, userData }) => {
     const [viewedDoc, setViewedDoc] = useState(null)
-
-    useEffect(() => {
-        if (!courseId) return
-        let isActive = true
-        fetchCourseDocsOnce(String(courseId), `${API}/api/v1/courses/${courseId}/`)
-            .then(data => {
-                if (!isActive) return
-                if (data.ministerial_docs) {
-                    setCourseDocs(data.ministerial_docs)
-                }
-            })
-            .catch(err => {
-                if (!isActive) return
-                console.error(err)
-            })
-        return () => {
-            isActive = false
-        }
-    }, [courseId])
 
     const getExt = (url) => url ? url.split('?')[0].split('.').pop().toUpperCase() : 'DOC'
     let docsList = []
@@ -59,17 +24,6 @@ const TabDocs = ({ lessonInfo, courseId, userData }) => {
             icon: <HiOutlineBookOpen /> 
         })
     }
-    courseDocs.forEach(d => {
-        docsList.push({ 
-            name: d.title, 
-            url: d.file, 
-            size: 'مرفق وزاري', 
-            type: d.doc_type || 'PDF', 
-            color: '#832a96', 
-            bg: 'linear-gradient(135deg, rgba(131, 42, 150, 0.2), rgba(219, 54, 114, 0.1))',
-            icon: <HiOutlineDocumentText /> 
-        })
-    })
 
     return (
         <div className="lv-tab-pane lv-fade">

@@ -1017,7 +1017,7 @@ const LessonViewer = () => {
                             )}
                             {activeTab === 'docs' && (
                                 <FeatureGate feature="lesson_docs">
-                                    <TabDocs lessonInfo={lessonInfo} courseId={courseId} userData={userData} />
+                                    <TabDocs lessonInfo={lessonInfo} userData={userData} />
                                 </FeatureGate>
                             )}
                             {CURRENT_LESSON.hasLab && (
