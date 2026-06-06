@@ -18,6 +18,7 @@ const Login = () => {
     const [loading, setLoading] = useState(false)
     const [errorMsg, setErrorMsg] = useState('')
     const [isUnauthorized, setIsUnauthorized] = useState(false)
+    const [unauthorizedMsg, setUnauthorizedMsg] = useState('')
     const navigate = useNavigate()
     const fieldMessageMap = {
         captcha_token: 'الكابشا مطلوبة',
@@ -76,7 +77,8 @@ const Login = () => {
                     return []
                 }
 
-                if (data.error_code === 'UNAUTHORIZED_DEVICE') {
+                if (data.error_code === 'UNAUTHORIZED_DEVICE' || data.error_code === 'MAX_DEVICES_REACHED') {
+                    setUnauthorizedMsg(data.error || 'جهاز غير مصرح به. تم تسجيل المحاولة.')
                     setIsUnauthorized(true)
                     return
                 }
@@ -154,11 +156,7 @@ const Login = () => {
                     </h1>
                     
                     <p style={{ color: '#fecaca', fontSize: '1.125rem', marginBottom: '2rem', lineHeight: '1.6' }}>
-                        عذراً، هذا الجهاز غير مسجل ضمن الأجهزة المعتمدة.
-                        <br/>
-                        <span style={{ fontWeight: 'bold', color: 'white', display: 'block', marginTop: '8px' }}>
-                            تم تسجيل محاولة الدخول وتوثيق عنوان الـ IP الخاص بك.
-                        </span>
+                        {unauthorizedMsg || 'عذراً، هذا الجهاز غير مسجل ضمن الأجهزة المعتمدة.'}
                     </p>
 
                     <button 

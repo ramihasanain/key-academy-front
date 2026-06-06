@@ -367,7 +367,7 @@ export const AdminModelGrid = () => {
                                                     {c.type === 'boolean' ? (row[c.key] ? <span className="hq-badge-green">نعم</span> : <span className="hq-badge-red">لا</span>) :
                                                         c.type === 'device_policy' ? ({
                                                             single: 'جهاز واحد',
-                                                            multi: 'أجهزة متعددة',
+                                                            multi: 'جهازان (حد 2)',
                                                             any: 'أي جهاز',
                                                         }[row[c.key]] || 'جهاز واحد') :
                                                         c.type === 'currency' ? `${row[c.key] || 0}` :

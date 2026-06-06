@@ -22,11 +22,11 @@ const SCHEMAS = {
                 label: 'سياسة الدخول من الأجهزة',
                 type: 'select',
                 fullWidth: true,
-                helperText: 'ينطبق على أي مدير (سوبر أو فرعي). OTP / التحقق بخطوتين يبقى مطلوباً كما هو.',
+                helperText: '«جهازان» = لابتوب + موبايل مثلاً (حد أقصى 2). OTP يبقى مطلوباً. ينطبق على أي مدير.',
                 options: [
                     { value: 'single', label: 'جهاز واحد (افتراضي)' },
-                    { value: 'multi', label: 'أجهزة متعددة' },
-                    { value: 'any', label: 'أي جهاز (بدون قيد جهاز)' },
+                    { value: 'multi', label: 'جهازان فقط (حد أقصى 2)' },
+                    { value: 'any', label: 'أي جهاز (بدون قيد)' },
                 ],
             },
         ]
