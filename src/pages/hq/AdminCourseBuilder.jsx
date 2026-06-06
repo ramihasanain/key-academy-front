@@ -63,6 +63,35 @@ export const AdminCourseBuilder = ({ id }) => {
     const [allCourses, setAllCourses] = useState([])
     const [sourceCourseId, setSourceCourseId] = useState('')
     const [copying, setCopying] = useState(false)
+    const [courseDirty, setCourseDirty] = useState(false)
+
+    const FILE_FIELDS = ['doc_file', 'cover_image', 'hero_image', 'file', 'exam_file']
+
+    const markCourseDirty = (updater) => {
+        if (typeof updater === 'function') setCourse(prev => updater(prev))
+        else setCourse(updater)
+        setCourseDirty(true)
+    }
+
+    const itemNeedsSave = (item, extraFileFields = []) => {
+        if (!item?.id) return true
+        if (item._dirty) return true
+        return [...FILE_FIELDS, ...extraFileFields].some(k => item[k] instanceof File)
+    }
+
+    const stripEntityForSave = (obj, extraRemove = []) => {
+        const out = { ...obj }
+        ;[
+            'localId', '_dirty', 'showAdvanced', 'showBuilder', 'lessons', 'quizzes', 'questions',
+            'is_exam', 'exam_id', 'exam_file', 'exam_start_time', 'exam_end_time',
+            'exam_total_mark', 'exam_instructions',
+            ...extraRemove,
+        ].forEach(k => delete out[k])
+        FILE_FIELDS.forEach(k => {
+            if (!(out[k] instanceof File)) delete out[k]
+        })
+        return out
+    }
 
     // Trash Memory for intelligent deletion
     const [deletedItems, setDeletedItems] = useState({
@@ -221,7 +250,10 @@ export const AdminCourseBuilder = ({ id }) => {
     }
 
     const updateModule = (mIndex, field, val) => {
-        const newMods = [...modules]; newMods[mIndex][field] = val; setModules(newMods)
+        const newMods = [...modules]
+        newMods[mIndex][field] = val
+        newMods[mIndex]._dirty = true
+        setModules(newMods)
     }
 
     // --- Lesson Operations ---
@@ -245,7 +277,10 @@ export const AdminCourseBuilder = ({ id }) => {
     }
 
     const updateLesson = (mIndex, lIndex, field, val) => {
-        const newMods = [...modules]; newMods[mIndex].lessons[lIndex][field] = val; setModules(newMods)
+        const newMods = [...modules]
+        newMods[mIndex].lessons[lIndex][field] = val
+        newMods[mIndex].lessons[lIndex]._dirty = true
+        setModules(newMods)
     }
 
     // --- Quiz Operations ---
@@ -264,7 +299,10 @@ export const AdminCourseBuilder = ({ id }) => {
     }
 
     const updateQuiz = (mIndex, lIndex, qzIndex, field, val) => {
-        const newMods = [...modules]; newMods[mIndex].lessons[lIndex].quizzes[qzIndex][field] = val; setModules(newMods)
+        const newMods = [...modules]
+        newMods[mIndex].lessons[lIndex].quizzes[qzIndex][field] = val
+        newMods[mIndex].lessons[lIndex].quizzes[qzIndex]._dirty = true
+        setModules(newMods)
     }
 
     // --- Question Operations ---
@@ -282,12 +320,16 @@ export const AdminCourseBuilder = ({ id }) => {
     }
 
     const updateQuestion = (mIndex, lIndex, qzIndex, qsIndex, field, val) => {
-        const newMods = [...modules]; newMods[mIndex].lessons[lIndex].quizzes[qzIndex].questions[qsIndex][field] = val; setModules(newMods)
+        const newMods = [...modules]
+        newMods[mIndex].lessons[lIndex].quizzes[qzIndex].questions[qsIndex][field] = val
+        newMods[mIndex].lessons[lIndex].quizzes[qzIndex].questions[qsIndex]._dirty = true
+        setModules(newMods)
     }
 
     const updateQuestionOption = (mIndex, lIndex, qzIndex, qsIndex, optIndex, val) => {
         const newMods = [...modules]
         newMods[mIndex].lessons[lIndex].quizzes[qzIndex].questions[qsIndex].options[optIndex] = val
+        newMods[mIndex].lessons[lIndex].quizzes[qzIndex].questions[qsIndex]._dirty = true
         setModules(newMods)
     }
 
@@ -296,6 +338,7 @@ export const AdminCourseBuilder = ({ id }) => {
         const qs = newMods[mIndex].lessons[lIndex].quizzes[qzIndex].questions[qsIndex]
         if (!qs.options_explanations) qs.options_explanations = ['', '', '', '']
         qs.options_explanations[optIndex] = val
+        qs._dirty = true
         setModules(newMods)
     }
 
@@ -335,6 +378,7 @@ export const AdminCourseBuilder = ({ id }) => {
             const existing = newMods[mIndex].lessons[lIndex].quizzes[qzIndex].questions
             parsedQuestions.forEach((pq, idx) => { pq.order = existing.length + idx + 1 })
             newMods[mIndex].lessons[lIndex].quizzes[qzIndex].questions = [...existing, ...parsedQuestions]
+            newMods[mIndex].lessons[lIndex].quizzes[qzIndex]._dirty = true
             setModules(newMods)
             alert(`تم توليد ${parsedQuestions.length} سؤال بنجاح!`)
         } else {
@@ -375,6 +419,7 @@ export const AdminCourseBuilder = ({ id }) => {
                     correct: q.correct_index,
                     explanations: q.explanations
                 }));
+                newMods[mIndex].lessons[lIndex]._dirty = true;
                 setModules(newMods);
                 alert('تم توليد الأسئلة الفجائية بنجاح!');
             }
@@ -421,6 +466,7 @@ export const AdminCourseBuilder = ({ id }) => {
                         keywords: []
                     });
                 });
+                quiz._dirty = true;
                 setModules(newMods);
                 alert(`تم توليد ${data.questions.length} سؤال بنجاح!`);
             }
@@ -515,6 +561,7 @@ export const AdminCourseBuilder = ({ id }) => {
             qs.options = newOptions;
             qs.options_explanations = newExplanations;
             qs.correct_index = newCorrectIndex;
+            qs._dirty = true;
             setModules(newMods);
         }
     };
@@ -525,32 +572,51 @@ export const AdminCourseBuilder = ({ id }) => {
         // Obsolete, we now enforce 3 quizzes.
     }
     const removeInVideoQuiz = (mIndex, lIndex, qzIdx) => {
-        const newMods = [...modules]; newMods[mIndex].lessons[lIndex].json_data.in_video_quizzes.splice(qzIdx, 1); setModules(newMods);
+        const newMods = [...modules]
+        newMods[mIndex].lessons[lIndex].json_data.in_video_quizzes.splice(qzIdx, 1)
+        newMods[mIndex].lessons[lIndex]._dirty = true
+        setModules(newMods)
     }
     const updateInVideoQuiz = (mIndex, lIndex, qzIdx, field, val) => {
-        const newMods = [...modules]; newMods[mIndex].lessons[lIndex].json_data.in_video_quizzes[qzIdx][field] = val; setModules(newMods);
+        const newMods = [...modules]
+        newMods[mIndex].lessons[lIndex].json_data.in_video_quizzes[qzIdx][field] = val
+        newMods[mIndex].lessons[lIndex]._dirty = true
+        setModules(newMods)
     }
     const updateInVideoQuizOption = (mIndex, lIndex, qzIdx, optIdx, val) => {
-        const newMods = [...modules]; newMods[mIndex].lessons[lIndex].json_data.in_video_quizzes[qzIdx].options[optIdx] = val; setModules(newMods);
+        const newMods = [...modules]
+        newMods[mIndex].lessons[lIndex].json_data.in_video_quizzes[qzIdx].options[optIdx] = val
+        newMods[mIndex].lessons[lIndex]._dirty = true
+        setModules(newMods)
     }
     const updateInVideoQuizExplanation = (mIndex, lIndex, qzIdx, optIdx, val) => {
-        const newMods = [...modules]; newMods[mIndex].lessons[lIndex].json_data.in_video_quizzes[qzIdx].explanations[optIdx] = val; setModules(newMods);
+        const newMods = [...modules]
+        newMods[mIndex].lessons[lIndex].json_data.in_video_quizzes[qzIdx].explanations[optIdx] = val
+        newMods[mIndex].lessons[lIndex]._dirty = true
+        setModules(newMods)
     }
     const addInVideoQuizOption = (mIndex, lIndex, qzIdx) => {
-        const newMods = [...modules]; newMods[mIndex].lessons[lIndex].json_data.in_video_quizzes[qzIdx].options.push('');
-        newMods[mIndex].lessons[lIndex].json_data.in_video_quizzes[qzIdx].explanations.push(''); setModules(newMods);
+        const newMods = [...modules]
+        newMods[mIndex].lessons[lIndex].json_data.in_video_quizzes[qzIdx].options.push('')
+        newMods[mIndex].lessons[lIndex].json_data.in_video_quizzes[qzIdx].explanations.push('')
+        newMods[mIndex].lessons[lIndex]._dirty = true
+        setModules(newMods)
     }
     const removeInVideoQuizOption = (mIndex, lIndex, qzIdx, optIdx) => {
-        const newMods = [...modules]; const qz = newMods[mIndex].lessons[lIndex].json_data.in_video_quizzes[qzIdx];
-        qz.options.splice(optIdx, 1); qz.explanations.splice(optIdx, 1);
-        if(qz.correct >= qz.options.length) qz.correct = 0;
-        setModules(newMods);
+        const newMods = [...modules]
+        const qz = newMods[mIndex].lessons[lIndex].json_data.in_video_quizzes[qzIdx]
+        qz.options.splice(optIdx, 1)
+        qz.explanations.splice(optIdx, 1)
+        if (qz.correct >= qz.options.length) qz.correct = 0
+        newMods[mIndex].lessons[lIndex]._dirty = true
+        setModules(newMods)
     }
     const updateLessonJsonData = (mIndex, lIndex, field, val) => {
-        const newMods = [...modules]; 
-        if(!newMods[mIndex].lessons[lIndex].json_data) newMods[mIndex].lessons[lIndex].json_data={}; 
-        newMods[mIndex].lessons[lIndex].json_data[field] = val; 
-        setModules(newMods);
+        const newMods = [...modules]
+        if (!newMods[mIndex].lessons[lIndex].json_data) newMods[mIndex].lessons[lIndex].json_data = {}
+        newMods[mIndex].lessons[lIndex].json_data[field] = val
+        newMods[mIndex].lessons[lIndex]._dirty = true
+        setModules(newMods)
     }
 
     // --- Course Docs Operations (Ministerial Docs) ---
@@ -558,58 +624,45 @@ export const AdminCourseBuilder = ({ id }) => {
         setCourseDocs([...courseDocs, { localId: Date.now(), title: '', file: null, doc_type: 'PDF' }])
     }
     const updateCourseDoc = (index, field, val) => {
-        const newDocs = [...courseDocs]; newDocs[index][field] = val; setCourseDocs(newDocs);
+        const newDocs = [...courseDocs]
+        newDocs[index][field] = val
+        newDocs[index]._dirty = true
+        setCourseDocs(newDocs)
     }
     const removeCourseDoc = (index) => {
         const toDel = courseDocs[index]; trackDelete('ministerialdocs', toDel.id);
         setCourseDocs(courseDocs.filter((_, i) => i !== index));
     }
 
-    // Payload Builder for safe File Upload vs JSON
-    const buildPayload = (dataObj) => {
-        const fileFields = ['doc_file', 'cover_image', 'hero_image', 'file'];
-        let hasFile = false;
+    // Payload Builder — يرفع الملفات الجديدة فقط (File)، ولا يعيد إرسال الروابط المحفوظة
+    const buildPayload = (dataObj, extraRemove = []) => {
+        const dataObjClean = stripEntityForSave(dataObj, extraRemove)
+        const hasNewFile = FILE_FIELDS.some(k => dataObjClean[k] instanceof File)
 
-        for (const k of fileFields) {
-            if (dataObj[k] instanceof File) hasFile = true;
-        }
-
-        if (hasFile) {
-            const fd = new FormData();
-            Object.keys(dataObj).forEach(k => {
-                if (dataObj[k] !== null && dataObj[k] !== undefined) {
-                    if (fileFields.includes(k)) {
-                        if (dataObj[k] instanceof File) {
-                            fd.append(k, dataObj[k]);
-                        }
-                    } else {
-                        if (Array.isArray(dataObj[k])) {
-                            dataObj[k].forEach(val => fd.append(k, val));
-                        } else if (typeof dataObj[k] === 'object' && !(dataObj[k] instanceof File)) {
-                            fd.append(k, JSON.stringify(dataObj[k]));
-                        } else {
-                            if (dataObj[k] === '' && (k === 'grade' || k === 'subject' || k === 'teacher')) {
-                                // Do not append empty string for foreign keys
-                            } else {
-                                fd.append(k, dataObj[k]);
-                            }
-                        }
-                    }
+        if (hasNewFile) {
+            const fd = new FormData()
+            Object.keys(dataObjClean).forEach(k => {
+                const val = dataObjClean[k]
+                if (val === null || val === undefined) return
+                if (FILE_FIELDS.includes(k)) {
+                    if (val instanceof File) fd.append(k, val)
+                } else if (Array.isArray(val)) {
+                    val.forEach(item => fd.append(k, item))
+                } else if (typeof val === 'object') {
+                    fd.append(k, JSON.stringify(val))
+                } else {
+                    if (val === '' && (k === 'grade' || k === 'subject' || k === 'teacher')) return
+                    fd.append(k, val)
                 }
-            });
-            return { body: fd, isMultipart: true };
-        } else {
-            const jsonObj = { ...dataObj };
-            fileFields.forEach(k => {
-                if (typeof jsonObj[k] === 'string') delete jsonObj[k];
-            });
-            
-            if (jsonObj.grade === '') jsonObj.grade = null;
-            if (jsonObj.subject === '') jsonObj.subject = null;
-            if (jsonObj.teacher === '') jsonObj.teacher = null;
-            
-            return { body: JSON.stringify(jsonObj), isMultipart: false };
+            })
+            return { body: fd, isMultipart: true }
         }
+
+        const jsonObj = { ...dataObjClean }
+        if (jsonObj.grade === '') jsonObj.grade = null
+        if (jsonObj.subject === '') jsonObj.subject = null
+        if (jsonObj.teacher === '') jsonObj.teacher = null
+        return { body: JSON.stringify(jsonObj), isMultipart: false }
     }
 
 
@@ -645,125 +698,162 @@ export const AdminCourseBuilder = ({ id }) => {
 
         try {
             // 1. Process Trash Memory (Deletions) in precise order
+            let deletedCount = 0
             for (const type of ['questions', 'quizzes', 'lessons', 'weeklyexams', 'modules', 'ministerialdocs']) {
                 for (const dbId of deletedItems[type]) {
                     await fetch(`${API}/api/hq/${type}/${dbId}/`, { method: 'DELETE', headers: headersJson }).catch(() => { })
+                    deletedCount++
                 }
             }
 
             // 2. Clear trash cache locally
             setDeletedItems({ modules: [], lessons: [], quizzes: [], questions: [], ministerialdocs: [], weeklyexams: [] })
 
-            // 3. Save Course Base
-            const cPayload = buildPayload(course)
-            let cHeaders = cPayload.isMultipart ? headersMulti : headersJson;
+            // 3. Save Course Base — فقط إذا تغيّرت بيانات الدورة
+            let courseId = isNew ? null : parseInt(id, 10)
+            let savedCount = 0
 
-            const cRes = await fetch(`${API}/api/hq/courses/${isNew ? '' : `${id}/`}`, {
-                method: isNew ? 'POST' : 'PUT', headers: cHeaders, body: cPayload.body
-            })
-            if (!cRes.ok) throw new Error("فشل اتصال أثناء حفظ بيانات الدورة")
-            const savedCourse = await cRes.json()
-            const courseId = savedCourse.id
-
-            // 4. Save Course Docs (Ministerial)
-            for (const doc of courseDocs) {
-                const dData = { ...doc, course: courseId }
-                delete dData.localId;
-                const pl = buildPayload(dData)
-                let hdrs = pl.isMultipart ? headersMulti : headersJson;
-
-                if (doc.id) await fetch(`${API}/api/hq/ministerialdocs/${doc.id}/`, { method: 'PUT', headers: hdrs, body: pl.body })
-                else {
-                    const r = await fetch(`${API}/api/hq/ministerialdocs/`, { method: 'POST', headers: hdrs, body: pl.body });
-                    const sd = await r.json(); doc.id = sd.id;
-                }
+            if (isNew || courseDirty || course.hero_image instanceof File) {
+                const cPayload = buildPayload(course)
+                const cHeaders = cPayload.isMultipart ? headersMulti : headersJson
+                const cRes = await fetch(`${API}/api/hq/courses/${isNew ? '' : `${id}/`}`, {
+                    method: isNew ? 'POST' : 'PATCH',
+                    headers: cHeaders,
+                    body: cPayload.body,
+                })
+                if (!cRes.ok) throw new Error('فشل اتصال أثناء حفظ بيانات الدورة')
+                const savedCourse = await cRes.json()
+                courseId = savedCourse.id
+                savedCount++
+                setCourseDirty(false)
             }
 
-            // 5. Save Modules -> Lessons -> Quizzes -> Questions (Deep Hierarchy Integration)
+            // 4. Save Course Docs — جديد أو معدّل فقط
+            for (const doc of courseDocs) {
+                if (!itemNeedsSave(doc)) continue
+                const dData = stripEntityForSave({ ...doc, course: courseId }, ['localId'])
+                const pl = buildPayload(dData)
+                const hdrs = pl.isMultipart ? headersMulti : headersJson
+                if (doc.id) {
+                    await fetch(`${API}/api/hq/ministerialdocs/${doc.id}/`, { method: 'PATCH', headers: hdrs, body: pl.body })
+                } else {
+                    const r = await fetch(`${API}/api/hq/ministerialdocs/`, { method: 'POST', headers: hdrs, body: pl.body })
+                    const sd = await r.json()
+                    doc.id = sd.id
+                }
+                doc._dirty = false
+                savedCount++
+            }
+
+            // 5. Save Modules -> Lessons -> Quizzes -> Questions (المعدّل والجديد فقط)
             for (const mod of modules) {
-                const modData = { ...mod, course: courseId }
-                
-                // Clean keys before saving module itself
-                delete modData.lessons; delete modData.localId;
-                delete modData.is_exam; delete modData.exam_id; delete modData.exam_file;
-                delete modData.exam_start_time; delete modData.exam_end_time; delete modData.exam_total_mark; delete modData.exam_instructions;
+                let moduleId = mod.id
+                const modNeedsSave = itemNeedsSave(mod)
 
-                const pLoad = buildPayload(modData)
-                let mHdrs = pLoad.isMultipart ? headersMulti : headersJson;
-
-                let mRes;
-                if (mod.id) mRes = await fetch(`${API}/api/hq/modules/${mod.id}/`, { method: 'PUT', headers: mHdrs, body: pLoad.body })
-                else mRes = await fetch(`${API}/api/hq/modules/`, { method: 'POST', headers: mHdrs, body: pLoad.body })
-                const savedMod = await mRes.json()
-
-                mod.id = savedMod.id
-
-                // IF EXAM: Handle WeeklyExam creation
-                if (mod.is_exam) {
-                    const exData = { 
-                        module: savedMod.id, 
-                        title: mod.title,
-                        total_mark: mod.exam_total_mark || 100,
-                        instructions: mod.exam_instructions || ''
-                    }
-                    if (mod.exam_start_time) exData.start_time = new Date(mod.exam_start_time).toISOString()
-                    if (mod.exam_end_time) exData.end_time = new Date(mod.exam_end_time).toISOString()
-                    if (mod.exam_file instanceof File) exData.file = mod.exam_file
-                    
-                    const exPayload = buildPayload(exData)
-                    let exHdrs = exPayload.isMultipart ? headersMulti : headersJson;
-                    
-                    if (mod.exam_id) {
-                        await fetch(`${API}/api/hq/weeklyexams/${mod.exam_id}/`, { method: 'PUT', headers: exHdrs, body: exPayload.body })
+                if (modNeedsSave) {
+                    const modData = stripEntityForSave({ ...mod, course: courseId })
+                    const pLoad = buildPayload(modData)
+                    const mHdrs = pLoad.isMultipart ? headersMulti : headersJson
+                    let mRes
+                    if (mod.id) {
+                        mRes = await fetch(`${API}/api/hq/modules/${mod.id}/`, { method: 'PATCH', headers: mHdrs, body: pLoad.body })
                     } else {
-                        const exRes = await fetch(`${API}/api/hq/weeklyexams/`, { method: 'POST', headers: exHdrs, body: exPayload.body })
-                        const savedEx = await exRes.json()
-                        mod.exam_id = savedEx.id
+                        mRes = await fetch(`${API}/api/hq/modules/`, { method: 'POST', headers: mHdrs, body: pLoad.body })
                     }
-                    continue; // Skip lessons logic for exams
+                    if (!mRes.ok) throw new Error(`فشل حفظ الوحدة "${mod.title}"`)
+                    const savedMod = await mRes.json()
+                    moduleId = savedMod.id
+                    mod.id = savedMod.id
+                    savedCount++
+                    if (!mod.is_exam) mod._dirty = false
+                }
+
+                if (mod.is_exam) {
+                    const examNeedsSave = !mod.exam_id || mod._dirty || mod.exam_file instanceof File
+                    if (examNeedsSave) {
+                        const exData = {
+                            module: moduleId,
+                            title: mod.title,
+                            total_mark: mod.exam_total_mark || 100,
+                            instructions: mod.exam_instructions || '',
+                        }
+                        if (mod.exam_start_time) exData.start_time = new Date(mod.exam_start_time).toISOString()
+                        if (mod.exam_end_time) exData.end_time = new Date(mod.exam_end_time).toISOString()
+                        if (mod.exam_file instanceof File) exData.file = mod.exam_file
+                        const exPayload = buildPayload(exData)
+                        const exHdrs = exPayload.isMultipart ? headersMulti : headersJson
+                        if (mod.exam_id) {
+                            await fetch(`${API}/api/hq/weeklyexams/${mod.exam_id}/`, { method: 'PATCH', headers: exHdrs, body: exPayload.body })
+                        } else {
+                            const exRes = await fetch(`${API}/api/hq/weeklyexams/`, { method: 'POST', headers: exHdrs, body: exPayload.body })
+                            const savedEx = await exRes.json()
+                            mod.exam_id = savedEx.id
+                        }
+                        mod._dirty = false
+                        savedCount++
+                    }
+                    continue
                 }
 
                 for (const less of mod.lessons) {
-                    const lessData = { ...less, module: savedMod.id }
-                    delete lessData.quizzes; delete lessData.localId; delete lessData.showAdvanced;
+                    let lessonId = less.id
 
-                    const pLoad = buildPayload(lessData)
-                    let lHdrs = pLoad.isMultipart ? headersMulti : headersJson;
-
-                    let lRes;
-                    if (less.id) lRes = await fetch(`${API}/api/hq/lessons/${less.id}/`, { method: 'PUT', headers: lHdrs, body: pLoad.body })
-                    else lRes = await fetch(`${API}/api/hq/lessons/`, { method: 'POST', headers: lHdrs, body: pLoad.body })
-                    const savedLess = await lRes.json()
-
-                    less.id = savedLess.id
+                    if (itemNeedsSave(less)) {
+                        const lessData = stripEntityForSave({ ...less, module: moduleId })
+                        const pLoad = buildPayload(lessData)
+                        const lHdrs = pLoad.isMultipart ? headersMulti : headersJson
+                        let lRes
+                        if (less.id) {
+                            lRes = await fetch(`${API}/api/hq/lessons/${less.id}/`, { method: 'PATCH', headers: lHdrs, body: pLoad.body })
+                        } else {
+                            lRes = await fetch(`${API}/api/hq/lessons/`, { method: 'POST', headers: lHdrs, body: pLoad.body })
+                        }
+                        if (!lRes.ok) throw new Error(`فشل حفظ الدرس "${less.title}"`)
+                        const savedLess = await lRes.json()
+                        lessonId = savedLess.id
+                        less.id = savedLess.id
+                        less._dirty = false
+                        savedCount++
+                    }
 
                     for (const qz of less.quizzes) {
-                        const qzData = { ...qz, lesson: savedLess.id }
-                        delete qzData.questions; delete qzData.localId; delete qzData.showBuilder;
+                        if (!itemNeedsSave(qz)) continue
 
-                        let qRes;
-                        if (qz.id) qRes = await fetch(`${API}/api/hq/quizzes/${qz.id}/`, { method: 'PUT', headers: headersJson, body: JSON.stringify(qzData) })
-                        else qRes = await fetch(`${API}/api/hq/quizzes/`, { method: 'POST', headers: headersJson, body: JSON.stringify(qzData) })
+                        const qzData = stripEntityForSave({ ...qz, lesson: lessonId }, ['questions', 'showBuilder'])
+                        let qRes
+                        if (qz.id) {
+                            qRes = await fetch(`${API}/api/hq/quizzes/${qz.id}/`, { method: 'PATCH', headers: headersJson, body: JSON.stringify(qzData) })
+                        } else {
+                            qRes = await fetch(`${API}/api/hq/quizzes/`, { method: 'POST', headers: headersJson, body: JSON.stringify(qzData) })
+                        }
+                        if (!qRes.ok) throw new Error(`فشل حفظ الاختبار "${qz.title}"`)
                         const savedQz = await qRes.json()
-
                         qz.id = savedQz.id
+                        qz._dirty = false
+                        savedCount++
 
                         for (const qs of qz.questions) {
-                            const qsData = { ...qs, quiz: savedQz.id }
-                            delete qsData.localId;
+                            if (!itemNeedsSave(qs)) continue
 
-                            let qsRes;
-                            if (qs.id) qsRes = await fetch(`${API}/api/hq/questions/${qs.id}/`, { method: 'PUT', headers: headersJson, body: JSON.stringify(qsData) })
-                            else qsRes = await fetch(`${API}/api/hq/questions/`, { method: 'POST', headers: headersJson, body: JSON.stringify(qsData) })
-
+                            const qsData = stripEntityForSave({ ...qs, quiz: savedQz.id })
+                            let qsRes
+                            if (qs.id) {
+                                qsRes = await fetch(`${API}/api/hq/questions/${qs.id}/`, { method: 'PATCH', headers: headersJson, body: JSON.stringify(qsData) })
+                            } else {
+                                qsRes = await fetch(`${API}/api/hq/questions/`, { method: 'POST', headers: headersJson, body: JSON.stringify(qsData) })
+                            }
+                            if (!qsRes.ok) throw new Error('فشل حفظ أحد أسئلة الاختبار')
                             const savedQs = await qsRes.json()
                             qs.id = savedQs.id
+                            qs._dirty = false
+                            savedCount++
                         }
                     }
                 }
             }
 
-            alert('تم النشر بنجاح')
+            const totalChanges = savedCount + deletedCount
+            alert(totalChanges > 0 ? `تم حفظ التعديلات بنجاح (${totalChanges} عنصر)` : 'لا توجد تغييرات جديدة للحفظ')
             navigate('/hq/courses')
         } catch (err) {
             console.error(err)
@@ -787,7 +877,7 @@ export const AdminCourseBuilder = ({ id }) => {
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'var(--hq-bg)', padding: '10px 15px', borderRadius: '10px', border: '1px solid var(--hq-border)' }}>
                         <span style={{ fontWeight: 'bold', fontSize: '0.95rem', color: course.is_published ? '#34d399' : 'var(--hq-text-muted)' }}>{course.is_published ? 'منشور للطلاب بالمنصة' : 'مسودة مخفية حالياً'}</span>
                         <div className="hq-toggle-switch">
-                            <input type="checkbox" id="crs-pub" checked={!!course.is_published} onChange={e => setCourse({ ...course, is_published: e.target.checked })} />
+                            <input type="checkbox" id="crs-pub" checked={!!course.is_published} onChange={e => markCourseDirty({ ...course, is_published: e.target.checked })} />
                             <label htmlFor="crs-pub"></label>
                         </div>
                     </div>
@@ -797,7 +887,7 @@ export const AdminCourseBuilder = ({ id }) => {
                         </button>
                     )}
                     <button className="hq-btn-primary" onClick={handleSaveTree} disabled={saving} style={{ padding: '12px 25px', fontSize: '1.05rem', boxShadow: '0 5px 15px rgba(99, 102, 241, 0.4)' }}>
-                        <HiOutlineCheckCircle /> {saving ? 'جاري الرفع والضخ...' : 'الحفظ والنشر الشامل'}
+                        <HiOutlineCheckCircle /> {saving ? 'جاري الحفظ...' : (isNew ? 'إنشاء الدورة' : 'حفظ التعديلات')}
                     </button>
                 </div>
             </div>
@@ -808,19 +898,19 @@ export const AdminCourseBuilder = ({ id }) => {
                 <div className="hq-df-grid" style={{ gridTemplateColumns: '1fr 1fr 1fr', gap: '20px' }}>
                     <div className="hq-df-group">
                         <label>عنوان واسم الكورس <span style={{ color: 'red' }}>*</span></label>
-                        <input type="text" value={course.title} onChange={e => setCourse({ ...course, title: e.target.value })} placeholder="الفيزياء - السادس العلمي" />
+                        <input type="text" value={course.title} onChange={e => markCourseDirty({ ...course, title: e.target.value })} placeholder="الفيزياء - السادس العلمي" />
                     </div>
                     <div className="hq-df-group">
                         <label>الأستاذ للمادة <span style={{ color: 'red' }}>*</span></label>
                         <select value={course.teacher || ''} onChange={e => {
                             const tId = e.target.value;
                             const t = teachers.find(x => x.id == tId);
-                            setCourse({ 
-                                ...course, 
-                                teacher: tId, 
-                                subject: t && t.subjects && t.subjects.length > 0 ? t.subjects[0] : '', 
-                                grade: t && t.grades && t.grades.length > 0 ? t.grades[0] : '', 
-                                branches: t && t.branches ? t.branches : [] 
+                            markCourseDirty({
+                                ...course,
+                                teacher: tId,
+                                subject: t && t.subjects && t.subjects.length > 0 ? t.subjects[0] : '',
+                                grade: t && t.grades && t.grades.length > 0 ? t.grades[0] : '',
+                                branches: t && t.branches ? t.branches : [],
                             })
                         }}>
                             <option value="">-- يرجى اختيار الأستاذ --</option>
@@ -829,17 +919,17 @@ export const AdminCourseBuilder = ({ id }) => {
                     </div>
                     <div className="hq-df-group">
                         <label>التسعيرة الإجمالية (د.ع) <span style={{ color: 'red' }}>*</span></label>
-                        <input type="text" value={course.price} onChange={e => setCourse({ ...course, price: e.target.value })} />
+                        <input type="text" value={course.price} onChange={e => markCourseDirty({ ...course, price: e.target.value })} />
                     </div>
 
                     <div className="hq-df-group">
                         <label>سعة مجموعة الشات للطلاب (للمساعد) <span style={{ color: 'red' }}>*</span></label>
-                        <input type="number" min="50" max="1000" value={course.students_per_group || 200} onChange={e => setCourse({ ...course, students_per_group: parseInt(e.target.value) || 200 })} />
+                        <input type="number" min="50" max="1000" value={course.students_per_group || 200} onChange={e => markCourseDirty({ ...course, students_per_group: parseInt(e.target.value) || 200 })} />
                     </div>
 
                     <div className="hq-df-group">
                         <label>لون الهوية البصرية (Theme)</label>
-                        <select value={course.color || 'blue'} onChange={e => setCourse({ ...course, color: e.target.value })}>
+                        <select value={course.color || 'blue'} onChange={e => markCourseDirty({ ...course, color: e.target.value })}>
                             <option value="blue">أزرق سماوي</option>
                             <option value="red">أحمر ناري</option>
                             <option value="green">أخضر زمردي</option>
@@ -850,7 +940,7 @@ export const AdminCourseBuilder = ({ id }) => {
 
                     <div className="hq-df-group">
                         <label>الترتيب (الأقل يظهر أولاً)</label>
-                        <input type="number" value={course.order || 0} onChange={e => setCourse({ ...course, order: parseInt(e.target.value) || 0 })} />
+                        <input type="number" value={course.order || 0} onChange={e => markCourseDirty({ ...course, order: parseInt(e.target.value) || 0 })} />
                     </div>
                 </div>
 
@@ -859,7 +949,7 @@ export const AdminCourseBuilder = ({ id }) => {
                         <label>صورة الغلاف الاحترافية للكورس (Hero Image) <HiOutlineSparkles style={{ color: '#10b981' }} /></label>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', background: '#f8fafc', padding: '10px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
                             <input type="file" accept="image/*, image/webp, .webp" onChange={e => {
-                                if (e.target.files && e.target.files[0]) { setCourse({ ...course, hero_image: e.target.files[0] }) }
+                                if (e.target.files && e.target.files[0]) { markCourseDirty({ ...course, hero_image: e.target.files[0] }) }
                             }} style={{ flex: 1, fontSize: '0.9rem' }} />
                             <SmartImagePreview fileOrUrl={course.hero_image} />
                         </div>
