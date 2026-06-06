@@ -47,12 +47,7 @@ const TabDocs = ({ lessonInfo, courseId, userData }) => {
     const getExt = (url) => url ? url.split('?')[0].split('.').pop().toUpperCase() : 'DOC'
     let docsList = []
     if (lessonInfo?.doc_file) {
-        let fileName = 'ملزمة الدرس الحالية'
-        try {
-            fileName = decodeURIComponent(lessonInfo.doc_file.split('/').pop().split('?')[0]) || fileName
-        } catch (e) {
-            fileName = lessonInfo.doc_file.split('/').pop().split('?')[0] || fileName
-        }
+        const fileName = lessonInfo.doc_name || lessonInfo.title || 'ملزمة الدرس الحالية'
 
         docsList.push({ 
             name: fileName, 

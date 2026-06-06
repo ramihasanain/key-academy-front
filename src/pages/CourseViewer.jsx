@@ -454,11 +454,11 @@ const CourseViewer = () => {
                                                                             <div className="cv-file-info">
                                                                                 <div className="cv-file-icon"><HiOutlineDocumentArrowDown /></div>
                                                                                 <div className="cv-file-texts">
-                                                                                    <h4>{lesson.title}</h4>
+                                                                                    <h4>{lesson.doc_name || lesson.title}</h4>
                                                                                     <span>ملف PDF • الحجم: {lesson.doc_size || '1.5MB'}</span>
                                                                                 </div>
                                                                             </div>
-                                                                            <button className="cv-btn-download-circle" title="عرض الملف" onClick={(e) => handleViewDoc(e, lesson.doc_file, lesson.title)}>
+                                                                            <button className="cv-btn-download-circle" title="عرض الملف" onClick={(e) => handleViewDoc(e, lesson.doc_file, lesson.doc_name || lesson.title)}>
                                                                                 <HiOutlineDocumentText />
                                                                             </button>
                                                                         </div>
