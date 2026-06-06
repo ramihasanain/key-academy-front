@@ -13,6 +13,7 @@ const SCHEMAS = {
             { key: 'last_name', label: 'الاسم الأخير' },
             { key: 'phone', label: 'رقم الهاتف' },
             { key: 'role', label: 'الصلاحية (الدور)' },
+            { key: 'admin_device_policy', label: 'سياسة الأجهزة', type: 'device_policy' },
             { key: 'is_superuser', label: 'صلاحيات عليا', type: 'boolean' }
         ],
         filters: [{ 
@@ -364,6 +365,11 @@ export const AdminModelGrid = () => {
                                             {schema.columns.map(c => (
                                                 <td key={c.key}>
                                                     {c.type === 'boolean' ? (row[c.key] ? <span className="hq-badge-green">نعم</span> : <span className="hq-badge-red">لا</span>) :
+                                                        c.type === 'device_policy' ? ({
+                                                            single: 'جهاز واحد',
+                                                            multi: 'أجهزة متعددة',
+                                                            any: 'أي جهاز',
+                                                        }[row[c.key]] || 'جهاز واحد') :
                                                         c.type === 'currency' ? `${row[c.key] || 0}` :
                                                             c.type === 'datetime' ? (row[c.key] ? new Date(row[c.key]).toLocaleDateString('ar-EG') : '-') :
                                                                 c.type === 'number_badge' ? <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(56,189,248,0.15)', color: '#38bdf8', padding: '4px 12px', borderRadius: '20px', fontWeight: 'bold' }}>{row[c.key] || 0}</span> :

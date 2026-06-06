@@ -16,7 +16,19 @@ const SCHEMAS = {
             { key: 'last_name', label: 'الاسم الأخير', type: 'text' },
             { key: 'email', label: 'البريد الإلكتروني', type: 'text' },
             { key: 'is_staff', label: 'صلاحيات الموظفين (دخول لوحة التحكم)', type: 'boolean' },
-            { key: 'is_superuser', label: 'صلاحيات كاملة', type: 'boolean' }
+            { key: 'is_superuser', label: 'صلاحيات كاملة (Super Admin)', type: 'boolean' },
+            {
+                key: 'admin_device_policy',
+                label: 'سياسة الدخول من الأجهزة',
+                type: 'select',
+                fullWidth: true,
+                helperText: 'ينطبق على أي مدير (سوبر أو فرعي). OTP / التحقق بخطوتين يبقى مطلوباً كما هو.',
+                options: [
+                    { value: 'single', label: 'جهاز واحد (افتراضي)' },
+                    { value: 'multi', label: 'أجهزة متعددة' },
+                    { value: 'any', label: 'أي جهاز (بدون قيد جهاز)' },
+                ],
+            },
         ]
     },
     students: {
@@ -332,7 +344,7 @@ export const AdminModelForm = () => {
                     <form onSubmit={handleSubmit} className="hq-dynamic-form">
                         <div className="hq-df-grid">
                             {schema.fields.map(f => (
-                                <div key={f.key} className={`hq-df-group ${f.type === 'textarea' ? 'full-width' : ''}`}>
+                                <div key={f.key} className={`hq-df-group ${f.type === 'textarea' || f.fullWidth ? 'full-width' : ''}`}>
                                     <label>{f.label} {f.required && <span style={{ color: 'red' }}>*</span>}</label>
 
                                     {f.type === 'textarea' ? (
@@ -373,7 +385,6 @@ export const AdminModelForm = () => {
                                         >
                                             <option value="">-- يرجى الاختيار --</option>
 
-                                            {/* Smart fallback to display legacy/mismatched data */}
                                             {formData[f.key] && !(dynamicOptions[f.key] || f.options || []).some(o => o.value == formData[f.key]) && (
                                                 <option value={formData[f.key]}>{formData[f.key]} (تم اختيار هذا سابقاً)</option>
                                             )}
@@ -419,6 +430,11 @@ export const AdminModelForm = () => {
                                             onChange={e => handleChange(f.key, e.target.value)}
                                             required={f.required}
                                         />
+                                    )}
+                                    {f.helperText && (
+                                        <p style={{ margin: '8px 0 0', fontSize: '0.85rem', color: 'var(--hq-text-muted)', lineHeight: 1.5 }}>
+                                            {f.helperText}
+                                        </p>
                                     )}
                                 </div>
                             ))}
