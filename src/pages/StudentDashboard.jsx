@@ -103,7 +103,7 @@ const StudentDashboard = () => {
     const [completedCourses, setCompletedCourses] = useState([])
     const [certificates, setCertificates] = useState([])
     const [myNotes, setMyNotes] = useState([])
-    const [videoStats, setVideoStats] = useState(null)
+    const [courseProgressList, setCourseProgressList] = useState([])
     const fetchedTabsRef = useRef(new Set())
     const browseCoursesFetchedRef = useRef(false)
     const statsFetchedRef = useRef(false)
@@ -240,9 +240,24 @@ const StudentDashboard = () => {
 
         else if (activeTab === 'profile') {
             setLoadingVideoStats(true)
-            fetch(API + '/api/interactions/video-stats/', { headers })
+            fetch(API + '/api/enrollments/my-courses/', { headers })
                 .then(res => res.json())
-                .then(data => setVideoStats(data))
+                .then(enrollments => {
+                    const courseIds = (enrollments || []).map(e => e.course?.id).filter(Boolean)
+                    if (courseIds.length === 0) {
+                        setCourseProgressList([])
+                        return
+                    }
+                    return Promise.all(
+                        courseIds.map(courseId =>
+                            fetch(`${API}/api/interactions/student-lesson-progress/?course_id=${courseId}`, { headers })
+                                .then(r => r.ok ? r.json() : null)
+                                .catch(() => null)
+                        )
+                    ).then(progressList => {
+                        setCourseProgressList((progressList || []).filter(Boolean))
+                    })
+                })
                 .catch(console.error)
                 .finally(() => setLoadingVideoStats(false));
         }
@@ -586,7 +601,7 @@ const StudentDashboard = () => {
 
                 {/* ===== PROFILE ===== */}
                 {activeTab === 'profile' && (
-                    <TabProfile videoStats={videoStats} isLoading={loadingVideoStats} />
+                    <TabProfile courseProgressList={courseProgressList} isLoading={loadingVideoStats} />
                 )}
             </main>
 
