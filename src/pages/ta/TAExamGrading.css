@@ -99,6 +99,40 @@
     color: #1e293b;
 }
 
+.exam-grade-sidebar-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.exam-grade-sidebar-head h3 {
+    margin: 0;
+}
+
+.exam-grade-sidebar-close {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border: none;
+    border-radius: 10px;
+    background: #f1f5f9;
+    color: #475569;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.exam-grade-backdrop {
+    display: none;
+}
+
+.exam-grade-mobile-fab {
+    display: none;
+}
+
 .exam-grade-field {
     margin-bottom: 16px;
 }
@@ -489,14 +523,20 @@
 @media (max-width: 768px) {
     .exam-grading-page {
         padding: 8px;
+        padding-bottom: calc(88px + env(safe-area-inset-bottom, 0px));
     }
 
     .exam-grading-page--annotator {
         padding: 0;
+        padding-bottom: calc(88px + env(safe-area-inset-bottom, 0px));
     }
 
     .exam-annotator-sticky-head {
         top: 0;
+    }
+
+    .exam-grading-header {
+        padding: 10px 12px 0;
     }
 
     .exam-grading-header h1 {
@@ -507,22 +547,72 @@
         display: inline-flex;
     }
 
+    .exam-grade-backdrop {
+        display: block;
+        position: fixed;
+        inset: 0;
+        z-index: 10050;
+        border: none;
+        padding: 0;
+        margin: 0;
+        background: rgba(15, 23, 42, 0.55);
+        cursor: pointer;
+        animation: exam-grade-fade-in 0.2s ease;
+    }
+
+    .exam-grade-mobile-fab {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        position: fixed;
+        left: 16px;
+        right: 16px;
+        bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+        z-index: 10049;
+        padding: 14px 20px;
+        border: none;
+        border-radius: 16px;
+        background: linear-gradient(135deg, #10b981, #059669);
+        color: white;
+        font-family: inherit;
+        font-size: 1rem;
+        font-weight: 900;
+        box-shadow: 0 10px 30px rgba(16, 185, 129, 0.45);
+        cursor: pointer;
+    }
+
+    .exam-grade-mobile-fab-score {
+        margin-right: auto;
+        background: rgba(255, 255, 255, 0.2);
+        padding: 4px 10px;
+        border-radius: 999px;
+        font-size: 0.88rem;
+    }
+
     .exam-grading-sidebar {
         display: none;
         position: fixed;
         left: 0;
         right: 0;
         bottom: 0;
-        z-index: 10000;
-        max-height: 70vh;
-        max-height: 70dvh;
+        z-index: 10051;
+        max-height: 85vh;
+        max-height: 85dvh;
         overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
         border-radius: 20px 20px 0 0;
-        box-shadow: 0 -10px 40px rgba(0,0,0,0.15);
+        box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.2);
+        padding: 20px 20px calc(24px + env(safe-area-inset-bottom, 0px));
+        animation: exam-grade-slide-up 0.25s ease;
     }
 
     .exam-grading-sidebar.open {
         display: block;
+    }
+
+    .exam-grade-sidebar-close {
+        display: inline-flex;
     }
 
     .exam-grading-main {
@@ -538,6 +628,16 @@
     .exam-annotator-actions {
         justify-content: center;
     }
+}
+
+@keyframes exam-grade-slide-up {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+}
+
+@keyframes exam-grade-fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
 }
 
 /* ── TA Exams list page ── */

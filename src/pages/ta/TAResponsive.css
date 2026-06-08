@@ -140,6 +140,9 @@
     .ta-layout .hq-content:has(> .ta-chat-layout) {
         padding: 0 !important;
     }
+    .ta-layout .hq-content:has(> .exam-grading-page) {
+        padding: 0 !important;
+    }
     .ta-layout .ta-page {
         padding: 14px !important;
         max-width: 100% !important;
