@@ -2,6 +2,8 @@
  * أدوات التصحيح — إحداثيات نسبية (0–1) لتعمل على الويب والموبايل.
  */
 
+import { ensureSecureUrl } from '../../config'
+
 export const GRADING_DATA_VERSION = 2
 
 export function normalizePages(data) {
@@ -123,9 +125,11 @@ export async function loadFileForViewer(url, token) {
     if (!url) return null
     if (url.startsWith('data:') || url.startsWith('blob:')) return { url }
 
+    const fetchUrl = ensureSecureUrl(url)
+
     try {
         const headers = token ? { Authorization: `Bearer ${token}` } : {}
-        const res = await fetch(url, { headers, credentials: 'include' })
+        const res = await fetch(fetchUrl, { headers, credentials: 'include' })
         if (!res.ok) return null
         const blob = await res.blob()
         const blobUrl = URL.createObjectURL(blob)

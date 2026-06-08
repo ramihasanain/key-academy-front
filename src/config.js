@@ -1,6 +1,17 @@
 // API Base URL — يتم تحديده تلقائياً حسب البيئة
 const envApiUrl = (import.meta.env.VITE_API_URL || '').trim()
-export const API = envApiUrl || 'http://127.0.0.1:8000'
+
+/** Upgrade http→https when the page is served over TLS (prevents mixed-content blocks). */
+export function ensureSecureUrl(url) {
+    if (!url || typeof url !== 'string') return url
+    if (typeof window !== 'undefined' && window.location.protocol === 'https:' && url.startsWith('http://')) {
+        return url.replace(/^http:\/\//i, 'https://')
+    }
+    return url
+}
+
+const rawApi = envApiUrl || 'http://127.0.0.1:8000'
+export const API = ensureSecureUrl(rawApi.replace(/\/+$/, ''))
 
 let isRefreshing = false;
 let refreshSubscribers = [];
