@@ -110,7 +110,7 @@ export const ExamPaperAnnotator = ({
     readOnly = false,
     onPageRefsReady,
     authToken = null,
-}) {
+}) => {
     const isMobile = useMediaQuery('(max-width: 768px)')
     const [activeTool, setActiveTool] = useState(TOOLS.pen)
     const [activeColor, setActiveColor] = useState(COLORS[0])
