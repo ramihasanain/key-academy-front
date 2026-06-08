@@ -22,11 +22,11 @@ import {
     normalizeStrokeForSave,
     normalizeMarkForSave,
     hitTestAnnotation,
-    loadFileAsBlobUrl,
+    loadFileForViewer,
     exportAnnotatedPages,
 } from './examAnnotatorUtils'
 
-pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/legacy/build/pdf.worker.min.mjs`
+pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`
 
 export { exportAnnotatedPages }
 
@@ -55,17 +55,29 @@ function useMediaQuery(query) {
 }
 
 function PdfPageView({ url, pageNumber, scale, token, onNumPages, onRenderSuccess }) {
-    const [blobUrl, setBlobUrl] = useState(null)
+    const [pdfSource, setPdfSource] = useState(null)
     const [loadError, setLoadError] = useState(false)
 
     useEffect(() => {
         let revoked = null
         let cancelled = false
-        loadFileAsBlobUrl(url, token).then((resolved) => {
+        setLoadError(false)
+        setPdfSource(null)
+
+        loadFileForViewer(url, token).then((loaded) => {
             if (cancelled) return
-            if (resolved?.startsWith('blob:')) revoked = resolved
-            setBlobUrl(resolved)
+            if (!loaded) {
+                setLoadError(true)
+                return
+            }
+            if (loaded.url?.startsWith('blob:')) revoked = loaded.url
+            if (loaded.data) {
+                setPdfSource({ data: loaded.data })
+            } else {
+                setPdfSource(loaded.url)
+            }
         })
+
         return () => {
             cancelled = true
             if (revoked) URL.revokeObjectURL(revoked)
@@ -75,20 +87,26 @@ function PdfPageView({ url, pageNumber, scale, token, onNumPages, onRenderSucces
     if (loadError) {
         return (
             <div className="exam-annotator-fallback">
+                <p>تعذر تحميل PDF داخل الصفحة</p>
                 <a href={url} target="_blank" rel="noreferrer">فتح PDF في تبويب جديد</a>
             </div>
         )
     }
 
-    if (!blobUrl) {
+    if (!pdfSource) {
         return <div className="exam-annotator-loading">جاري تحميل الملف...</div>
     }
 
     return (
         <Document
-            file={blobUrl}
-            loading={<div className="exam-annotator-loading">جاري تحميل PDF...</div>}
-            error={<div className="exam-annotator-fallback">تعذر تحميل PDF — <a href={url} target="_blank" rel="noreferrer">فتح خارجياً</a></div>}
+            file={pdfSource}
+            loading={<div className="exam-annotator-loading">جاري عرض PDF...</div>}
+            error={
+                <div className="exam-annotator-fallback">
+                    <p>تعذر عرض PDF</p>
+                    <a href={url} target="_blank" rel="noreferrer">فتح خارجياً</a>
+                </div>
+            }
             onLoadSuccess={({ numPages }) => onNumPages?.(numPages)}
             onLoadError={() => setLoadError(true)}
         >
@@ -147,10 +165,11 @@ export const ExamPaperAnnotator = ({
     useEffect(() => {
         pages.forEach((p) => {
             if (p.type !== 'image' || p.url.startsWith('data:')) return
-            loadFileAsBlobUrl(p.url, authToken).then((resolved) => {
+            loadFileForViewer(p.url, authToken).then((loaded) => {
+                if (!loaded?.url) return
                 setImageBlobUrls((prev) => {
                     if (prev[p.index]) return prev
-                    return { ...prev, [p.index]: resolved }
+                    return { ...prev, [p.index]: loaded.url }
                 })
             })
         })

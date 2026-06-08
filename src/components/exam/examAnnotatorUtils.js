@@ -119,17 +119,27 @@ export function hitTestAnnotation(annotations, x, y, width, height) {
     return null
 }
 
-export async function loadFileAsBlobUrl(url, token) {
-    if (!url || url.startsWith('data:') || url.startsWith('blob:')) return url
+export async function loadFileForViewer(url, token) {
+    if (!url) return null
+    if (url.startsWith('data:') || url.startsWith('blob:')) return { url }
+
     try {
         const headers = token ? { Authorization: `Bearer ${token}` } : {}
         const res = await fetch(url, { headers, credentials: 'include' })
-        if (!res.ok) return url
+        if (!res.ok) return null
         const blob = await res.blob()
-        return URL.createObjectURL(blob)
+        const blobUrl = URL.createObjectURL(blob)
+        const buffer = await blob.arrayBuffer()
+        return { url: blobUrl, data: buffer, mime: blob.type }
     } catch {
-        return url
+        return null
     }
+}
+
+/** @deprecated use loadFileForViewer */
+export async function loadFileAsBlobUrl(url, token) {
+    const loaded = await loadFileForViewer(url, token)
+    return loaded?.url || url
 }
 
 export function exportAnnotatedPages(pageElements) {
