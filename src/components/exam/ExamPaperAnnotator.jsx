@@ -386,54 +386,7 @@ export const ExamPaperAnnotator = ({
         )
     }
 
-    const toolbar = !readOnly && (
-        <div className={`exam-annotator-toolbar ${isMobile ? 'mobile' : ''}`}>
-            <div className="exam-annotator-tools">
-                {[
-                    [TOOLS.pen, HiOutlinePencil, 'قلم'],
-                    [TOOLS.text, HiOutlineChatBubbleBottomCenterText, 'نص'],
-                    [TOOLS.check, HiOutlineCheck, 'صح'],
-                    [TOOLS.cross, HiOutlineXMark, 'خطأ'],
-                    [TOOLS.eraser, HiOutlineTrash, 'محو'],
-                ].map(([tool, Icon, label]) => (
-                    <button
-                        key={tool}
-                        type="button"
-                        className={activeTool === tool ? 'active' : ''}
-                        onClick={() => setActiveTool(tool)}
-                        title={label}
-                    >
-                        <Icon size={isMobile ? 20 : 18} />
-                        {!isMobile && <span>{label}</span>}
-                    </button>
-                ))}
-            </div>
-            <div className="exam-annotator-colors">
-                {COLORS.map((c) => (
-                    <button
-                        key={c}
-                        type="button"
-                        className={activeColor === c ? 'active' : ''}
-                        style={{ background: c }}
-                        onClick={() => setActiveColor(c)}
-                        aria-label="لون"
-                    />
-                ))}
-            </div>
-            <div className="exam-annotator-actions">
-                <button type="button" onClick={undoLast} title="تراجع"><HiOutlineArrowUturnLeft size={18} /></button>
-                {!isMobile && (
-                    <button type="button" onClick={clearPage} title="مسح"><HiOutlineTrash size={18} /></button>
-                )}
-                <button type="button" onClick={() => setScale((s) => Math.max(0.5, s - 0.1))}><HiOutlineMagnifyingGlassMinus size={18} /></button>
-                <span className="exam-annotator-zoom">{Math.round(scale * 100)}%</span>
-                <button type="button" onClick={() => setScale((s) => Math.min(2.5, s + 0.1))}><HiOutlineMagnifyingGlassPlus size={18} /></button>
-                <button type="button" onClick={() => setFullscreen((f) => !f)} title="ملء الشاشة">
-                    <HiOutlineArrowsPointingOut size={18} />
-                </button>
-            </div>
-        </div>
-    )
+    const showPager = pages.length > 1 || (isPdf && pdfNumPages > 1)
 
     if (!pages.length) {
         return <div className="exam-annotator-empty">لا توجد صفحات — تأكد من رفع الطالب ملف PDF أو صورة</div>
@@ -441,41 +394,101 @@ export const ExamPaperAnnotator = ({
 
     return (
         <div className={`exam-annotator ${fullscreen ? 'fullscreen' : ''} ${isMobile ? 'is-mobile' : ''}`}>
-            {toolbar}
-
-            {(pages.length > 1 || (isPdf && pdfNumPages > 1)) && (
-                <div className="exam-annotator-pager">
-                    {pages.length > 1 && pages.map((p, i) => (
-                        <button
-                            key={p.index}
-                            type="button"
-                            className={currentPage === i ? 'active' : ''}
-                            onClick={() => setCurrentPage(i)}
-                        >
-                            {p.label || `ملف ${i + 1}`}
-                        </button>
-                    ))}
-                    {isPdf && pdfNumPages > 1 && (
-                        <div className="exam-annotator-pdf-nav">
-                            <button
-                                type="button"
-                                disabled={pdfSubPage <= 1}
-                                onClick={() => setPdfSubPage((p) => Math.max(1, p - 1))}
-                            >
-                                <HiOutlineChevronRight size={18} />
-                            </button>
-                            <span>صفحة {pdfSubPage} / {pdfNumPages}</span>
-                            <button
-                                type="button"
-                                disabled={pdfSubPage >= pdfNumPages}
-                                onClick={() => setPdfSubPage((p) => Math.min(pdfNumPages, p + 1))}
-                            >
-                                <HiOutlineChevronLeft size={18} />
-                            </button>
+            <div className="exam-annotator-sticky-head">
+                <div className={`exam-annotator-toolbar ${isMobile ? 'mobile' : ''} ${readOnly ? 'readonly' : ''}`}>
+                    {readOnly ? (
+                        <div className="exam-annotator-locked-label">
+                            <HiOutlineCheck size={18} />
+                            <span>الورقة مقفلة — للعرض فقط</span>
                         </div>
+                    ) : (
+                        <>
+                            <div className="exam-annotator-tools">
+                                {[
+                                    [TOOLS.pen, HiOutlinePencil, 'قلm'],
+                                    [TOOLS.text, HiOutlineChatBubbleBottomCenterText, 'نص'],
+                                    [TOOLS.check, HiOutlineCheck, 'صح'],
+                                    [TOOLS.cross, HiOutlineXMark, 'خطأ'],
+                                    [TOOLS.eraser, HiOutlineTrash, 'محو'],
+                                ].map(([tool, Icon, label]) => (
+                                    <button
+                                        key={tool}
+                                        type="button"
+                                        className={activeTool === tool ? 'active' : ''}
+                                        onClick={() => setActiveTool(tool)}
+                                        title={label}
+                                    >
+                                        <Icon size={isMobile ? 20 : 18} />
+                                        {!isMobile && <span>{label}</span>}
+                                    </button>
+                                ))}
+                            </div>
+                            <div className="exam-annotator-colors">
+                                {COLORS.map((c) => (
+                                    <button
+                                        key={c}
+                                        type="button"
+                                        className={activeColor === c ? 'active' : ''}
+                                        style={{ background: c }}
+                                        onClick={() => setActiveColor(c)}
+                                        aria-label="لون"
+                                    />
+                                ))}
+                            </div>
+                        </>
                     )}
+                    <div className="exam-annotator-actions">
+                        {!readOnly && (
+                            <>
+                                <button type="button" onClick={undoLast} title="تراجع"><HiOutlineArrowUturnLeft size={18} /></button>
+                                {!isMobile && (
+                                    <button type="button" onClick={clearPage} title="مسح"><HiOutlineTrash size={18} /></button>
+                                )}
+                            </>
+                        )}
+                        <button type="button" onClick={() => setScale((s) => Math.max(0.5, s - 0.1))}><HiOutlineMagnifyingGlassMinus size={18} /></button>
+                        <span className="exam-annotator-zoom">{Math.round(scale * 100)}%</span>
+                        <button type="button" onClick={() => setScale((s) => Math.min(2.5, s + 0.1))}><HiOutlineMagnifyingGlassPlus size={18} /></button>
+                        <button type="button" onClick={() => setFullscreen((f) => !f)} title="ملء الشاشة">
+                            <HiOutlineArrowsPointingOut size={18} />
+                        </button>
+                    </div>
                 </div>
-            )}
+
+                {showPager && (
+                    <div className="exam-annotator-pager">
+                        {pages.length > 1 && pages.map((p, i) => (
+                            <button
+                                key={p.index}
+                                type="button"
+                                className={currentPage === i ? 'active' : ''}
+                                onClick={() => setCurrentPage(i)}
+                            >
+                                {p.label || `ملف ${i + 1}`}
+                            </button>
+                        ))}
+                        {isPdf && pdfNumPages > 1 && (
+                            <div className="exam-annotator-pdf-nav">
+                                <button
+                                    type="button"
+                                    disabled={pdfSubPage <= 1}
+                                    onClick={() => setPdfSubPage((p) => Math.max(1, p - 1))}
+                                >
+                                    <HiOutlineChevronRight size={18} />
+                                </button>
+                                <span>صفحة {pdfSubPage} / {pdfNumPages}</span>
+                                <button
+                                    type="button"
+                                    disabled={pdfSubPage >= pdfNumPages}
+                                    onClick={() => setPdfSubPage((p) => Math.min(pdfNumPages, p + 1))}
+                                >
+                                    <HiOutlineChevronLeft size={18} />
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                )}
+            </div>
 
             <div className="exam-annotator-stage" ref={stageRef}>
                 <div
@@ -492,7 +505,7 @@ export const ExamPaperAnnotator = ({
                         onPointerCancel={handlePointerUp}
                         onPointerLeave={handlePointerUp}
                     />
-                    {textPrompt && (
+                    {textPrompt && !readOnly && (
                         <div
                             className="exam-annotator-text-popup"
                             style={{ left: textPrompt.x, top: textPrompt.y }}

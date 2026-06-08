@@ -6,6 +6,11 @@
     font-family: 'Tajawal', 'Cairo', sans-serif;
 }
 
+.exam-grading-page--annotator {
+    padding: 0;
+    min-height: 0;
+}
+
 .exam-grading-header-actions {
     display: flex;
     flex-wrap: wrap;
@@ -72,6 +77,13 @@
     border-radius: 18px;
     border: 1px solid #e2e8f0;
     box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
+}
+
+.exam-grading-main {
+    overflow: visible;
+}
+
+.exam-grading-sidebar {
     overflow: hidden;
 }
 
@@ -175,6 +187,23 @@
     margin-top: 10px;
 }
 
+.exam-grade-save.reopen {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    margin-top: 8px;
+}
+
+.exam-grade-locked-banner {
+    background: #ecfdf5;
+    border: 1px solid #a7f3d0;
+    border-radius: 12px;
+    padding: 14px;
+    margin-bottom: 16px;
+    color: #047857;
+    font-size: 0.88rem;
+    font-weight: 700;
+    line-height: 1.6;
+}
+
 .exam-grade-status {
     display: inline-flex;
     align-items: center;
@@ -190,7 +219,15 @@
 .exam-grade-status.in_review { background: #dbeafe; color: #1d4ed8; }
 .exam-grade-status.graded { background: #d1fae5; color: #047857; }
 
-.exam-annotator { direction: rtl; }
+.exam-annotator { direction: rtl; display: flex; flex-direction: column; }
+
+.exam-annotator-sticky-head {
+    position: sticky;
+    top: 0;
+    z-index: 40;
+    flex-shrink: 0;
+    box-shadow: 0 4px 20px rgba(15, 23, 42, 0.15);
+}
 
 .exam-annotator-toolbar {
     display: flex;
@@ -201,6 +238,19 @@
     background: #0f172a;
     color: white;
     border-bottom: 1px solid #1e293b;
+}
+
+.exam-annotator-toolbar.readonly {
+    justify-content: space-between;
+}
+
+.exam-annotator-locked-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: #94a3b8;
+    font-size: 0.85rem;
+    font-weight: 700;
 }
 
 .exam-annotator-tools,
@@ -361,9 +411,9 @@
 }
 
 .exam-annotator-toolbar.mobile {
-    position: sticky;
-    bottom: 0;
-    z-index: 10;
+    position: static;
+    bottom: auto;
+    z-index: auto;
     padding: 10px;
     gap: 8px;
 }
@@ -439,6 +489,14 @@
 @media (max-width: 768px) {
     .exam-grading-page {
         padding: 8px;
+    }
+
+    .exam-grading-page--annotator {
+        padding: 0;
+    }
+
+    .exam-annotator-sticky-head {
+        top: 0;
     }
 
     .exam-grading-header h1 {

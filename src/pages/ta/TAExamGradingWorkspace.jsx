@@ -7,6 +7,8 @@ import {
     HiOutlineDocumentText,
     HiOutlineCheckCircle,
     HiOutlineCloudArrowUp,
+    HiOutlineLockClosed,
+    HiOutlinePencilSquare,
 } from 'react-icons/hi2'
 import './TAExamGrading.css'
 
@@ -35,6 +37,8 @@ export const TAExamGradingWorkspace = () => {
     const [savingAnnotations, setSavingAnnotations] = useState(false)
     const [message, setMessage] = useState('')
     const [sidebarOpen, setSidebarOpen] = useState(false)
+    const [isReEditing, setIsReEditing] = useState(false)
+    const [reopening, setReopening] = useState(false)
     const pageRefsRef = useRef([])
     const saveTimerRef = useRef(null)
     const authToken = sessionStorage.getItem('spy_token') || localStorage.getItem('access_token')
@@ -51,6 +55,9 @@ export const TAExamGradingWorkspace = () => {
             setGrade(data.submission.grade ?? '')
             setNote(data.submission.feedback_note || '')
             setGradingData(data.grading_data?.pages ? data.grading_data : { version: 1, pages: data.grading_data || {} })
+            if (data.submission?.grading_status !== 'graded') {
+                setIsReEditing(false)
+            }
         } catch (err) {
             setMessage(err.message || 'حدث خطأ')
         } finally {
@@ -78,9 +85,36 @@ export const TAExamGradingWorkspace = () => {
     }, [submissionId])
 
     const handleGradingChange = (data) => {
+        if (workspace?.submission?.grading_status === 'graded' && !isReEditing) return
         setGradingData(data)
         if (saveTimerRef.current) clearTimeout(saveTimerRef.current)
         saveTimerRef.current = setTimeout(() => saveAnnotations(data), 1200)
+    }
+
+    const reopenGrading = async () => {
+        if (!window.confirm('إعادة فتح الورقة للتعديل؟')) return
+        setReopening(true)
+        setMessage('')
+        try {
+            const res = await fetch(`${API}/api/interactions/exams/ta-reopen-grading/${submissionId}/`, {
+                method: 'POST',
+                headers: authHeaders(),
+            })
+            if (!res.ok) {
+                const err = await res.json().catch(() => ({}))
+                throw new Error(err.error || 'تعذر إعادة فتح الورقة')
+            }
+            setIsReEditing(true)
+            setWorkspace((prev) => prev ? {
+                ...prev,
+                submission: { ...prev.submission, grading_status: 'in_review' },
+            } : prev)
+            setMessage('تم فتح الورقة للتعديل')
+        } catch (err) {
+            setMessage(err.message || 'حدث خطأ')
+        } finally {
+            setReopening(false)
+        }
     }
 
     const uploadCorrectedBlob = async (blob) => {
@@ -140,6 +174,7 @@ export const TAExamGradingWorkspace = () => {
             })
             if (!res.ok) throw new Error('فشل حفظ العلامة')
             setMessage('تم حفظ التصحيح والعلامة بنجاح')
+            setIsReEditing(false)
             await loadWorkspace()
         } catch (err) {
             setMessage(err.message || 'حدث خطأ أثناء الحفظ')
@@ -163,9 +198,10 @@ export const TAExamGradingWorkspace = () => {
 
     const { submission, exam, pages } = workspace
     const statusClass = submission.grading_status || 'pending'
+    const isLocked = submission.grading_status === 'graded' && !isReEditing
 
     return (
-        <div className="exam-grading-page">
+        <div className="exam-grading-page exam-grading-page--annotator">
             <div className="exam-grading-header">
                 <div>
                     <button type="button" className="exam-grading-back" onClick={() => navigate('/ta/exams')}>
@@ -195,6 +231,7 @@ export const TAExamGradingWorkspace = () => {
                         pages={pages}
                         gradingData={gradingData}
                         onChange={handleGradingChange}
+                        readOnly={isLocked}
                         onPageRefsReady={(refs) => { pageRefsRef.current = refs }}
                         authToken={authToken}
                     />
@@ -202,6 +239,13 @@ export const TAExamGradingWorkspace = () => {
 
                 <aside className={`exam-grading-sidebar ${sidebarOpen ? 'open' : ''}`}>
                     <h3>لوحة التصحيح</h3>
+
+                    {isLocked && (
+                        <div className="exam-grade-locked-banner">
+                            <HiOutlineLockClosed size={20} style={{ verticalAlign: 'middle', marginLeft: 6 }} />
+                            تم تصحيح هذه الورقة. للتعديل اضغط «إعادة تصحيح».
+                        </div>
+                    )}
 
                     <div className="exam-grade-links">
                         {exam.question_file_url && (
@@ -231,6 +275,8 @@ export const TAExamGradingWorkspace = () => {
                                 value={grade}
                                 onChange={(e) => setGrade(e.target.value)}
                                 placeholder="0"
+                                disabled={isLocked}
+                                readOnly={isLocked}
                             />
                             <span>/ {exam.total_mark}</span>
                         </div>
@@ -242,6 +288,8 @@ export const TAExamGradingWorkspace = () => {
                             value={note}
                             onChange={(e) => setNote(e.target.value)}
                             placeholder="اكتب ملاحظاتك وتوجيهاتك للطالب..."
+                            disabled={isLocked}
+                            readOnly={isLocked}
                         />
                     </div>
 
@@ -256,27 +304,41 @@ export const TAExamGradingWorkspace = () => {
                         </p>
                     )}
 
-                    <button
-                        type="button"
-                        className="exam-grade-save"
-                        onClick={saveGrade}
-                        disabled={saving}
-                    >
-                        {saving ? 'جاري الحفظ...' : 'حفظ التصحيح والعلامة'}
-                    </button>
+                    {isLocked ? (
+                        <button
+                            type="button"
+                            className="exam-grade-save reopen"
+                            onClick={reopenGrading}
+                            disabled={reopening}
+                        >
+                            <HiOutlinePencilSquare size={20} style={{ verticalAlign: 'middle', marginLeft: 8 }} />
+                            {reopening ? 'جاري الفتح...' : 'إعادة تصحيح'}
+                        </button>
+                    ) : (
+                        <>
+                            <button
+                                type="button"
+                                className="exam-grade-save"
+                                onClick={saveGrade}
+                                disabled={saving}
+                            >
+                                {saving ? 'جاري الحفظ...' : 'حفظ التصحيح والعلامة'}
+                            </button>
 
-                    <button
-                        type="button"
-                        className="exam-grade-save secondary"
-                        onClick={async () => {
-                            setSavingAnnotations(true)
-                            await saveAnnotations(gradingData)
-                            setSavingAnnotations(false)
-                            setMessage('تم حفظ التعليقات')
-                        }}
-                    >
-                        حفظ التعليقات فقط
-                    </button>
+                            <button
+                                type="button"
+                                className="exam-grade-save secondary"
+                                onClick={async () => {
+                                    setSavingAnnotations(true)
+                                    await saveAnnotations(gradingData)
+                                    setSavingAnnotations(false)
+                                    setMessage('تم حفظ التعليقات')
+                                }}
+                            >
+                                حفظ التعليقات فقط
+                            </button>
+                        </>
+                    )}
                 </aside>
             </div>
         </div>
