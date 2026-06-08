@@ -84,6 +84,9 @@ const TAGroups = lazy(() =>
 const TAExams = lazy(() =>
   import("./pages/ta/TAExams").then((m) => ({ default: m.TAExams })),
 );
+const TAExamGradingWorkspace = lazy(() =>
+  import("./pages/ta/TAExamGradingWorkspace").then((m) => ({ default: m.TAExamGradingWorkspace })),
+);
 const TAMutedStudents = lazy(() =>
   import("./pages/ta/TAMutedStudents").then((m) => ({
     default: m.TAMutedStudents,
@@ -334,6 +337,7 @@ function App() {
               <Route path="groups" element={<TAGroups />} />
               <Route path="notes" element={<TANotebook />} />
               <Route path="exams" element={<TAExams />} />
+              <Route path="exams/grade/:submissionId" element={<TAExamGradingWorkspace />} />
               <Route path="muted" element={<TAMutedStudents />} />
               <Route
                 path="moderation-history"

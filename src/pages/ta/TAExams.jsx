@@ -1,9 +1,16 @@
 import React, { useState, useEffect } from 'react'
-import { useOutletContext } from 'react-router-dom'
+import { useNavigate, useOutletContext } from 'react-router-dom'
 import { API } from '../../config'
 import { HiOutlineDocumentText, HiOutlineArrowDownTray, HiOutlineCheck, HiOutlinePencilSquare } from 'react-icons/hi2'
 
+const STATUS_BADGE = {
+    pending: { label: 'بانتظار التصحيح', bg: '#fef3c7', color: '#b45309' },
+    in_review: { label: 'قيد التصحيح', bg: '#dbeafe', color: '#1d4ed8' },
+    graded: { label: 'تم التصحيح', bg: '#d1fae5', color: '#047857' },
+}
+
 export const TAExams = () => {
+    const navigate = useNavigate()
     const { activeGroupId } = useOutletContext() || {}
     const [exams, setExams] = useState([])
     const [loading, setLoading] = useState(true)
@@ -66,7 +73,11 @@ export const TAExams = () => {
                     'Authorization': `Bearer ${tk}`,
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify(gradeInput[subId])
+                body: JSON.stringify({
+                    grade: gradeInput[subId]?.grade,
+                    feedback_note: gradeInput[subId]?.note,
+                    note: gradeInput[subId]?.note,
+                })
             })
             if (res.ok) {
                 alert('تم حفظ العلامة بنجاح')
@@ -132,8 +143,9 @@ export const TAExams = () => {
                                 <tr style={{ borderBottom: '2px solid #f1f5f9', background: '#f8fafc' }}>
                                     <th style={{ padding: '15px' }}>الطالب</th>
                                     <th style={{ padding: '15px' }}>تاريخ التسليم</th>
-                                    <th style={{ padding: '15px' }}>ورقة الإجابة</th>
-                                    <th style={{ padding: '15px', width: '300px' }}>التقييم والعلامة</th>
+                                    <th style={{ padding: '15px' }}>الحالة</th>
+                                    <th style={{ padding: '15px' }}>التصحيح</th>
+                                    <th style={{ padding: '15px', width: '320px' }}>العلامة السريعة</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -142,11 +154,28 @@ export const TAExams = () => {
                                         <td style={{ padding: '15px', fontWeight: 'bold' }}>{sub.student_name}</td>
                                         <td style={{ padding: '15px', color: '#64748b', fontSize: '0.9rem' }}>{new Date(sub.submitted_at).toLocaleString('ar-EG')}</td>
                                         <td style={{ padding: '15px' }}>
-                                            {sub.file_url ? (
-                                                <a href={sub.file_url} target="_blank" rel="noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', background: '#e0f2fe', color: '#0284c7', padding: '6px 12px', borderRadius: '20px', textDecoration: 'none', fontWeight: 'bold', fontSize: '0.9rem' }}>
-                                                    <HiOutlineArrowDownTray /> تحميل الورقة
+                                            {(() => {
+                                                const st = STATUS_BADGE[sub.grading_status] || STATUS_BADGE.pending
+                                                return (
+                                                    <span style={{ background: st.bg, color: st.color, padding: '6px 12px', borderRadius: '999px', fontSize: '0.82rem', fontWeight: 'bold' }}>
+                                                        {st.label}
+                                                    </span>
+                                                )
+                                            })()}
+                                        </td>
+                                        <td style={{ padding: '15px' }}>
+                                            <button
+                                                type="button"
+                                                onClick={() => navigate(`/ta/exams/grade/${sub.id}`)}
+                                                style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: 'linear-gradient(135deg, #6366f1, #4f46e5)', color: 'white', padding: '8px 14px', borderRadius: '10px', border: 'none', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.88rem', marginLeft: '8px' }}
+                                            >
+                                                <HiOutlinePencilSquare size={18} /> تصحيح أونلاين
+                                            </button>
+                                            {sub.file_url && (
+                                                <a href={sub.file_url} target="_blank" rel="noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', background: '#e0f2fe', color: '#0284c7', padding: '6px 12px', borderRadius: '20px', textDecoration: 'none', fontWeight: 'bold', fontSize: '0.88rem' }}>
+                                                    <HiOutlineArrowDownTray /> تحميل
                                                 </a>
-                                            ) : 'لا يوجد ملف'}
+                                            )}
                                         </td>
                                         <td style={{ padding: '15px' }}>
                                             <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>

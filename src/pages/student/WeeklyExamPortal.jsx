@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { API } from '../../config'
-import { HiOutlineArrowRight, HiOutlineDocumentText, HiOutlineClock, HiOutlineCloudArrowUp, HiOutlineCheckCircle, HiOutlineExclamationCircle, HiOutlineInformationCircle } from 'react-icons/hi2'
+import { HiOutlineArrowRight, HiOutlineDocumentText, HiOutlineClock, HiOutlineCloudArrowUp, HiOutlineCheckCircle, HiOutlineExclamationCircle, HiOutlineInformationCircle, HiOutlineAcademicCap, HiOutlinePencilSquare } from 'react-icons/hi2'
+import { ExamCorrectedViewer } from '../../components/exam/ExamCorrectedViewer'
 
 export const WeeklyExamPortal = () => {
     const { examId } = useParams()
@@ -208,6 +209,22 @@ export const WeeklyExamPortal = () => {
                             </div>
                         </div>
 
+                        {/* Model Answer */}
+                        {hasSubmitted && exam.model_answer?.visible && exam.model_answer?.url && (
+                            <div style={{ background: 'white', borderRadius: '16px', padding: '0', overflow: 'hidden', boxShadow: '0 10px 25px rgba(0,0,0,0.05)', border: '2px solid #6366f1' }}>
+                                <div style={{ background: '#6366f1', padding: '15px 25px', color: 'white', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                    <HiOutlineAcademicCap size={24} />
+                                    <h3 style={{ margin: 0, fontSize: '1.2rem' }}>الإجابة النموذجية</h3>
+                                </div>
+                                <div style={{ padding: '25px' }}>
+                                    <p style={{ margin: '0 0 16px', color: '#64748b', fontSize: '0.92rem' }}>أصبحت الإجابة النموذجية متاحة بعد انتهاء وقت الامتحان.</p>
+                                    <a href={exam.model_answer.url} target="_blank" rel="noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: '#eef2ff', color: '#4f46e5', padding: '12px 20px', borderRadius: '12px', textDecoration: 'none', fontWeight: 'bold' }}>
+                                        <HiOutlineDocumentText size={20} /> عرض الإجابة النموذجية
+                                    </a>
+                                </div>
+                            </div>
+                        )}
+
                         {/* Grading Results */}
                         {hasSubmitted && exam.submission.grade !== null && (
                             <div style={{ background: 'white', borderRadius: '16px', padding: '0', overflow: 'hidden', boxShadow: '0 10px 25px rgba(0,0,0,0.05)', border: '2px solid #10b981' }}>
@@ -226,6 +243,22 @@ export const WeeklyExamPortal = () => {
                                             {exam.submission.feedback_note ? exam.submission.feedback_note : 'لا توجد ملاحظات إضافية من المساعد.'}
                                         </div>
                                     </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {hasSubmitted && exam.submission.corrected_paper?.visible && (
+                            <div style={{ background: 'white', borderRadius: '16px', padding: '0', overflow: 'hidden', boxShadow: '0 10px 25px rgba(0,0,0,0.05)', border: '2px solid #f59e0b' }}>
+                                <div style={{ background: '#f59e0b', padding: '15px 25px', color: 'white', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                    <HiOutlinePencilSquare size={24} />
+                                    <h3 style={{ margin: 0, fontSize: '1.2rem' }}>ورقتك المصححة</h3>
+                                </div>
+                                <div style={{ padding: '20px' }}>
+                                    <ExamCorrectedViewer
+                                        pages={exam.submission.submission_pages || []}
+                                        gradingData={exam.submission.corrected_paper?.grading_data}
+                                        correctedUrl={exam.submission.corrected_paper?.url}
+                                    />
                                 </div>
                             </div>
                         )}
