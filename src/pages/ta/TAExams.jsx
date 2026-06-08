@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react'
-import { useNavigate, useOutletContext } from 'react-router-dom'
+import { useNavigate, useOutletContext, useLocation } from 'react-router-dom'
 import { API } from '../../config'
 import {
     HiOutlineDocumentText,
     HiOutlineArrowDownTray,
-    HiOutlineCheck,
     HiOutlinePencilSquare,
     HiOutlineClipboardDocumentCheck,
+    HiOutlineCheckCircle,
 } from 'react-icons/hi2'
 import './TAExamGrading.css'
 
@@ -18,13 +18,14 @@ const STATUS_BADGE = {
 
 export const TAExams = () => {
     const navigate = useNavigate()
+    const location = useLocation()
     const { activeGroupId } = useOutletContext() || {}
     const [exams, setExams] = useState([])
     const [loading, setLoading] = useState(true)
     const [selectedExam, setSelectedExam] = useState(null)
     const [submissions, setSubmissions] = useState([])
     const [loadingSubs, setLoadingSubs] = useState(false)
-    const [gradeInput, setGradeInput] = useState({})
+    const [reopeningId, setReopeningId] = useState(null)
 
     useEffect(() => {
         const fetchExams = async () => {
@@ -56,11 +57,6 @@ export const TAExams = () => {
                 const data = await res.json()
                 setSubmissions(data.submissions)
                 setSelectedExam(data.exam)
-                const gInputs = {}
-                data.submissions.forEach((s) => {
-                    gInputs[s.id] = { grade: s.grade ?? '', note: s.feedback_note || '' }
-                })
-                setGradeInput(gInputs)
             }
         } catch (err) {
             console.error(err)
@@ -69,27 +65,34 @@ export const TAExams = () => {
         }
     }
 
-    const saveGrade = async (subId) => {
+    useEffect(() => {
+        if (selectedExam?.id && location.pathname.endsWith('/ta/exams')) {
+            fetchSubmissions(selectedExam.id)
+        }
+    }, [location.pathname])
+
+    const reopenGrading = async (subId) => {
         const tk = sessionStorage.getItem('spy_token') || localStorage.getItem('access_token')
+        setReopeningId(subId)
         try {
-            const res = await fetch(`${API}/api/interactions/exams/ta-grade/${subId}/`, {
+            const res = await fetch(`${API}/api/interactions/exams/ta-reopen-grading/${subId}/`, {
                 method: 'POST',
-                headers: {
-                    Authorization: `Bearer ${tk}`,
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    grade: gradeInput[subId]?.grade,
-                    feedback_note: gradeInput[subId]?.note,
-                    note: gradeInput[subId]?.note,
-                }),
+                headers: { Authorization: `Bearer ${tk}` },
             })
-            if (res.ok) alert('تم حفظ العلامة بنجاح')
-            else alert('حدث خطأ أثناء الحفظ')
+            if (!res.ok) {
+                const err = await res.json().catch(() => ({}))
+                alert(err.error || 'تعذر إعادة فتح التصحيح')
+                return
+            }
+            navigate(`/ta/exams/grade/${subId}`)
         } catch {
-            alert('حدث خطأ أثناء الحفظ')
+            alert('حدث خطأ')
+        } finally {
+            setReopeningId(null)
         }
     }
+
+    const isGraded = (sub) => sub.grading_status === 'graded' || sub.grade != null
 
     if (loading) return <div className="ta-loading">جاري جلب قائمة الامتحانات...</div>
 
@@ -97,7 +100,7 @@ export const TAExams = () => {
         <div className="ta-exams-page">
             <div className="ta-exams-header">
                 <h2><HiOutlineClipboardDocumentCheck /> الامتحانات الأسبوعية</h2>
-                <p>اختر امتحاناً ← اضغط <strong>تصحيح الورقة أونلاين</strong> ← ارسم على PDF أو الصورة ← احفظ العلامة</p>
+                <p>اختر امتحاناً ← صحّح أونلاين من داخل الورقة ← أو من التطبيق — بعد الحفظ تظهر العلامة و«إعادة تصحيح»</p>
             </div>
 
             <div className="ta-exams-grid">
@@ -149,50 +152,48 @@ export const TAExams = () => {
                                             </span>
                                         </div>
 
-                                        <button
-                                            type="button"
-                                            className="ta-grade-online-btn"
-                                            onClick={() => navigate(`/ta/exams/grade/${sub.id}`)}
-                                        >
-                                            <HiOutlinePencilSquare size={24} />
-                                            تصحيح الورقة أونلاين
-                                            <small>افتح PDF أو الصورة وارسم التعليقات مباشرة</small>
-                                        </button>
-
-                                        <div className="ta-submission-quick">
-                                            <div className="ta-submission-quick-grade">
-                                                <input
-                                                    type="number"
-                                                    placeholder="العلامة"
-                                                    value={gradeInput[sub.id]?.grade || ''}
-                                                    onChange={(e) => setGradeInput({
-                                                        ...gradeInput,
-                                                        [sub.id]: { ...gradeInput[sub.id], grade: e.target.value },
-                                                    })}
-                                                />
-                                                <span>/ {selectedExam.total_mark}</span>
+                                        {isGraded(sub) ? (
+                                            <div className="ta-grade-done-panel">
+                                                <div className="ta-grade-done-main">
+                                                    <HiOutlineCheckCircle size={28} />
+                                                    <div>
+                                                        <strong>تم التصحيح</strong>
+                                                        <span className="ta-grade-done-score">
+                                                            العلامة: <b>{sub.grade}</b> / {selectedExam.total_mark}
+                                                        </span>
+                                                        {sub.feedback_note && (
+                                                            <span className="ta-grade-done-note">{sub.feedback_note}</span>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                                <div className="ta-grade-done-actions">
+                                                    <button
+                                                        type="button"
+                                                        className="ta-regrade-btn"
+                                                        onClick={() => reopenGrading(sub.id)}
+                                                        disabled={reopeningId === sub.id}
+                                                    >
+                                                        <HiOutlinePencilSquare size={18} />
+                                                        {reopeningId === sub.id ? 'جاري الفتح...' : 'إعادة تصحيح'}
+                                                    </button>
+                                                    {sub.file_url && (
+                                                        <a href={sub.file_url} target="_blank" rel="noreferrer" className="ta-download-btn">
+                                                            <HiOutlineArrowDownTray size={16} /> تحميل
+                                                        </a>
+                                                    )}
+                                                </div>
                                             </div>
-                                            <input
-                                                type="text"
-                                                className="ta-submission-note"
-                                                placeholder="ملاحظات (اختياري)"
-                                                value={gradeInput[sub.id]?.note || ''}
-                                                onChange={(e) => setGradeInput({
-                                                    ...gradeInput,
-                                                    [sub.id]: { ...gradeInput[sub.id], note: e.target.value },
-                                                })}
-                                            />
-                                            <div className="ta-submission-actions">
-                                                <button type="button" className="ta-save-grade-btn" onClick={() => saveGrade(sub.id)}>
-                                                    <HiOutlineCheck size={18} /> حفظ العلامة
-                                                </button>
-                                                {sub.file_url && (
-                                                    <a href={sub.file_url} target="_blank" rel="noreferrer" className="ta-download-btn">
-                                                        <HiOutlineArrowDownTray size={16} /> تحميل
-                                                    </a>
-                                                )}
-                                            </div>
-                                        </div>
+                                        ) : (
+                                            <button
+                                                type="button"
+                                                className="ta-grade-online-btn"
+                                                onClick={() => navigate(`/ta/exams/grade/${sub.id}`)}
+                                            >
+                                                <HiOutlinePencilSquare size={24} />
+                                                تصحيح الورقة أونلاين
+                                                <small>افتح PDF أو الصورة وارسم التعليقات مباشرة</small>
+                                            </button>
+                                        )}
                                     </div>
                                 )
                             })}

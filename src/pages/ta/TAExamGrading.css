@@ -832,6 +832,73 @@
     opacity: 0.9;
 }
 
+.ta-grade-done-panel {
+    background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+    border: 2px solid #6ee7b7;
+    border-radius: 14px;
+    padding: 18px 16px;
+}
+
+.ta-grade-done-main {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    color: #047857;
+    margin-bottom: 14px;
+}
+
+.ta-grade-done-main strong {
+    display: block;
+    font-size: 1.15rem;
+    margin-bottom: 6px;
+}
+
+.ta-grade-done-score {
+    display: block;
+    font-size: 0.95rem;
+    color: #065f46;
+}
+
+.ta-grade-done-score b {
+    font-size: 1.25rem;
+}
+
+.ta-grade-done-note {
+    display: block;
+    margin-top: 8px;
+    font-size: 0.85rem;
+    color: #047857;
+    line-height: 1.5;
+}
+
+.ta-grade-done-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding-top: 12px;
+    border-top: 1px dashed #6ee7b7;
+}
+
+.ta-regrade-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: white;
+    border: none;
+    padding: 12px 18px;
+    border-radius: 12px;
+    font-weight: 800;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 0.95rem;
+}
+
+.ta-regrade-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
 .ta-submission-quick {
     display: flex;
     flex-wrap: wrap;
