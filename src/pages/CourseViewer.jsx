@@ -199,9 +199,14 @@ const CourseViewer = () => {
         return <div className="cv-master-page" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}><h2 style={{ color: 'black' }}>جاري تحضير غرفتك الدراسية...</h2></div>
     }
 
-    const isExamModule = (mod) => mod.title.includes('امتحان') || (mod.weekly_exam && (!mod.lessons || mod.lessons.length === 0));
+    const moduleWeeklyExams = (mod) => {
+        if (Array.isArray(mod.weekly_exams) && mod.weekly_exams.length) return mod.weekly_exams;
+        if (mod.weekly_exam) return [mod.weekly_exam];
+        return [];
+    };
+    const isExamModule = (mod) => mod.title.includes('امتحان') || (moduleWeeklyExams(mod).length > 0 && (!mod.lessons || mod.lessons.length === 0));
     const standardModules = courseData?.modules?.filter(m => !isExamModule(m)) || [];
-    const allExams = courseData?.modules?.filter(m => m.weekly_exam).map(m => m.weekly_exam) || [];
+    const allExams = courseData?.modules?.flatMap(m => moduleWeeklyExams(m)) || [];
     const isViewOnlyRead = isViewOnlyCourse(courseData);
     const canOpenGroupChat = isViewOnlyRead || isFeatureEnabled('groups');
 

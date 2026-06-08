@@ -83,7 +83,7 @@ export const AdminCourseBuilder = ({ id }) => {
         const out = { ...obj }
         ;[
             'localId', '_dirty', 'showAdvanced', 'showBuilder', 'lessons', 'quizzes', 'questions',
-            'is_exam', 'exam_id', 'exam_file', 'exam_start_time', 'exam_end_time',
+            'is_exam', 'weekly_exams', 'exam_id', 'exam_file', 'exam_start_time', 'exam_end_time',
             'exam_total_mark', 'exam_instructions',
             ...extraRemove,
         ].forEach(k => delete out[k])
@@ -177,25 +177,30 @@ export const AdminCourseBuilder = ({ id }) => {
 
                 const courseMods = allModules.filter(m => m.course == id).sort((a, b) => a.order - b.order)
 
-                const tree = courseMods.map(m => {
-                    const examData = allExams.find(ex => ex.module == m.id)
-                    if (examData) {
-                        return {
-                            ...m, localId: m.id,
-                            is_exam: true,
-                            exam_id: examData.id,
-                            exam_start_time: examData.start_time ? examData.start_time.slice(0,16) : '',
-                            exam_end_time: examData.end_time ? examData.end_time.slice(0,16) : '',
-                            exam_total_mark: examData.total_mark,
-                            exam_instructions: examData.instructions || '',
-                            exam_file: examData.file,
-                            lessons: []
-                        }
-                    }
+                const mapExamFromApi = (ex) => ({
+                    localId: ex.id,
+                    id: ex.id,
+                    exam_id: ex.id,
+                    title: ex.title || '',
+                    exam_start_time: ex.start_time ? ex.start_time.slice(0, 16) : '',
+                    exam_end_time: ex.end_time ? ex.end_time.slice(0, 16) : '',
+                    exam_total_mark: ex.total_mark,
+                    exam_instructions: ex.instructions || '',
+                    exam_file: ex.file,
+                })
 
+                const tree = courseMods.map(m => {
                     const moduleLessons = allLessons.filter(l => l.module == m.id).sort((a, b) => a.order - b.order)
+                    const weekly_exams = allExams
+                        .filter(ex => ex.module == m.id)
+                        .sort((a, b) => new Date(a.start_time || 0) - new Date(b.start_time || 0))
+                        .map(mapExamFromApi)
+
                     return {
-                        ...m, localId: m.id, is_exam: false,
+                        ...m,
+                        localId: m.id,
+                        is_exam: moduleLessons.length === 0 && weekly_exams.length > 0,
+                        weekly_exams,
                         lessons: moduleLessons.map(l => {
                             const lessonQuizzes = allQuizzes.filter(q => q.lesson == l.id)
                             return {
@@ -232,11 +237,25 @@ export const AdminCourseBuilder = ({ id }) => {
     }, [id, isNew])
 
     // --- Module Operations ---
+    const emptyWeeklyExam = (title = '') => ({
+        localId: Date.now() + Math.random(),
+        title,
+        exam_start_time: '',
+        exam_end_time: '',
+        exam_total_mark: 100,
+        exam_instructions: '',
+        exam_file: null,
+    })
+
     const addModule = (isExam = false) => {
         if (isExam) {
-            setModules([...modules, { localId: Date.now(), title: '', order: modules.length + 1, is_free: false, is_exam: true, exam_start_time: '', exam_end_time: '', exam_total_mark: 100, exam_instructions: '', exam_file: null, lessons: [] }])
+            setModules([...modules, {
+                localId: Date.now(), title: '', order: modules.length + 1, is_free: false, is_exam: true,
+                weekly_exams: [emptyWeeklyExam('')],
+                lessons: []
+            }])
         } else {
-            setModules([...modules, { localId: Date.now(), title: '', order: modules.length + 1, is_free: false, is_exam: false, lessons: [] }])
+            setModules([...modules, { localId: Date.now(), title: '', order: modules.length + 1, is_free: false, is_exam: false, weekly_exams: [], lessons: [] }])
         }
         setExpandedModule(modules.length)
     }
@@ -245,8 +264,35 @@ export const AdminCourseBuilder = ({ id }) => {
         if (!window.confirm("متأكد من حذف هذه الوحدة بالكامل؟")) return
         const toDel = modules[mIndex]
         trackDelete('modules', toDel.id)
-        if (toDel.is_exam && toDel.exam_id) trackDelete('weeklyexams', toDel.exam_id)
+        ;(toDel.weekly_exams || []).forEach(ex => { if (ex.exam_id) trackDelete('weeklyexams', ex.exam_id) })
         setModules(modules.filter((_, i) => i !== mIndex))
+    }
+
+    const updateWeeklyExam = (mIndex, eIndex, field, val) => {
+        const newMods = [...modules]
+        newMods[mIndex].weekly_exams[eIndex][field] = val
+        newMods[mIndex].weekly_exams[eIndex]._dirty = true
+        newMods[mIndex]._dirty = true
+        setModules(newMods)
+    }
+
+    const addWeeklyExam = (mIndex) => {
+        const newMods = [...modules]
+        const mod = newMods[mIndex]
+        const count = (mod.weekly_exams?.length || 0) + 1
+        mod.weekly_exams = [...(mod.weekly_exams || []), emptyWeeklyExam(`${mod.title || 'امتحان'} ${count}`)]
+        mod._dirty = true
+        setModules(newMods)
+    }
+
+    const removeWeeklyExam = (mIndex, eIndex) => {
+        if (!window.confirm('حذف هذا الامتحان الأسبوعي؟')) return
+        const newMods = [...modules]
+        const ex = newMods[mIndex].weekly_exams[eIndex]
+        if (ex.exam_id) trackDelete('weeklyexams', ex.exam_id)
+        newMods[mIndex].weekly_exams = newMods[mIndex].weekly_exams.filter((_, i) => i !== eIndex)
+        newMods[mIndex]._dirty = true
+        setModules(newMods)
     }
 
     const updateModule = (mIndex, field, val) => {
@@ -769,30 +815,7 @@ export const AdminCourseBuilder = ({ id }) => {
                 }
 
                 if (mod.is_exam) {
-                    const examNeedsSave = !mod.exam_id || mod._dirty || mod.exam_file instanceof File
-                    if (examNeedsSave) {
-                        const exData = {
-                            module: moduleId,
-                            title: mod.title,
-                            total_mark: mod.exam_total_mark || 100,
-                            instructions: mod.exam_instructions || '',
-                        }
-                        if (mod.exam_start_time) exData.start_time = new Date(mod.exam_start_time).toISOString()
-                        if (mod.exam_end_time) exData.end_time = new Date(mod.exam_end_time).toISOString()
-                        if (mod.exam_file instanceof File) exData.file = mod.exam_file
-                        const exPayload = buildPayload(exData)
-                        const exHdrs = exPayload.isMultipart ? headersMulti : headersJson
-                        if (mod.exam_id) {
-                            await fetch(`${API}/api/hq/weeklyexams/${mod.exam_id}/`, { method: 'PATCH', headers: exHdrs, body: exPayload.body })
-                        } else {
-                            const exRes = await fetch(`${API}/api/hq/weeklyexams/`, { method: 'POST', headers: exHdrs, body: exPayload.body })
-                            const savedEx = await exRes.json()
-                            mod.exam_id = savedEx.id
-                        }
-                        mod._dirty = false
-                        savedCount++
-                    }
-                    continue
+                    mod._dirty = false
                 }
 
                 for (const less of mod.lessons) {
@@ -848,6 +871,36 @@ export const AdminCourseBuilder = ({ id }) => {
                             qs._dirty = false
                             savedCount++
                         }
+                    }
+                }
+
+                if (mod.weekly_exams?.length) {
+                    for (const exam of mod.weekly_exams) {
+                        const examNeedsSave = !exam.exam_id || exam._dirty || exam.exam_file instanceof File
+                        if (!examNeedsSave) continue
+
+                        const exData = {
+                            module: moduleId,
+                            title: exam.title || mod.title,
+                            total_mark: exam.exam_total_mark || 100,
+                            instructions: exam.exam_instructions || '',
+                        }
+                        if (exam.exam_start_time) exData.start_time = new Date(exam.exam_start_time).toISOString()
+                        if (exam.exam_end_time) exData.end_time = new Date(exam.exam_end_time).toISOString()
+                        if (exam.exam_file instanceof File) exData.file = exam.exam_file
+                        const exPayload = buildPayload(exData)
+                        const exHdrs = exPayload.isMultipart ? headersMulti : headersJson
+                        if (exam.exam_id) {
+                            await fetch(`${API}/api/hq/weeklyexams/${exam.exam_id}/`, { method: 'PATCH', headers: exHdrs, body: exPayload.body })
+                        } else {
+                            const exRes = await fetch(`${API}/api/hq/weeklyexams/`, { method: 'POST', headers: exHdrs, body: exPayload.body })
+                            if (!exRes.ok) throw new Error(`فشل حفظ امتحان "${exam.title || mod.title}"`)
+                            const savedEx = await exRes.json()
+                            exam.exam_id = savedEx.id
+                            exam.id = savedEx.id
+                        }
+                        exam._dirty = false
+                        savedCount++
                     }
                 }
             }
@@ -995,7 +1048,7 @@ export const AdminCourseBuilder = ({ id }) => {
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
                                     {isExpanded && (
                                         <>
-                                            {mod.is_exam && <span style={{ background: '#f59e0b', color: 'white', padding: '2px 8px', borderRadius: '6px', fontSize: '0.8rem', fontWeight: 'bold' }}>وحدة امتحان</span>}
+                                            {mod.is_exam && <span style={{ background: '#f59e0b', color: 'white', padding: '2px 8px', borderRadius: '6px', fontSize: '0.8rem', fontWeight: 'bold' }}>وحدة امتحان ({mod.weekly_exams?.length || 0})</span>}
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'white', padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--hq-border)' }} onClick={e => e.stopPropagation()}>
                                                 <span style={{ fontSize: '0.85rem', fontWeight: 'bold', color: mod.is_free ? '#10b981' : 'inherit' }}>مجانية (Preview)</span>
                                                 <div className="hq-toggle-switch">
@@ -1013,37 +1066,54 @@ export const AdminCourseBuilder = ({ id }) => {
                             {/* EXAM OR Lessons Body Accordion */}
                             {isExpanded && mod.is_exam && (
                                 <div style={{ padding: '24px', background: '#fffbeb', borderTop: '1px solid #fcd34d' }}>
-                                    <h5 style={{ margin: 0, fontSize: '1rem', color: '#b45309', marginBottom: '20px' }}>إعدادات الامتحان الأسبوعي الفرعية</h5>
-                                    
-                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
-                                        <div>
-                                            <label style={{ display: 'block', fontSize: '0.85rem', marginBottom: '8px', color: 'var(--hq-text-main)', fontWeight: 'bold' }}>وقت بداية الامتحان (تاريخ ووقت)</label>
-                                            <input type="datetime-local" value={mod.exam_start_time || ''} onChange={e => updateModule(mIndex, 'exam_start_time', e.target.value)} style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #fcd34d', outline: 'none' }} />
-                                        </div>
-                                        <div>
-                                            <label style={{ display: 'block', fontSize: '0.85rem', marginBottom: '8px', color: 'var(--hq-text-main)', fontWeight: 'bold' }}>آخر موعد للتسليم (تاريخ ووقت النهاية)</label>
-                                            <input type="datetime-local" value={mod.exam_end_time || ''} onChange={e => updateModule(mIndex, 'exam_end_time', e.target.value)} style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #fcd34d', outline: 'none' }} />
-                                        </div>
-                                        <div>
-                                            <label style={{ display: 'block', fontSize: '0.85rem', marginBottom: '8px', color: 'var(--hq-text-main)', fontWeight: 'bold' }}>العلامة العظمى للامتحان</label>
-                                            <input type="number" value={mod.exam_total_mark || 100} onChange={e => updateModule(mIndex, 'exam_total_mark', parseInt(e.target.value))} style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #fcd34d', outline: 'none' }} />
-                                        </div>
-                                        <div>
-                                            <label style={{ display: 'block', fontSize: '0.85rem', marginBottom: '8px', color: 'var(--hq-text-main)', fontWeight: 'bold' }}>طريقة الاستلام (رفع ملف PDF)</label>
-                                            <div style={{ display: 'flex', alignItems: 'center', background: 'white', padding: '5px 12px', borderRadius: '8px', border: '1px solid #fcd34d' }}>
-                                                <input type="file" accept=".pdf" onChange={e => {
-                                                    if (e.target.files && e.target.files[0]) updateModule(mIndex, 'exam_file', e.target.files[0])
-                                                }} style={{ flex: 1, fontSize: '0.85rem' }} />
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                                        <h5 style={{ margin: 0, fontSize: '1rem', color: '#b45309' }}>امتحانات أسبوعية لهذه الوحدة</h5>
+                                        <button className="hq-btn-secondary" onClick={() => addWeeklyExam(mIndex)} style={{ padding: '8px 15px', fontSize: '0.9rem', color: '#b45309', borderColor: '#fcd34d', background: 'white', borderRadius: '8px' }}>
+                                            + امتحان أسبوعي
+                                        </button>
+                                    </div>
+
+                                    {(mod.weekly_exams || []).map((exam, eIndex) => (
+                                        <div key={exam.localId} style={{ background: 'white', borderRadius: '12px', border: '1px solid #fcd34d', padding: '20px', marginBottom: eIndex < mod.weekly_exams.length - 1 ? '20px' : 0 }}>
+                                            <div style={{ display: 'flex', gap: '12px', alignItems: 'center', marginBottom: '16px' }}>
+                                                <span style={{ fontWeight: 'bold', color: '#b45309', minWidth: '24px' }}>{eIndex + 1}.</span>
+                                                <input type="text" placeholder="عنوان الامتحان..." value={exam.title || ''} onChange={e => updateWeeklyExam(mIndex, eIndex, 'title', e.target.value)} style={{ flex: 1, padding: '10px 12px', borderRadius: '8px', border: '1px solid #fcd34d', outline: 'none', fontWeight: 'bold' }} />
+                                                {(mod.weekly_exams?.length > 1) && (
+                                                    <button className="hq-action-btn delete" onClick={() => removeWeeklyExam(mIndex, eIndex)} title="حذف الامتحان"><HiOutlineTrash /></button>
+                                                )}
                                             </div>
-                                            {typeof mod.exam_file === 'string' && mod.exam_file && <div style={{ fontSize: '0.8rem', color: '#10b981', marginTop: '5px' }}>يوجد ملف محفوظ.</div>}
-                                            <div style={{ fontSize: '0.8rem', color: '#64748b', marginTop: '5px' }}>سيقوم الطالب بتحميل هذا الملف، حله، ثم إعادة رفعه كملف PDF.</div>
+
+                                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+                                                <div>
+                                                    <label style={{ display: 'block', fontSize: '0.85rem', marginBottom: '8px', color: 'var(--hq-text-main)', fontWeight: 'bold' }}>وقت بداية الامتحان (تاريخ ووقت)</label>
+                                                    <input type="datetime-local" value={exam.exam_start_time || ''} onChange={e => updateWeeklyExam(mIndex, eIndex, 'exam_start_time', e.target.value)} style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #fcd34d', outline: 'none' }} />
+                                                </div>
+                                                <div>
+                                                    <label style={{ display: 'block', fontSize: '0.85rem', marginBottom: '8px', color: 'var(--hq-text-main)', fontWeight: 'bold' }}>آخر موعد للتسليم (تاريخ ووقت النهاية)</label>
+                                                    <input type="datetime-local" value={exam.exam_end_time || ''} onChange={e => updateWeeklyExam(mIndex, eIndex, 'exam_end_time', e.target.value)} style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #fcd34d', outline: 'none' }} />
+                                                </div>
+                                                <div>
+                                                    <label style={{ display: 'block', fontSize: '0.85rem', marginBottom: '8px', color: 'var(--hq-text-main)', fontWeight: 'bold' }}>العلامة العظمى للامتحان</label>
+                                                    <input type="number" value={exam.exam_total_mark || 100} onChange={e => updateWeeklyExam(mIndex, eIndex, 'exam_total_mark', parseInt(e.target.value))} style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #fcd34d', outline: 'none' }} />
+                                                </div>
+                                                <div>
+                                                    <label style={{ display: 'block', fontSize: '0.85rem', marginBottom: '8px', color: 'var(--hq-text-main)', fontWeight: 'bold' }}>طريقة الاستلام (رفع ملف PDF)</label>
+                                                    <div style={{ display: 'flex', alignItems: 'center', background: 'white', padding: '5px 12px', borderRadius: '8px', border: '1px solid #fcd34d' }}>
+                                                        <input type="file" accept=".pdf" onChange={e => {
+                                                            if (e.target.files && e.target.files[0]) updateWeeklyExam(mIndex, eIndex, 'exam_file', e.target.files[0])
+                                                        }} style={{ flex: 1, fontSize: '0.85rem' }} />
+                                                    </div>
+                                                    {typeof exam.exam_file === 'string' && exam.exam_file && <div style={{ fontSize: '0.8rem', color: '#10b981', marginTop: '5px' }}>يوجد ملف محفوظ.</div>}
+                                                </div>
+                                            </div>
+                                            <div style={{ marginTop: '16px' }}>
+                                                <label style={{ display: 'block', fontSize: '0.85rem', marginBottom: '8px', color: 'var(--hq-text-main)', fontWeight: 'bold' }}>تعليمات وإرشادات إضافية</label>
+                                                <textarea value={exam.exam_instructions || ''} onChange={e => updateWeeklyExam(mIndex, eIndex, 'exam_instructions', e.target.value)} placeholder="مثال: يرجى كتابة الإجابة بخط واضح..." style={{ width: '100%', height: '70px', padding: '12px', borderRadius: '8px', border: '1px solid #fcd34d', outline: 'none', resize: 'vertical' }}></textarea>
+                                            </div>
                                         </div>
-                                    </div>
-                                    <div style={{ marginTop: '20px' }}>
-                                        <label style={{ display: 'block', fontSize: '0.85rem', marginBottom: '8px', color: 'var(--hq-text-main)', fontWeight: 'bold' }}>تعليمات وإرشادات إضافية للامتحان (تظهر للطالب قبل البدء بالتسليم)</label>
-                                        <textarea value={mod.exam_instructions || ''} onChange={e => updateModule(mIndex, 'exam_instructions', e.target.value)} placeholder="مثال: يرجى كتابة الإجابة بخط واضح، يُمنع استخدام الآلة الحاسبة..." style={{ width: '100%', height: '80px', padding: '12px', borderRadius: '8px', border: '1px solid #fcd34d', outline: 'none', resize: 'vertical' }}></textarea>
-                                    </div>
-                                    <p style={{ fontSize: '0.8rem', color: '#92400e', marginTop: '15px' }}>ملاحظة: هذه الوحدة خاصة بالامتحان فقط، عند ضغط الطالب عليها سيتم توجيهه لصفحة الامتحان المخصصة حيث تظهر له التعليمات والمؤقت.</p>
+                                    ))}
+
+                                    <p style={{ fontSize: '0.8rem', color: '#92400e', marginTop: '15px' }}>يمكنك إضافة أكثر من امتحان أسبوعي لنفس الوحدة (مثلاً امتحان كل أسبوع).</p>
                                 </div>
                             )}
 
