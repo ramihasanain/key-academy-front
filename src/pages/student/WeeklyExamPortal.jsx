@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { API } from '../../config'
 import { HiOutlineArrowRight, HiOutlineDocumentText, HiOutlineClock, HiOutlineCloudArrowUp, HiOutlineCheckCircle, HiOutlineExclamationCircle, HiOutlineInformationCircle, HiOutlineAcademicCap, HiOutlinePencilSquare } from 'react-icons/hi2'
-import { ExamCorrectedViewer } from '../../components/exam/ExamCorrectedViewer'
+import { ExamCorrectedViewer, ExamModelAnswerViewer } from '../../components/exam/ExamCorrectedViewer'
+import './WeeklyExamPortal.css'
 
 export const WeeklyExamPortal = () => {
     const { examId } = useParams()
@@ -133,8 +134,8 @@ export const WeeklyExamPortal = () => {
     const hasSubmitted = !!exam?.submission;
     
     return (
-        <div style={{ minHeight: '100vh', padding: '60px 20px', background: 'radial-gradient(circle at top right, #fbfbfe, #f1f5f9)', fontFamily: "'Tajawal', 'Cairo', sans-serif" }}>
-            <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
+        <div className="exam-student-portal">
+            <div className="exam-student-portal-inner">
                 
                 {/* Header Navbar */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '30px' }}>
@@ -179,7 +180,7 @@ export const WeeklyExamPortal = () => {
                 )}
                 
                 {/* Main Content Layout */}
-                <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.8fr) minmax(0, 1fr)', gap: '30px', alignItems: 'start' }}>
+                <div className="exam-student-grid">
                     
                     {/* Right Col: Details & Instructions */}
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '25px' }}>
@@ -210,17 +211,25 @@ export const WeeklyExamPortal = () => {
                         </div>
 
                         {/* Model Answer */}
-                        {hasSubmitted && exam.model_answer?.visible && exam.model_answer?.url && (
-                            <div style={{ background: 'white', borderRadius: '16px', padding: '0', overflow: 'hidden', boxShadow: '0 10px 25px rgba(0,0,0,0.05)', border: '2px solid #6366f1' }}>
-                                <div style={{ background: '#6366f1', padding: '15px 25px', color: 'white', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        {hasSubmitted && exam.model_answer?.visible && (exam.model_answer?.pages?.length || exam.model_answer?.url) && (
+                            <div className="exam-student-card" style={{ border: '2px solid #6366f1' }}>
+                                <div className="exam-student-card-header purple">
                                     <HiOutlineAcademicCap size={24} />
-                                    <h3 style={{ margin: 0, fontSize: '1.2rem' }}>الإجابة النموذجية</h3>
+                                    <h3>الإجابة النموذجية</h3>
                                 </div>
-                                <div style={{ padding: '25px' }}>
-                                    <p style={{ margin: '0 0 16px', color: '#64748b', fontSize: '0.92rem' }}>أصبحت الإجابة النموذجية متاحة بعد انتهاء وقت الامتحان.</p>
-                                    <a href={exam.model_answer.url} target="_blank" rel="noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: '#eef2ff', color: '#4f46e5', padding: '12px 20px', borderRadius: '12px', textDecoration: 'none', fontWeight: 'bold' }}>
-                                        <HiOutlineDocumentText size={20} /> عرض الإجابة النموذجية
-                                    </a>
+                                <div className="exam-student-card-body">
+                                    <p className="exam-student-multi-hint">
+                                        {exam.model_answer.pages?.length > 1
+                                            ? `الإجابة النموذجية تحتوي ${exam.model_answer.pages.length} ملفات — اختر التبويب للتنقل بينها.`
+                                            : 'أصبحت الإجابة النموذجية متاحة بعد انتهاء وقت الامتحان.'}
+                                    </p>
+                                    <div className="exam-student-viewer-wrap">
+                                        <ExamModelAnswerViewer
+                                            pages={exam.model_answer.pages || []}
+                                            url={exam.model_answer.url}
+                                            authToken={localStorage.getItem('access_token')}
+                                        />
+                                    </div>
                                 </div>
                             </div>
                         )}
@@ -248,18 +257,26 @@ export const WeeklyExamPortal = () => {
                         )}
 
                         {hasSubmitted && exam.submission.corrected_paper?.visible && (
-                            <div style={{ background: 'white', borderRadius: '16px', padding: '0', overflow: 'hidden', boxShadow: '0 10px 25px rgba(0,0,0,0.05)', border: '2px solid #f59e0b' }}>
-                                <div style={{ background: '#f59e0b', padding: '15px 25px', color: 'white', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            <div className="exam-student-card" style={{ border: '2px solid #f59e0b' }}>
+                                <div className="exam-student-card-header amber">
                                     <HiOutlinePencilSquare size={24} />
-                                    <h3 style={{ margin: 0, fontSize: '1.2rem' }}>ورقتك المصححة</h3>
+                                    <h3>ورقتك المصححة</h3>
                                 </div>
-                                <div style={{ padding: '20px' }}>
-                                    <ExamCorrectedViewer
-                                        pages={exam.submission.submission_pages || []}
-                                        gradingData={exam.submission.corrected_paper?.grading_data}
-                                        correctedUrl={exam.submission.corrected_paper?.url}
-                                        authToken={localStorage.getItem('access_token')}
-                                    />
+                                <div className="exam-student-card-body">
+                                    {(exam.submission.submission_pages?.length > 1 || exam.submission.corrected_paper?.pages?.length > 1) && (
+                                        <p className="exam-student-multi-hint">
+                                            التصحيح يشمل أكثر من ملف — استخدم التبويبات أعلى الورقة للتنقل بين الصفحات.
+                                        </p>
+                                    )}
+                                    <div className="exam-student-viewer-wrap">
+                                        <ExamCorrectedViewer
+                                            pages={exam.submission.submission_pages || []}
+                                            correctedPages={exam.submission.corrected_paper?.pages || []}
+                                            gradingData={exam.submission.corrected_paper?.grading_data}
+                                            correctedUrl={exam.submission.corrected_paper?.url}
+                                            authToken={localStorage.getItem('access_token')}
+                                        />
+                                    </div>
                                 </div>
                             </div>
                         )}

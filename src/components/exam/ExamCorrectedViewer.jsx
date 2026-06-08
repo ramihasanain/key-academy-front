@@ -1,18 +1,33 @@
-import React, { useMemo } from 'react'
+import React from 'react'
 import { ExamPaperAnnotator } from './ExamPaperAnnotator'
 import '../../pages/ta/TAExamGrading.css'
 
-export const ExamCorrectedViewer = ({ pages = [], gradingData = {}, correctedUrl = null, authToken = null }) => {
-    const hasAnnotations = useMemo(() => {
-        const p = gradingData?.pages || gradingData || {}
-        return Object.values(p).some((arr) => Array.isArray(arr) && arr.length > 0)
-    }, [gradingData])
-
-    if (pages.length && hasAnnotations) {
+/**
+ * عرض الورقة المصححة للطالب — يدعم PDF/صور/ZIP متعدد + تعليقات المساعد.
+ * الأولوية: submission_pages + grading_data → corrected_pages → رابط احتياطي.
+ */
+export const ExamCorrectedViewer = ({
+    pages = [],
+    correctedPages = [],
+    gradingData = {},
+    correctedUrl = null,
+    authToken = null,
+}) => {
+    if (pages?.length) {
         return (
             <ExamPaperAnnotator
                 pages={pages}
-                gradingData={gradingData}
+                gradingData={gradingData || {}}
+                readOnly
+                authToken={authToken}
+            />
+        )
+    }
+
+    if (correctedPages?.length) {
+        return (
+            <ExamPaperAnnotator
+                pages={correctedPages}
                 readOnly
                 authToken={authToken}
             />
@@ -20,25 +35,44 @@ export const ExamCorrectedViewer = ({ pages = [], gradingData = {}, correctedUrl
     }
 
     if (correctedUrl) {
-        const isPdf = correctedUrl.toLowerCase().includes('.pdf')
         return (
             <div className="exam-corrected-viewer">
-                {isPdf ? (
-                    <iframe
-                        title="الورقة المصححة"
-                        src={correctedUrl}
-                        style={{ width: '100%', minHeight: '600px', border: 'none', borderRadius: '12px' }}
-                    />
-                ) : (
-                    <img
-                        src={correctedUrl}
-                        alt="الورقة المصححة"
-                        style={{ width: '100%', borderRadius: '12px', boxShadow: '0 8px 24px rgba(0,0,0,0.08)' }}
-                    />
-                )}
+                <a
+                    href={correctedUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="exam-student-file-link"
+                >
+                    عرض الورقة المصححة
+                </a>
             </div>
         )
     }
 
-    return <p style={{ color: '#64748b', textAlign: 'center' }}>لا تتوفر ورقة مصححة بعد.</p>
+    return <p className="exam-student-empty">لا تتوفر ورقة مصححة بعد.</p>
+}
+
+/**
+ * عرض الإجابة النموذجية — داخل المتصفح مع دعم ملفات متعددة.
+ */
+export const ExamModelAnswerViewer = ({ pages = [], url = null, authToken = null }) => {
+    if (pages?.length) {
+        return (
+            <ExamPaperAnnotator
+                pages={pages}
+                readOnly
+                authToken={authToken}
+            />
+        )
+    }
+
+    if (url) {
+        return (
+            <a href={url} target="_blank" rel="noreferrer" className="exam-student-file-link">
+                عرض الإجابة النموذجية
+            </a>
+        )
+    }
+
+    return null
 }

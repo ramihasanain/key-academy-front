@@ -1,0 +1,108 @@
+.exam-student-portal {
+    min-height: 100vh;
+    min-height: 100dvh;
+    padding: 24px 16px 40px;
+    background: radial-gradient(circle at top right, #fbfbfe, #f1f5f9);
+    font-family: 'Tajawal', 'Cairo', sans-serif;
+}
+
+.exam-student-portal-inner {
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.exam-student-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.8fr) minmax(0, 1fr);
+    gap: 24px;
+    align-items: start;
+}
+
+.exam-student-card {
+    background: white;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
+    border: 1px solid #e2e8f0;
+}
+
+.exam-student-card-body {
+    padding: 20px;
+}
+
+.exam-student-card-header {
+    padding: 14px 20px;
+    color: white;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.exam-student-card-header h3 {
+    margin: 0;
+    font-size: 1.15rem;
+}
+
+.exam-student-card-header.purple { background: #6366f1; }
+.exam-student-card-header.green { background: #10b981; }
+.exam-student-card-header.amber { background: #f59e0b; }
+
+.exam-student-viewer-wrap {
+    padding: 12px;
+    background: #f1f5f9;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.exam-student-viewer-wrap .exam-annotator-sticky-head {
+    top: 0;
+}
+
+.exam-student-file-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #eef2ff;
+    color: #4f46e5;
+    padding: 12px 20px;
+    border-radius: 12px;
+    text-decoration: none;
+    font-weight: 700;
+}
+
+.exam-student-empty {
+    color: #64748b;
+    text-align: center;
+    margin: 0;
+}
+
+.exam-student-multi-hint {
+    margin: 0 0 12px;
+    color: #64748b;
+    font-size: 0.88rem;
+    line-height: 1.6;
+}
+
+@media (max-width: 768px) {
+    .exam-student-portal {
+        padding: 16px 10px 32px;
+    }
+
+    .exam-student-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+
+    .exam-student-portal h1 {
+        font-size: 1.35rem !important;
+    }
+
+    .exam-student-viewer-wrap {
+        padding: 8px;
+    }
+
+    .exam-student-viewer-wrap .exam-annotator-stage {
+        min-height: 50vh;
+        min-height: 50dvh;
+    }
+}
