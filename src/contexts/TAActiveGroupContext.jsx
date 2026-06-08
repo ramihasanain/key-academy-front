@@ -22,13 +22,20 @@ export const TAActiveGroupProvider = ({ children, initialGroups = [] }) => {
     }, [])
 
     useEffect(() => {
-        if (initialGroups.length > 0) {
-            setGroups(initialGroups)
-            const valid = initialGroups.some(g => g.id === activeGroupId)
+        let cancelled = false
+        const syncGroups = async () => {
+            const tk = sessionStorage.getItem('spy_token') || localStorage.getItem('access_token')
+            const fresh = tk ? await fetchTAGroups(tk) : []
+            const nextGroups = fresh.length > 0 ? fresh : initialGroups
+            if (cancelled || nextGroups.length === 0) return
+            setGroups(nextGroups)
+            const valid = nextGroups.some(g => g.id === activeGroupId)
             if (!valid) {
-                setActiveGroupId(initialGroups[0].id)
+                setActiveGroupId(nextGroups[0].id)
             }
         }
+        syncGroups()
+        return () => { cancelled = true }
     }, [initialGroups, activeGroupId, setActiveGroupId])
 
     const activeGroup = groups.find(g => g.id === activeGroupId) || groups[0] || null

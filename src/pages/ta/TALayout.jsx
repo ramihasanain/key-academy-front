@@ -168,19 +168,19 @@ const TALayoutShell = ({ profile }) => {
                             </h2>
                             <p style={{ margin: 0, color: 'var(--hq-text-muted)', fontSize: '13px' }}>كادر المتابعة والتقييم</p>
                         </div>
-                        {groups.length > 1 && (
+                        {(groups.length > 1 || (profile?.ta_info?.teachers?.length || 0) > 1) && groups.length > 0 && (
                             <select
                                 className="ta-group-select"
                                 value={activeGroupId || ''}
                                 onChange={e => setActiveGroupId(parseInt(e.target.value, 10))}
                                 style={{
                                     padding: '8px 12px', borderRadius: '8px', border: '2px solid var(--hq-primary)',
-                                    fontWeight: '600', minWidth: '220px', background: 'white',
+                                    fontWeight: '600', minWidth: '260px', background: 'white',
                                 }}
                             >
                                 {groups.map(g => (
                                     <option key={g.id} value={g.id}>
-                                        {g.name} ({g.students_count} طالب)
+                                        {g.teacher_name ? `${g.teacher_name} — ` : ''}{g.name || `مجموعة ${g.index}`} ({g.students_count} طالب)
                                     </option>
                                 ))}
                             </select>
