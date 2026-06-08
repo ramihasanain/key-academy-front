@@ -34,8 +34,10 @@ export const TAExamGradingWorkspace = () => {
     const [saving, setSaving] = useState(false)
     const [savingAnnotations, setSavingAnnotations] = useState(false)
     const [message, setMessage] = useState('')
+    const [sidebarOpen, setSidebarOpen] = useState(false)
     const pageRefsRef = useRef([])
     const saveTimerRef = useRef(null)
+    const authToken = sessionStorage.getItem('spy_token') || localStorage.getItem('access_token')
 
     const loadWorkspace = useCallback(async () => {
         setLoading(true)
@@ -167,15 +169,24 @@ export const TAExamGradingWorkspace = () => {
             <div className="exam-grading-header">
                 <div>
                     <button type="button" className="exam-grading-back" onClick={() => navigate('/ta/exams')}>
-                        <HiOutlineArrowRight size={18} /> العودة للامتحانات
+                        <HiOutlineArrowRight size={18} /> العودة
                     </button>
-                    <h1 style={{ marginTop: '14px' }}>تصحيح أونلاين — {submission.student_name}</h1>
+                    <h1 style={{ marginTop: '14px' }}>تصحيح — {submission.student_name}</h1>
                     <p>{exam.title} · {exam.module_title}</p>
                 </div>
-                <span className={`exam-grade-status ${statusClass}`}>
-                    {STATUS_LABELS[statusClass] || statusClass}
-                    {savingAnnotations && ' · جاري الحفظ...'}
-                </span>
+                <div className="exam-grading-header-actions">
+                    <span className={`exam-grade-status ${statusClass}`}>
+                        {STATUS_LABELS[statusClass] || statusClass}
+                        {savingAnnotations && ' · جاري الحفظ...'}
+                    </span>
+                    <button
+                        type="button"
+                        className="exam-grade-panel-toggle"
+                        onClick={() => setSidebarOpen((o) => !o)}
+                    >
+                        {sidebarOpen ? 'إخفاء العلامة' : 'العلامة والحفظ'}
+                    </button>
+                </div>
             </div>
 
             <div className="exam-grading-layout">
@@ -185,10 +196,11 @@ export const TAExamGradingWorkspace = () => {
                         gradingData={gradingData}
                         onChange={handleGradingChange}
                         onPageRefsReady={(refs) => { pageRefsRef.current = refs }}
+                        authToken={authToken}
                     />
                 </div>
 
-                <aside className="exam-grading-sidebar">
+                <aside className={`exam-grading-sidebar ${sidebarOpen ? 'open' : ''}`}>
                     <h3>لوحة التصحيح</h3>
 
                     <div className="exam-grade-links">

@@ -1,8 +1,28 @@
 .exam-grading-page {
     min-height: 100vh;
+    min-height: 100dvh;
     background: linear-gradient(135deg, #f8fafc 0%, #eef2ff 100%);
-    padding: 20px;
+    padding: 12px;
     font-family: 'Tajawal', 'Cairo', sans-serif;
+}
+
+.exam-grading-header-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+}
+
+.exam-grade-panel-toggle {
+    display: none;
+    border: 2px solid #6366f1;
+    background: white;
+    color: #4f46e5;
+    padding: 10px 16px;
+    border-radius: 12px;
+    font-weight: 800;
+    cursor: pointer;
+    font-family: inherit;
 }
 
 .exam-grading-header {
@@ -257,18 +277,113 @@
 }
 
 .exam-annotator-stage {
-    padding: 20px;
+    padding: 12px;
     background: #e2e8f0;
-    min-height: 520px;
+    min-height: 420px;
     overflow: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.exam-annotator.fullscreen {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: #0f172a;
+    display: flex;
+    flex-direction: column;
+}
+
+.exam-annotator.fullscreen .exam-annotator-stage {
+    flex: 1;
+    min-height: 0;
 }
 
 .exam-annotator-page-wrap {
     position: relative;
     max-width: 900px;
+    width: 100%;
     margin: 0 auto;
     background: white;
     box-shadow: 0 12px 30px rgba(15, 23, 42, 0.12);
+    line-height: 0;
+}
+
+.exam-annotator-image {
+    width: 100%;
+    height: auto;
+    display: block;
+    user-select: none;
+    -webkit-user-drag: none;
+}
+
+.exam-annotator-pdf-nav {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-right: auto;
+    background: white;
+    padding: 6px 12px;
+    border-radius: 999px;
+    border: 1px solid #cbd5e1;
+}
+
+.exam-annotator-pdf-nav button {
+    border: none;
+    background: #eef2ff;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.exam-annotator-pdf-nav button:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.exam-annotator-zoom {
+    min-width: 44px;
+    text-align: center;
+    font-weight: 700;
+}
+
+.exam-annotator-hint {
+    margin: 0;
+    padding: 10px 16px;
+    font-size: 0.82rem;
+    color: #64748b;
+    text-align: center;
+    background: #f8fafc;
+    border-top: 1px solid #e2e8f0;
+}
+
+.exam-annotator-toolbar.mobile {
+    position: sticky;
+    bottom: 0;
+    z-index: 10;
+    padding: 10px;
+    gap: 8px;
+}
+
+.exam-annotator-toolbar.mobile .exam-annotator-tools button {
+    min-width: 44px;
+    min-height: 44px;
+    justify-content: center;
+    padding: 10px;
+}
+
+.exam-annotator-toolbar.mobile .exam-annotator-colors button {
+    width: 32px;
+    height: 32px;
+}
+
+.exam-annotator.is-mobile .exam-annotator-stage {
+    padding: 8px;
+    min-height: 55vh;
+    min-height: 55dvh;
 }
 
 .exam-annotator-canvas {
@@ -318,5 +433,51 @@
     }
     .exam-grading-sidebar {
         position: static;
+    }
+}
+
+@media (max-width: 768px) {
+    .exam-grading-page {
+        padding: 8px;
+    }
+
+    .exam-grading-header h1 {
+        font-size: 1.1rem;
+    }
+
+    .exam-grade-panel-toggle {
+        display: inline-flex;
+    }
+
+    .exam-grading-sidebar {
+        display: none;
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 10000;
+        max-height: 70vh;
+        max-height: 70dvh;
+        overflow-y: auto;
+        border-radius: 20px 20px 0 0;
+        box-shadow: 0 -10px 40px rgba(0,0,0,0.15);
+    }
+
+    .exam-grading-sidebar.open {
+        display: block;
+    }
+
+    .exam-grading-main {
+        border-radius: 14px;
+    }
+
+    .exam-annotator-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .exam-annotator-tools,
+    .exam-annotator-actions {
+        justify-content: center;
     }
 }

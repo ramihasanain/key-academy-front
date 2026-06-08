@@ -1,8 +1,24 @@
-import React from 'react'
+import React, { useMemo } from 'react'
 import { ExamPaperAnnotator } from './ExamPaperAnnotator'
 import '../../pages/ta/TAExamGrading.css'
 
-export const ExamCorrectedViewer = ({ pages = [], gradingData = {}, correctedUrl = null }) => {
+export const ExamCorrectedViewer = ({ pages = [], gradingData = {}, correctedUrl = null, authToken = null }) => {
+    const hasAnnotations = useMemo(() => {
+        const p = gradingData?.pages || gradingData || {}
+        return Object.values(p).some((arr) => Array.isArray(arr) && arr.length > 0)
+    }, [gradingData])
+
+    if (pages.length && hasAnnotations) {
+        return (
+            <ExamPaperAnnotator
+                pages={pages}
+                gradingData={gradingData}
+                readOnly
+                authToken={authToken}
+            />
+        )
+    }
+
     if (correctedUrl) {
         const isPdf = correctedUrl.toLowerCase().includes('.pdf')
         return (
@@ -21,16 +37,6 @@ export const ExamCorrectedViewer = ({ pages = [], gradingData = {}, correctedUrl
                     />
                 )}
             </div>
-        )
-    }
-
-    if (pages.length && gradingData) {
-        return (
-            <ExamPaperAnnotator
-                pages={pages}
-                gradingData={gradingData}
-                readOnly
-            />
         )
     }
 

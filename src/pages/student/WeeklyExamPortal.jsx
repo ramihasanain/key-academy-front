@@ -258,6 +258,7 @@ export const WeeklyExamPortal = () => {
                                         pages={exam.submission.submission_pages || []}
                                         gradingData={exam.submission.corrected_paper?.grading_data}
                                         correctedUrl={exam.submission.corrected_paper?.url}
+                                        authToken={localStorage.getItem('access_token')}
                                     />
                                 </div>
                             </div>

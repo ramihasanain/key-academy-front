@@ -11,9 +11,24 @@ import {
     HiOutlineArrowUturnLeft,
     HiOutlineMagnifyingGlassPlus,
     HiOutlineMagnifyingGlassMinus,
+    HiOutlineArrowsPointingOut,
+    HiOutlineChevronLeft,
+    HiOutlineChevronRight,
 } from 'react-icons/hi2'
+import {
+    GRADING_DATA_VERSION,
+    normalizePages,
+    redrawCanvas,
+    normalizeStrokeForSave,
+    normalizeMarkForSave,
+    hitTestAnnotation,
+    loadFileAsBlobUrl,
+    exportAnnotatedPages,
+} from './examAnnotatorUtils'
 
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/legacy/build/pdf.worker.min.mjs`
+
+export { exportAnnotatedPages }
 
 const TOOLS = {
     pen: 'pen',
@@ -25,98 +40,66 @@ const TOOLS = {
 
 const COLORS = ['#ef4444', '#f59e0b', '#10b981', '#3b82f6', '#8b5cf6', '#0f172a']
 
-function normalizePages(data) {
-    if (!data || typeof data !== 'object') return {}
-    if (data.pages && typeof data.pages === 'object') return data.pages
-    return data
+function useMediaQuery(query) {
+    const [matches, setMatches] = useState(() =>
+        typeof window !== 'undefined' ? window.matchMedia(query).matches : false,
+    )
+    useEffect(() => {
+        const mq = window.matchMedia(query)
+        const handler = () => setMatches(mq.matches)
+        handler()
+        mq.addEventListener('change', handler)
+        return () => mq.removeEventListener('change', handler)
+    }, [query])
+    return matches
 }
 
-function drawAnnotation(ctx, ann, scale = 1) {
-    if (!ann) return
-    const s = scale
-    if (ann.type === 'pen' && ann.points?.length > 1) {
-        ctx.strokeStyle = ann.color || '#ef4444'
-        ctx.lineWidth = (ann.width || 3) * s
-        ctx.lineCap = 'round'
-        ctx.lineJoin = 'round'
-        ctx.beginPath()
-        ann.points.forEach(([x, y], i) => {
-            if (i === 0) ctx.moveTo(x * s, y * s)
-            else ctx.lineTo(x * s, y * s)
+function PdfPageView({ url, pageNumber, scale, token, onNumPages, onRenderSuccess }) {
+    const [blobUrl, setBlobUrl] = useState(null)
+    const [loadError, setLoadError] = useState(false)
+
+    useEffect(() => {
+        let revoked = null
+        let cancelled = false
+        loadFileAsBlobUrl(url, token).then((resolved) => {
+            if (cancelled) return
+            if (resolved?.startsWith('blob:')) revoked = resolved
+            setBlobUrl(resolved)
         })
-        ctx.stroke()
+        return () => {
+            cancelled = true
+            if (revoked) URL.revokeObjectURL(revoked)
+        }
+    }, [url, token])
+
+    if (loadError) {
+        return (
+            <div className="exam-annotator-fallback">
+                <a href={url} target="_blank" rel="noreferrer">فتح PDF في تبويب جديد</a>
+            </div>
+        )
     }
-    if (ann.type === 'text' && ann.text) {
-        ctx.fillStyle = ann.color || '#ef4444'
-        ctx.font = `bold ${(ann.fontSize || 18) * s}px Tajawal, Cairo, sans-serif`
-        ctx.fillText(ann.text, ann.x * s, ann.y * s)
+
+    if (!blobUrl) {
+        return <div className="exam-annotator-loading">جاري تحميل الملف...</div>
     }
-    if (ann.type === 'check') {
-        const size = (ann.size || 28) * s
-        const x = ann.x * s
-        const y = ann.y * s
-        ctx.strokeStyle = ann.color || '#10b981'
-        ctx.lineWidth = 4 * s
-        ctx.beginPath()
-        ctx.moveTo(x, y + size * 0.5)
-        ctx.lineTo(x + size * 0.35, y + size)
-        ctx.lineTo(x + size, y)
-        ctx.stroke()
-    }
-    if (ann.type === 'cross') {
-        const size = (ann.size || 28) * s
-        const x = ann.x * s
-        const y = ann.y * s
-        ctx.strokeStyle = ann.color || '#ef4444'
-        ctx.lineWidth = 4 * s
-        ctx.beginPath()
-        ctx.moveTo(x, y)
-        ctx.lineTo(x + size, y + size)
-        ctx.moveTo(x + size, y)
-        ctx.lineTo(x, y + size)
-        ctx.stroke()
-    }
-}
 
-function redrawCanvas(canvas, annotations, scale) {
-    if (!canvas) return
-    const ctx = canvas.getContext('2d')
-    ctx.clearRect(0, 0, canvas.width, canvas.height)
-    ;(annotations || []).forEach((ann) => drawAnnotation(ctx, ann, scale))
-}
-
-export function exportAnnotatedPages(pageElements) {
-    return Promise.all(
-        pageElements.map(async ({ wrap, canvas, type }) => {
-            const rect = wrap.getBoundingClientRect()
-            const out = document.createElement('canvas')
-            out.width = rect.width * 2
-            out.height = rect.height * 2
-            const ctx = out.getContext('2d')
-            ctx.scale(2, 2)
-            ctx.fillStyle = '#ffffff'
-            ctx.fillRect(0, 0, rect.width, rect.height)
-
-            if (type === 'image') {
-                const img = wrap.querySelector('img')
-                if (img?.complete) {
-                    ctx.drawImage(img, 0, 0, rect.width, rect.height)
-                }
-            } else if (type === 'pdf') {
-                const pdfCanvas = wrap.querySelector('canvas')
-                if (pdfCanvas) {
-                    ctx.drawImage(pdfCanvas, 0, 0, rect.width, rect.height)
-                }
-            }
-
-            if (canvas) {
-                ctx.drawImage(canvas, 0, 0, rect.width, rect.height)
-            }
-
-            return new Promise((resolve) => {
-                out.toBlob((blob) => resolve(blob), 'image/png', 0.92)
-            })
-        }),
+    return (
+        <Document
+            file={blobUrl}
+            loading={<div className="exam-annotator-loading">جاري تحميل PDF...</div>}
+            error={<div className="exam-annotator-fallback">تعذر تحميل PDF — <a href={url} target="_blank" rel="noreferrer">فتح خارجياً</a></div>}
+            onLoadSuccess={({ numPages }) => onNumPages?.(numPages)}
+            onLoadError={() => setLoadError(true)}
+        >
+            <Page
+                pageNumber={pageNumber}
+                width={Math.min(typeof window !== 'undefined' ? window.innerWidth - 48 : 900, 900) * scale}
+                renderTextLayer={false}
+                renderAnnotationLayer={false}
+                onRenderSuccess={onRenderSuccess}
+            />
+        </Document>
     )
 }
 
@@ -126,38 +109,64 @@ export const ExamPaperAnnotator = ({
     onChange,
     readOnly = false,
     onPageRefsReady,
+    authToken = null,
 }) {
+    const isMobile = useMediaQuery('(max-width: 768px)')
     const [activeTool, setActiveTool] = useState(TOOLS.pen)
     const [activeColor, setActiveColor] = useState(COLORS[0])
     const [scale, setScale] = useState(1)
     const [currentPage, setCurrentPage] = useState(0)
+    const [pdfSubPage, setPdfSubPage] = useState(1)
+    const [pdfNumPages, setPdfNumPages] = useState(1)
     const [localPages, setLocalPages] = useState(() => normalizePages(gradingData))
-    const [pdfPages, setPdfPages] = useState({})
     const [textPrompt, setTextPrompt] = useState(null)
+    const [fullscreen, setFullscreen] = useState(false)
+    const [imageBlobUrls, setImageBlobUrls] = useState({})
 
     const wrapRefs = useRef({})
     const canvasRefs = useRef({})
     const drawingRef = useRef(null)
+    const stageRef = useRef(null)
 
     useEffect(() => {
         setLocalPages(normalizePages(gradingData))
     }, [gradingData])
 
-    const pageKey = String(pages[currentPage]?.index ?? currentPage)
+    const activePage = pages[currentPage]
+    const isPdf = activePage?.type === 'pdf'
+    const pageKey = isPdf
+        ? `${activePage.index}-p${pdfSubPage}`
+        : String(activePage?.index ?? currentPage)
     const pageAnnotations = localPages[pageKey] || []
+
+    useEffect(() => {
+        setPdfSubPage(1)
+        setPdfNumPages(1)
+    }, [currentPage])
+
+    useEffect(() => {
+        pages.forEach((p) => {
+            if (p.type !== 'image' || p.url.startsWith('data:')) return
+            loadFileAsBlobUrl(p.url, authToken).then((resolved) => {
+                setImageBlobUrls((prev) => {
+                    if (prev[p.index]) return prev
+                    return { ...prev, [p.index]: resolved }
+                })
+            })
+        })
+    }, [pages, authToken])
 
     const emitChange = useCallback(
         (nextPages) => {
             setLocalPages(nextPages)
-            onChange?.({ version: 1, pages: nextPages })
+            onChange?.({ version: GRADING_DATA_VERSION, pages: nextPages })
         },
         [onChange],
     )
 
     const updatePageAnnotations = useCallback(
         (key, annotations) => {
-            const next = { ...localPages, [key]: annotations }
-            emitChange(next)
+            emitChange({ ...localPages, [key]: annotations })
         },
         [localPages, emitChange],
     )
@@ -168,89 +177,103 @@ export const ExamPaperAnnotator = ({
         if (!wrap || !canvas) return
         const rect = wrap.getBoundingClientRect()
         if (rect.width > 0 && rect.height > 0) {
-            canvas.width = rect.width
-            canvas.height = rect.height
-            redrawCanvas(canvas, pageAnnotations, 1)
+            canvas.width = Math.floor(rect.width)
+            canvas.height = Math.floor(rect.height)
+            redrawCanvas(canvas, pageAnnotations)
         }
     }, [pageKey, pageAnnotations])
 
     useEffect(() => {
-        syncCanvasSize()
+        const t = setTimeout(syncCanvasSize, 80)
+        return () => clearTimeout(t)
+    }, [syncCanvasSize, currentPage, pdfSubPage, scale, fullscreen])
+
+    useEffect(() => {
         const wrap = wrapRefs.current[pageKey]
         if (!wrap || typeof ResizeObserver === 'undefined') return undefined
-        const observer = new ResizeObserver(syncCanvasSize)
+        const observer = new ResizeObserver(() => syncCanvasSize())
         observer.observe(wrap)
         return () => observer.disconnect()
-    }, [pageKey, pageAnnotations, syncCanvasSize, currentPage, scale])
+    }, [pageKey, syncCanvasSize])
 
     useEffect(() => {
         if (!onPageRefsReady) return
-        const refs = pages.map((p) => {
+        const refs = pages.flatMap((p) => {
+            if (p.type === 'pdf') {
+                const count = pdfNumPages || 1
+                return Array.from({ length: count }, (_, i) => {
+                    const key = `${p.index}-p${i + 1}`
+                    return {
+                        wrap: wrapRefs.current[key],
+                        canvas: canvasRefs.current[key],
+                        type: 'pdf',
+                    }
+                })
+            }
             const key = String(p.index)
-            return {
+            return [{
                 wrap: wrapRefs.current[key],
                 canvas: canvasRefs.current[key],
                 type: p.type,
-            }
+            }]
         })
-        onPageRefsReady(refs)
-    }, [pages, localPages, onPageRefsReady])
+        onPageRefsReady(refs.filter((r) => r.wrap))
+    }, [pages, localPages, onPageRefsReady, pdfNumPages])
 
     const getCanvasPos = (e, canvas) => {
         const rect = canvas.getBoundingClientRect()
+        const clientX = e.clientX ?? e.touches?.[0]?.clientX ?? 0
+        const clientY = e.clientY ?? e.touches?.[0]?.clientY ?? 0
         return {
-            x: e.clientX - rect.left,
-            y: e.clientY - rect.top,
+            x: clientX - rect.left,
+            y: clientY - rect.top,
         }
     }
 
     const handlePointerDown = (e) => {
         if (readOnly) return
+        e.preventDefault()
         const canvas = canvasRefs.current[pageKey]
         if (!canvas) return
+        canvas.setPointerCapture?.(e.pointerId)
         const pos = getCanvasPos(e, canvas)
 
         if (activeTool === TOOLS.pen) {
             drawingRef.current = {
                 type: 'pen',
                 color: activeColor,
-                width: 3,
+                width: isMobile ? 4 : 3,
                 points: [[pos.x, pos.y]],
             }
         } else if (activeTool === TOOLS.check) {
-            const ann = { id: Date.now(), type: 'check', x: pos.x, y: pos.y, size: 28, color: '#10b981' }
-            updatePageAnnotations(pageKey, [...pageAnnotations, ann])
+            updatePageAnnotations(pageKey, [
+                ...pageAnnotations,
+                normalizeMarkForSave(
+                    { id: Date.now(), type: 'check', x: pos.x, y: pos.y, size: isMobile ? 34 : 28, color: '#10b981' },
+                    canvas.width,
+                    canvas.height,
+                ),
+            ])
         } else if (activeTool === TOOLS.cross) {
-            const ann = { id: Date.now(), type: 'cross', x: pos.x, y: pos.y, size: 28, color: '#ef4444' }
-            updatePageAnnotations(pageKey, [...pageAnnotations, ann])
+            updatePageAnnotations(pageKey, [
+                ...pageAnnotations,
+                normalizeMarkForSave(
+                    { id: Date.now(), type: 'cross', x: pos.x, y: pos.y, size: isMobile ? 34 : 28, color: '#ef4444' },
+                    canvas.width,
+                    canvas.height,
+                ),
+            ])
         } else if (activeTool === TOOLS.text) {
             setTextPrompt({ x: pos.x, y: pos.y })
         } else if (activeTool === TOOLS.eraser) {
-            const hit = pageAnnotations.findLast?.((ann) => {
-                if (ann.type === 'text') {
-                    return Math.abs(ann.x - pos.x) < 80 && Math.abs(ann.y - pos.y) < 20
-                }
-                if (ann.points?.length) {
-                    const last = ann.points[ann.points.length - 1]
-                    return Math.hypot(last[0] - pos.x, last[1] - pos.y) < 25
-                }
-                return Math.hypot((ann.x || 0) - pos.x, (ann.y || 0) - pos.y) < 30
-            }) || pageAnnotations.slice().reverse().find((ann) => {
-                if (ann.type === 'text') return Math.abs(ann.x - pos.x) < 80 && Math.abs(ann.y - pos.y) < 20
-                if (ann.points?.length) {
-                    const last = ann.points[ann.points.length - 1]
-                    return Math.hypot(last[0] - pos.x, last[1] - pos.y) < 25
-                }
-                return Math.hypot((ann.x || 0) - pos.x, (ann.y || 0) - pos.y) < 30
-            })
-            if (hit) {
-                updatePageAnnotations(pageKey, pageAnnotations.filter((a) => a !== hit))
-            }
+            const hit = hitTestAnnotation(pageAnnotations, pos.x, pos.y, canvas.width, canvas.height)
+            if (hit) updatePageAnnotations(pageKey, pageAnnotations.filter((a) => a !== hit))
         }
     }
 
     const handlePointerMove = (e) => {
         if (readOnly || !drawingRef.current) return
+        e.preventDefault()
         const canvas = canvasRefs.current[pageKey]
         if (!canvas) return
         const pos = getCanvasPos(e, canvas)
@@ -269,9 +292,16 @@ export const ExamPaperAnnotator = ({
         }
     }
 
-    const handlePointerUp = () => {
-        if (!drawingRef.current) return
-        const stroke = { ...drawingRef.current, id: Date.now() }
+    const handlePointerUp = (e) => {
+        const canvas = canvasRefs.current[pageKey]
+        if (!drawingRef.current || !canvas) return
+        e?.preventDefault?.()
+        canvas.releasePointerCapture?.(e?.pointerId)
+        const stroke = normalizeStrokeForSave(
+            { ...drawingRef.current, id: Date.now() },
+            canvas.width,
+            canvas.height,
+        )
         drawingRef.current = null
         updatePageAnnotations(pageKey, [...pageAnnotations, stroke])
     }
@@ -287,44 +317,48 @@ export const ExamPaperAnnotator = ({
     }
 
     const submitText = () => {
-        if (!textPrompt?.value?.trim()) {
+        const canvas = canvasRefs.current[pageKey]
+        if (!canvas || !textPrompt?.value?.trim()) {
             setTextPrompt(null)
             return
         }
-        const ann = {
+        const ann = normalizeMarkForSave({
             id: Date.now(),
             type: 'text',
             x: textPrompt.x,
             y: textPrompt.y,
             text: textPrompt.value.trim(),
             color: activeColor,
-            fontSize: 18,
-        }
+            fontSize: isMobile ? 20 : 18,
+        }, canvas.width, canvas.height)
         updatePageAnnotations(pageKey, [...pageAnnotations, ann])
         setTextPrompt(null)
     }
 
     const renderPageContent = (page) => {
-        const key = String(page.index)
         if (page.type === 'pdf') {
-            const numPages = pdfPages[key] || 1
             return (
-                <Document
-                    file={page.url}
-                    loading={<div className="exam-annotator-loading">جاري تحميل PDF...</div>}
-                    onLoadSuccess={({ numPages: n }) => setPdfPages((p) => ({ ...p, [key]: n }))}
-                >
-                    <Page
-                        pageNumber={1}
-                        scale={scale}
-                        renderTextLayer={false}
-                        renderAnnotationLayer={false}
-                    />
-                </Document>
+                <PdfPageView
+                    url={page.url}
+                    pageNumber={pdfSubPage}
+                    scale={scale}
+                    token={authToken}
+                    onNumPages={setPdfNumPages}
+                    onRenderSuccess={syncCanvasSize}
+                />
             )
         }
         if (page.type === 'image') {
-            return <img src={page.url} alt={page.label} draggable={false} style={{ width: '100%', display: 'block' }} />
+            const src = imageBlobUrls[page.index] || page.url
+            return (
+                <img
+                    src={src}
+                    alt={page.label}
+                    draggable={false}
+                    className="exam-annotator-image"
+                    onLoad={syncCanvasSize}
+                />
+            )
         }
         return (
             <div className="exam-annotator-fallback">
@@ -333,86 +367,110 @@ export const ExamPaperAnnotator = ({
         )
     }
 
+    const toolbar = !readOnly && (
+        <div className={`exam-annotator-toolbar ${isMobile ? 'mobile' : ''}`}>
+            <div className="exam-annotator-tools">
+                {[
+                    [TOOLS.pen, HiOutlinePencil, 'قلم'],
+                    [TOOLS.text, HiOutlineChatBubbleBottomCenterText, 'نص'],
+                    [TOOLS.check, HiOutlineCheck, 'صح'],
+                    [TOOLS.cross, HiOutlineXMark, 'خطأ'],
+                    [TOOLS.eraser, HiOutlineTrash, 'محو'],
+                ].map(([tool, Icon, label]) => (
+                    <button
+                        key={tool}
+                        type="button"
+                        className={activeTool === tool ? 'active' : ''}
+                        onClick={() => setActiveTool(tool)}
+                        title={label}
+                    >
+                        <Icon size={isMobile ? 20 : 18} />
+                        {!isMobile && <span>{label}</span>}
+                    </button>
+                ))}
+            </div>
+            <div className="exam-annotator-colors">
+                {COLORS.map((c) => (
+                    <button
+                        key={c}
+                        type="button"
+                        className={activeColor === c ? 'active' : ''}
+                        style={{ background: c }}
+                        onClick={() => setActiveColor(c)}
+                        aria-label="لون"
+                    />
+                ))}
+            </div>
+            <div className="exam-annotator-actions">
+                <button type="button" onClick={undoLast} title="تراجع"><HiOutlineArrowUturnLeft size={18} /></button>
+                {!isMobile && (
+                    <button type="button" onClick={clearPage} title="مسح"><HiOutlineTrash size={18} /></button>
+                )}
+                <button type="button" onClick={() => setScale((s) => Math.max(0.5, s - 0.1))}><HiOutlineMagnifyingGlassMinus size={18} /></button>
+                <span className="exam-annotator-zoom">{Math.round(scale * 100)}%</span>
+                <button type="button" onClick={() => setScale((s) => Math.min(2.5, s + 0.1))}><HiOutlineMagnifyingGlassPlus size={18} /></button>
+                <button type="button" onClick={() => setFullscreen((f) => !f)} title="ملء الشاشة">
+                    <HiOutlineArrowsPointingOut size={18} />
+                </button>
+            </div>
+        </div>
+    )
+
     if (!pages.length) {
-        return <div className="exam-annotator-empty">لا توجد صفحات لعرضها</div>
+        return <div className="exam-annotator-empty">لا توجد صفحات — تأكد من رفع الطالب ملف PDF أو صورة</div>
     }
 
-    const activePage = pages[currentPage]
-
     return (
-        <div className="exam-annotator">
-            {!readOnly && (
-                <div className="exam-annotator-toolbar">
-                    <div className="exam-annotator-tools">
-                        {[
-                            [TOOLS.pen, HiOutlinePencil, 'قلم'],
-                            [TOOLS.text, HiOutlineChatBubbleBottomCenterText, 'نص'],
-                            [TOOLS.check, HiOutlineCheck, 'صح'],
-                            [TOOLS.cross, HiOutlineXMark, 'خطأ'],
-                            [TOOLS.eraser, HiOutlineTrash, 'محو'],
-                        ].map(([tool, Icon, label]) => (
-                            <button
-                                key={tool}
-                                type="button"
-                                className={activeTool === tool ? 'active' : ''}
-                                onClick={() => setActiveTool(tool)}
-                                title={label}
-                            >
-                                <Icon size={18} />
-                                <span>{label}</span>
-                            </button>
-                        ))}
-                    </div>
-                    <div className="exam-annotator-colors">
-                        {COLORS.map((c) => (
-                            <button
-                                key={c}
-                                type="button"
-                                className={activeColor === c ? 'active' : ''}
-                                style={{ background: c }}
-                                onClick={() => setActiveColor(c)}
-                            />
-                        ))}
-                    </div>
-                    <div className="exam-annotator-actions">
-                        <button type="button" onClick={undoLast} title="تراجع"><HiOutlineArrowUturnLeft size={18} /></button>
-                        <button type="button" onClick={clearPage} title="مسح الصفحة"><HiOutlineTrash size={18} /></button>
-                        <button type="button" onClick={() => setScale((s) => Math.max(0.6, s - 0.15))}><HiOutlineMagnifyingGlassMinus size={18} /></button>
-                        <span>{Math.round(scale * 100)}%</span>
-                        <button type="button" onClick={() => setScale((s) => Math.min(2.2, s + 0.15))}><HiOutlineMagnifyingGlassPlus size={18} /></button>
-                    </div>
-                </div>
-            )}
+        <div className={`exam-annotator ${fullscreen ? 'fullscreen' : ''} ${isMobile ? 'is-mobile' : ''}`}>
+            {toolbar}
 
-            {pages.length > 1 && (
+            {(pages.length > 1 || (isPdf && pdfNumPages > 1)) && (
                 <div className="exam-annotator-pager">
-                    {pages.map((p, i) => (
+                    {pages.length > 1 && pages.map((p, i) => (
                         <button
                             key={p.index}
                             type="button"
                             className={currentPage === i ? 'active' : ''}
                             onClick={() => setCurrentPage(i)}
                         >
-                            {p.label || `صفحة ${i + 1}`}
+                            {p.label || `ملف ${i + 1}`}
                         </button>
                     ))}
+                    {isPdf && pdfNumPages > 1 && (
+                        <div className="exam-annotator-pdf-nav">
+                            <button
+                                type="button"
+                                disabled={pdfSubPage <= 1}
+                                onClick={() => setPdfSubPage((p) => Math.max(1, p - 1))}
+                            >
+                                <HiOutlineChevronRight size={18} />
+                            </button>
+                            <span>صفحة {pdfSubPage} / {pdfNumPages}</span>
+                            <button
+                                type="button"
+                                disabled={pdfSubPage >= pdfNumPages}
+                                onClick={() => setPdfSubPage((p) => Math.min(pdfNumPages, p + 1))}
+                            >
+                                <HiOutlineChevronLeft size={18} />
+                            </button>
+                        </div>
+                    )}
                 </div>
             )}
 
-            <div className="exam-annotator-stage">
+            <div className="exam-annotator-stage" ref={stageRef}>
                 <div
                     className="exam-annotator-page-wrap"
                     ref={(el) => { wrapRefs.current[pageKey] = el }}
                 >
-                    {renderPageContent(activePage)}
+                    {activePage && renderPageContent(activePage)}
                     <canvas
                         ref={(el) => { canvasRefs.current[pageKey] = el }}
                         className={`exam-annotator-canvas ${readOnly ? 'readonly' : ''}`}
-                        width={900}
-                        height={1200}
                         onPointerDown={handlePointerDown}
                         onPointerMove={handlePointerMove}
                         onPointerUp={handlePointerUp}
+                        onPointerCancel={handlePointerUp}
                         onPointerLeave={handlePointerUp}
                     />
                     {textPrompt && (
@@ -425,14 +483,18 @@ export const ExamPaperAnnotator = ({
                                 value={textPrompt.value || ''}
                                 onChange={(e) => setTextPrompt({ ...textPrompt, value: e.target.value })}
                                 onKeyDown={(e) => e.key === 'Enter' && submitText()}
-                                placeholder="اكتب ملاحظة..."
+                                placeholder="ملاحظة..."
                             />
                             <button type="button" onClick={submitText}>إضافة</button>
-                            <button type="button" onClick={() => setTextPrompt(null)}>إلغاء</button>
+                            <button type="button" onClick={() => setTextPrompt(null)}>×</button>
                         </div>
                     )}
                 </div>
             </div>
+
+            {isMobile && !readOnly && (
+                <p className="exam-annotator-hint">استخدم إصبعك للرسم مباشرة على الورقة — قرّب/بعّد من أزرار التكبير</p>
+            )}
         </div>
     )
 }
