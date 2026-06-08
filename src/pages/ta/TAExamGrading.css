@@ -481,3 +481,261 @@
         justify-content: center;
     }
 }
+
+/* ── TA Exams list page ── */
+.ta-exams-page {
+    padding: 16px;
+    font-family: 'Tajawal', 'Cairo', sans-serif;
+}
+
+.ta-exams-header {
+    margin-bottom: 24px;
+}
+
+.ta-exams-header h2 {
+    margin: 0 0 8px;
+    color: #0f172a;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.ta-exams-header p {
+    margin: 0;
+    color: #64748b;
+    font-size: 0.95rem;
+    line-height: 1.6;
+}
+
+.ta-exams-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.ta-exam-card {
+    text-align: right;
+    background: white;
+    border: 2px solid transparent;
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    color: #334155;
+    font-family: inherit;
+}
+
+.ta-exam-card.active {
+    border-color: #6366f1;
+    background: #f5f3ff;
+}
+
+.ta-exam-card h4 {
+    margin: 8px 0 0;
+    font-size: 1.1rem;
+    color: #0f172a;
+}
+
+.ta-exam-card span {
+    font-size: 0.85rem;
+    color: #64748b;
+}
+
+.ta-exam-card strong {
+    margin-top: 8px;
+    color: #059669;
+    font-size: 0.88rem;
+}
+
+.ta-exams-loading,
+.ta-exams-empty {
+    text-align: center;
+    color: #64748b;
+    padding: 30px;
+}
+
+.ta-exams-detail {
+    background: white;
+    border-radius: 18px;
+    padding: 24px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+}
+
+.ta-exams-detail h3 {
+    margin: 0 0 20px;
+    color: #1e293b;
+}
+
+.ta-exams-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 14px;
+    margin-bottom: 28px;
+}
+
+.ta-exams-stats .stat {
+    text-align: center;
+    padding: 18px;
+    border-radius: 14px;
+    border: 1px solid #e2e8f0;
+}
+
+.ta-exams-stats .stat b {
+    display: block;
+    font-size: 2rem;
+    line-height: 1.2;
+}
+
+.ta-exams-stats .stat span {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #64748b;
+}
+
+.ta-exams-stats .stat.blue { background: #eff6ff; } .ta-exams-stats .stat.blue b { color: #2563eb; }
+.ta-exams-stats .stat.green { background: #ecfdf5; border-color: #a7f3d0; } .ta-exams-stats .stat.green b { color: #059669; }
+.ta-exams-stats .stat.red { background: #fff1f2; border-color: #fecdd3; } .ta-exams-stats .stat.red b { color: #e11d48; }
+.ta-exams-stats .stat.yellow { background: #fffbeb; border-color: #fde68a; } .ta-exams-stats .stat.yellow b { color: #d97706; }
+
+.ta-submissions-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.ta-submission-card {
+    border: 2px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 20px;
+    background: #fafafa;
+}
+
+.ta-submission-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.ta-submission-top h4 {
+    margin: 0 0 4px;
+    color: #0f172a;
+    font-size: 1.05rem;
+}
+
+.ta-submission-top p {
+    margin: 0;
+    color: #64748b;
+    font-size: 0.85rem;
+}
+
+.ta-submission-status {
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: 800;
+    white-space: nowrap;
+}
+
+.ta-grade-online-btn {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 20px 16px;
+    margin-bottom: 16px;
+    border: none;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #6366f1 0%, #4f46e5 50%, #7c3aed 100%);
+    color: white;
+    font-size: 1.15rem;
+    font-weight: 900;
+    cursor: pointer;
+    font-family: inherit;
+    box-shadow: 0 8px 24px rgba(99, 102, 241, 0.45);
+    transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.ta-grade-online-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 28px rgba(99, 102, 241, 0.55);
+}
+
+.ta-grade-online-btn small {
+    font-size: 0.78rem;
+    font-weight: 600;
+    opacity: 0.9;
+}
+
+.ta-submission-quick {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+    padding-top: 14px;
+    border-top: 1px dashed #cbd5e1;
+}
+
+.ta-submission-quick-grade {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.ta-submission-quick-grade input {
+    width: 72px;
+    padding: 10px;
+    border-radius: 10px;
+    border: 1px solid #cbd5e1;
+    font-weight: 700;
+    text-align: center;
+}
+
+.ta-submission-note {
+    flex: 1;
+    min-width: 160px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid #cbd5e1;
+    font-family: inherit;
+}
+
+.ta-submission-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.ta-save-grade-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #10b981;
+    color: white;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 10px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.ta-download-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #e0f2fe;
+    color: #0284c7;
+    padding: 10px 14px;
+    border-radius: 10px;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 0.88rem;
+}
