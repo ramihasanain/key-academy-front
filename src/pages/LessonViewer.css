@@ -1222,6 +1222,49 @@
 .lv-note-content p { margin-bottom: 12px; }
 .lv-nc-date { font-size: 0.85rem; font-weight: 700; color: #94a3b8; }
 
+.lv-notes-editor--editing {
+    border: 2px solid rgba(139, 92, 246, 0.35);
+    border-radius: var(--radius-xl);
+    padding: 4px;
+}
+.lv-ne-edit-banner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 14px 4px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #7c3aed;
+}
+.lv-ne-cancel-btn {
+    background: transparent;
+    border: 1px solid rgba(139, 92, 246, 0.3);
+    color: #7c3aed;
+    border-radius: 8px;
+    padding: 4px 12px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+.lv-ne-cancel-btn:hover { background: rgba(139, 92, 246, 0.08); }
+
+.lv-note-actions { display: flex; gap: 4px; }
+.lv-note-action-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border: none;
+    border-radius: 8px;
+    background: rgba(131, 42, 150, 0.06);
+    color: #64748b;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+}
+.lv-note-action-btn:hover { background: rgba(131, 42, 150, 0.14); color: #7c3aed; }
+.lv-note-action-btn--danger:hover { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
+
 /* ===== Q&A POST / COMMENTS STYLE ===== */
 .lv-post-card {
     background: rgba(255,255,255,0.75); backdrop-filter: blur(10px);
