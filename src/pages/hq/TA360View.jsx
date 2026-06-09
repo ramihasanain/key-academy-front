@@ -35,10 +35,9 @@ export const TA360View = ({ id }) => {
             }
         }
         
-        // Debounce to prevent spam requests while typing
-        const timeoutId = setTimeout(() => {
-            fetchData()
-        }, 500)
+        // Debounce filter changes only; first load should not wait
+        const delay = (studentFilter || dateFilter) ? 500 : 0
+        const timeoutId = setTimeout(fetchData, delay)
         
         return () => clearTimeout(timeoutId)
     }, [finalId, studentFilter, dateFilter])
