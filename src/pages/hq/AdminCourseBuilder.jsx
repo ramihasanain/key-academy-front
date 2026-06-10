@@ -104,13 +104,20 @@ export const AdminCourseBuilder = ({ id }) => {
     }
 
     const openCopyModal = async () => {
+        if (!course.teacher) {
+            return alert('يرجى تحديد الأستاذ للدورة أولاً قبل نسخ المحتوى.')
+        }
         const tk = localStorage.getItem('access_token')
         const headers = { 'Authorization': `Bearer ${tk}` }
         try {
             const crsRes = await fetch(`${API}/api/hq/courses/?page_size=1000`, { headers })
             if (crsRes.ok) {
                 const data = await crsRes.json()
-                setAllCourses((data.results || data).filter(c => c.id != id))
+                const sameTeacherCourses = (data.results || data).filter(c =>
+                    String(c.id) !== String(id) && String(c.teacher) === String(course.teacher)
+                )
+                setAllCourses(sameTeacherCourses)
+                setSourceCourseId('')
                 setCopyModalOpen(true)
             }
         } catch (e) { console.error("Error fetching courses", e) }
@@ -1437,6 +1444,11 @@ export const AdminCourseBuilder = ({ id }) => {
                                     <option key={c.id} value={c.id}>{c.title}</option>
                                 ))}
                             </select>
+                            {allCourses.length === 0 && (
+                                <p style={{ color: '#64748b', fontSize: '0.85rem', marginTop: '10px' }}>
+                                    لا توجد دورات أخرى لنفس الأستاذ يمكن النسخ منها.
+                                </p>
+                            )}
                         </div>
 
                         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
