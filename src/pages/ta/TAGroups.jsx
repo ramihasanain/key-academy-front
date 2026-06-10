@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { useOutletContext } from 'react-router-dom'
 import { API } from '../../config'
-import { HiOutlinePaperClip, HiOutlinePaperAirplane, HiOutlineMicrophone, HiOutlineStop, HiOutlineTrash, HiOutlineNoSymbol, HiOutlineChatBubbleOvalLeftEllipsis, HiOutlinePhoto, HiOutlineArrowDownTray, HiOutlineXMark, HiOutlineEye, HiOutlineArrowUturnLeft } from 'react-icons/hi2'
+import { HiOutlinePaperClip, HiOutlinePaperAirplane, HiOutlineMicrophone, HiOutlineStop, HiOutlineTrash, HiOutlineNoSymbol, HiOutlineChatBubbleOvalLeftEllipsis, HiOutlinePhoto, HiOutlineArrowDownTray, HiOutlineXMark, HiOutlineEye, HiOutlineArrowUturnLeft, HiOutlineUserGroup } from 'react-icons/hi2'
 import { TAStudent360 } from './TAStudent360'
 import './TAGroups.css'
 import { FEATURE_LOCKED_MESSAGE } from '../../constants/platformFeatures'
@@ -605,32 +605,46 @@ export const TAGroups = () => {
             <div className={`ta-chat-main ${mobileView === 'list' ? 'hidden-mobile' : ''}`}>
                 {activeCourseId ? (
                     <>
-                        <div className="ta-chat-header" style={{ padding: '15px', borderBottom: '1px solid var(--hq-border)', color: 'var(--hq-text-main)', fontWeight: 'bold', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '10px' }}>
-                            <button className="ta-chat-back-btn" onClick={() => setMobileView('list')} style={{ display: 'none', border: 'none', cursor: 'pointer' }}>
+                        <div className={`ta-chat-header ${privateTarget ? 'ta-chat-header--private' : ''}`}>
+                            <button
+                                type="button"
+                                className="ta-chat-back-btn"
+                                onClick={() => setMobileView('list')}
+                                aria-label="العودة لقائمة الطلاب"
+                            >
                                 <HiOutlineArrowUturnLeft size={20} />
                             </button>
-                            <img src="/new-logo.png" alt="Logo" style={{ height: '35px', objectFit: 'contain' }} />
-                            
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flex: 1, justifyContent: 'center' }}>
-                                {privateTarget ? (
-                                    <>
-                                        <button
-                                            type="button"
-                                            onClick={() => { setPrivateTarget(null); setReplyingTo(null); }}
-                                            style={{ background: 'transparent', border: 'none', color: 'var(--hq-text-muted)', cursor: 'pointer', fontSize: '12px', padding: '4px 8px' }}
-                                            title="العودة لدردشة المجموعة"
-                                        >
-                                            ← المجموعة
-                                        </button>
-                                        <div style={{ width: '30px', height: '30px', borderRadius: '50%', background: '#10b981', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white' }}>{(privateTarget.name || 'ط')[0]}</div>
-                                        <span>محادثة خاصة: {privateTarget.name}</span>
-                                    </>
-                                ) : (
-                                    <span>مجموعة ({groups.find(g => g.id === activeGroupId)?.index})</span>
-                                )}
-                            </div>
 
-                            <img src="/key-icon-logo.png" alt="Key Logo" style={{ height: '35px', objectFit: 'contain' }} />
+                            {privateTarget ? (
+                                <>
+                                    <div className="ta-chat-header-private">
+                                        <div className="ta-chat-header-avatar" aria-hidden>
+                                            {(privateTarget.name || 'ط').trim().charAt(0)}
+                                        </div>
+                                        <div className="ta-chat-header-private-text">
+                                            <span className="ta-chat-header-private-label">محادثة خاصة</span>
+                                            <span className="ta-chat-header-private-name">{privateTarget.name}</span>
+                                        </div>
+                                    </div>
+                                    <button
+                                        type="button"
+                                        className="ta-chat-to-group-btn"
+                                        onClick={() => { setPrivateTarget(null); setReplyingTo(null); }}
+                                        title="العودة لدردشة المجموعة"
+                                    >
+                                        <HiOutlineUserGroup size={20} />
+                                        <span className="ta-chat-to-group-btn-label">المجموعة</span>
+                                    </button>
+                                </>
+                            ) : (
+                                <>
+                                    <img src="/new-logo.png" alt="Logo" className="ta-chat-header-logo" />
+                                    <span className="ta-chat-header-title">
+                                        مجموعة ({groups.find(g => g.id === activeGroupId)?.index})
+                                    </span>
+                                    <img src="/key-icon-logo.png" alt="Key Logo" className="ta-chat-header-icon" />
+                                </>
+                            )}
                         </div>
 
                         <div id="ta-chat-msgs" className="ta-chat-msgs-scroll">

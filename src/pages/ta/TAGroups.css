@@ -74,16 +74,109 @@
 /* Chat Header */
 .ta-chat-header {
     flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 15px;
+    border-bottom: 1px solid var(--hq-border);
+    color: var(--hq-text-main);
+    font-weight: bold;
     background: var(--hq-surface) !important;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
     z-index: 10;
+    min-height: 56px;
 }
 
 .ta-chat-back-btn {
     display: none;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
     border: none;
     cursor: pointer;
     background: transparent;
+}
+
+.ta-chat-header-logo,
+.ta-chat-header-icon {
+    height: 35px;
+    object-fit: contain;
+    flex-shrink: 0;
+}
+
+.ta-chat-header-title {
+    flex: 1;
+    text-align: center;
+    font-size: 15px;
+}
+
+.ta-chat-header-private {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+    min-width: 0;
+    justify-content: center;
+}
+
+.ta-chat-header-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: #10b981;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    flex-shrink: 0;
+}
+
+.ta-chat-header-private-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+    text-align: right;
+}
+
+.ta-chat-header-private-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: #10b981;
+    line-height: 1.2;
+}
+
+.ta-chat-header-private-name {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--hq-text-main);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.2;
+}
+
+.ta-chat-to-group-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+    padding: 8px 12px;
+    border: 1px solid var(--hq-border);
+    border-radius: 10px;
+    background: var(--hq-bg);
+    color: var(--hq-text-muted);
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.ta-chat-to-group-btn:hover {
+    color: var(--hq-primary);
+    border-color: rgba(131, 42, 150, 0.3);
 }
 
 /* منطقة الرسائل — تملأ المساحة بين الهيدر وحقل الكتابة */
@@ -262,14 +355,47 @@
 
     .ta-chat-back-btn {
         display: flex !important;
-        align-items: center;
-        justify-content: center;
-        width: 40px;
-        height: 40px;
         background: rgba(131, 42, 150, 0.1) !important;
         border-radius: 50%;
         color: var(--hq-primary) !important;
-        margin-left: 10px;
+    }
+
+    .ta-chat-header {
+        padding: 10px 12px;
+        gap: 8px;
+        min-height: 52px;
+    }
+
+    .ta-chat-header--private .ta-chat-header-private {
+        justify-content: flex-start;
+    }
+
+    .ta-chat-header--private .ta-chat-header-private-text {
+        text-align: right;
+    }
+
+    .ta-chat-header-logo,
+    .ta-chat-header-icon {
+        display: none;
+    }
+
+    .ta-chat-header:not(.ta-chat-header--private) .ta-chat-header-title {
+        font-size: 14px;
+    }
+
+    .ta-chat-to-group-btn {
+        width: 40px;
+        height: 40px;
+        padding: 0;
+        justify-content: center;
+        border-radius: 50%;
+        background: rgba(16, 185, 129, 0.1);
+        border-color: rgba(16, 185, 129, 0.25);
+        color: #10b981;
+    }
+
+    .ta-chat-to-group-btn-label {
+        display: none;
     }
 
     .ta-chat-msgs-scroll,
