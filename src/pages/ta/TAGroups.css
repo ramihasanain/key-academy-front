@@ -33,6 +33,23 @@
     flex-direction: column;
 }
 
+.ta-chat-student-search {
+    width: 100%;
+    box-sizing: border-box;
+    margin-bottom: 8px;
+    padding: 8px 10px;
+    border: 1px solid var(--hq-border);
+    border-radius: 8px;
+    background: var(--hq-bg);
+    color: var(--hq-text-main);
+    font-size: 12px;
+    outline: none;
+}
+
+.ta-chat-student-search:focus {
+    border-color: var(--hq-primary);
+}
+
 .ta-chat-main {
     flex: 1 1 auto;
     min-height: 0;

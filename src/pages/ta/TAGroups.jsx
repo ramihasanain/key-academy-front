@@ -7,7 +7,7 @@ import './TAGroups.css'
 import { FEATURE_LOCKED_MESSAGE } from '../../constants/platformFeatures'
 
 /** FRONTEND-ONLY: غيّر إلى true لإعادة صور/ملفات/صوت في دردشة الأستاذ والمساعد */
-const STAFF_CHAT_MEDIA_ENABLED = false
+const STAFF_CHAT_MEDIA_ENABLED = true
 
 export const TAGroups = () => {
     const { activeGroupId: assistantGroupId, activeGroup: assistantGroup, profile } = useOutletContext() || {}
@@ -41,6 +41,7 @@ export const TAGroups = () => {
     // Private Messaging Target
     const [privateTarget, setPrivateTarget] = useState(null) // { id, name }
     const [inboxContacts, setInboxContacts] = useState([])
+    const [studentSearch, setStudentSearch] = useState('')
     const [mobileView, setMobileView] = useState('list')
 
     // WS reference
@@ -382,6 +383,7 @@ export const TAGroups = () => {
         setMessages([])
         setPrivateTarget(null)
         setInboxContacts([])
+        setStudentSearch('')
         fetchInbox(courseId, groupId)
         startPolling(courseId, groupId)
         setMobileView('chat')
@@ -450,7 +452,11 @@ export const TAGroups = () => {
             const fd = new FormData()
             fd.append('course', activeCourseId)
             fd.append('group', activeGroupId)
-            if (messageText.trim()) fd.append('content', messageText.trim())
+            if (privateTarget) {
+                fd.append('content', finalContent)
+            } else if (messageText.trim()) {
+                fd.append('content', messageText.trim())
+            }
             if (replyingTo) fd.append('reply_to_id', replyingTo.id)
 
             if (file) {
@@ -515,6 +521,12 @@ export const TAGroups = () => {
         }
     }
 
+    const filteredInboxContacts = inboxContacts.filter(contact => {
+        if (!studentSearch.trim()) return true
+        const q = studentSearch.trim().toLowerCase()
+        return (contact.name || '').toLowerCase().includes(q) || (contact.username || '').toLowerCase().includes(q)
+    })
+
     return (
         <div className="ta-chat-layout">
             {/* Left Sidebar: Select Course & Group */}
@@ -547,10 +559,22 @@ export const TAGroups = () => {
                             </div>
                         ))}
 
-                        <div style={{ margin: '15px 0 5px 0', fontSize: '12px', color: 'var(--hq-text-muted)', fontWeight: 'bold' }}>رسائل الطلاب الخاصة</div>
+                        <div style={{ margin: '15px 0 5px 0', fontSize: '12px', color: 'var(--hq-text-muted)', fontWeight: 'bold' }}>الطلاب — رسائل خاصة</div>
+                        <input
+                            type="text"
+                            value={studentSearch}
+                            onChange={e => setStudentSearch(e.target.value)}
+                            placeholder="بحث عن طالب..."
+                            className="ta-chat-student-search"
+                        />
 
-                        {/* Private Inbox Contacts */}
-                        {inboxContacts.map(contact => (
+                        {/* All students in shard — assistants can start a private chat without waiting for inbound messages */}
+                        {inboxContacts.length === 0 ? (
+                            <div style={{ color: 'var(--hq-text-muted)', fontSize: '12px', padding: '8px 4px' }}>لا يوجد طلاب في هذه المجموعة</div>
+                        ) : filteredInboxContacts.length === 0 ? (
+                            <div style={{ color: 'var(--hq-text-muted)', fontSize: '12px', padding: '8px 4px' }}>لا توجد نتائج للبحث</div>
+                        ) : null}
+                        {filteredInboxContacts.map(contact => (
                             <div
                                 key={contact.id}
                                 onClick={() => {
@@ -590,6 +614,14 @@ export const TAGroups = () => {
                             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flex: 1, justifyContent: 'center' }}>
                                 {privateTarget ? (
                                     <>
+                                        <button
+                                            type="button"
+                                            onClick={() => { setPrivateTarget(null); setReplyingTo(null); }}
+                                            style={{ background: 'transparent', border: 'none', color: 'var(--hq-text-muted)', cursor: 'pointer', fontSize: '12px', padding: '4px 8px' }}
+                                            title="العودة لدردشة المجموعة"
+                                        >
+                                            ← المجموعة
+                                        </button>
                                         <div style={{ width: '30px', height: '30px', borderRadius: '50%', background: '#10b981', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white' }}>{(privateTarget.name || 'ط')[0]}</div>
                                         <span>محادثة خاصة: {privateTarget.name}</span>
                                     </>
@@ -620,6 +652,11 @@ export const TAGroups = () => {
                                 
                                 return (
                                     <>
+                                        {privateTarget && dispMsgs.length === 0 && (
+                                            <div style={{ textAlign: 'center', color: 'var(--hq-text-muted)', padding: '40px 20px', fontSize: '14px' }}>
+                                                لا توجد رسائل سابقة مع {privateTarget.name}. يمكنك بدء المحادثة الآن مباشرة.
+                                            </div>
+                                        )}
                                         {latestPinned && !privateTarget && (
                                             <div 
                                                 onClick={() => {
@@ -855,7 +892,7 @@ export const TAGroups = () => {
                             <div style={{ padding: '15px', borderTop: '1px solid var(--hq-border)', textAlign: 'center', color: '#ef4444', fontWeight: 'bold', lineHeight: 1.7 }}>
                                 <div>🕵️‍♂️ وضع المراقبة (الإدارة) — قراءة فقط</div>
                                 <div style={{ fontSize: '12px', color: 'var(--hq-text-muted)', fontWeight: 'normal', marginTop: '6px' }}>
-                                    لمشاهدة الرسائل الخاصة مع الطلاب: اختر الطالب من قسم «رسائل الطلاب الخاصة» على اليسار
+                                    لمشاهدة الرسائل الخاصة مع الطلاب: اختر الطالب من قائمة «الطلاب — رسائل خاصة» على اليسار
                                 </div>
                             </div>
                         )}
