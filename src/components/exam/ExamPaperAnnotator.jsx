@@ -14,6 +14,7 @@ import {
     HiOutlineArrowsPointingOut,
     HiOutlineChevronLeft,
     HiOutlineChevronRight,
+    HiOutlineHandRaised,
 } from 'react-icons/hi2'
 import {
     GRADING_DATA_VERSION,
@@ -33,6 +34,7 @@ pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.vers
 export { exportAnnotatedPages }
 
 const TOOLS = {
+    pan: 'pan',
     pen: 'pen',
     text: 'text',
     check: 'check',
@@ -132,7 +134,11 @@ export const ExamPaperAnnotator = ({
     authToken = null,
 }) => {
     const isMobile = useMediaQuery('(max-width: 768px)')
-    const [activeTool, setActiveTool] = useState(TOOLS.pen)
+    const [activeTool, setActiveTool] = useState(() => (
+        typeof window !== 'undefined' && window.matchMedia('(max-width: 768px)').matches
+            ? TOOLS.pan
+            : TOOLS.pen
+    ))
     const [activeColor, setActiveColor] = useState(COLORS[0])
     const [scale, setScale] = useState(1)
     const [currentPage, setCurrentPage] = useState(0)
@@ -302,7 +308,7 @@ export const ExamPaperAnnotator = ({
     }
 
     const handlePointerDown = (e) => {
-        if (readOnly || isPinchingRef.current) return
+        if (readOnly || isPinchingRef.current || activeTool === TOOLS.pan) return
         e.preventDefault()
         const canvas = canvasRefs.current[pageKey]
         if (!canvas) return
@@ -441,17 +447,20 @@ export const ExamPaperAnnotator = ({
 
     const showPager = pages.length > 1 || (isPdf && pdfNumPages > 1)
     const toolLabels = {
+        [TOOLS.pan]: 'تحريك',
         [TOOLS.pen]: 'قلم',
         [TOOLS.text]: 'نص',
         [TOOLS.check]: 'صح',
         [TOOLS.cross]: 'خطأ',
         [TOOLS.eraser]: 'محو',
     }
+    const isPanMode = activeTool === TOOLS.pan
     const activeToolLabel = toolLabels[activeTool] || 'أدوات'
 
     const toolButtons = !readOnly && (
         <div className="exam-annotator-tools">
             {[
+                [TOOLS.pan, HiOutlineHandRaised, 'تحريك'],
                 [TOOLS.pen, HiOutlinePencil, 'قلم'],
                 [TOOLS.text, HiOutlineChatBubbleBottomCenterText, 'نص'],
                 [TOOLS.check, HiOutlineCheck, 'صح'],
@@ -631,7 +640,7 @@ export const ExamPaperAnnotator = ({
                 )}
             </div>
 
-            <div className="exam-annotator-stage" ref={stageRef}>
+            <div className={`exam-annotator-stage ${isPanMode ? 'pan-active' : ''}`} ref={stageRef}>
                 <div
                     className="exam-annotator-page-wrap"
                     ref={(el) => { wrapRefs.current[pageKey] = el }}
@@ -639,7 +648,7 @@ export const ExamPaperAnnotator = ({
                     {activePage && renderPageContent(activePage)}
                     <canvas
                         ref={(el) => { canvasRefs.current[pageKey] = el }}
-                        className={`exam-annotator-canvas ${readOnly ? 'readonly' : ''}`}
+                        className={`exam-annotator-canvas ${readOnly ? 'readonly' : ''} ${isPanMode ? 'pan-mode' : ''}`}
                         onPointerDown={handlePointerDown}
                         onPointerMove={handlePointerMove}
                         onPointerUp={handlePointerUp}
@@ -669,7 +678,9 @@ export const ExamPaperAnnotator = ({
                 <p className="exam-annotator-hint">
                     {readOnly
                         ? 'اسحب الورقة للتنقل — قرّب بإصبعين للتكبير'
-                        : 'ارسم بإصبع واحد · قرّب بإصبعين · افتح القوائم أعلاه للأدوات'}
+                        : isPanMode
+                            ? 'وضع التحريك: اسحب وقرّب بدون رسم — اختر القلم للتصحيح'
+                            : 'ارسم بإصبع واحد · قرّب بإصبعين · اختر «تحريك» للتنقل بدون رسم'}
                 </p>
             )}
         </div>

@@ -624,6 +624,21 @@
     pointer-events: none;
 }
 
+.exam-annotator-canvas.pan-mode {
+    cursor: grab;
+    pointer-events: none;
+    touch-action: pan-x pan-y pinch-zoom;
+}
+
+.exam-annotator-stage.pan-active {
+    touch-action: pan-x pan-y pinch-zoom;
+    cursor: grab;
+}
+
+.exam-annotator-stage.pan-active:active {
+    cursor: grabbing;
+}
+
 .exam-annotator-text-popup {
     position: absolute;
     z-index: 20;
