@@ -118,11 +118,12 @@ const CourseEvaluationDetail = ({ course, courseMeta, onBack }) => {
             </button>
 
             {courseMeta?.hero_image && (
-                <div style={{ borderRadius: '16px', overflow: 'hidden', marginBottom: '16px', maxHeight: '200px' }}>
+                <div className="parent-course-detail-hero">
                     <img
                         src={courseMeta.hero_image}
                         alt={course.course_title}
-                        style={{ width: '100%', height: '200px', objectFit: 'cover' }}
+                        loading="eager"
+                        decoding="async"
                     />
                 </div>
             )}
@@ -250,11 +251,15 @@ const ParentPerformance = () => {
                                         disabled={loadingCourseId === course.course_id}
                                     >
                                         {course.hero_image ? (
-                                            <img
-                                                src={course.hero_image}
-                                                alt={course.course_title}
-                                                className="parent-course-card-image"
-                                            />
+                                            <div className="parent-course-card-image-wrap">
+                                                <img
+                                                    src={course.hero_image}
+                                                    alt={course.course_title}
+                                                    className="parent-course-card-image"
+                                                    loading="lazy"
+                                                    decoding="async"
+                                                />
+                                            </div>
                                         ) : (
                                             <div
                                                 className="parent-course-card-placeholder"
