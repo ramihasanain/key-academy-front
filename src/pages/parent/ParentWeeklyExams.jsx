@@ -20,41 +20,12 @@ const ParentWeeklyExams = () => {
         const load = async () => {
             setLoading(true)
             try {
-                const coursesRes = await fetch(
-                    `${API}/api/v1/parent/students/${student.id}/courses/`,
+                const res = await fetch(
+                    `${API}/api/v1/parent/students/${student.id}/weekly-exams/`,
                     { headers },
                 )
-                const coursesData = await coursesRes.json()
-                const courses = coursesData.courses || []
-
-                const results = await Promise.all(
-                    courses.map(async (course) => {
-                        try {
-                            const res = await fetch(
-                                `${API}/api/v1/parent/students/${student.id}/progress/?course_id=${course.course_id}`,
-                                { headers },
-                            )
-                            const progress = await res.json()
-                            if (!res.ok) return null
-
-                            let exams = progress.weekly_exams
-                            if (exams?.feature_disabled) exams = []
-                            if (!Array.isArray(exams)) exams = []
-
-                            return {
-                                course_id: course.course_id,
-                                course_title: course.course_title,
-                                hero_image: course.hero_image,
-                                teacher_name: course.teacher_name,
-                                exams: exams.filter(e => e?.exam_id),
-                            }
-                        } catch {
-                            return null
-                        }
-                    }),
-                )
-
-                setCourseExams(results.filter(Boolean))
+                const data = await res.json()
+                setCourseExams(res.ok ? (data.courses || []) : [])
             } catch {
                 setCourseExams([])
             } finally {
