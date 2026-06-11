@@ -2,6 +2,8 @@ import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { API } from '../../config'
 import { ExamPaperAnnotator, exportAnnotatedPages } from '../../components/exam/ExamPaperAnnotator'
+import { CollapsibleSection } from '../../components/CollapsibleSection'
+import '../../components/CollapsibleSection.css'
 import {
     HiOutlineArrowRight,
     HiOutlineDocumentText,
@@ -11,8 +13,23 @@ import {
     HiOutlinePencilSquare,
     HiOutlineXMark,
     HiOutlineClipboardDocumentCheck,
+    HiOutlineChevronDown,
 } from 'react-icons/hi2'
 import './TAExamGrading.css'
+
+function useMediaQuery(query) {
+    const [matches, setMatches] = useState(() =>
+        typeof window !== 'undefined' ? window.matchMedia(query).matches : false,
+    )
+    useEffect(() => {
+        const mq = window.matchMedia(query)
+        const handler = () => setMatches(mq.matches)
+        handler()
+        mq.addEventListener('change', handler)
+        return () => mq.removeEventListener('change', handler)
+    }, [query])
+    return matches
+}
 
 const STATUS_LABELS = {
     pending: 'بانتظار التصحيح',
@@ -39,6 +56,8 @@ export const TAExamGradingWorkspace = () => {
     const [savingAnnotations, setSavingAnnotations] = useState(false)
     const [message, setMessage] = useState('')
     const [sidebarOpen, setSidebarOpen] = useState(false)
+    const [headerOpen, setHeaderOpen] = useState(false)
+    const isMobile = useMediaQuery('(max-width: 768px)')
     const [isReEditing, setIsReEditing] = useState(false)
     const [reopening, setReopening] = useState(false)
     const pageRefsRef = useRef([])
@@ -71,13 +90,6 @@ export const TAExamGradingWorkspace = () => {
     useEffect(() => {
         loadWorkspace()
     }, [loadWorkspace])
-
-    useEffect(() => {
-        if (loading || !workspace) return
-        if (window.matchMedia('(max-width: 768px)').matches) {
-            setSidebarOpen(true)
-        }
-    }, [loading, workspace])
 
     const saveAnnotations = useCallback(async (data) => {
         setSavingAnnotations(true)
@@ -219,45 +231,28 @@ export const TAExamGradingWorkspace = () => {
         requestAnimationFrame(() => scrollToGradePanel())
     }
 
-    const gradePanelBody = (
-        <>
-            <div className="exam-grade-sidebar-head">
-                <h3>لوحة التصحيح</h3>
-                <button
-                    type="button"
-                    className="exam-grade-sidebar-close"
-                    onClick={() => setSidebarOpen(false)}
-                    aria-label="إغلاق"
-                >
-                    <HiOutlineXMark size={22} />
-                </button>
-            </div>
-
-            {isLocked && (
-                <div className="exam-grade-locked-banner">
-                    <HiOutlineLockClosed size={20} style={{ verticalAlign: 'middle', marginLeft: 6 }} />
-                    تم تصحيح هذه الورقة. للتعديل اضغط «إعادة تصحيح».
-                </div>
+    const fileLinks = (
+        <div className="exam-grade-links">
+            {exam.question_file_url && (
+                <a href={exam.question_file_url} target="_blank" rel="noreferrer">
+                    <HiOutlineDocumentText size={18} /> ورقة الأسئلة
+                </a>
             )}
+            {exam.model_answer_file_url && (
+                <a href={exam.model_answer_file_url} target="_blank" rel="noreferrer">
+                    <HiOutlineCheckCircle size={18} /> الإجابة النموذجية
+                </a>
+            )}
+            {submission.file_url && (
+                <a href={submission.file_url} target="_blank" rel="noreferrer">
+                    <HiOutlineCloudArrowUp size={18} /> ملف الطالب الأصلي
+                </a>
+            )}
+        </div>
+    )
 
-            <div className="exam-grade-links">
-                {exam.question_file_url && (
-                    <a href={exam.question_file_url} target="_blank" rel="noreferrer">
-                        <HiOutlineDocumentText size={18} /> ورقة الأسئلة
-                    </a>
-                )}
-                {exam.model_answer_file_url && (
-                    <a href={exam.model_answer_file_url} target="_blank" rel="noreferrer">
-                        <HiOutlineCheckCircle size={18} /> الإجابة النموذجية
-                    </a>
-                )}
-                {submission.file_url && (
-                    <a href={submission.file_url} target="_blank" rel="noreferrer">
-                        <HiOutlineCloudArrowUp size={18} /> ملف الطالب الأصلي
-                    </a>
-                )}
-            </div>
-
+    const gradeFields = (
+        <>
             <div className="exam-grade-field">
                 <label>العلامة</label>
                 <div className="exam-grade-row">
@@ -285,18 +280,11 @@ export const TAExamGradingWorkspace = () => {
                     readOnly={isLocked}
                 />
             </div>
+        </>
+    )
 
-            {message && (
-                <p style={{
-                    fontSize: '0.88rem',
-                    color: message.includes('نجاح') || message.includes('فتح') ? '#059669' : '#dc2626',
-                    marginBottom: '10px',
-                    fontWeight: 700,
-                }}>
-                    {message}
-                </p>
-            )}
-
+    const saveActions = (
+        <div className="exam-grade-actions">
             {isLocked ? (
                 <button
                     type="button"
@@ -332,32 +320,122 @@ export const TAExamGradingWorkspace = () => {
                     </button>
                 </>
             )}
+        </div>
+    )
+
+    const gradePanelBody = (
+        <>
+            <div className="exam-grade-sidebar-head">
+                <h3>لوحة التصحيح</h3>
+                <button
+                    type="button"
+                    className="exam-grade-sidebar-close"
+                    onClick={() => setSidebarOpen(false)}
+                    aria-label="إغلاق"
+                >
+                    <HiOutlineXMark size={22} />
+                </button>
+            </div>
+
+            {isLocked && (
+                <div className="exam-grade-locked-banner">
+                    <HiOutlineLockClosed size={20} style={{ verticalAlign: 'middle', marginLeft: 6 }} />
+                    تم تصحيح هذه الورقة. للتعديل اضغط «إعادة تصحيح».
+                </div>
+            )}
+
+            {isMobile ? (
+                <div className="exam-grade-mobile-sections">
+                    <CollapsibleSection title="الملفات والمراجع" subtitle="أسئلة · نموذج · ملف الطالب">
+                        {fileLinks}
+                    </CollapsibleSection>
+
+                    <CollapsibleSection
+                        title="العلامة والملاحظات"
+                        subtitle={grade !== '' && grade !== null ? `العلامة: ${grade}/${exam.total_mark}` : 'أدخل العلامة والملاحظات'}
+                        badge={grade !== '' && grade !== null ? `${grade}/${exam.total_mark}` : null}
+                        defaultOpen
+                    >
+                        {gradeFields}
+                    </CollapsibleSection>
+
+                    {message && (
+                        <p className={`exam-grade-message ${message.includes('نجاح') || message.includes('فتح') ? 'success' : 'error'}`}>
+                            {message}
+                        </p>
+                    )}
+
+                    {saveActions}
+                </div>
+            ) : (
+                <>
+                    {fileLinks}
+                    {gradeFields}
+                    {message && (
+                        <p className={`exam-grade-message ${message.includes('نجاح') || message.includes('فتح') ? 'success' : 'error'}`}>
+                            {message}
+                        </p>
+                    )}
+                    {saveActions}
+                </>
+            )}
         </>
     )
 
     return (
-        <div className="exam-grading-page exam-grading-page--annotator">
-            <div className="exam-grading-header">
-                <div>
-                    <button type="button" className="exam-grading-back" onClick={() => navigate('/ta/exams')}>
-                        <HiOutlineArrowRight size={18} /> العودة
-                    </button>
-                    <h1 style={{ marginTop: '14px' }}>تصحيح — {submission.student_name}</h1>
-                    <p>{exam.title} · {exam.module_title}</p>
-                </div>
-                <div className="exam-grading-header-actions">
-                    <span className={`exam-grade-status ${statusClass}`}>
-                        {STATUS_LABELS[statusClass] || statusClass}
-                        {savingAnnotations && ' · جاري الحفظ...'}
-                    </span>
-                    <button
-                        type="button"
-                        className="exam-grade-panel-toggle"
-                        onClick={() => (sidebarOpen ? setSidebarOpen(false) : openGradePanel())}
-                    >
-                        {sidebarOpen ? 'إخفاء العلامة' : 'العلامة والحفظ'}
-                    </button>
-                </div>
+        <div className={`exam-grading-page exam-grading-page--annotator ${isMobile ? 'is-mobile' : ''}`}>
+            <div className={`exam-grading-header ${headerOpen ? 'expanded' : 'collapsed'}`}>
+                {isMobile ? (
+                    <>
+                        <button
+                            type="button"
+                            className="exam-grading-header-compact"
+                            onClick={() => setHeaderOpen((o) => !o)}
+                            aria-expanded={headerOpen}
+                        >
+                            <span className="exam-grading-header-compact-main">
+                                <strong>{submission.student_name}</strong>
+                                <span>{exam.title}</span>
+                            </span>
+                            <span className={`exam-grade-status ${statusClass}`}>
+                                {STATUS_LABELS[statusClass] || statusClass}
+                            </span>
+                            <HiOutlineChevronDown className="exam-grading-header-chevron" />
+                        </button>
+                        {headerOpen && (
+                            <div className="exam-grading-header-details">
+                                <button type="button" className="exam-grading-back" onClick={() => navigate('/ta/exams')}>
+                                    <HiOutlineArrowRight size={18} /> العودة للامتحانات
+                                </button>
+                                <p className="exam-grading-header-meta">{exam.module_title}</p>
+                                {savingAnnotations && <p className="exam-grading-saving-hint">جاري حفظ التعليقات...</p>}
+                            </div>
+                        )}
+                    </>
+                ) : (
+                    <>
+                        <div>
+                            <button type="button" className="exam-grading-back" onClick={() => navigate('/ta/exams')}>
+                                <HiOutlineArrowRight size={18} /> العودة
+                            </button>
+                            <h1 style={{ marginTop: '14px' }}>تصحيح — {submission.student_name}</h1>
+                            <p>{exam.title} · {exam.module_title}</p>
+                        </div>
+                        <div className="exam-grading-header-actions">
+                            <span className={`exam-grade-status ${statusClass}`}>
+                                {STATUS_LABELS[statusClass] || statusClass}
+                                {savingAnnotations && ' · جاري الحفظ...'}
+                            </span>
+                            <button
+                                type="button"
+                                className="exam-grade-panel-toggle"
+                                onClick={() => (sidebarOpen ? setSidebarOpen(false) : openGradePanel())}
+                            >
+                                {sidebarOpen ? 'إخفاء العلامة' : 'العلامة والحفظ'}
+                            </button>
+                        </div>
+                    </>
+                )}
             </div>
 
             {sidebarOpen && (

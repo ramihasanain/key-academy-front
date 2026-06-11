@@ -444,6 +444,146 @@
     border-top: 1px solid #e2e8f0;
 }
 
+.exam-annotator-mobile-panels {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 8px;
+    background: #0f172a;
+}
+
+.exam-annotator-locked-banner-mobile {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    background: rgba(16, 185, 129, 0.15);
+    color: #6ee7b7;
+    font-size: 0.85rem;
+    font-weight: 700;
+}
+
+.exam-annotator-zoom-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.exam-annotator-zoom-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 44px;
+    min-height: 44px;
+    padding: 8px 12px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, 0.08);
+    color: white;
+    font-weight: 800;
+    font-size: 0.82rem;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.exam-annotator-zoom-row .exam-annotator-zoom {
+    min-width: 56px;
+    color: #e2e8f0;
+    font-size: 1rem;
+}
+
+.exam-grade-message {
+    font-size: 0.88rem;
+    margin: 0 0 10px;
+    font-weight: 700;
+    line-height: 1.5;
+}
+
+.exam-grade-message.success { color: #059669; }
+.exam-grade-message.error { color: #dc2626; }
+
+.exam-grade-actions {
+    margin-top: 4px;
+}
+
+.exam-grade-mobile-sections {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.exam-grading-header-compact {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 12px 14px;
+    border: none;
+    background: white;
+    border-bottom: 1px solid #e2e8f0;
+    cursor: pointer;
+    font-family: inherit;
+    text-align: right;
+}
+
+.exam-grading-header-compact-main {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.exam-grading-header-compact-main strong {
+    font-size: 0.95rem;
+    color: #0f172a;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.exam-grading-header-compact-main span {
+    font-size: 0.78rem;
+    color: #64748b;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.exam-grading-header-chevron {
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+    color: #64748b;
+    transition: transform 0.2s ease;
+}
+
+.exam-grading-header.expanded .exam-grading-header-chevron {
+    transform: rotate(180deg);
+}
+
+.exam-grading-header-details {
+    padding: 0 12px 12px;
+    background: white;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.exam-grading-header-meta {
+    margin: 8px 0 0;
+    color: #64748b;
+    font-size: 0.85rem;
+}
+
+.exam-grading-saving-hint {
+    margin: 8px 0 0;
+    color: #6366f1;
+    font-size: 0.82rem;
+    font-weight: 700;
+}
+
 .exam-annotator-toolbar.mobile {
     position: static;
     bottom: auto;
@@ -522,21 +662,64 @@
 
 @media (max-width: 768px) {
     .exam-grading-page {
-        padding: 8px;
-        padding-bottom: calc(88px + env(safe-area-inset-bottom, 0px));
+        padding: 0;
+        padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px));
     }
 
     .exam-grading-page--annotator {
         padding: 0;
-        padding-bottom: calc(88px + env(safe-area-inset-bottom, 0px));
+        padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px));
+        min-height: 100vh;
+        min-height: 100dvh;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .exam-grading-page.is-mobile .exam-grading-layout {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+        gap: 0;
+    }
+
+    .exam-grading-page.is-mobile .exam-grading-main {
+        flex: 1;
+        min-height: 0;
+        display: flex;
+        flex-direction: column;
+        border-radius: 0;
+        border: none;
+        box-shadow: none;
+    }
+
+    .exam-grading-page.is-mobile .exam-annotator {
+        flex: 1;
+        min-height: 0;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .exam-grading-page.is-mobile .exam-annotator-stage {
+        flex: 1;
+        min-height: 0;
+        padding: 6px;
+        touch-action: pan-x pan-y pinch-zoom;
     }
 
     .exam-annotator-sticky-head {
         top: 0;
+        flex-shrink: 0;
     }
 
     .exam-grading-header {
-        padding: 10px 12px 0;
+        margin-bottom: 0;
+        padding: 0;
+        flex-shrink: 0;
+    }
+
+    .exam-grading-header.collapsed {
+        margin-bottom: 0;
     }
 
     .exam-grading-header h1 {
@@ -566,19 +749,19 @@
         justify-content: center;
         gap: 10px;
         position: fixed;
-        left: 16px;
-        right: 16px;
-        bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+        left: 12px;
+        right: 12px;
+        bottom: calc(12px + env(safe-area-inset-bottom, 0px));
         z-index: 10049;
-        padding: 14px 20px;
+        padding: 12px 16px;
         border: none;
-        border-radius: 16px;
+        border-radius: 14px;
         background: linear-gradient(135deg, #10b981, #059669);
         color: white;
         font-family: inherit;
-        font-size: 1rem;
+        font-size: 0.95rem;
         font-weight: 900;
-        box-shadow: 0 10px 30px rgba(16, 185, 129, 0.45);
+        box-shadow: 0 8px 24px rgba(16, 185, 129, 0.4);
         cursor: pointer;
     }
 
@@ -587,7 +770,7 @@
         background: rgba(255, 255, 255, 0.2);
         padding: 4px 10px;
         border-radius: 999px;
-        font-size: 0.88rem;
+        font-size: 0.85rem;
     }
 
     .exam-grading-sidebar {
@@ -597,13 +780,13 @@
         right: 0;
         bottom: 0;
         z-index: 10051;
-        max-height: 85vh;
-        max-height: 85dvh;
+        max-height: 88vh;
+        max-height: 88dvh;
         overflow-y: auto;
         -webkit-overflow-scrolling: touch;
         border-radius: 20px 20px 0 0;
         box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.2);
-        padding: 20px 20px calc(24px + env(safe-area-inset-bottom, 0px));
+        padding: 16px 16px calc(20px + env(safe-area-inset-bottom, 0px));
         animation: exam-grade-slide-up 0.25s ease;
     }
 
@@ -615,18 +798,80 @@
         display: inline-flex;
     }
 
-    .exam-grading-main {
-        border-radius: 14px;
-    }
-
-    .exam-annotator-toolbar {
-        flex-direction: column;
-        align-items: stretch;
-    }
-
-    .exam-annotator-tools,
-    .exam-annotator-actions {
+    .exam-annotator-mobile-panels .exam-annotator-tools {
         justify-content: center;
+        gap: 8px;
+    }
+
+    .exam-annotator-mobile-panels .exam-annotator-tools button {
+        min-width: 48px;
+        min-height: 48px;
+        flex: 1;
+        max-width: 72px;
+        justify-content: center;
+        background: rgba(255, 255, 255, 0.1);
+        border-color: rgba(255, 255, 255, 0.15);
+        color: white;
+    }
+
+    .exam-annotator-mobile-panels .exam-annotator-colors {
+        justify-content: center;
+        margin-top: 10px;
+    }
+
+    .exam-annotator-mobile-panels .exam-annotator-colors button {
+        width: 36px;
+        height: 36px;
+    }
+
+    .exam-annotator-mobile-panels .exam-annotator-actions {
+        margin-top: 10px;
+        justify-content: center;
+    }
+
+    .exam-annotator-mobile-panels .exam-annotator-actions button {
+        flex: 1;
+        min-height: 44px;
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        color: white;
+        border-radius: 10px;
+        font-weight: 700;
+        font-size: 0.82rem;
+        gap: 6px;
+    }
+
+    .exam-annotator-mobile-panels .exam-annotator-pager {
+        background: transparent;
+        border: none;
+        padding: 0;
+    }
+
+    .exam-annotator-mobile-panels .exam-annotator-pager button {
+        min-height: 44px;
+    }
+
+    .exam-annotator-hint {
+        flex-shrink: 0;
+        font-size: 0.78rem;
+        padding: 8px 12px;
+    }
+
+    .exam-grade-status {
+        margin-bottom: 0;
+        flex-shrink: 0;
+        font-size: 0.72rem;
+        padding: 4px 10px;
+    }
+
+    .exam-grade-save {
+        min-height: 48px;
+        font-size: 0.95rem;
+    }
+
+    .exam-grade-field input[type="number"],
+    .exam-grade-field textarea {
+        font-size: 16px;
     }
 }
 
