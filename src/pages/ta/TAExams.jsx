@@ -24,8 +24,10 @@ export const TAExams = () => {
     const [loading, setLoading] = useState(true)
     const [selectedExam, setSelectedExam] = useState(null)
     const [submissions, setSubmissions] = useState([])
+    const [notSubmittedStudents, setNotSubmittedStudents] = useState([])
     const [loadingSubs, setLoadingSubs] = useState(false)
     const [reopeningId, setReopeningId] = useState(null)
+    const [activeStatList, setActiveStatList] = useState(null)
 
     useEffect(() => {
         const fetchExams = async () => {
@@ -56,7 +58,9 @@ export const TAExams = () => {
             if (res.ok) {
                 const data = await res.json()
                 setSubmissions(data.submissions)
+                setNotSubmittedStudents(data.not_submitted_students || [])
                 setSelectedExam(data.exam)
+                setActiveStatList(null)
             }
         } catch (err) {
             console.error(err)
@@ -94,6 +98,28 @@ export const TAExams = () => {
 
     const isGraded = (sub) => sub.grading_status === 'graded' || sub.grade != null
 
+    const statLists = {
+        submitted: {
+            title: 'الطلاب الذين سلّموا',
+            names: submissions.map((s) => s.student_name).sort((a, b) => a.localeCompare(b, 'ar')),
+        },
+        not_submitted: {
+            title: 'الطلاب الذين لم يسلّموا',
+            names: notSubmittedStudents.map((s) => s.student_name),
+        },
+        graded: {
+            title: 'الطلاب الذين تم تصحيحهم',
+            names: submissions
+                .filter((s) => s.grade != null)
+                .map((s) => s.student_name)
+                .sort((a, b) => a.localeCompare(b, 'ar')),
+        },
+    }
+
+    const toggleStatList = (key) => {
+        setActiveStatList((prev) => (prev === key ? null : key))
+    }
+
     if (loading) return <div className="ta-loading">جاري جلب قائمة الامتحانات...</div>
 
     return (
@@ -129,10 +155,49 @@ export const TAExams = () => {
 
                     <div className="ta-exams-stats">
                         <div className="stat blue"><b>{selectedExam.total_students || 0}</b><span>إجمالي الطلاب</span></div>
-                        <div className="stat green"><b>{submissions.length}</b><span>تم التسليم</span></div>
-                        <div className="stat red"><b>{Math.max(0, (selectedExam.total_students || 0) - submissions.length)}</b><span>لم يسلم</span></div>
-                        <div className="stat yellow"><b>{submissions.filter((s) => s.grade != null).length}</b><span>تم التصحيح</span></div>
+                        <button
+                            type="button"
+                            className={`stat green clickable ${activeStatList === 'submitted' ? 'active' : ''}`}
+                            onClick={() => toggleStatList('submitted')}
+                        >
+                            <b>{submissions.length}</b>
+                            <span>تم التسليم</span>
+                        </button>
+                        <button
+                            type="button"
+                            className={`stat red clickable ${activeStatList === 'not_submitted' ? 'active' : ''}`}
+                            onClick={() => toggleStatList('not_submitted')}
+                        >
+                            <b>{notSubmittedStudents.length}</b>
+                            <span>لم يسلم</span>
+                        </button>
+                        <button
+                            type="button"
+                            className={`stat yellow clickable ${activeStatList === 'graded' ? 'active' : ''}`}
+                            onClick={() => toggleStatList('graded')}
+                        >
+                            <b>{submissions.filter((s) => s.grade != null).length}</b>
+                            <span>تم التصحيح</span>
+                        </button>
                     </div>
+
+                    {activeStatList && (
+                        <div className={`ta-exams-stat-list ta-exams-stat-list--${activeStatList}`}>
+                            <div className="ta-exams-stat-list-head">
+                                <strong>{statLists[activeStatList].title}</strong>
+                                <span>{statLists[activeStatList].names.length} طالب</span>
+                            </div>
+                            {statLists[activeStatList].names.length === 0 ? (
+                                <p className="ta-exams-stat-list-empty">لا يوجد طلاب في هذه القائمة.</p>
+                            ) : (
+                                <ul className="ta-exams-stat-list-names">
+                                    {statLists[activeStatList].names.map((name, idx) => (
+                                        <li key={`${activeStatList}-${name}-${idx}`}>{name}</li>
+                                    ))}
+                                </ul>
+                            )}
+                        </div>
+                    )}
 
                     {submissions.length === 0 ? (
                         <p className="ta-exams-empty">لا يوجد تسليمات بعد.</p>
