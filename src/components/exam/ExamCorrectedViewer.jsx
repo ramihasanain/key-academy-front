@@ -3,22 +3,9 @@ import { ExamPaperAnnotator } from './ExamPaperAnnotator'
 import { hasGradingAnnotations } from './examAnnotatorUtils'
 import '../../pages/ta/TAExamGrading.css'
 
-function useMediaQuery(query) {
-    const [matches, setMatches] = React.useState(() =>
-        typeof window !== 'undefined' ? window.matchMedia(query).matches : false,
-    )
-    React.useEffect(() => {
-        const mq = window.matchMedia(query)
-        const handler = () => setMatches(mq.matches)
-        handler()
-        mq.addEventListener('change', handler)
-        return () => mq.removeEventListener('change', handler)
-    }, [query])
-    return matches
-}
-
 /**
  * عرض الورقة المصححة للطالب — يدعم PDF/صور/ZIP متعدد + تعليقات المساعد.
+ * الأولوية: أوراق الطالب + grading_data → صور مصحّحة + grading_data → رابط احتياطي.
  */
 export const ExamCorrectedViewer = ({
     pages = [],
@@ -27,33 +14,21 @@ export const ExamCorrectedViewer = ({
     correctedUrl = null,
     authToken = null,
 }) => {
-    const isMobile = useMediaQuery('(max-width: 768px)')
     const hasAnnotations = hasGradingAnnotations(gradingData)
-    const hasBakedCorrected = correctedPages?.some((p) => p.type === 'image')
-
-    // نسخة مصوّرة مرفوعة — احتياط للموبايل عند PDF أحادي الصفحة
-    const isSinglePdfSubmission = pages.length === 1 && pages[0]?.type === 'pdf'
-    if (isMobile && isSinglePdfSubmission && hasBakedCorrected && correctedPages.length === 1) {
-        return (
-            <ExamPaperAnnotator
-                pages={correctedPages}
-                readOnly
-                authToken={authToken}
-            />
-        )
-    }
+    const overlayData = hasAnnotations ? gradingData : {}
 
     if (pages?.length) {
         return (
             <ExamPaperAnnotator
                 pages={pages}
-                gradingData={hasAnnotations ? gradingData : {}}
+                gradingData={overlayData}
                 readOnly
                 authToken={authToken}
             />
         )
     }
 
+  // صور من corrected_file — التصحيح مدمج في الصورة (لا نكرّر الـ overlay)
     if (correctedPages?.length) {
         return (
             <ExamPaperAnnotator

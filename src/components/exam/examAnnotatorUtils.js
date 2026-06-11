@@ -23,14 +23,25 @@ export function resolvePageAnnotations(pages, pageKey, { fileIndex, pdfSubPage, 
     const direct = pages[pageKey]
     if (Array.isArray(direct) && direct.length) return direct
 
+    const fileKey = fileIndex != null ? String(fileIndex) : null
+    if (fileKey) {
+        const byIndex = pages[fileKey]
+        if (Array.isArray(byIndex) && byIndex.length) {
+            if (!isPdf || pdfSubPage == null || pdfSubPage === 1) return byIndex
+        }
+    }
+
     if (!isPdf || fileIndex == null || pdfSubPage == null) return EMPTY_ANNOTATIONS
 
-    const legacyFileKey = String(fileIndex)
-    const legacy = pages[legacyFileKey]
-    if (!Array.isArray(legacy) || !legacy.length) return EMPTY_ANNOTATIONS
+    const prefix = `${fileIndex}-p`
+    const fromSub = pages[`${fileIndex}-p${pdfSubPage}`]
+    if (Array.isArray(fromSub) && fromSub.length) return fromSub
 
-    const hasSubPageKeys = Object.keys(pages).some((k) => k.includes('-p'))
-    if (!hasSubPageKeys || pdfSubPage === 1) return legacy
+    const hasSubPageKeys = Object.keys(pages).some((k) => k.startsWith(prefix))
+    const legacy = pages[fileKey]
+    if (Array.isArray(legacy) && legacy.length && (!hasSubPageKeys || pdfSubPage === 1)) {
+        return legacy
+    }
     return EMPTY_ANNOTATIONS
 }
 
