@@ -18,26 +18,36 @@ export const WeeklyExamPortal = () => {
     // Countdown states
     const [timeLeftStr, setTimeLeftStr] = useState('')
     
-    useEffect(() => {
-        const fetchPortal = async () => {
-            const tk = localStorage.getItem('access_token')
-            try {
-                const res = await fetch(`${API}/api/interactions/exams/student-portal/${examId}/`, {
-                    headers: { 'Authorization': `Bearer ${tk}` }
-                })
-                if (res.ok) {
-                    const data = await res.json()
-                    setExam(data)
-                } else {
-                    const err = await res.json()
-                    setErrorMsg(err.error || 'خطأ في جلب بيانات الامتحان.')
+    const fetchPortal = async ({ silent = false } = {}) => {
+        const tk = localStorage.getItem('access_token')
+        if (!silent) setLoading(true)
+        try {
+            const res = await fetch(
+                `${API}/api/interactions/exams/student-portal/${examId}/?t=${Date.now()}`,
+                {
+                    headers: {
+                        'Authorization': `Bearer ${tk}`,
+                        'Cache-Control': 'no-cache',
+                    },
+                    cache: 'no-store',
                 }
-            } catch (err) {
-                setErrorMsg('فشل الاتصال بالخادم. تأكد من إنترنتك.')
-            } finally {
-                setLoading(false)
+            )
+            if (res.ok) {
+                const data = await res.json()
+                setExam(data)
+                setErrorMsg('')
+            } else {
+                const err = await res.json()
+                setErrorMsg(err.error || 'خطأ في جلب بيانات الامتحان.')
             }
+        } catch (err) {
+            setErrorMsg('فشل الاتصال بالخادم. تأكد من إنترنتك.')
+        } finally {
+            if (!silent) setLoading(false)
         }
+    }
+
+    useEffect(() => {
         fetchPortal()
     }, [examId])
     
@@ -115,8 +125,8 @@ export const WeeklyExamPortal = () => {
             })
             
             if (res.ok) {
-                // Success! Refresh
-                window.location.reload()
+                setFileOptions([])
+                await fetchPortal({ silent: true })
             } else {
                 const err = await res.json()
                 setErrorMsg(err.error || 'حدث خطأ أثناء الرفع')
@@ -331,15 +341,27 @@ export const WeeklyExamPortal = () => {
                         )}
 
                         {hasSubmitted && (
-                            <div style={{ background: 'white', borderRadius: '16px', padding: '30px 20px', boxShadow: '0 4px 15px rgba(0,0,0,0.02)', border: '1px solid #e2e8f0', textAlign: 'center' }}>
-                                <HiOutlineDocumentText size={50} color="#cbd5e1" style={{ marginBottom: '15px' }} />
-                                <h3 style={{ margin: 0, fontSize: '1.1rem', color: '#475569', marginBottom: '10px' }}>ملفك المرفوع</h3>
-                                <p style={{ fontSize: '0.85rem', color: '#94a3b8', margin: 0, marginBottom: '20px' }}>لا يمكنك تعديل الملف بعد أن تم إرساله وحفظه في النظام.</p>
-                                {exam.submission.file_url ? (
-                                    <a href={exam.submission.file_url} target="_blank" rel="noreferrer" style={{ display: 'inline-block', background: '#eff6ff', color: '#3b82f6', textDecoration: 'none', padding: '10px 20px', borderRadius: '10px', fontSize: '0.9rem', fontWeight: 'bold' }}>معاينة حلك المرفوع</a>
-                                ) : (
-                                    <span style={{ color: '#94a3b8' }}>لا يوجد ملف مرفق</span>
-                                )}
+                            <div className="exam-student-card exam-student-submitted-card">
+                                <div className="exam-student-card-header green">
+                                    <HiOutlineDocumentText size={24} />
+                                    <h3>إجابتك المرسلة</h3>
+                                </div>
+                                <div className="exam-student-card-body">
+                                    <p className="exam-student-multi-hint">
+                                        لا يمكنك تعديل الملف بعد التسليم. استخدم التبويبات للتنقل بين الصفحات إن وُجدت.
+                                    </p>
+                                    {(exam.submission.submission_pages?.length || exam.submission.file_url) ? (
+                                        <div className="exam-student-viewer-wrap">
+                                            <ExamModelAnswerViewer
+                                                pages={exam.submission.submission_pages || []}
+                                                url={exam.submission.file_url}
+                                                authToken={localStorage.getItem('access_token')}
+                                            />
+                                        </div>
+                                    ) : (
+                                        <p className="exam-student-empty">لا يوجد ملف مرفق</p>
+                                    )}
+                                </div>
                             </div>
                         )}
                         

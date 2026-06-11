@@ -93,6 +93,15 @@
         gap: 16px;
     }
 
+  /* إجابتك المرسلة تظهر مباشرة بعد رسالة النجاح على الموبايل */
+    .exam-student-grid > :last-child {
+        order: -1;
+    }
+
+    .exam-student-submitted-card {
+        border: 2px solid #10b981;
+    }
+
     .exam-student-portal h1 {
         font-size: 1.35rem !important;
     }
