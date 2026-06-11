@@ -2,14 +2,41 @@
  * أدوات التصحيح — إحداثيات نسبية (0–1) لتعمل على الويب والموبايل.
  */
 
+import { pdfjs } from 'react-pdf'
 import { ensureSecureUrl } from '../../config'
 
+pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`
+
 export const GRADING_DATA_VERSION = 2
+
+const EMPTY_ANNOTATIONS = []
 
 export function normalizePages(data) {
     if (!data || typeof data !== 'object') return {}
     if (data.pages && typeof data.pages === 'object') return data.pages
     return data
+}
+
+/** يجمع مفاتيح التعليقات مع دعم الصيغ القديمة (مثل "0" بدل "0-p1"). */
+export function resolvePageAnnotations(pages, pageKey, { fileIndex, pdfSubPage, isPdf } = {}) {
+    if (!pages || typeof pages !== 'object') return EMPTY_ANNOTATIONS
+    const direct = pages[pageKey]
+    if (Array.isArray(direct) && direct.length) return direct
+
+    if (!isPdf || fileIndex == null || pdfSubPage == null) return EMPTY_ANNOTATIONS
+
+    const legacyFileKey = String(fileIndex)
+    const legacy = pages[legacyFileKey]
+    if (!Array.isArray(legacy) || !legacy.length) return EMPTY_ANNOTATIONS
+
+    const hasSubPageKeys = Object.keys(pages).some((k) => k.includes('-p'))
+    if (!hasSubPageKeys || pdfSubPage === 1) return legacy
+    return EMPTY_ANNOTATIONS
+}
+
+export function hasGradingAnnotations(gradingData) {
+    const pages = normalizePages(gradingData)
+    return Object.values(pages).some((arr) => Array.isArray(arr) && arr.length > 0)
 }
 
 export function isNormalizedAnnotation(ann) {
@@ -144,6 +171,46 @@ export async function loadFileForViewer(url, token) {
 export async function loadFileAsBlobUrl(url, token) {
     const loaded = await loadFileForViewer(url, token)
     return loaded?.url || url
+}
+
+/** تصدير PDF مع التعليقات عبر pdf.js — يعمل لكل الصفحات بدون الاعتماد على DOM. */
+export async function exportPdfWithAnnotations({ url, token, fileIndex, gradingData, numPages }) {
+    const loaded = await loadFileForViewer(url, token)
+    if (!loaded) return []
+
+    const annotationPages = normalizePages(gradingData)
+    const doc = await pdfjs.getDocument(
+        loaded.data ? { data: loaded.data } : loaded.url,
+    ).promise
+    const total = numPages || doc.numPages
+    const blobs = []
+
+    for (let pageNum = 1; pageNum <= total; pageNum += 1) {
+        const page = await doc.getPage(pageNum)
+        const viewport = page.getViewport({ scale: 2 })
+        const canvas = document.createElement('canvas')
+        canvas.width = Math.max(1, Math.floor(viewport.width))
+        canvas.height = Math.max(1, Math.floor(viewport.height))
+        const ctx = canvas.getContext('2d')
+        ctx.fillStyle = '#ffffff'
+        ctx.fillRect(0, 0, canvas.width, canvas.height)
+        await page.render({ canvasContext: ctx, viewport }).promise
+
+        const pageKey = `${fileIndex}-p${pageNum}`
+        const anns = resolvePageAnnotations(annotationPages, pageKey, {
+            fileIndex,
+            pdfSubPage: pageNum,
+            isPdf: true,
+        })
+        anns.forEach((ann) => drawAnnotation(ctx, ann, canvas.width, canvas.height))
+
+        const blob = await new Promise((resolve) => {
+            canvas.toBlob((b) => resolve(b), 'image/png', 0.92)
+        })
+        if (blob) blobs.push(blob)
+    }
+
+    return blobs
 }
 
 export function exportAnnotatedPages(pageElements) {

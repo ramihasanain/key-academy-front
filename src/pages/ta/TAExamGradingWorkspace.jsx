@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { API } from '../../config'
 import { ExamPaperAnnotator, exportAnnotatedPages } from '../../components/exam/ExamPaperAnnotator'
+import { exportPdfWithAnnotations, hasGradingAnnotations } from '../../components/exam/examAnnotatorUtils'
 import { CollapsibleSection } from '../../components/CollapsibleSection'
 import '../../components/CollapsibleSection.css'
 import {
@@ -139,27 +140,40 @@ export const TAExamGradingWorkspace = () => {
         }
     }
 
-    const uploadCorrectedBlob = async (blob) => {
+    const uploadCorrectedBlob = async (blob, filename = `corrected_${submissionId}.png`) => {
         const fd = new FormData()
-        fd.append('file', blob, `corrected_${submissionId}.png`)
-        await fetch(`${API}/api/interactions/exams/ta-upload-corrected/${submissionId}/`, {
+        fd.append('file', blob, filename)
+        const res = await fetch(`${API}/api/interactions/exams/ta-upload-corrected/${submissionId}/`, {
             method: 'POST',
             headers: authHeaders(),
             body: fd,
         })
+        if (!res.ok) {
+            const err = await res.json().catch(() => ({}))
+            throw new Error(err.error || 'فشل رفع الورقة المصححة')
+        }
     }
 
-    const exportAndUploadCorrected = async () => {
+    const exportAndUploadCorrected = async (pagesList, data) => {
+        const pdfPage = pagesList?.find((p) => p.type === 'pdf')
+        if (pdfPage) {
+            const blobs = await exportPdfWithAnnotations({
+                url: pdfPage.url,
+                token: authToken,
+                fileIndex: pdfPage.index,
+                gradingData: data,
+            })
+            if (blobs[0]) {
+                await uploadCorrectedBlob(blobs[0])
+            }
+            return
+        }
+
         const refs = pageRefsRef.current.filter((r) => r?.wrap)
         if (!refs.length) return
         const blobs = await exportAnnotatedPages(refs)
-        if (blobs.length === 1 && blobs[0]) {
-            await uploadCorrectedBlob(blobs[0])
-            return
-        }
-        if (blobs.length > 1) {
-            await uploadCorrectedBlob(blobs[0])
-        }
+        const first = blobs.find(Boolean)
+        if (first) await uploadCorrectedBlob(first)
     }
 
     const saveGrade = async () => {
@@ -179,10 +193,8 @@ export const TAExamGradingWorkspace = () => {
             if (saveTimerRef.current) clearTimeout(saveTimerRef.current)
             await saveAnnotations(gradingData)
 
-            const refs = pageRefsRef.current.filter((r) => r?.wrap)
-            const hasAnnotations = Object.values(gradingData.pages || {}).some((arr) => arr?.length)
-            if (hasAnnotations && refs.length) {
-                await exportAndUploadCorrected()
+            if (hasGradingAnnotations(gradingData)) {
+                await exportAndUploadCorrected(pages, gradingData)
             }
 
             const res = await fetch(`${API}/api/interactions/exams/ta-grade/${submissionId}/`, {

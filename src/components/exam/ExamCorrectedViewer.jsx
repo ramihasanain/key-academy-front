@@ -1,10 +1,11 @@
 import React from 'react'
 import { ExamPaperAnnotator } from './ExamPaperAnnotator'
+import { hasGradingAnnotations } from './examAnnotatorUtils'
 import '../../pages/ta/TAExamGrading.css'
 
 /**
  * عرض الورقة المصححة للطالب — يدعم PDF/صور/ZIP متعدد + تعليقات المساعد.
- * الأولوية: submission_pages + grading_data → corrected_pages → رابط احتياطي.
+ * الأولوية: تعليقات على أوراق الطالب → نسخة مصوّرة مرفوعة → رابط احتياطي.
  */
 export const ExamCorrectedViewer = ({
     pages = [],
@@ -13,11 +14,13 @@ export const ExamCorrectedViewer = ({
     correctedUrl = null,
     authToken = null,
 }) => {
+    const hasAnnotations = hasGradingAnnotations(gradingData)
+
     if (pages?.length) {
         return (
             <ExamPaperAnnotator
                 pages={pages}
-                gradingData={gradingData || {}}
+                gradingData={hasAnnotations ? gradingData : {}}
                 readOnly
                 authToken={authToken}
             />

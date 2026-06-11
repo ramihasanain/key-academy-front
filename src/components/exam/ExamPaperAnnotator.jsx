@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Document, Page, pdfjs } from 'react-pdf'
 import 'react-pdf/dist/Page/AnnotationLayer.css'
 import 'react-pdf/dist/Page/TextLayer.css'
@@ -19,6 +19,7 @@ import {
 import {
     GRADING_DATA_VERSION,
     normalizePages,
+    resolvePageAnnotations,
     redrawCanvas,
     normalizeStrokeForSave,
     normalizeMarkForSave,
@@ -58,7 +59,7 @@ function useMediaQuery(query) {
     return matches
 }
 
-function PdfPageView({ url, pageNumber, scale, token, onNumPages, onRenderSuccess }) {
+function PdfPageView({ url, pageNumber, scale, token, onNumPages, onRenderSuccess, onRenderSchedule }) {
     const [pdfSource, setPdfSource] = useState(null)
     const [loadError, setLoadError] = useState(false)
 
@@ -119,7 +120,10 @@ function PdfPageView({ url, pageNumber, scale, token, onNumPages, onRenderSucces
                 width={Math.min(typeof window !== 'undefined' ? window.innerWidth - 48 : 900, 900) * scale}
                 renderTextLayer={false}
                 renderAnnotationLayer={false}
-                onRenderSuccess={onRenderSuccess}
+                onRenderSuccess={() => {
+                    onRenderSuccess?.()
+                    onRenderSchedule?.()
+                }}
             />
         </Document>
     )
@@ -165,7 +169,14 @@ export const ExamPaperAnnotator = ({
     const pageKey = isPdf
         ? `${activePage.index}-p${pdfSubPage}`
         : String(activePage?.index ?? currentPage)
-    const pageAnnotations = localPages[pageKey] || []
+    const pageAnnotations = useMemo(
+        () => resolvePageAnnotations(localPages, pageKey, {
+            fileIndex: activePage?.index,
+            pdfSubPage,
+            isPdf,
+        }),
+        [localPages, pageKey, activePage?.index, pdfSubPage, isPdf],
+    )
 
     useEffect(() => {
         setPdfSubPage(1)
@@ -212,18 +223,23 @@ export const ExamPaperAnnotator = ({
         }
     }, [pageKey, pageAnnotations])
 
-    useEffect(() => {
-        const t = setTimeout(syncCanvasSize, 80)
-        return () => clearTimeout(t)
-    }, [syncCanvasSize, currentPage, pdfSubPage, scale, fullscreen])
+    const scheduleCanvasSync = useCallback(() => {
+        const delays = [0, 80, 200, 500, 1000]
+        const timers = delays.map((ms) => setTimeout(syncCanvasSize, ms))
+        return () => timers.forEach(clearTimeout)
+    }, [syncCanvasSize])
+
+    useEffect(() => scheduleCanvasSync(), [scheduleCanvasSync, currentPage, pdfSubPage, scale, fullscreen, pageAnnotations])
 
     useEffect(() => {
         const wrap = wrapRefs.current[pageKey]
         if (!wrap || typeof ResizeObserver === 'undefined') return undefined
         const observer = new ResizeObserver(() => syncCanvasSize())
         observer.observe(wrap)
+        const pdfCanvas = wrap.querySelector('.react-pdf__Page canvas')
+        if (pdfCanvas) observer.observe(pdfCanvas)
         return () => observer.disconnect()
-    }, [pageKey, syncCanvasSize])
+    }, [pageKey, syncCanvasSize, isPdf, pdfNumPages])
 
     useEffect(() => {
         const stage = stageRef.current
@@ -422,6 +438,7 @@ export const ExamPaperAnnotator = ({
                     token={authToken}
                     onNumPages={setPdfNumPages}
                     onRenderSuccess={syncCanvasSize}
+                    onRenderSchedule={scheduleCanvasSync}
                 />
             )
         }
