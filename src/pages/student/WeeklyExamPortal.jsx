@@ -23,11 +23,10 @@ export const WeeklyExamPortal = () => {
         if (!silent) setLoading(true)
         try {
             const res = await fetch(
-                `${API}/api/interactions/exams/student-portal/${examId}/?t=${Date.now()}`,
+                `${API}/api/interactions/exams/student-portal/${examId}/`,
                 {
                     headers: {
                         'Authorization': `Bearer ${tk}`,
-                        'Cache-Control': 'no-cache',
                     },
                     cache: 'no-store',
                 }

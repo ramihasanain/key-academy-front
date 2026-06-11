@@ -19,6 +19,13 @@ if (typeof URL.parse !== 'function') {
   };
 }
 
+// إزالة Service Worker قديم يعترض طلبات API ويسبب CORS (sw.js في Network)
+if (typeof navigator !== 'undefined' && 'serviceWorker' in navigator) {
+  navigator.serviceWorker.getRegistrations().then((regs) => {
+    regs.forEach((reg) => reg.unregister())
+  }).catch(() => {})
+}
+
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
