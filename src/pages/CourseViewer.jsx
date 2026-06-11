@@ -38,6 +38,10 @@ import './LessonViewer.css' // Import styling to make Chat fully identical
 
 const courseViewerRequestCache = new Map()
 
+export const invalidateCourseViewerCache = () => {
+    courseViewerRequestCache.clear()
+}
+
 /* ======== COURSE WEBSOCKET CHAT ======== */
 const CourseChatDrawer = ({ courseId, userData, onClose, readOnly = false }) => {
     return (
@@ -160,6 +164,27 @@ const CourseViewer = () => {
                 setLoading(false)
             })
     }, [slug])
+
+    // تحديث حالة التسليم عند فتح تبويب الامتحانات (بعد التسليم من الموبايل مثلاً)
+    useEffect(() => {
+        if (activeTab !== 'exams' || !slug) return
+        const token = localStorage.getItem('access_token')
+        const requestedCourseId = slug || 1
+        const cacheKey = `${API}/api/v1/courses/${requestedCourseId}/::${token && token !== 'undefined' && token !== 'null' ? 'auth' : 'anon'}`
+        courseViewerRequestCache.delete(cacheKey)
+        fetch(`${API}/api/v1/courses/${requestedCourseId}/?_=${Date.now()}`, {
+            headers: token && token !== 'undefined' && token !== 'null' ? { Authorization: `Bearer ${token}` } : {},
+            cache: 'no-store',
+        })
+            .then((res) => (res.ok ? res.json() : null))
+            .then((data) => {
+                if (data) {
+                    courseViewerRequestCache.set(cacheKey, { data })
+                    setCourseData(data)
+                }
+            })
+            .catch(() => {})
+    }, [activeTab, slug])
 
     useEffect(() => {
         const handleScroll = () => {
@@ -568,7 +593,7 @@ const CourseViewer = () => {
                                 ) : (
                                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '20px' }}>
                                         {allExams.map(exam => {
-                                            const isSubmitted = !!exam.submission;
+                                            const isSubmitted = !!(exam.submission?.id || exam.submission?.submitted_at);
                                             return (
                                                 <div key={exam.id} style={{ background: 'white', borderRadius: '20px', padding: '24px', boxShadow: '0 8px 30px rgba(0,0,0,0.04)', border: isSubmitted ? '2px solid #10b981' : '1px solid rgba(0,0,0,0.05)', display: 'flex', flexDirection: 'column' }}>
                                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '15px' }}>
@@ -598,7 +623,10 @@ const CourseViewer = () => {
                                                     
                                                     {!isSubmitted && (
                                                         <button 
-                                                            onClick={() => navigate(`/student/exam/${exam.id}`)}
+                                                            onClick={() => {
+                                                                invalidateCourseViewerCache()
+                                                                navigate(`/student/exam/${exam.id}`)
+                                                            }}
                                                             style={{ width: '100%', marginTop: '20px', padding: '14px', background: 'linear-gradient(135deg, var(--primary), var(--secondary))', color: 'white', border: 'none', borderRadius: '14px', fontWeight: 'bold', fontSize: '1.05rem', cursor: 'pointer', transition: 'transform 0.2s', boxShadow: '0 4px 15px rgba(99, 102, 241, 0.4)' }}
                                                             onMouseOver={e => e.currentTarget.style.transform = 'translateY(-2px)'}
                                                             onMouseOut={e => e.currentTarget.style.transform = 'translateY(0)'}
@@ -608,7 +636,10 @@ const CourseViewer = () => {
                                                     )}
                                                     {isSubmitted && (
                                                         <button 
-                                                            onClick={() => navigate(`/student/exam/${exam.id}`)}
+                                                            onClick={() => {
+                                                                invalidateCourseViewerCache()
+                                                                navigate(`/student/exam/${exam.id}`)
+                                                            }}
                                                             style={{ width: '100%', marginTop: '20px', padding: '12px', background: 'white', color: '#10b981', border: '2px solid #10b981', borderRadius: '14px', fontWeight: 'bold', fontSize: '1rem', cursor: 'pointer', transition: 'background 0.2s' }}
                                                             onMouseOver={e => {e.currentTarget.style.background = '#10b981'; e.currentTarget.style.color = 'white'}}
                                                             onMouseOut={e => {e.currentTarget.style.background = 'white'; e.currentTarget.style.color = '#10b981'}}

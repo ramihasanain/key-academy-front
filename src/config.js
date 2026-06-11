@@ -48,6 +48,10 @@ window.fetch = async function(...args) {
              if (currentToken) config.headers['Authorization'] = `Bearer ${currentToken}`;
         }
 
+        if (!config.cache) {
+            config.cache = 'no-store';
+        }
+
         let response = await originalFetch(resource, config);
         
         // If unauthorized, attempt to use the refresh token

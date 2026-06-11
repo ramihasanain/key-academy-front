@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { API } from '../../config'
 import { HiOutlineArrowRight, HiOutlineDocumentText, HiOutlineClock, HiOutlineCloudArrowUp, HiOutlineCheckCircle, HiOutlineExclamationCircle, HiOutlineInformationCircle, HiOutlineAcademicCap, HiOutlinePencilSquare } from 'react-icons/hi2'
@@ -18,15 +18,18 @@ export const WeeklyExamPortal = () => {
     // Countdown states
     const [timeLeftStr, setTimeLeftStr] = useState('')
     
-    const fetchPortal = async ({ silent = false } = {}) => {
+    const fetchPortal = useCallback(async ({ silent = false } = {}) => {
         const tk = localStorage.getItem('access_token')
         if (!silent) setLoading(true)
         try {
             const res = await fetch(
-                `${API}/api/interactions/exams/student-portal/${examId}/`,
+                `${API}/api/interactions/exams/student-portal/${examId}/?_=${Date.now()}`,
                 {
+                    method: 'GET',
                     headers: {
                         'Authorization': `Bearer ${tk}`,
+                        'Cache-Control': 'no-cache',
+                        'Pragma': 'no-cache',
                     },
                     cache: 'no-store',
                 }
@@ -36,7 +39,7 @@ export const WeeklyExamPortal = () => {
                 setExam(data)
                 setErrorMsg('')
             } else {
-                const err = await res.json()
+                const err = await res.json().catch(() => ({}))
                 setErrorMsg(err.error || 'خطأ في جلب بيانات الامتحان.')
             }
         } catch (err) {
@@ -44,11 +47,31 @@ export const WeeklyExamPortal = () => {
         } finally {
             if (!silent) setLoading(false)
         }
-    }
+    }, [examId])
 
     useEffect(() => {
         fetchPortal()
-    }, [examId])
+    }, [fetchPortal])
+
+    // إعادة الجلب عند العودة للتبويب (مثلاً بعد التسليم من الموبايل)
+    useEffect(() => {
+        const onVisible = () => {
+            if (document.visibilityState === 'visible') {
+                fetchPortal({ silent: true })
+            }
+        }
+        const onPageShow = (e) => {
+            if (e.persisted) fetchPortal({ silent: true })
+        }
+        document.addEventListener('visibilitychange', onVisible)
+        window.addEventListener('pageshow', onPageShow)
+        window.addEventListener('focus', onVisible)
+        return () => {
+            document.removeEventListener('visibilitychange', onVisible)
+            window.removeEventListener('pageshow', onPageShow)
+            window.removeEventListener('focus', onVisible)
+        }
+    }, [fetchPortal])
     
     useEffect(() => {
         if (!exam) return;
@@ -140,7 +163,9 @@ export const WeeklyExamPortal = () => {
     if (loading) return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', background: '#f8fafc', color: '#64748b' }}>جاري تحميل بوابة الامتحان...</div>
     if (errorMsg && !exam) return <div style={{ padding: '40px', textAlign: 'center', color: '#ef4444' }}>{errorMsg} <br/><button onClick={() => navigate(-1)} style={{ marginTop: '20px', padding: '10px 20px', background: '#e2e8f0', borderRadius: '10px', border: 'none', cursor: 'pointer' }}>العودة</button></div>
     
-    const hasSubmitted = !!exam?.submission;
+    const hasSubmitted = Boolean(
+        exam?.has_submitted || exam?.submission?.id || exam?.submission?.submitted_at
+    );
     
     return (
         <div className="exam-student-portal">
