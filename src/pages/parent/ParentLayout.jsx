@@ -97,7 +97,7 @@ const ParentLayoutShell = () => {
                 <div className="parent-welcome-card">
                     <div className="parent-student-avatar">{studentInitial}</div>
                     <div className="parent-welcome-text">
-                        <span className="parent-welcome-label">أهلاً بولي أمر الطالب</span>
+                        <span className="parent-welcome-label">أهلاً ولي أمر الطالب</span>
                         <strong className="parent-student-name">{studentName}</strong>
                     </div>
                 </div>
@@ -140,7 +140,7 @@ const ParentLayoutShell = () => {
                         <HiOutlineBars3 />
                     </button>
                     <div className="parent-topbar-center">
-                        <span className="parent-topbar-greeting">أهلاً بولي أمر الطالب</span>
+                        <span className="parent-topbar-greeting">أهلاً ولي أمر الطالب</span>
                         <strong>{studentName}</strong>
                     </div>
                     <div className="parent-topbar-avatar">{studentInitial}</div>
