@@ -1,0 +1,198 @@
+.parent-perf-page {
+    color: #e2e8f0;
+}
+
+.parent-perf-header h2 {
+    margin: 0 0 8px;
+    font-size: 1.45rem;
+    font-weight: 800;
+}
+
+.parent-perf-header p {
+    margin: 0 0 24px;
+    color: #94a3b8;
+    font-size: 0.95rem;
+}
+
+.parent-course-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 20px;
+}
+
+.parent-course-card {
+    position: relative;
+    border-radius: 18px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(15, 23, 42, 0.6);
+    cursor: pointer;
+    text-align: right;
+    color: inherit;
+    padding: 0;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.parent-course-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 16px 40px rgba(56, 189, 248, 0.15);
+}
+
+.parent-course-card:disabled {
+    opacity: 0.7;
+    cursor: wait;
+}
+
+.parent-course-card-image {
+    width: 100%;
+    height: 160px;
+    object-fit: cover;
+    display: block;
+}
+
+.parent-course-card-placeholder {
+    width: 100%;
+    height: 160px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: rgba(255, 255, 255, 0.9);
+    background: linear-gradient(135deg, #0ea5e9, #6366f1);
+}
+
+.parent-course-card-body {
+    padding: 16px 18px 18px;
+}
+
+.parent-course-card-body h3 {
+    margin: 0 0 8px;
+    font-size: 1.05rem;
+    font-weight: 700;
+    line-height: 1.4;
+}
+
+.parent-course-card-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    font-size: 0.82rem;
+    color: #94a3b8;
+}
+
+.parent-course-card-badge {
+    background: rgba(56, 189, 248, 0.12);
+    color: #38bdf8;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-weight: 600;
+}
+
+.parent-detail-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 16px;
+    background: rgba(56, 189, 248, 0.1);
+    border: 1px solid rgba(56, 189, 248, 0.25);
+    color: #38bdf8;
+    padding: 8px 14px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.parent-summary-row {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 24px;
+}
+
+.parent-summary-card {
+    padding: 14px 18px;
+    border-radius: 14px;
+    flex: 1;
+    min-width: 120px;
+    text-align: center;
+}
+
+.parent-summary-card .value {
+    font-size: 1.5rem;
+    font-weight: 800;
+}
+
+.parent-summary-card .label {
+    font-size: 0.8rem;
+    color: #94a3b8;
+    margin-top: 4px;
+}
+
+.parent-summary-card.green {
+    background: rgba(16, 185, 129, 0.08);
+    border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.parent-summary-card.green .value { color: #34d399; }
+
+.parent-summary-card.blue {
+    background: rgba(56, 189, 248, 0.08);
+    border: 1px solid rgba(56, 189, 248, 0.2);
+}
+
+.parent-summary-card.blue .value { color: #38bdf8; }
+
+.parent-module-title {
+    margin: 0 0 12px;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #cbd5e1;
+}
+
+.parent-lesson-card {
+    padding: 14px 16px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.03);
+    margin-bottom: 10px;
+}
+
+.parent-lesson-card.active {
+    border-color: rgba(56, 189, 248, 0.25);
+}
+
+.parent-lesson-toggle {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    text-align: right;
+    color: inherit;
+}
+
+.parent-lesson-expanded {
+    overflow: hidden;
+    margin-top: 14px;
+}
+
+.parent-answer-row {
+    padding: 8px 12px;
+    border-radius: 8px;
+    margin-bottom: 6px;
+}
+
+.parent-answer-row.correct {
+    background: rgba(16, 185, 129, 0.08);
+    border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.parent-answer-row.wrong {
+    background: rgba(239, 68, 68, 0.08);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+}

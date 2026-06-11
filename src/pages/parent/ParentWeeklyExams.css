@@ -1,0 +1,166 @@
+.parent-weekly-page {
+    color: #e2e8f0;
+}
+
+.parent-weekly-header h2 {
+    margin: 0 0 8px;
+    font-size: 1.45rem;
+    font-weight: 800;
+}
+
+.parent-weekly-header p {
+    margin: 0 0 24px;
+    color: #94a3b8;
+}
+
+.parent-weekly-stats {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 28px;
+}
+
+.parent-weekly-stat {
+    flex: 1;
+    min-width: 110px;
+    padding: 16px;
+    border-radius: 14px;
+    text-align: center;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.parent-weekly-stat .num {
+    display: block;
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: #38bdf8;
+}
+
+.parent-weekly-stat.graded .num { color: #34d399; }
+.parent-weekly-stat.pending .num { color: #fbbf24; }
+
+.parent-weekly-stat .lbl {
+    font-size: 0.8rem;
+    color: #94a3b8;
+}
+
+.parent-weekly-courses {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.parent-weekly-course-block {
+    border-radius: 18px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(15, 23, 42, 0.5);
+    overflow: hidden;
+}
+
+.parent-weekly-course-head {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 18px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.parent-weekly-thumb {
+    width: 64px;
+    height: 64px;
+    border-radius: 12px;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+.parent-weekly-thumb.placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #0ea5e9, #6366f1);
+    font-size: 1.5rem;
+    color: #fff;
+}
+
+.parent-weekly-course-head h3 {
+    margin: 0 0 4px;
+    font-size: 1.05rem;
+    font-weight: 700;
+}
+
+.parent-weekly-course-head span {
+    font-size: 0.85rem;
+    color: #94a3b8;
+}
+
+.parent-weekly-exam-list {
+    padding: 12px 16px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.parent-weekly-exam-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    padding: 14px 16px;
+    border-radius: 12px;
+    flex-wrap: wrap;
+}
+
+.parent-weekly-exam-row.graded {
+    background: rgba(16, 185, 129, 0.06);
+    border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.parent-weekly-exam-row.pending {
+    background: rgba(251, 191, 36, 0.06);
+    border: 1px solid rgba(251, 191, 36, 0.2);
+}
+
+.parent-weekly-exam-row .exam-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.parent-weekly-exam-row .exam-date {
+    font-size: 0.8rem;
+    color: #94a3b8;
+}
+
+.parent-weekly-exam-row .exam-score {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+}
+
+.parent-weekly-exam-row .score-value {
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: #34d399;
+}
+
+.parent-weekly-exam-row .score-total {
+    color: #94a3b8;
+    font-size: 0.9rem;
+}
+
+.parent-weekly-exam-row .score-pct {
+    background: rgba(16, 185, 129, 0.15);
+    color: #34d399;
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 700;
+}
+
+.parent-weekly-exam-row .pending-label {
+    color: #fbbf24;
+    font-weight: 600;
+    font-size: 0.9rem;
+}

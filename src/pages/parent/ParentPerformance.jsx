@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { HiOutlineChevronLeft, HiOutlineChevronDown, HiOutlineChevronUp } from 'react-icons/hi2'
+import { HiOutlineChevronLeft, HiOutlineChevronDown, HiOutlineChevronUp, HiOutlineBookOpen } from 'react-icons/hi2'
 import { API } from '../../config'
 import { getParentSelectedStudent } from '../../components/ParentProtectedRoute'
 import EmptyState from '../../components/core/EmptyState'
+import './ParentPerformance.css'
 
 const hasLessonActivity = (lesson) => {
     const ai = lesson.ai_quiz
@@ -22,30 +23,23 @@ const LessonEvaluationCard = ({ lesson }) => {
     const active = hasLessonActivity(lesson)
 
     return (
-        <div className="hq-card glass-panel" style={{
-            padding: '14px 16px', borderRadius: '12px',
-            border: `1px solid ${active ? 'rgba(56, 189, 248, 0.2)' : 'rgba(255,255,255,0.08)'}`,
-            opacity: active ? 1 : 0.75,
-        }}>
+        <div className={`parent-lesson-card ${active ? 'active' : ''}`} style={{ opacity: active ? 1 : 0.75 }}>
             <button
                 type="button"
-                onClick={() => setExpanded(v => !v)}
-                style={{
-                    width: '100%', display: 'flex', justifyContent: 'space-between',
-                    alignItems: 'center', gap: '12px', background: 'none', border: 'none',
-                    cursor: 'pointer', padding: 0, textAlign: 'right', color: 'inherit',
-                }}
+                className="parent-lesson-toggle"
+                onClick={() => active && setExpanded(v => !v)}
+                disabled={!active}
             >
                 <div style={{ flex: 1 }}>
                     <h4 style={{ fontSize: '1rem', margin: '0 0 6px', fontWeight: 'bold' }}>{lesson.lesson_title}</h4>
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', fontSize: '0.82rem' }}>
                         {hasAi && (
-                            <span style={{ background: 'rgba(16,185,129,0.1)', padding: '3px 8px', borderRadius: '6px', color: '#34d399' }}>
+                            <span style={{ background: 'rgba(16,185,129,0.12)', padding: '3px 8px', borderRadius: '6px', color: '#34d399' }}>
                                 اختبار AI: <strong>{ai.best_percentage ?? ai.latest_attempt.percentage}%</strong>
                             </span>
                         )}
                         {hasVideo && (
-                            <span style={{ background: 'rgba(56,189,248,0.1)', padding: '3px 8px', borderRadius: '6px', color: '#38bdf8' }}>
+                            <span style={{ background: 'rgba(56,189,248,0.12)', padding: '3px 8px', borderRadius: '6px', color: '#38bdf8' }}>
                                 أسئلة الفيديو: <strong>{video.correct_answers}/{video.total_answers}</strong>
                             </span>
                         )}
@@ -54,11 +48,58 @@ const LessonEvaluationCard = ({ lesson }) => {
                 </div>
                 {active && (expanded ? <HiOutlineChevronUp /> : <HiOutlineChevronDown />)}
             </button>
+
+            <AnimatePresence>
+                {expanded && active && (
+                    <motion.div
+                        className="parent-lesson-expanded"
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                    >
+                        {hasAi && (
+                            <div style={{ marginBottom: '12px', padding: '12px', borderRadius: '10px', background: 'rgba(16,185,129,0.06)', border: '1px solid rgba(16,185,129,0.15)' }}>
+                                <p style={{ margin: '0 0 6px', fontWeight: 600, fontSize: '0.88rem', color: '#34d399' }}>اختبار الذكاء الاصطناعي</p>
+                                <p style={{ margin: 0, fontSize: '0.85rem', color: '#cbd5e1' }}>
+                                    آخر محاولة: <strong>{ai.latest_attempt.percentage}%</strong> ({ai.latest_attempt.score}/{ai.latest_attempt.total})
+                                    {ai.attempts_count > 1 && ` — ${ai.attempts_count} محاولات`}
+                                </p>
+                                {ai.best_percentage != null && ai.best_percentage !== ai.latest_attempt.percentage && (
+                                    <p style={{ margin: '6px 0 0', fontSize: '0.82rem', color: '#94a3b8' }}>
+                                        أفضل نتيجة: <strong>{ai.best_percentage}%</strong>
+                                    </p>
+                                )}
+                            </div>
+                        )}
+                        {hasVideo && (
+                            <div>
+                                <p style={{ margin: '0 0 10px', fontWeight: 600, fontSize: '0.88rem', color: '#38bdf8' }}>
+                                    أسئلة الفيديو — أول إجابة لكل سؤال
+                                </p>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                                    {(video.first_answers || []).map((ans, idx) => (
+                                        <div
+                                            key={idx}
+                                            className={`parent-answer-row ${ans.is_correct ? 'correct' : 'wrong'}`}
+                                        >
+                                            <div style={{ fontWeight: 600, fontSize: '0.85rem', marginBottom: '4px' }}>{ans.question_text}</div>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px', fontSize: '0.8rem' }}>
+                                                <span style={{ color: ans.is_correct ? '#34d399' : '#f87171' }}>إجابة الطالب: {ans.answer_text}</span>
+                                                <span>{ans.is_correct ? '✅' : '❌'}</span>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div>
     )
 }
 
-const CourseEvaluationDetail = ({ course, onBack }) => {
+const CourseEvaluationDetail = ({ course, courseMeta, onBack }) => {
     const modulesMap = new Map()
     ;(course.lessons || []).forEach(lesson => {
         const key = lesson.module_id
@@ -68,62 +109,50 @@ const CourseEvaluationDetail = ({ course, onBack }) => {
         modulesMap.get(key).lessons.push(lesson)
     })
     const modules = Array.from(modulesMap.values())
-    const exams = Array.isArray(course.weekly_exams) ? course.weekly_exams.filter(e => e?.exam_id) : []
     const summary = course.summary || {}
 
     return (
         <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
-            <button type="button" onClick={onBack} style={{
-                display: 'inline-flex', alignItems: 'center', gap: '6px', marginBottom: '16px',
-                background: 'rgba(56,189,248,0.1)', border: '1px solid rgba(56,189,248,0.25)',
-                color: '#38bdf8', padding: '8px 14px', borderRadius: '10px', cursor: 'pointer', fontWeight: 600,
-            }}>
+            <button type="button" className="parent-detail-back" onClick={onBack}>
                 <HiOutlineChevronLeft /> رجوع للدورات
             </button>
 
-            <h3 style={{ margin: '0 0 16px', fontSize: '1.2rem', fontWeight: 'bold' }}>{course.course_title}</h3>
-
-            <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '20px' }}>
-                <div style={{ padding: '14px 18px', borderRadius: '12px', flex: 1, minWidth: '120px', background: 'rgba(16,185,129,0.08)', border: '1px solid rgba(16,185,129,0.2)', textAlign: 'center' }}>
-                    <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#34d399' }}>{summary.ai_quiz_avg_percentage ?? 0}%</div>
-                    <div style={{ fontSize: '0.8rem', color: '#94a3b8' }}>معدل اختبارات AI</div>
-                </div>
-                <div style={{ padding: '14px 18px', borderRadius: '12px', flex: 1, minWidth: '120px', background: 'rgba(56,189,248,0.08)', border: '1px solid rgba(56,189,248,0.2)', textAlign: 'center' }}>
-                    <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#38bdf8' }}>{summary.video_quiz_correct_percentage ?? 0}%</div>
-                    <div style={{ fontSize: '0.8rem', color: '#94a3b8' }}>دقة أسئلة الفيديو</div>
-                </div>
-                <div style={{ padding: '14px 18px', borderRadius: '12px', flex: 1, minWidth: '120px', background: 'rgba(251,191,36,0.08)', border: '1px solid rgba(251,191,36,0.2)', textAlign: 'center' }}>
-                    <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#fbbf24' }}>{summary.weekly_exams_graded ?? 0}/{summary.weekly_exams_total ?? 0}</div>
-                    <div style={{ fontSize: '0.8rem', color: '#94a3b8' }}>امتحانات مصحّحة</div>
-                </div>
-            </div>
-
-            {exams.length > 0 && (
-                <div style={{ marginBottom: '20px' }}>
-                    <h4 style={{ margin: '0 0 10px', fontSize: '1rem', fontWeight: 'bold' }}>الامتحانات الأسبوعية</h4>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                        {exams.map(ex => (
-                            <div key={ex.exam_id} style={{ padding: '12px 14px', borderRadius: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
-                                <span style={{ fontWeight: 600 }}>{ex.module_title || ex.title}</span>
-                                <span style={{ fontSize: '0.9rem' }}>
-                                    {ex.is_graded
-                                        ? <strong style={{ color: '#34d399' }}>{ex.grade} / {ex.total_mark}</strong>
-                                        : <span style={{ color: '#94a3b8' }}>بانتظار التصحيح</span>}
-                                </span>
-                            </div>
-                        ))}
-                    </div>
+            {courseMeta?.hero_image && (
+                <div style={{ borderRadius: '16px', overflow: 'hidden', marginBottom: '16px', maxHeight: '200px' }}>
+                    <img
+                        src={courseMeta.hero_image}
+                        alt={course.course_title}
+                        style={{ width: '100%', height: '200px', objectFit: 'cover' }}
+                    />
                 </div>
             )}
 
+            <h3 style={{ margin: '0 0 6px', fontSize: '1.25rem', fontWeight: 'bold' }}>{course.course_title}</h3>
+            {courseMeta?.teacher_name && (
+                <p style={{ margin: '0 0 16px', color: '#94a3b8', fontSize: '0.9rem' }}>الأستاذ: {courseMeta.teacher_name}</p>
+            )}
+
+            <div className="parent-summary-row">
+                <div className="parent-summary-card green">
+                    <div className="value">{summary.ai_quiz_avg_percentage ?? 0}%</div>
+                    <div className="label">معدل اختبارات AI</div>
+                </div>
+                <div className="parent-summary-card blue">
+                    <div className="value">{summary.video_quiz_correct_percentage ?? 0}%</div>
+                    <div className="label">دقة أسئلة الفيديو</div>
+                </div>
+                <div className="parent-summary-card" style={{ background: 'rgba(251,191,36,0.08)', border: '1px solid rgba(251,191,36,0.2)' }}>
+                    <div className="value" style={{ color: '#fbbf24' }}>{summary.weekly_exams_graded ?? 0}/{summary.weekly_exams_total ?? 0}</div>
+                    <div className="label">امتحانات مصحّحة</div>
+                </div>
+            </div>
+
             {modules.map(mod => (
-                <div key={mod.module_id} style={{ marginBottom: '20px' }}>
-                    <h4 style={{ margin: '0 0 10px', fontSize: '1rem', fontWeight: 'bold' }}>{mod.module_title}</h4>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                        {mod.lessons.map(lesson => (
-                            <LessonEvaluationCard key={lesson.lesson_id} lesson={lesson} />
-                        ))}
-                    </div>
+                <div key={mod.module_id} style={{ marginBottom: '24px' }}>
+                    <h4 className="parent-module-title">{mod.module_title}</h4>
+                    {mod.lessons.map(lesson => (
+                        <LessonEvaluationCard key={lesson.lesson_id} lesson={lesson} />
+                    ))}
                 </div>
             ))}
         </motion.div>
@@ -183,17 +212,18 @@ const ParentPerformance = () => {
     }
 
     const selectedCourse = selectedCourseId ? progressMap[selectedCourseId] : null
+    const selectedMeta = courses.find(c => c.course_id === selectedCourseId)
 
     if (!student) {
         return <EmptyState title="لم يتم اختيار طالب" message="ارجع واختر الطالب أولاً" />
     }
 
     return (
-        <div>
-            <h2 style={{ margin: '0 0 8px', fontSize: '1.4rem', fontWeight: 800 }}>تقييم أدائي 📊</h2>
-            <p style={{ margin: '0 0 20px', color: '#94a3b8', fontSize: '0.95rem' }}>
-                أداء {student.full_name || student.first_name} في الدورات المسجّل بها
-            </p>
+        <div className="parent-perf-page">
+            <div className="parent-perf-header">
+                <h2>تقييم أدائي 📊</h2>
+                <p>أداء {student.full_name || student.first_name} في الدورات المسجّل بها — اختر دورة لعرض التفاصيل</p>
+            </div>
 
             {loading ? (
                 <EmptyState isLoading title="جاري تحميل الدورات..." message="" />
@@ -203,33 +233,50 @@ const ParentPerformance = () => {
                         <CourseEvaluationDetail
                             key="detail"
                             course={selectedCourse}
+                            courseMeta={selectedMeta}
                             onBack={() => setSelectedCourseId(null)}
                         />
                     ) : courses.length === 0 ? (
                         <EmptyState title="لا توجد دورات" message="الطالب غير مسجّل بأي دورة حالياً" />
                     ) : (
                         <motion.div key="list" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                            <div className="parent-course-grid">
                                 {courses.map(course => (
                                     <button
                                         key={course.course_id}
                                         type="button"
+                                        className="parent-course-card"
                                         onClick={() => handleSelectCourse(course.course_id)}
                                         disabled={loadingCourseId === course.course_id}
-                                        style={{
-                                            padding: '16px 18px', borderRadius: '12px',
-                                            border: '1px solid rgba(56,189,248,0.2)',
-                                            background: 'rgba(56,189,248,0.06)',
-                                            cursor: 'pointer', textAlign: 'right', width: '100%', color: 'inherit',
-                                        }}
                                     >
-                                        <h4 style={{ margin: '0 0 6px', fontSize: '1.05rem', fontWeight: 'bold' }}>
-                                            {course.course_title}
-                                        </h4>
-                                        <span style={{ fontSize: '0.85rem', color: '#94a3b8' }}>
-                                            {course.teacher_name || 'أستاذ'}
-                                            {loadingCourseId === course.course_id ? ' — جاري التحميل...' : ''}
-                                        </span>
+                                        {course.hero_image ? (
+                                            <img
+                                                src={course.hero_image}
+                                                alt={course.course_title}
+                                                className="parent-course-card-image"
+                                            />
+                                        ) : (
+                                            <div
+                                                className="parent-course-card-placeholder"
+                                                style={course.color?.startsWith('#') ? { background: course.color } : undefined}
+                                            >
+                                                <HiOutlineBookOpen style={{ fontSize: '2rem' }} />
+                                            </div>
+                                        )}
+                                        <div className="parent-course-card-body">
+                                            <h3>{course.course_title}</h3>
+                                            <div className="parent-course-card-meta">
+                                                <span className="parent-course-card-badge">{course.teacher_name || 'أستاذ'}</span>
+                                                {course.is_completed && (
+                                                    <span className="parent-course-card-badge" style={{ background: 'rgba(16,185,129,0.12)', color: '#34d399' }}>
+                                                        مكتملة
+                                                    </span>
+                                                )}
+                                                {loadingCourseId === course.course_id && (
+                                                    <span>جاري التحميل...</span>
+                                                )}
+                                            </div>
+                                        </div>
                                     </button>
                                 ))}
                             </div>

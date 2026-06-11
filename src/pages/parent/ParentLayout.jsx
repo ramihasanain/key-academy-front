@@ -4,6 +4,7 @@ import {
     HiOutlineInformationCircle,
     HiOutlineAcademicCap,
     HiOutlineChartBar,
+    HiOutlineClipboardDocumentCheck,
     HiOutlineArrowRightOnRectangle,
     HiOutlineBars3,
     HiOutlineXMark,
@@ -44,6 +45,7 @@ const ParentLayoutShell = () => {
         { to: '/parent/about', label: 'من نحن', icon: <HiOutlineInformationCircle /> },
         { to: '/parent/teachers', label: 'الأساتذة', icon: <HiOutlineAcademicCap /> },
         { to: '/parent/performance', label: 'تقييم أدائي', icon: <HiOutlineChartBar /> },
+        { to: '/parent/weekly-exams', label: 'الامتحانات الأسبوعية', icon: <HiOutlineClipboardDocumentCheck /> },
     ]
 
     return (

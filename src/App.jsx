@@ -19,6 +19,7 @@ const ParentChangePassword = lazy(() => import("./pages/parent/ParentChangePassw
 const ParentSelectStudent = lazy(() => import("./pages/parent/ParentSelectStudent"));
 const ParentLayout = lazy(() => import("./pages/parent/ParentLayout"));
 const ParentPerformance = lazy(() => import("./pages/parent/ParentPerformance"));
+const ParentWeeklyExams = lazy(() => import("./pages/parent/ParentWeeklyExams"));
 const StudentDashboard = lazy(() => import("./pages/StudentDashboard"));
 const CourseViewer = lazy(() => import("./pages/CourseViewer"));
 const LessonViewer = lazy(() => import("./pages/LessonViewer"));
@@ -276,6 +277,7 @@ function App() {
               <Route path="teachers" element={<Teachers profilePathPrefix="/parent/teachers" />} />
               <Route path="teachers/:id" element={<TeacherProfile readOnlyParent />} />
               <Route path="performance" element={<ParentPerformance />} />
+              <Route path="weekly-exams" element={<ParentWeeklyExams />} />
             </Route>
             <Route
               path="/dashboard"
