@@ -1,16 +1,17 @@
 .parent-perf-page {
-    color: #e2e8f0;
+    color: #1e293b;
 }
 
 .parent-perf-header h2 {
     margin: 0 0 8px;
     font-size: 1.45rem;
     font-weight: 800;
+    color: #1e293b;
 }
 
 .parent-perf-header p {
     margin: 0 0 24px;
-    color: #94a3b8;
+    color: #64748b;
     font-size: 0.95rem;
 }
 
@@ -24,18 +25,19 @@
     position: relative;
     border-radius: 18px;
     overflow: hidden;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid #e8edf5;
+    background: #ffffff;
     cursor: pointer;
     text-align: right;
-    color: inherit;
+    color: #1e293b;
     padding: 0;
     transition: transform 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: 0 4px 20px rgba(15, 23, 42, 0.06);
 }
 
 .parent-course-card:hover {
     transform: translateY(-4px);
-    box-shadow: 0 16px 40px rgba(56, 189, 248, 0.15);
+    box-shadow: 0 16px 40px rgba(99, 102, 241, 0.12);
 }
 
 .parent-course-card:disabled {
@@ -58,12 +60,13 @@
     justify-content: center;
     font-size: 2.5rem;
     font-weight: 800;
-    color: rgba(255, 255, 255, 0.9);
-    background: linear-gradient(135deg, #0ea5e9, #6366f1);
+    color: #fff;
+    background: linear-gradient(135deg, #818cf8, #6366f1);
 }
 
 .parent-course-card-body {
     padding: 16px 18px 18px;
+    background: #ffffff;
 }
 
 .parent-course-card-body h3 {
@@ -71,6 +74,7 @@
     font-size: 1.05rem;
     font-weight: 700;
     line-height: 1.4;
+    color: #1e293b;
 }
 
 .parent-course-card-meta {
@@ -78,15 +82,20 @@
     flex-wrap: wrap;
     gap: 8px;
     font-size: 0.82rem;
-    color: #94a3b8;
+    color: #64748b;
 }
 
 .parent-course-card-badge {
-    background: rgba(56, 189, 248, 0.12);
-    color: #38bdf8;
+    background: #eef2ff;
+    color: #4f46e5;
     padding: 3px 10px;
     border-radius: 999px;
     font-weight: 600;
+}
+
+.parent-badge-complete {
+    background: #ecfdf5;
+    color: #059669;
 }
 
 .parent-detail-back {
@@ -94,13 +103,31 @@
     align-items: center;
     gap: 6px;
     margin-bottom: 16px;
-    background: rgba(56, 189, 248, 0.1);
-    border: 1px solid rgba(56, 189, 248, 0.25);
-    color: #38bdf8;
+    background: #ffffff;
+    border: 1px solid #e0e7ff;
+    color: #4f46e5;
     padding: 8px 14px;
     border-radius: 10px;
     cursor: pointer;
     font-weight: 600;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+}
+
+.parent-detail-back:hover {
+    background: #eef2ff;
+}
+
+.parent-course-detail-title {
+    margin: 0 0 6px;
+    font-size: 1.25rem;
+    font-weight: bold;
+    color: #1e293b;
+}
+
+.parent-course-detail-teacher {
+    margin: 0 0 16px;
+    color: #64748b;
+    font-size: 0.9rem;
 }
 
 .parent-summary-row {
@@ -116,6 +143,9 @@
     flex: 1;
     min-width: 120px;
     text-align: center;
+    background: #ffffff;
+    border: 1px solid #e8edf5;
+    box-shadow: 0 2px 12px rgba(15, 23, 42, 0.04);
 }
 
 .parent-summary-card .value {
@@ -125,41 +155,50 @@
 
 .parent-summary-card .label {
     font-size: 0.8rem;
-    color: #94a3b8;
+    color: #64748b;
     margin-top: 4px;
 }
 
 .parent-summary-card.green {
-    background: rgba(16, 185, 129, 0.08);
-    border: 1px solid rgba(16, 185, 129, 0.2);
+    background: #f0fdf4;
+    border-color: #bbf7d0;
 }
 
-.parent-summary-card.green .value { color: #34d399; }
+.parent-summary-card.green .value { color: #16a34a; }
 
 .parent-summary-card.blue {
-    background: rgba(56, 189, 248, 0.08);
-    border: 1px solid rgba(56, 189, 248, 0.2);
+    background: #eff6ff;
+    border-color: #bfdbfe;
 }
 
-.parent-summary-card.blue .value { color: #38bdf8; }
+.parent-summary-card.blue .value { color: #2563eb; }
+
+.parent-summary-card.amber {
+    background: #fffbeb;
+    border-color: #fde68a;
+}
+
+.parent-summary-card.amber .value { color: #d97706; }
 
 .parent-module-title {
     margin: 0 0 12px;
     font-size: 1rem;
     font-weight: 700;
-    color: #cbd5e1;
+    color: #334155;
 }
 
 .parent-lesson-card {
     padding: 14px 16px;
     border-radius: 12px;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid #e8edf5;
+    background: #ffffff;
     margin-bottom: 10px;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.03);
 }
 
 .parent-lesson-card.active {
-    border-color: rgba(56, 189, 248, 0.25);
+    border-color: #c7d2fe;
+    box-shadow: 0 4px 16px rgba(99, 102, 241, 0.08);
 }
 
 .parent-lesson-toggle {
@@ -173,12 +212,74 @@
     cursor: pointer;
     padding: 0;
     text-align: right;
-    color: inherit;
+    color: #1e293b;
+}
+
+.parent-lesson-toggle h4 {
+    font-size: 1rem;
+    margin: 0 0 6px;
+    font-weight: bold;
+    color: #1e293b;
+}
+
+.parent-badge-ai {
+    background: #ecfdf5;
+    color: #059669;
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-size: 0.82rem;
+}
+
+.parent-badge-video {
+    background: #eff6ff;
+    color: #2563eb;
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-size: 0.82rem;
+}
+
+.parent-lesson-muted {
+    color: #94a3b8;
+    font-size: 0.82rem;
 }
 
 .parent-lesson-expanded {
     overflow: hidden;
     margin-top: 14px;
+}
+
+.parent-ai-block {
+    margin-bottom: 12px;
+    padding: 12px;
+    border-radius: 10px;
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+}
+
+.parent-ai-block-title {
+    margin: 0 0 6px;
+    font-weight: 600;
+    font-size: 0.88rem;
+    color: #059669;
+}
+
+.parent-ai-block-text {
+    margin: 0;
+    font-size: 0.85rem;
+    color: #475569;
+}
+
+.parent-ai-block-sub {
+    margin: 6px 0 0;
+    font-size: 0.82rem;
+    color: #64748b;
+}
+
+.parent-video-block-title {
+    margin: 0 0 10px;
+    font-weight: 600;
+    font-size: 0.88rem;
+    color: #2563eb;
 }
 
 .parent-answer-row {
@@ -188,56 +289,37 @@
 }
 
 .parent-answer-row.correct {
-    background: rgba(16, 185, 129, 0.08);
-    border: 1px solid rgba(16, 185, 129, 0.2);
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
 }
 
 .parent-answer-row.wrong {
-    background: rgba(239, 68, 68, 0.08);
-    border: 1px solid rgba(239, 68, 68, 0.2);
+    background: #fef2f2;
+    border: 1px solid #fecaca;
 }
 
+.parent-answer-q {
+    font-weight: 600;
+    font-size: 0.85rem;
+    margin-bottom: 4px;
+    color: #334155;
+}
+
+.parent-answer-a-correct { color: #059669; }
+.parent-answer-a-wrong { color: #dc2626; }
+
 @media (max-width: 900px) {
-    .parent-perf-header h2 {
-        font-size: 1.2rem;
-    }
-
-    .parent-perf-header p {
-        font-size: 0.88rem;
-        margin-bottom: 18px;
-    }
-
-    .parent-course-grid {
-        grid-template-columns: 1fr;
-        gap: 14px;
-    }
-
+    .parent-perf-header h2 { font-size: 1.2rem; }
+    .parent-perf-header p { font-size: 0.88rem; margin-bottom: 18px; }
+    .parent-course-grid { grid-template-columns: 1fr; gap: 14px; }
     .parent-course-card-image,
-    .parent-course-card-placeholder {
-        height: 140px;
-    }
-
-    .parent-summary-row {
-        flex-direction: column;
-        gap: 10px;
-    }
-
-    .parent-summary-card {
-        min-width: unset;
-    }
-
-    .parent-detail-back {
-        width: 100%;
-        justify-content: center;
-    }
-
-    .parent-lesson-toggle h4 {
-        font-size: 0.92rem !important;
-    }
+    .parent-course-card-placeholder { height: 140px; }
+    .parent-summary-row { flex-direction: column; gap: 10px; }
+    .parent-summary-card { min-width: unset; }
+    .parent-detail-back { width: 100%; justify-content: center; }
+    .parent-lesson-toggle h4 { font-size: 0.92rem !important; }
 }
 
 @media (max-width: 380px) {
-    .parent-course-card-body h3 {
-        font-size: 0.95rem;
-    }
+    .parent-course-card-body h3 { font-size: 0.95rem; }
 }

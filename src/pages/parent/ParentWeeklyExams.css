@@ -1,16 +1,17 @@
 .parent-weekly-page {
-    color: #e2e8f0;
+    color: #1e293b;
 }
 
 .parent-weekly-header h2 {
     margin: 0 0 8px;
     font-size: 1.45rem;
     font-weight: 800;
+    color: #1e293b;
 }
 
 .parent-weekly-header p {
     margin: 0 0 24px;
-    color: #94a3b8;
+    color: #64748b;
 }
 
 .parent-weekly-stats {
@@ -26,23 +27,24 @@
     padding: 16px;
     border-radius: 14px;
     text-align: center;
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: #ffffff;
+    border: 1px solid #e8edf5;
+    box-shadow: 0 2px 12px rgba(15, 23, 42, 0.04);
 }
 
 .parent-weekly-stat .num {
     display: block;
     font-size: 1.6rem;
     font-weight: 800;
-    color: #38bdf8;
+    color: #4f46e5;
 }
 
-.parent-weekly-stat.graded .num { color: #34d399; }
-.parent-weekly-stat.pending .num { color: #fbbf24; }
+.parent-weekly-stat.graded .num { color: #16a34a; }
+.parent-weekly-stat.pending .num { color: #d97706; }
 
 .parent-weekly-stat .lbl {
     font-size: 0.8rem;
-    color: #94a3b8;
+    color: #64748b;
 }
 
 .parent-weekly-courses {
@@ -53,9 +55,10 @@
 
 .parent-weekly-course-block {
     border-radius: 18px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    background: rgba(15, 23, 42, 0.5);
+    border: 1px solid #e8edf5;
+    background: #ffffff;
     overflow: hidden;
+    box-shadow: 0 4px 20px rgba(15, 23, 42, 0.06);
 }
 
 .parent-weekly-course-head {
@@ -63,8 +66,8 @@
     align-items: center;
     gap: 16px;
     padding: 16px 18px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-    background: rgba(255, 255, 255, 0.02);
+    border-bottom: 1px solid #f1f5f9;
+    background: #fafbfc;
 }
 
 .parent-weekly-thumb {
@@ -79,7 +82,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(135deg, #0ea5e9, #6366f1);
+    background: linear-gradient(135deg, #818cf8, #6366f1);
     font-size: 1.5rem;
     color: #fff;
 }
@@ -88,11 +91,12 @@
     margin: 0 0 4px;
     font-size: 1.05rem;
     font-weight: 700;
+    color: #1e293b;
 }
 
 .parent-weekly-course-head span {
     font-size: 0.85rem;
-    color: #94a3b8;
+    color: #64748b;
 }
 
 .parent-weekly-exam-list {
@@ -113,24 +117,22 @@
 }
 
 .parent-weekly-exam-row.graded {
-    background: rgba(16, 185, 129, 0.06);
-    border: 1px solid rgba(16, 185, 129, 0.2);
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
 }
 
 .parent-weekly-exam-row.pending {
-    background: rgba(251, 191, 36, 0.06);
-    border: 1px solid rgba(251, 191, 36, 0.2);
+    background: #fffbeb;
+    border: 1px solid #fde68a;
 }
 
-.parent-weekly-exam-row .exam-info {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
+.parent-weekly-exam-row .exam-info strong {
+    color: #1e293b;
 }
 
 .parent-weekly-exam-row .exam-date {
     font-size: 0.8rem;
-    color: #94a3b8;
+    color: #64748b;
 }
 
 .parent-weekly-exam-row .exam-score {
@@ -142,17 +144,17 @@
 .parent-weekly-exam-row .score-value {
     font-size: 1.4rem;
     font-weight: 800;
-    color: #34d399;
+    color: #16a34a;
 }
 
 .parent-weekly-exam-row .score-total {
-    color: #94a3b8;
+    color: #64748b;
     font-size: 0.9rem;
 }
 
 .parent-weekly-exam-row .score-pct {
-    background: rgba(16, 185, 129, 0.15);
-    color: #34d399;
+    background: #dcfce7;
+    color: #16a34a;
     padding: 2px 8px;
     border-radius: 6px;
     font-size: 0.8rem;
@@ -160,21 +162,14 @@
 }
 
 .parent-weekly-exam-row .pending-label {
-    color: #fbbf24;
+    color: #d97706;
     font-weight: 600;
     font-size: 0.9rem;
 }
 
 @media (max-width: 900px) {
-    .parent-weekly-header h2 {
-        font-size: 1.2rem;
-    }
-
-    .parent-weekly-stats {
-        flex-direction: column;
-        gap: 8px;
-    }
-
+    .parent-weekly-header h2 { font-size: 1.2rem; }
+    .parent-weekly-stats { flex-direction: column; gap: 8px; }
     .parent-weekly-stat {
         min-width: unset;
         display: flex;
@@ -183,21 +178,13 @@
         text-align: right;
         padding: 12px 16px;
     }
-
-    .parent-weekly-stat .num {
-        font-size: 1.3rem;
-    }
-
-    .parent-weekly-course-head {
-        flex-wrap: wrap;
-    }
-
+    .parent-weekly-stat .num { font-size: 1.3rem; }
+    .parent-weekly-course-head { flex-wrap: wrap; }
     .parent-weekly-exam-row {
         flex-direction: column;
         align-items: flex-start;
         gap: 10px;
     }
-
     .parent-weekly-exam-row .exam-score {
         width: 100%;
         justify-content: flex-start;

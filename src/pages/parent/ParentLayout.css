@@ -1,31 +1,42 @@
+/* ── Parent portal — Light theme ── */
 .parent-portal {
+    --parent-bg: #f4f6fb;
+    --parent-surface: #ffffff;
+    --parent-surface-2: #f8fafc;
+    --parent-border: #e8edf5;
+    --parent-text: #1e293b;
+    --parent-text-muted: #64748b;
+    --parent-accent: #6366f1;
+    --parent-accent-soft: #eef2ff;
+    --parent-accent-text: #4f46e5;
+    --parent-shadow: 0 4px 24px rgba(15, 23, 42, 0.06);
+    --parent-shadow-lg: 0 12px 40px rgba(15, 23, 42, 0.1);
+
     min-height: 100vh;
     min-height: 100dvh;
     display: flex;
-    background: linear-gradient(160deg, #0b1220 0%, #0f172a 45%, #111827 100%);
-    color: #f8fafc;
+    background: var(--parent-bg);
+    color: var(--parent-text);
     position: relative;
 }
 
-/* ── Sidebar overlay (mobile) ── */
 .parent-sidebar-overlay {
     display: none;
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.55);
-    backdrop-filter: blur(4px);
+    background: rgba(15, 23, 42, 0.35);
+    backdrop-filter: blur(3px);
     z-index: 199;
     border: none;
     cursor: pointer;
 }
 
-/* ── Sidebar ── */
 .parent-sidebar {
     width: 280px;
     flex-shrink: 0;
-    background: linear-gradient(180deg, rgba(15, 23, 42, 0.98) 0%, rgba(10, 15, 28, 0.99) 100%);
-    border-left: 1px solid rgba(56, 189, 248, 0.12);
-    box-shadow: -8px 0 32px rgba(0, 0, 0, 0.25);
+    background: var(--parent-surface);
+    border-left: 1px solid var(--parent-border);
+    box-shadow: var(--parent-shadow);
     display: flex;
     flex-direction: column;
     padding: 20px 14px;
@@ -46,7 +57,7 @@
     gap: 12px;
     padding: 4px 6px 16px;
     margin-bottom: 12px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+    border-bottom: 1px solid var(--parent-border);
     position: relative;
 }
 
@@ -54,14 +65,14 @@
     width: 44px;
     height: 44px;
     border-radius: 14px;
-    background: linear-gradient(135deg, #38bdf8, #6366f1);
+    background: linear-gradient(135deg, #818cf8, #6366f1);
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 1.35rem;
     color: #fff;
     flex-shrink: 0;
-    box-shadow: 0 4px 16px rgba(56, 189, 248, 0.35);
+    box-shadow: 0 4px 14px rgba(99, 102, 241, 0.3);
 }
 
 .parent-sidebar-brand h2 {
@@ -69,11 +80,12 @@
     font-size: 0.95rem;
     font-weight: 800;
     line-height: 1.3;
+    color: var(--parent-text);
 }
 
 .parent-sidebar-brand span {
     font-size: 0.72rem;
-    color: #64748b;
+    color: var(--parent-text-muted);
     letter-spacing: 0.04em;
 }
 
@@ -82,9 +94,9 @@
     position: absolute;
     left: 4px;
     top: 4px;
-    background: rgba(255, 255, 255, 0.08);
-    border: none;
-    color: #e2e8f0;
+    background: var(--parent-surface-2);
+    border: 1px solid var(--parent-border);
+    color: var(--parent-text);
     width: 36px;
     height: 36px;
     border-radius: 10px;
@@ -94,7 +106,6 @@
     justify-content: center;
 }
 
-/* ── Welcome card ── */
 .parent-welcome-card {
     display: flex;
     align-items: center;
@@ -102,15 +113,15 @@
     padding: 14px;
     margin-bottom: 12px;
     border-radius: 16px;
-    background: linear-gradient(135deg, rgba(56, 189, 248, 0.1) 0%, rgba(99, 102, 241, 0.08) 100%);
-    border: 1px solid rgba(56, 189, 248, 0.18);
+    background: linear-gradient(135deg, #eef2ff 0%, #f5f3ff 100%);
+    border: 1px solid #e0e7ff;
 }
 
 .parent-student-avatar {
     width: 48px;
     height: 48px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #0ea5e9, #8b5cf6);
+    background: linear-gradient(135deg, #818cf8, #a78bfa);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -118,7 +129,22 @@
     font-weight: 800;
     color: #fff;
     flex-shrink: 0;
-    box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.25);
+}
+
+.parent-welcome-label {
+    font-size: 0.8rem;
+    color: var(--parent-text-muted);
+    font-weight: 500;
+}
+
+.parent-student-name {
+    font-size: 1rem;
+    font-weight: 800;
+    color: var(--parent-accent-text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .parent-welcome-text {
@@ -126,21 +152,6 @@
     flex-direction: column;
     gap: 4px;
     min-width: 0;
-}
-
-.parent-welcome-label {
-    font-size: 0.8rem;
-    color: #94a3b8;
-    font-weight: 500;
-}
-
-.parent-student-name {
-    font-size: 1rem;
-    font-weight: 800;
-    color: #38bdf8;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
 }
 
 .parent-switch-student {
@@ -152,9 +163,9 @@
     padding: 10px 14px;
     margin-bottom: 12px;
     border-radius: 12px;
-    border: 1px dashed rgba(56, 189, 248, 0.35);
-    background: rgba(56, 189, 248, 0.06);
-    color: #38bdf8;
+    border: 1px dashed #c7d2fe;
+    background: var(--parent-accent-soft);
+    color: var(--parent-accent-text);
     font-size: 0.85rem;
     font-weight: 600;
     cursor: pointer;
@@ -162,10 +173,9 @@
 }
 
 .parent-switch-student:hover {
-    background: rgba(56, 189, 248, 0.12);
+    background: #e0e7ff;
 }
 
-/* ── Nav links ── */
 .parent-sidebar-nav {
     flex: 1;
     display: flex;
@@ -180,46 +190,42 @@
     gap: 12px;
     padding: 12px 14px;
     border-radius: 14px;
-    color: #cbd5e1;
+    color: var(--parent-text-muted);
     text-decoration: none;
     font-weight: 600;
     font-size: 0.92rem;
     border: 1px solid transparent;
-    transition: background 0.2s, color 0.2s, border-color 0.2s, transform 0.15s;
+    transition: background 0.2s, color 0.2s, border-color 0.2s;
 }
 
 .parent-nav-link:hover {
-    background: rgba(255, 255, 255, 0.05);
-    color: #f1f5f9;
+    background: var(--parent-surface-2);
+    color: var(--parent-text);
 }
 
 .parent-nav-link.active {
-    background: linear-gradient(135deg, rgba(56, 189, 248, 0.18) 0%, rgba(99, 102, 241, 0.12) 100%);
-    color: #38bdf8;
-    border-color: rgba(56, 189, 248, 0.28);
-    box-shadow: 0 4px 16px rgba(56, 189, 248, 0.1);
+    background: var(--parent-accent-soft);
+    color: var(--parent-accent-text);
+    border-color: #c7d2fe;
 }
 
 .parent-nav-icon {
     width: 36px;
     height: 36px;
     border-radius: 10px;
-    background: rgba(255, 255, 255, 0.05);
+    background: var(--parent-surface-2);
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 1.15rem;
     flex-shrink: 0;
-    transition: background 0.2s;
+    color: var(--parent-text-muted);
+    transition: background 0.2s, color 0.2s;
 }
 
 .parent-nav-link.active .parent-nav-icon {
-    background: rgba(56, 189, 248, 0.2);
-    color: #38bdf8;
-}
-
-.parent-nav-label {
-    line-height: 1.3;
+    background: #e0e7ff;
+    color: var(--parent-accent-text);
 }
 
 .parent-logout-btn {
@@ -230,9 +236,9 @@
     margin-top: auto;
     padding: 13px 14px;
     border-radius: 14px;
-    border: 1px solid rgba(239, 68, 68, 0.28);
-    background: rgba(239, 68, 68, 0.08);
-    color: #f87171;
+    border: 1px solid #fecaca;
+    background: #fef2f2;
+    color: #dc2626;
     cursor: pointer;
     font-weight: 600;
     font-size: 0.9rem;
@@ -241,10 +247,9 @@
 }
 
 .parent-logout-btn:hover {
-    background: rgba(239, 68, 68, 0.15);
+    background: #fee2e2;
 }
 
-/* ── Main content ── */
 .parent-main {
     flex: 1;
     margin-right: 280px;
@@ -254,6 +259,7 @@
     display: flex;
     flex-direction: column;
     overflow-x: hidden;
+    background: var(--parent-bg);
 }
 
 .parent-topbar {
@@ -262,18 +268,19 @@
     gap: 12px;
     padding: 12px 16px;
     padding-top: max(12px, env(safe-area-inset-top));
-    background: rgba(15, 23, 42, 0.92);
+    background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(12px);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    border-bottom: 1px solid var(--parent-border);
     position: sticky;
     top: 0;
     z-index: 90;
+    box-shadow: 0 1px 8px rgba(15, 23, 42, 0.04);
 }
 
 .parent-menu-btn {
-    background: rgba(255, 255, 255, 0.08);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    color: #f1f5f9;
+    background: var(--parent-surface-2);
+    border: 1px solid var(--parent-border);
+    color: var(--parent-text);
     width: 42px;
     height: 42px;
     border-radius: 12px;
@@ -296,13 +303,13 @@
 
 .parent-topbar-greeting {
     font-size: 0.72rem;
-    color: #94a3b8;
+    color: var(--parent-text-muted);
 }
 
 .parent-topbar-center strong {
     font-size: 0.9rem;
     font-weight: 800;
-    color: #38bdf8;
+    color: var(--parent-accent-text);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -313,12 +320,13 @@
     width: 38px;
     height: 38px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #0ea5e9, #8b5cf6);
+    background: linear-gradient(135deg, #818cf8, #a78bfa);
     display: flex;
     align-items: center;
     justify-content: center;
     font-weight: 800;
     font-size: 0.95rem;
+    color: #fff;
     flex-shrink: 0;
 }
 
@@ -331,19 +339,16 @@
     box-sizing: border-box;
 }
 
-/* ── Bottom nav (mobile) ── */
 .parent-bottom-nav {
     display: none;
 }
 
-/* ── Desktop: hide mobile-only elements ── */
 @media (min-width: 901px) {
     .parent-bottom-nav {
         display: none !important;
     }
 }
 
-/* ── Tablet & mobile ── */
 @media (max-width: 900px) {
     .parent-sidebar-overlay {
         display: block;
@@ -356,6 +361,7 @@
 
     .parent-sidebar.open {
         transform: translateX(0);
+        box-shadow: var(--parent-shadow-lg);
     }
 
     .parent-sidebar-close {
@@ -382,13 +388,14 @@
         left: 0;
         right: 0;
         z-index: 150;
-        background: rgba(15, 23, 42, 0.96);
+        background: rgba(255, 255, 255, 0.97);
         backdrop-filter: blur(16px);
-        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        border-top: 1px solid var(--parent-border);
         padding: 6px 4px;
         padding-bottom: max(6px, env(safe-area-inset-bottom));
         justify-content: space-around;
         gap: 2px;
+        box-shadow: 0 -4px 20px rgba(15, 23, 42, 0.06);
     }
 
     .parent-bottom-link {
@@ -400,7 +407,7 @@
         gap: 3px;
         padding: 8px 4px;
         border-radius: 12px;
-        color: #94a3b8;
+        color: var(--parent-text-muted);
         text-decoration: none;
         font-size: 0.65rem;
         font-weight: 600;
@@ -422,8 +429,8 @@
     }
 
     .parent-bottom-link.active {
-        color: #38bdf8;
-        background: rgba(56, 189, 248, 0.1);
+        color: var(--parent-accent-text);
+        background: var(--parent-accent-soft);
     }
 }
 
@@ -443,7 +450,6 @@
     }
 }
 
-/* Parent pages embedded (About, Teachers) — mobile overflow */
 @media (max-width: 900px) {
     .parent-main-inner .page-transition,
     .parent-main-inner .about-hero,
