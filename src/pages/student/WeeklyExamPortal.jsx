@@ -28,8 +28,6 @@ export const WeeklyExamPortal = () => {
                     method: 'GET',
                     headers: {
                         'Authorization': `Bearer ${tk}`,
-                        'Cache-Control': 'no-cache',
-                        'Pragma': 'no-cache',
                     },
                     cache: 'no-store',
                 }
