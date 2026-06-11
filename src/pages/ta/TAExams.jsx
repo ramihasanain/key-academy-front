@@ -130,7 +130,7 @@ export const TAExams = () => {
                     <div className="ta-exams-stats">
                         <div className="stat blue"><b>{selectedExam.total_students || 0}</b><span>إجمالي الطلاب</span></div>
                         <div className="stat green"><b>{submissions.length}</b><span>تم التسليم</span></div>
-                        <div className="stat red"><b>{Math.max(0, (selectedExam.total_students || 0) - submissions.length)}</b><span>متخلف</span></div>
+                        <div className="stat red"><b>{Math.max(0, (selectedExam.total_students || 0) - submissions.length)}</b><span>لم يسلم</span></div>
                         <div className="stat yellow"><b>{submissions.filter((s) => s.grade != null).length}</b><span>تم التصحيح</span></div>
                     </div>
 
