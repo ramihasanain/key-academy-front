@@ -196,3 +196,48 @@
     background: rgba(239, 68, 68, 0.08);
     border: 1px solid rgba(239, 68, 68, 0.2);
 }
+
+@media (max-width: 900px) {
+    .parent-perf-header h2 {
+        font-size: 1.2rem;
+    }
+
+    .parent-perf-header p {
+        font-size: 0.88rem;
+        margin-bottom: 18px;
+    }
+
+    .parent-course-grid {
+        grid-template-columns: 1fr;
+        gap: 14px;
+    }
+
+    .parent-course-card-image,
+    .parent-course-card-placeholder {
+        height: 140px;
+    }
+
+    .parent-summary-row {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .parent-summary-card {
+        min-width: unset;
+    }
+
+    .parent-detail-back {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .parent-lesson-toggle h4 {
+        font-size: 0.92rem !important;
+    }
+}
+
+@media (max-width: 380px) {
+    .parent-course-card-body h3 {
+        font-size: 0.95rem;
+    }
+}

@@ -1,128 +1,365 @@
 .parent-portal {
     min-height: 100vh;
+    min-height: 100dvh;
     display: flex;
-    background: var(--bg-secondary, #0f172a);
-    color: var(--text-primary, #f8fafc);
+    background: linear-gradient(160deg, #0b1220 0%, #0f172a 45%, #111827 100%);
+    color: #f8fafc;
+    position: relative;
 }
 
+/* ── Sidebar overlay (mobile) ── */
+.parent-sidebar-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(4px);
+    z-index: 199;
+    border: none;
+    cursor: pointer;
+}
+
+/* ── Sidebar ── */
 .parent-sidebar {
-    width: 260px;
+    width: 280px;
     flex-shrink: 0;
-    background: rgba(15, 23, 42, 0.95);
-    border-left: 1px solid rgba(255, 255, 255, 0.08);
+    background: linear-gradient(180deg, rgba(15, 23, 42, 0.98) 0%, rgba(10, 15, 28, 0.99) 100%);
+    border-left: 1px solid rgba(56, 189, 248, 0.12);
+    box-shadow: -8px 0 32px rgba(0, 0, 0, 0.25);
     display: flex;
     flex-direction: column;
-    padding: 24px 16px;
+    padding: 20px 14px;
+    padding-bottom: max(20px, env(safe-area-inset-bottom));
     position: fixed;
     top: 0;
     right: 0;
     bottom: 0;
-    z-index: 100;
-    transition: transform 0.3s ease;
+    z-index: 200;
+    transition: transform 0.32s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
 }
 
-.parent-sidebar-header {
-    padding: 0 8px 20px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-    margin-bottom: 16px;
+.parent-sidebar-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 4px 6px 16px;
+    margin-bottom: 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+    position: relative;
 }
 
-.parent-sidebar-header h2 {
-    margin: 0 0 6px;
-    font-size: 1.1rem;
-    font-weight: 800;
+.parent-brand-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #38bdf8, #6366f1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.35rem;
+    color: #fff;
+    flex-shrink: 0;
+    box-shadow: 0 4px 16px rgba(56, 189, 248, 0.35);
 }
 
-.parent-sidebar-header p {
+.parent-sidebar-brand h2 {
     margin: 0;
+    font-size: 0.95rem;
+    font-weight: 800;
+    line-height: 1.3;
+}
+
+.parent-sidebar-brand span {
+    font-size: 0.72rem;
+    color: #64748b;
+    letter-spacing: 0.04em;
+}
+
+.parent-sidebar-close {
+    display: none;
+    position: absolute;
+    left: 4px;
+    top: 4px;
+    background: rgba(255, 255, 255, 0.08);
+    border: none;
+    color: #e2e8f0;
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    font-size: 1.25rem;
+    cursor: pointer;
+    align-items: center;
+    justify-content: center;
+}
+
+/* ── Welcome card ── */
+.parent-welcome-card {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px;
+    margin-bottom: 12px;
+    border-radius: 16px;
+    background: linear-gradient(135deg, rgba(56, 189, 248, 0.1) 0%, rgba(99, 102, 241, 0.08) 100%);
+    border: 1px solid rgba(56, 189, 248, 0.18);
+}
+
+.parent-student-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #0ea5e9, #8b5cf6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: #fff;
+    flex-shrink: 0;
+    box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
+}
+
+.parent-welcome-text {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+}
+
+.parent-welcome-label {
+    font-size: 0.8rem;
+    color: #94a3b8;
+    font-weight: 500;
+}
+
+.parent-student-name {
+    font-size: 1rem;
+    font-weight: 800;
+    color: #38bdf8;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.parent-switch-student {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 10px 14px;
+    margin-bottom: 12px;
+    border-radius: 12px;
+    border: 1px dashed rgba(56, 189, 248, 0.35);
+    background: rgba(56, 189, 248, 0.06);
+    color: #38bdf8;
     font-size: 0.85rem;
-    color: rgba(148, 163, 184, 0.9);
-    line-height: 1.5;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.parent-switch-student:hover {
+    background: rgba(56, 189, 248, 0.12);
+}
+
+/* ── Nav links ── */
+.parent-sidebar-nav {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 16px;
 }
 
 .parent-nav-link {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
     padding: 12px 14px;
-    border-radius: 12px;
-    color: rgba(226, 232, 240, 0.85);
+    border-radius: 14px;
+    color: #cbd5e1;
     text-decoration: none;
     font-weight: 600;
-    font-size: 0.95rem;
-    margin-bottom: 6px;
-    transition: background 0.2s, color 0.2s;
+    font-size: 0.92rem;
+    border: 1px solid transparent;
+    transition: background 0.2s, color 0.2s, border-color 0.2s, transform 0.15s;
 }
 
 .parent-nav-link:hover {
-    background: rgba(56, 189, 248, 0.1);
-    color: #38bdf8;
+    background: rgba(255, 255, 255, 0.05);
+    color: #f1f5f9;
 }
 
 .parent-nav-link.active {
-    background: rgba(56, 189, 248, 0.15);
+    background: linear-gradient(135deg, rgba(56, 189, 248, 0.18) 0%, rgba(99, 102, 241, 0.12) 100%);
     color: #38bdf8;
-    border: 1px solid rgba(56, 189, 248, 0.25);
+    border-color: rgba(56, 189, 248, 0.28);
+    box-shadow: 0 4px 16px rgba(56, 189, 248, 0.1);
 }
 
+.parent-nav-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.05);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.15rem;
+    flex-shrink: 0;
+    transition: background 0.2s;
+}
+
+.parent-nav-link.active .parent-nav-icon {
+    background: rgba(56, 189, 248, 0.2);
+    color: #38bdf8;
+}
+
+.parent-nav-label {
+    line-height: 1.3;
+}
+
+.parent-logout-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: auto;
+    padding: 13px 14px;
+    border-radius: 14px;
+    border: 1px solid rgba(239, 68, 68, 0.28);
+    background: rgba(239, 68, 68, 0.08);
+    color: #f87171;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.9rem;
+    width: 100%;
+    transition: background 0.2s;
+}
+
+.parent-logout-btn:hover {
+    background: rgba(239, 68, 68, 0.15);
+}
+
+/* ── Main content ── */
 .parent-main {
     flex: 1;
-    margin-right: 260px;
+    margin-right: 280px;
     min-height: 100vh;
+    min-height: 100dvh;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
     overflow-x: hidden;
-}
-
-.parent-main-inner {
-    max-width: 1100px;
-    margin: 0 auto;
-    padding: 24px 20px 48px;
 }
 
 .parent-topbar {
     display: none;
     align-items: center;
-    justify-content: space-between;
+    gap: 12px;
     padding: 12px 16px;
-    background: rgba(15, 23, 42, 0.95);
+    padding-top: max(12px, env(safe-area-inset-top));
+    background: rgba(15, 23, 42, 0.92);
+    backdrop-filter: blur(12px);
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     position: sticky;
     top: 0;
     z-index: 90;
 }
 
-.parent-logout-btn {
+.parent-menu-btn {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #f1f5f9;
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    font-size: 1.35rem;
+    cursor: pointer;
     display: flex;
     align-items: center;
-    gap: 8px;
-    margin-top: auto;
-    padding: 12px 14px;
-    border-radius: 12px;
-    border: 1px solid rgba(239, 68, 68, 0.3);
-    background: rgba(239, 68, 68, 0.08);
-    color: #f87171;
-    cursor: pointer;
-    font-weight: 600;
-    width: 100%;
+    justify-content: center;
+    flex-shrink: 0;
 }
 
-.parent-switch-student {
-    font-size: 0.8rem;
+.parent-topbar-center {
+    flex: 1;
+    min-width: 0;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.parent-topbar-greeting {
+    font-size: 0.72rem;
+    color: #94a3b8;
+}
+
+.parent-topbar-center strong {
+    font-size: 0.9rem;
+    font-weight: 800;
     color: #38bdf8;
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 4px 0;
-    margin-top: 8px;
-    text-decoration: underline;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;
 }
 
+.parent-topbar-avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #0ea5e9, #8b5cf6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 0.95rem;
+    flex-shrink: 0;
+}
+
+.parent-main-inner {
+    flex: 1;
+    max-width: 1100px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 28px 24px 48px;
+    box-sizing: border-box;
+}
+
+/* ── Bottom nav (mobile) ── */
+.parent-bottom-nav {
+    display: none;
+}
+
+/* ── Desktop: hide mobile-only elements ── */
+@media (min-width: 901px) {
+    .parent-bottom-nav {
+        display: none !important;
+    }
+}
+
+/* ── Tablet & mobile ── */
 @media (max-width: 900px) {
+    .parent-sidebar-overlay {
+        display: block;
+    }
+
     .parent-sidebar {
         transform: translateX(100%);
+        width: min(300px, 88vw);
     }
 
     .parent-sidebar.open {
         transform: translateX(0);
+    }
+
+    .parent-sidebar-close {
+        display: flex;
     }
 
     .parent-main {
@@ -131,5 +368,94 @@
 
     .parent-topbar {
         display: flex;
+    }
+
+    .parent-main-inner {
+        padding: 16px 14px 24px;
+        padding-bottom: calc(88px + env(safe-area-inset-bottom));
+    }
+
+    .parent-bottom-nav {
+        display: flex;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        z-index: 150;
+        background: rgba(15, 23, 42, 0.96);
+        backdrop-filter: blur(16px);
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 6px 4px;
+        padding-bottom: max(6px, env(safe-area-inset-bottom));
+        justify-content: space-around;
+        gap: 2px;
+    }
+
+    .parent-bottom-link {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 3px;
+        padding: 8px 4px;
+        border-radius: 12px;
+        color: #94a3b8;
+        text-decoration: none;
+        font-size: 0.65rem;
+        font-weight: 600;
+        min-width: 0;
+        transition: color 0.2s, background 0.2s;
+    }
+
+    .parent-bottom-link svg {
+        font-size: 1.35rem;
+        flex-shrink: 0;
+    }
+
+    .parent-bottom-link span {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 100%;
+        text-align: center;
+    }
+
+    .parent-bottom-link.active {
+        color: #38bdf8;
+        background: rgba(56, 189, 248, 0.1);
+    }
+}
+
+@media (max-width: 480px) {
+    .parent-main-inner {
+        padding: 12px 12px 20px;
+        padding-bottom: calc(84px + env(safe-area-inset-bottom));
+    }
+
+    .parent-bottom-link {
+        font-size: 0.6rem;
+        padding: 6px 2px;
+    }
+
+    .parent-bottom-link svg {
+        font-size: 1.2rem;
+    }
+}
+
+/* Parent pages embedded (About, Teachers) — mobile overflow */
+@media (max-width: 900px) {
+    .parent-main-inner .page-transition,
+    .parent-main-inner .about-hero,
+    .parent-main-inner .teachers-hero {
+        margin-left: -12px;
+        margin-right: -12px;
+        width: calc(100% + 24px);
+        max-width: none;
+    }
+
+    .parent-main-inner .container {
+        padding-left: 12px;
+        padding-right: 12px;
     }
 }

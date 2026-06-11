@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { Outlet, NavLink, useNavigate } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom'
 import {
     HiOutlineInformationCircle,
     HiOutlineAcademicCap,
@@ -8,12 +8,22 @@ import {
     HiOutlineArrowRightOnRectangle,
     HiOutlineBars3,
     HiOutlineXMark,
+    HiOutlineUserGroup,
+    HiOutlineArrowsRightLeft,
 } from 'react-icons/hi2'
 import { ParentProtectedRoute, getParentSelectedStudent } from '../../components/ParentProtectedRoute'
 import './ParentLayout.css'
 
+const NAV_ITEMS = [
+    { to: '/parent/about', label: 'من نحن', shortLabel: 'من نحن', icon: HiOutlineInformationCircle },
+    { to: '/parent/teachers', label: 'الأساتذة', shortLabel: 'الأساتذة', icon: HiOutlineAcademicCap },
+    { to: '/parent/performance', label: 'تقييم أدائي', shortLabel: 'التقييم', icon: HiOutlineChartBar },
+    { to: '/parent/weekly-exams', label: 'الامتحانات الأسبوعية', shortLabel: 'الامتحانات', icon: HiOutlineClipboardDocumentCheck },
+]
+
 const ParentLayoutShell = () => {
     const navigate = useNavigate()
+    const location = useLocation()
     const [sidebarOpen, setSidebarOpen] = useState(false)
     const student = getParentSelectedStudent()
 
@@ -25,8 +35,19 @@ const ParentLayoutShell = () => {
         userChildren = []
     }
 
-    const studentName = student?.full_name || student?.first_name || 'الطالب/ة'
-    const genderSuffix = student?.first_name?.endsWith('ة') ? 'الطالبة' : 'الطالب'
+    const studentName = student?.full_name || student?.first_name || 'الطالب'
+    const studentInitial = (studentName || 'ط')[0]
+
+    useEffect(() => {
+        setSidebarOpen(false)
+    }, [location.pathname])
+
+    useEffect(() => {
+        if (!sidebarOpen) return undefined
+        const prev = document.body.style.overflow
+        document.body.style.overflow = 'hidden'
+        return () => { document.body.style.overflow = prev }
+    }, [sidebarOpen])
 
     const handleLogout = () => {
         localStorage.removeItem('access_token')
@@ -41,40 +62,63 @@ const ParentLayoutShell = () => {
         navigate('/parent/select-student')
     }
 
-    const navItems = [
-        { to: '/parent/about', label: 'من نحن', icon: <HiOutlineInformationCircle /> },
-        { to: '/parent/teachers', label: 'الأساتذة', icon: <HiOutlineAcademicCap /> },
-        { to: '/parent/performance', label: 'تقييم أدائي', icon: <HiOutlineChartBar /> },
-        { to: '/parent/weekly-exams', label: 'الامتحانات الأسبوعية', icon: <HiOutlineClipboardDocumentCheck /> },
-    ]
+    const closeSidebar = () => setSidebarOpen(false)
 
     return (
         <div className="parent-portal">
+            {sidebarOpen && (
+                <button
+                    type="button"
+                    className="parent-sidebar-overlay"
+                    aria-label="إغلاق القائمة"
+                    onClick={closeSidebar}
+                />
+            )}
+
             <aside className={`parent-sidebar ${sidebarOpen ? 'open' : ''}`}>
-                <div className="parent-sidebar-header">
-                    <h2>بوابة أولياء الأمور</h2>
-                    <p>
-                        أهلاً بولي أمر {genderSuffix}
-                        <br />
-                        <strong style={{ color: '#38bdf8' }}>{studentName}</strong>
-                    </p>
-                    {userChildren.length > 1 && (
-                        <button type="button" className="parent-switch-student" onClick={handleSwitchStudent}>
-                            تبديل الطالب
-                        </button>
-                    )}
+                <div className="parent-sidebar-brand">
+                    <div className="parent-brand-icon">
+                        <HiOutlineUserGroup />
+                    </div>
+                    <div>
+                        <h2>بوابة أولياء الأمور</h2>
+                        <span>Key Academy</span>
+                    </div>
+                    <button
+                        type="button"
+                        className="parent-sidebar-close"
+                        onClick={closeSidebar}
+                        aria-label="إغلاق"
+                    >
+                        <HiOutlineXMark />
+                    </button>
                 </div>
 
-                <nav>
-                    {navItems.map(item => (
+                <div className="parent-welcome-card">
+                    <div className="parent-student-avatar">{studentInitial}</div>
+                    <div className="parent-welcome-text">
+                        <span className="parent-welcome-label">أهلاً بولي أمر الطالب</span>
+                        <strong className="parent-student-name">{studentName}</strong>
+                    </div>
+                </div>
+
+                {userChildren.length > 1 && (
+                    <button type="button" className="parent-switch-student" onClick={handleSwitchStudent}>
+                        <HiOutlineArrowsRightLeft />
+                        تبديل الطالب
+                    </button>
+                )}
+
+                <nav className="parent-sidebar-nav">
+                    {NAV_ITEMS.map(({ to, label, icon: Icon }) => (
                         <NavLink
-                            key={item.to}
-                            to={item.to}
+                            key={to}
+                            to={to}
                             className={({ isActive }) => `parent-nav-link ${isActive ? 'active' : ''}`}
-                            onClick={() => setSidebarOpen(false)}
+                            onClick={closeSidebar}
                         >
-                            {item.icon}
-                            {item.label}
+                            <span className="parent-nav-icon"><Icon /></span>
+                            <span className="parent-nav-label">{label}</span>
                         </NavLink>
                     ))}
                 </nav>
@@ -86,20 +130,38 @@ const ParentLayoutShell = () => {
             </aside>
 
             <div className="parent-main">
-                <div className="parent-topbar">
+                <header className="parent-topbar">
                     <button
                         type="button"
+                        className="parent-menu-btn"
                         onClick={() => setSidebarOpen(v => !v)}
-                        style={{ background: 'none', border: 'none', color: '#fff', fontSize: '1.5rem', cursor: 'pointer' }}
+                        aria-label="القائمة"
                     >
-                        {sidebarOpen ? <HiOutlineXMark /> : <HiOutlineBars3 />}
+                        <HiOutlineBars3 />
                     </button>
-                    <span style={{ fontWeight: 700, fontSize: '0.95rem' }}>ولي أمر {studentName}</span>
-                </div>
+                    <div className="parent-topbar-center">
+                        <span className="parent-topbar-greeting">أهلاً بولي أمر الطالب</span>
+                        <strong>{studentName}</strong>
+                    </div>
+                    <div className="parent-topbar-avatar">{studentInitial}</div>
+                </header>
 
                 <div className="parent-main-inner">
                     <Outlet />
                 </div>
+
+                <nav className="parent-bottom-nav" aria-label="التنقل السريع">
+                    {NAV_ITEMS.map(({ to, shortLabel, icon: Icon }) => (
+                        <NavLink
+                            key={to}
+                            to={to}
+                            className={({ isActive }) => `parent-bottom-link ${isActive ? 'active' : ''}`}
+                        >
+                            <Icon />
+                            <span>{shortLabel}</span>
+                        </NavLink>
+                    ))}
+                </nav>
             </div>
         </div>
     )

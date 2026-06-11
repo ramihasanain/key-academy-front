@@ -164,3 +164,42 @@
     font-weight: 600;
     font-size: 0.9rem;
 }
+
+@media (max-width: 900px) {
+    .parent-weekly-header h2 {
+        font-size: 1.2rem;
+    }
+
+    .parent-weekly-stats {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .parent-weekly-stat {
+        min-width: unset;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        text-align: right;
+        padding: 12px 16px;
+    }
+
+    .parent-weekly-stat .num {
+        font-size: 1.3rem;
+    }
+
+    .parent-weekly-course-head {
+        flex-wrap: wrap;
+    }
+
+    .parent-weekly-exam-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .parent-weekly-exam-row .exam-score {
+        width: 100%;
+        justify-content: flex-start;
+    }
+}
