@@ -83,11 +83,6 @@ const Login = () => {
                     return
                 }
 
-                if (data.parent_portal) {
-                    setErrorMsg(data.error || 'هذا حساب ولي أمر — استخدم بوابة الأولياء')
-                    return
-                }
-
                 const apiErrors = collectErrors(data)
                 const fallbackError = 'تعذر تسجيل الدخول، حاول مرة ثانية'
                 setErrorMsg(apiErrors.length ? apiErrors.join(' - ') : fallbackError)
@@ -108,6 +103,23 @@ const Login = () => {
 
             const user = data.user
             const pendingRedirect = localStorage.getItem('pending_course_redirect')
+
+            if (user.role === 'parent') {
+                localStorage.removeItem('parent_selected_student')
+                if (user.must_change_password) {
+                    navigate('/parent/change-password')
+                    return
+                }
+                if ((user.children || []).length > 1) {
+                    navigate('/parent/select-student')
+                    return
+                }
+                if (user.children?.[0]) {
+                    localStorage.setItem('parent_selected_student', JSON.stringify(user.children[0]))
+                }
+                navigate('/parent/about')
+                return
+            }
 
             if (pendingRedirect) {
                 localStorage.removeItem('pending_course_redirect')
