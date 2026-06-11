@@ -51,7 +51,7 @@
     padding: 12px;
     background: #f1f5f9;
     border-radius: 12px;
-    overflow: hidden;
+    overflow: visible;
 }
 
 .exam-student-viewer-wrap .exam-annotator-sticky-head {
@@ -97,12 +97,41 @@
         font-size: 1.35rem !important;
     }
 
+    .exam-student-card:has(.exam-student-viewer-wrap) {
+        overflow: visible;
+    }
+
     .exam-student-viewer-wrap {
         padding: 8px;
+        overflow: visible;
+    }
+
+    .exam-student-viewer-wrap .exam-annotator {
+        display: flex;
+        flex-direction: column;
+        min-height: 55vh;
+        min-height: 55dvh;
+    }
+
+    .exam-student-viewer-wrap .exam-annotator-sticky-head {
+        flex-shrink: 0;
     }
 
     .exam-student-viewer-wrap .exam-annotator-stage {
-        min-height: 50vh;
-        min-height: 50dvh;
+        flex: 1;
+        min-height: 45vh;
+        min-height: 45dvh;
+        overflow: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .exam-student-viewer-wrap .exam-annotator-page-wrap {
+        max-width: 100%;
+    }
+
+    .exam-student-viewer-wrap .exam-annotator-image--raster {
+        width: 100% !important;
+        height: auto;
+        display: block;
     }
 }

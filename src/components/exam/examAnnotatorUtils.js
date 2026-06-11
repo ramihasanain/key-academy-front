@@ -5,7 +5,7 @@
 import { pdfjs } from 'react-pdf'
 import { ensureSecureUrl } from '../../config'
 
-pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`
+pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/legacy/build/pdf.worker.min.mjs`
 
 export const GRADING_DATA_VERSION = 2
 
@@ -173,15 +173,48 @@ export async function loadFileAsBlobUrl(url, token) {
     return loaded?.url || url
 }
 
+function pdfDocumentSource(loaded) {
+    if (!loaded) return null
+    if (loaded.data) return { data: new Uint8Array(loaded.data) }
+    return loaded.url
+}
+
+/** يحوّل صفحة PDF إلى صورة — موثوق على iOS/Android حيث react-pdf قد يفشل. */
+export async function rasterizePdfPage({ url, token, pageNumber = 1, scale = 1 }) {
+    const loaded = await loadFileForViewer(url, token)
+    const source = pdfDocumentSource(loaded)
+    if (!source) throw new Error('تعذر تحميل PDF')
+
+    const doc = await pdfjs.getDocument(source).promise
+    const page = await doc.getPage(pageNumber)
+    const viewportWidth = Math.min(
+        (typeof window !== 'undefined' ? window.innerWidth : 900) - 48,
+        900,
+    ) * scale
+    const baseVp = page.getViewport({ scale: 1 })
+    const viewport = page.getViewport({ scale: viewportWidth / baseVp.width })
+
+    const canvas = document.createElement('canvas')
+    canvas.width = Math.max(1, Math.floor(viewport.width))
+    canvas.height = Math.max(1, Math.floor(viewport.height))
+    const ctx = canvas.getContext('2d')
+    ctx.fillStyle = '#ffffff'
+    ctx.fillRect(0, 0, canvas.width, canvas.height)
+    await page.render({ canvasContext: ctx, viewport }).promise
+
+    return {
+        dataUrl: canvas.toDataURL('image/jpeg', 0.9),
+        numPages: doc.numPages,
+    }
+}
+
 /** تصدير PDF مع التعليقات عبر pdf.js — يعمل لكل الصفحات بدون الاعتماد على DOM. */
 export async function exportPdfWithAnnotations({ url, token, fileIndex, gradingData, numPages }) {
     const loaded = await loadFileForViewer(url, token)
     if (!loaded) return []
 
     const annotationPages = normalizePages(gradingData)
-    const doc = await pdfjs.getDocument(
-        loaded.data ? { data: loaded.data } : loaded.url,
-    ).promise
+    const doc = await pdfjs.getDocument(pdfDocumentSource(loaded)).promise
     const total = numPages || doc.numPages
     const blobs = []
 

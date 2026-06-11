@@ -25,12 +25,13 @@ import {
     normalizeMarkForSave,
     hitTestAnnotation,
     loadFileForViewer,
+    rasterizePdfPage,
     exportAnnotatedPages,
 } from './examAnnotatorUtils'
 import { CollapsibleSection } from '../CollapsibleSection'
 import '../CollapsibleSection.css'
 
-pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`
+pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/legacy/build/pdf.worker.min.mjs`
 
 export { exportAnnotatedPages }
 
@@ -77,7 +78,7 @@ function PdfPageView({ url, pageNumber, scale, token, onNumPages, onRenderSucces
             }
             if (loaded.url?.startsWith('blob:')) revoked = loaded.url
             if (loaded.data) {
-                setPdfSource({ data: loaded.data })
+                setPdfSource({ data: new Uint8Array(loaded.data) })
             } else {
                 setPdfSource(loaded.url)
             }
@@ -126,6 +127,61 @@ function PdfPageView({ url, pageNumber, scale, token, onNumPages, onRenderSucces
                 }}
             />
         </Document>
+    )
+}
+
+/** عرض PDF كصورة على الموبايل — نفس مسار الصور التي تعمل للطالب. */
+function RasterPdfPageView({ url, pageNumber, scale, token, onNumPages, onRenderSuccess, onRenderSchedule }) {
+    const [src, setSrc] = useState(null)
+    const [loadError, setLoadError] = useState(false)
+    const renderCbRef = useRef({ onNumPages, onRenderSuccess, onRenderSchedule })
+    renderCbRef.current = { onNumPages, onRenderSuccess, onRenderSchedule }
+
+    useEffect(() => {
+        let cancelled = false
+        setSrc(null)
+        setLoadError(false)
+
+        rasterizePdfPage({ url, token, pageNumber, scale })
+            .then((result) => {
+                if (cancelled) return
+                renderCbRef.current.onNumPages?.(result.numPages)
+                setSrc(result.dataUrl)
+                renderCbRef.current.onRenderSuccess?.()
+                renderCbRef.current.onRenderSchedule?.()
+            })
+            .catch(() => {
+                if (!cancelled) setLoadError(true)
+            })
+
+        return () => { cancelled = true }
+    }, [url, token, pageNumber, scale])
+
+    if (loadError) {
+        return (
+            <div className="exam-annotator-fallback">
+                <p>تعذر عرض PDF على الموبايل</p>
+                <a href={url} target="_blank" rel="noreferrer">فتح الملف في تبويب جديد</a>
+            </div>
+        )
+    }
+
+    if (!src) {
+        return <div className="exam-annotator-loading">جاري تحميل الورقة...</div>
+    }
+
+    return (
+        <img
+            src={src}
+            alt="صفحة PDF"
+            draggable={false}
+            className="exam-annotator-image exam-annotator-image--raster"
+            style={{ width: `${scale * 100}%`, maxWidth: 'none' }}
+            onLoad={() => {
+                onRenderSuccess?.()
+                onRenderSchedule?.()
+            }}
+        />
     )
 }
 
@@ -428,8 +484,23 @@ export const ExamPaperAnnotator = ({
         setTextPrompt(null)
     }
 
+    const useRasterPdf = isMobile && readOnly
+
     const renderPageContent = (page) => {
         if (page.type === 'pdf') {
+            if (useRasterPdf) {
+                return (
+                    <RasterPdfPageView
+                        url={page.url}
+                        pageNumber={pdfSubPage}
+                        scale={scale}
+                        token={authToken}
+                        onNumPages={setPdfNumPages}
+                        onRenderSuccess={syncCanvasSize}
+                        onRenderSchedule={scheduleCanvasSync}
+                    />
+                )
+            }
             return (
                 <PdfPageView
                     url={page.url}
