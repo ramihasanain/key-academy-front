@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, Suspense, lazy } from 'react'
 import { createPortal } from 'react-dom'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
+import { isParentUser } from '../utils/blockParentFromStudentRoutes'
 import { API } from '../config'
 import { useAuth } from '../contexts/AuthContext'
 import { useUser } from '../hooks/useUser'
@@ -669,6 +670,10 @@ const LessonViewer = () => {
     
     const { userData } = useUser()
     const { isFeatureEnabled } = usePlatformFeatures()
+
+    useEffect(() => {
+        if (isParentUser()) navigate('/parent/about', { replace: true })
+    }, [navigate])
 
     const [activeContent, setActiveContent] = useState('video')
     const [activeTab, setActiveTab] = useState('notes')

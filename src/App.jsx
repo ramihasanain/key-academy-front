@@ -14,6 +14,11 @@ const TeacherProfile = lazy(() => import("./pages/TeacherProfile"));
 const FAQ = lazy(() => import("./pages/FAQ"));
 const Login = lazy(() => import("./pages/Login"));
 const Signup = lazy(() => import("./pages/Signup"));
+const ParentLogin = lazy(() => import("./pages/parent/ParentLogin"));
+const ParentChangePassword = lazy(() => import("./pages/parent/ParentChangePassword"));
+const ParentSelectStudent = lazy(() => import("./pages/parent/ParentSelectStudent"));
+const ParentLayout = lazy(() => import("./pages/parent/ParentLayout"));
+const ParentPerformance = lazy(() => import("./pages/parent/ParentPerformance"));
 const StudentDashboard = lazy(() => import("./pages/StudentDashboard"));
 const CourseViewer = lazy(() => import("./pages/CourseViewer"));
 const LessonViewer = lazy(() => import("./pages/LessonViewer"));
@@ -207,6 +212,9 @@ function HomeRoute() {
     if (user?.role === "teacher") {
       return <Navigate to="/teacher" replace />;
     }
+    if (user?.role === "parent") {
+      return <Navigate to="/parent/about" replace />;
+    }
   } catch {
     // Ignore invalid cached user payload and render home
   }
@@ -219,6 +227,7 @@ function App() {
   const path = location.pathname.toLowerCase();
   const hideNav =
     ["/login", "/signup"].includes(path) ||
+    path.startsWith("/parent") ||
     path.startsWith("/dashboard") ||
     path.startsWith("/course") ||
     path.startsWith("/lesson") ||
@@ -258,6 +267,16 @@ function App() {
               // }
             />
             <Route path="/signup" element={<Signup />} />
+            <Route path="/parent/login" element={<ParentLogin />} />
+            <Route path="/parent/change-password" element={<ParentChangePassword />} />
+            <Route path="/parent/select-student" element={<ParentSelectStudent />} />
+            <Route path="/parent" element={<ParentLayout />}>
+              <Route index element={<Navigate to="/parent/about" replace />} />
+              <Route path="about" element={<About />} />
+              <Route path="teachers" element={<Teachers profilePathPrefix="/parent/teachers" />} />
+              <Route path="teachers/:id" element={<TeacherProfile readOnlyParent />} />
+              <Route path="performance" element={<ParentPerformance />} />
+            </Route>
             <Route
               path="/dashboard"
               element={

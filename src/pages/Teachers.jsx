@@ -43,7 +43,7 @@ const ClearEiffelTowerIcon = () => (
     </svg>
 )
 
-const Teachers = () => {
+const Teachers = ({ profilePathPrefix = '/teachers' }) => {
     const [searchParams] = useSearchParams()
     const [allTeachers, setAllTeachers] = useState([])
     const [loading, setLoading] = useState(true)
@@ -223,7 +223,7 @@ const Teachers = () => {
                                         <h4>{teacher.name}</h4>
                                         <div className="t-subject">{teacher.subject}</div>
                                         <div className="t-grade" style={{ marginBottom: '20px' }}>{teacher.grade}</div>
-                                        <Link to={`/teachers/${teacher.id}`} className="btn-primary" style={{ marginTop: 'auto' }}>شوف ملف الأستاذ</Link>
+                                        <Link to={`${profilePathPrefix}/${teacher.id}`} className="btn-primary" style={{ marginTop: 'auto' }}>شوف ملف الأستاذ</Link>
                                     </div>
                                 </motion.div>
                             )}) : (

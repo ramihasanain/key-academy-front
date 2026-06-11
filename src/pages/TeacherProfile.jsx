@@ -41,7 +41,7 @@ const getTeacherProfile = async (id) => {
     return teacherRequestCache.get(id)
 }
 
-const TeacherProfile = () => {
+const TeacherProfile = ({ readOnlyParent = false }) => {
     const { id } = useParams()
     const [activeTab, setActiveTab] = useState('cv')
     const [teacher, setTeacher] = useState(null)
@@ -151,7 +151,9 @@ const TeacherProfile = () => {
                                     <h4 style={{ fontSize: '1.5rem' }}>{teacher.name}</h4>
                                     <div className="tc-subject" style={{ color: 'white' }}>{teacher.subject}</div>
                                     <div className="tc-grade">{teacher.grade}</div>
-                                    <Link to="/login" className="tc-btn profile-enroll-btn">سجل بدوراتي</Link>
+                                    {!readOnlyParent && (
+                                        <Link to="/login" className="tc-btn profile-enroll-btn">سجل بدوراتي</Link>
+                                    )}
                                 </div>
                             </motion.div>
                         </aside>
@@ -225,7 +227,9 @@ const TeacherProfile = () => {
                                             <div className="course-card-content">
                                                 <h4>{course.title}</h4>
                                                 <p>{course.desc}</p>
-                                                <Link to={`/course-preview/${course.slug || course.id}`} className="btn-primary w-full text-center mt-2" style={{ width: '100%', justifyContent: 'center' }}>شوف التفاصيل الكاملة</Link>
+                                                {!readOnlyParent && (
+                                                    <Link to={`/course-preview/${course.slug || course.id}`} className="btn-primary w-full text-center mt-2" style={{ width: '100%', justifyContent: 'center' }}>شوف التفاصيل الكاملة</Link>
+                                                )}
                                             </div>
                                         </motion.div>
                                     )) : (

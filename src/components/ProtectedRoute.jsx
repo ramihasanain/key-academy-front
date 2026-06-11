@@ -25,6 +25,7 @@ export const ProtectedRoute = ({ children, allowedRoles }) => {
             console.warn(`Access Denied for role: ${user.role}. Allowed: ${allowedRoles}`);
             
             // توجيه تلقائي حسب نوع الحساب لضمان عدم بقاء المستخدم عالقاً
+            if (user.role === 'parent') return <Navigate to="/parent/about" replace />;
             if (user.role === 'admin') return <Navigate to="/hq" replace />;
             if (user.role === 'assistant') return <Navigate to="/ta" replace />;
             if (user.role === 'teacher') return <Navigate to="/teacher" replace />;

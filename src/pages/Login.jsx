@@ -83,6 +83,11 @@ const Login = () => {
                     return
                 }
 
+                if (data.parent_portal) {
+                    setErrorMsg(data.error || 'هذا حساب ولي أمر — استخدم بوابة الأولياء')
+                    return
+                }
+
                 const apiErrors = collectErrors(data)
                 const fallbackError = 'تعذر تسجيل الدخول، حاول مرة ثانية'
                 setErrorMsg(apiErrors.length ? apiErrors.join(' - ') : fallbackError)
@@ -265,6 +270,11 @@ const Login = () => {
                     <div className="auth-footer">
                         ما عندك حساب؟{' '}
                         <Link to="/signup">سوي حساب هسة</Link>
+                    </div>
+
+                    <div className="auth-footer" style={{ marginTop: '12px' }}>
+                        ولي أمر؟{' '}
+                        <Link to="/parent/login">دخول بوابة الأولياء</Link>
                     </div>
                 </div>
             </motion.div>

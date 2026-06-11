@@ -29,6 +29,7 @@ import { VirtualLabsData } from '../data/VirtualLabsData'
 import EmptyState from '../components/core/EmptyState'
 import FeatureGate from '../components/FeatureGate'
 import { isViewOnlyCourse } from '../utils/viewOnlyAccess'
+import { isParentUser } from '../utils/blockParentFromStudentRoutes'
 import { usePlatformFeatures } from '../contexts/PlatformFeaturesContext'
 const SecurePDFViewer = lazy(() => import('../components/SecurePDFViewer'))
 import LiveChat from '../components/LiveChat'
@@ -79,6 +80,7 @@ const CourseChatDrawer = ({ courseId, userData, onClose, readOnly = false }) => 
 
 const CourseViewer = () => {
     const { slug } = useParams()
+    const navigate = useNavigate()
     const [courseData, setCourseData] = useState(null)
     const [loading, setLoading] = useState(true)
 
@@ -91,6 +93,10 @@ const CourseViewer = () => {
     const { userData } = useUser()
     const { isFeatureEnabled } = usePlatformFeatures()
     const [isChatOpen, setIsChatOpen] = useState(false)
+
+    useEffect(() => {
+        if (isParentUser()) navigate('/parent/about', { replace: true })
+    }, [navigate])
 
     useEffect(() => {
         const token = localStorage.getItem('access_token')
@@ -162,8 +168,6 @@ const CourseViewer = () => {
         window.addEventListener('scroll', handleScroll)
         return () => window.removeEventListener('scroll', handleScroll)
     }, [])
-
-    const navigate = useNavigate()
 
     const toggleModule = (id) => {
         setExpandedModule(expandedModule === id ? null : id)
