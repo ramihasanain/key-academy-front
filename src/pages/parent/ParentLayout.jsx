@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom'
 import {
-    HiOutlineInformationCircle,
+    HiOutlineSparkles,
     HiOutlineAcademicCap,
     HiOutlineChartBar,
     HiOutlineClipboardDocumentCheck,
@@ -15,9 +15,9 @@ import { ParentProtectedRoute, getParentSelectedStudent } from '../../components
 import './ParentLayout.css'
 
 const NAV_ITEMS = [
-    { to: '/parent/about', label: 'من نحن', shortLabel: 'من نحن', icon: HiOutlineInformationCircle },
+    { to: '/parent/features', label: 'المميزات', shortLabel: 'المميزات', icon: HiOutlineSparkles },
     { to: '/parent/teachers', label: 'الأساتذة', shortLabel: 'الأساتذة', icon: HiOutlineAcademicCap },
-    { to: '/parent/performance', label: 'تقييم أدائي', shortLabel: 'التقييم', icon: HiOutlineChartBar },
+    { to: '/parent/performance', label: 'مستوى الطالب', shortLabel: 'المستوى', icon: HiOutlineChartBar },
     { to: '/parent/weekly-exams', label: 'الامتحانات الأسبوعية', shortLabel: 'الامتحانات', icon: HiOutlineClipboardDocumentCheck },
 ]
 

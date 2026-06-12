@@ -672,7 +672,7 @@ const LessonViewer = () => {
     const { isFeatureEnabled } = usePlatformFeatures()
 
     useEffect(() => {
-        if (isParentUser()) navigate('/parent/about', { replace: true })
+        if (isParentUser()) navigate('/parent/features', { replace: true })
     }, [navigate])
 
     const [activeContent, setActiveContent] = useState('video')

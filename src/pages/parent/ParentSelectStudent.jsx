@@ -17,7 +17,7 @@ const ParentSelectStudentForm = () => {
 
     const handleSelect = (student) => {
         localStorage.setItem('parent_selected_student', JSON.stringify(student))
-        navigate('/parent/about')
+        navigate('/parent/features')
     }
 
     return (

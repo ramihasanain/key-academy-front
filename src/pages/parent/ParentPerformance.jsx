@@ -222,7 +222,7 @@ const ParentPerformance = () => {
     return (
         <div className="parent-perf-page">
             <div className="parent-perf-header">
-                <h2>تقييم أدائي 📊</h2>
+                <h2>مستوى الطالب 📊</h2>
                 <p>أداء {student.full_name || student.first_name} في الدورات المسجّل بها — اختر دورة لعرض التفاصيل</p>
             </div>
 

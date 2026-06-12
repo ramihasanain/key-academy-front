@@ -55,7 +55,7 @@ const ParentLogin = () => {
             if (user.children?.[0]) {
                 localStorage.setItem('parent_selected_student', JSON.stringify(user.children[0]))
             }
-            navigate('/parent/about')
+            navigate('/parent/features')
         } catch {
             setErrorMsg('خطأ بالاتصال بالسيرفر')
         } finally {

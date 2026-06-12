@@ -99,7 +99,7 @@ const CourseViewer = () => {
     const [isChatOpen, setIsChatOpen] = useState(false)
 
     useEffect(() => {
-        if (isParentUser()) navigate('/parent/about', { replace: true })
+        if (isParentUser()) navigate('/parent/features', { replace: true })
     }, [navigate])
 
     useEffect(() => {

@@ -214,7 +214,7 @@ function HomeRoute() {
       return <Navigate to="/teacher" replace />;
     }
     if (user?.role === "parent") {
-      return <Navigate to="/parent/about" replace />;
+      return <Navigate to="/parent/features" replace />;
     }
   } catch {
     // Ignore invalid cached user payload and render home
@@ -272,8 +272,9 @@ function App() {
             <Route path="/parent/change-password" element={<ParentChangePassword />} />
             <Route path="/parent/select-student" element={<ParentSelectStudent />} />
             <Route path="/parent" element={<ParentLayout />}>
-              <Route index element={<Navigate to="/parent/about" replace />} />
-              <Route path="about" element={<About />} />
+              <Route index element={<Navigate to="/parent/features" replace />} />
+              <Route path="features" element={<Features />} />
+              <Route path="about" element={<Navigate to="/parent/features" replace />} />
               <Route path="teachers" element={<Teachers profilePathPrefix="/parent/teachers" />} />
               <Route path="teachers/:id" element={<TeacherProfile readOnlyParent />} />
               <Route path="performance" element={<ParentPerformance />} />

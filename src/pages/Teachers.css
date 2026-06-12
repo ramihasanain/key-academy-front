@@ -652,6 +652,20 @@
     border: 1px solid rgba(0, 0, 0, 0.1);
 }
 
+.course-price-badge {
+    position: absolute;
+    bottom: 12px;
+    left: 12px;
+    background: rgba(131, 42, 150, 0.9);
+    backdrop-filter: blur(4px);
+    color: #fff;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
 .course-card-content {
     padding: 24px;
     flex: 1;

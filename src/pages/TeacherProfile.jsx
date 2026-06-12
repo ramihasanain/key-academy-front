@@ -108,6 +108,7 @@ const TeacherProfile = ({ readOnlyParent = false }) => {
             title: c.title,
             desc: c.subject + ' - ' + c.grade || '',
             lessons: c.lessons_count || 0,
+            price: c.price,
             img: c.hero_image || 'https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=500&auto=format&fit=crop&q=60'
         }))
     } else if (!coursesFetched && teacher.courses && teacher.courses.length > 0) {
@@ -116,6 +117,7 @@ const TeacherProfile = ({ readOnlyParent = false }) => {
             title: c.title,
             desc: c.description || '',
             lessons: c.lessons_count || 0,
+            price: c.price,
             img: c.hero_image || 'https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=500&auto=format&fit=crop&q=60'
         }))
     }
@@ -223,6 +225,9 @@ const TeacherProfile = ({ readOnlyParent = false }) => {
                                             <div className="course-card-img">
                                                 <img src={course.img} alt={course.title} />
                                                 <div className="course-lessons-badge">{course.lessons} درس</div>
+                                                {course.price != null && course.price !== '' && (
+                                                    <div className="course-price-badge">{course.price} د.ع</div>
+                                                )}
                                             </div>
                                             <div className="course-card-content">
                                                 <h4>{course.title}</h4>
