@@ -156,7 +156,7 @@ const CourseEvaluationDetail = ({ course, onBack }) => {
             <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '20px' }}>
                 <div className="hq-stat-card" style={{ padding: '14px 18px', borderRadius: '12px', flex: 1, minWidth: '120px', background: 'rgba(16,185,129,0.05)', border: '1px solid rgba(16,185,129,0.2)', textAlign: 'center' }}>
                     <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#10b981' }}>{summary.ai_quiz_avg_percentage ?? 0}%</div>
-                    <div style={{ fontSize: '0.8rem', color: 'var(--text-muted, #666)' }}>معدل اختبارات AI</div>
+                    <div style={{ fontSize: '0.8rem', color: 'var(--text-muted, #666)' }}>معدل اختبارات الذكاء الاصطناعي</div>
                 </div>
                 <div className="hq-stat-card" style={{ padding: '14px 18px', borderRadius: '12px', flex: 1, minWidth: '120px', background: 'rgba(56,189,248,0.05)', border: '1px solid rgba(56,189,248,0.2)', textAlign: 'center' }}>
                     <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#38bdf8' }}>{summary.video_quiz_correct_percentage ?? 0}%</div>

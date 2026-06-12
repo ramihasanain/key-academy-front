@@ -4,6 +4,7 @@ import { HiOutlineChevronLeft, HiOutlineChevronDown, HiOutlineChevronUp, HiOutli
 import { API } from '../../config'
 import { getParentSelectedStudent } from '../../components/ParentProtectedRoute'
 import EmptyState from '../../components/core/EmptyState'
+import ParentEvaluationGuideModal, { ParentEvaluationGuideTrigger } from './ParentEvaluationGuideModal'
 import './ParentPerformance.css'
 
 const hasLessonActivity = (lesson) => {
@@ -136,7 +137,7 @@ const CourseEvaluationDetail = ({ course, courseMeta, onBack }) => {
             <div className="parent-summary-row">
                 <div className="parent-summary-card green">
                     <div className="value">{summary.ai_quiz_avg_percentage ?? 0}%</div>
-                    <div className="label">معدل اختبارات AI</div>
+                    <div className="label">معدل اختبارات الذكاء الاصطناعي</div>
                 </div>
                 <div className="parent-summary-card blue">
                     <div className="value">{summary.video_quiz_correct_percentage ?? 0}%</div>
@@ -167,6 +168,7 @@ const ParentPerformance = () => {
     const [loading, setLoading] = useState(true)
     const [loadingCourseId, setLoadingCourseId] = useState(null)
     const [selectedCourseId, setSelectedCourseId] = useState(null)
+    const [guideOpen, setGuideOpen] = useState(false)
 
     useEffect(() => {
         if (!student?.id) return
@@ -222,9 +224,14 @@ const ParentPerformance = () => {
     return (
         <div className="parent-perf-page">
             <div className="parent-perf-header">
-                <h2>مستوى الطالب 📊</h2>
+                <div className="parent-perf-title-row">
+                    <h2>مستوى الطالب 📊</h2>
+                    <ParentEvaluationGuideTrigger onClick={() => setGuideOpen(true)} />
+                </div>
                 <p>أداء {student.full_name || student.first_name} في الدورات المسجّل بها — اختر دورة لعرض التفاصيل</p>
             </div>
+
+            <ParentEvaluationGuideModal open={guideOpen} onClose={() => setGuideOpen(false)} />
 
             {loading ? (
                 <EmptyState isLoading title="جاري تحميل الدورات..." message="" />

@@ -2,8 +2,15 @@
     color: #1e293b;
 }
 
+.parent-perf-title-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+}
+
 .parent-perf-header h2 {
-    margin: 0 0 8px;
+    margin: 0;
     font-size: 1.45rem;
     font-weight: 800;
     color: #1e293b;
