@@ -9,6 +9,7 @@ export const TASpyLogin = () => {
         if (token) {
             // Save the spy token to sessionStorage so we don't mess up our admin localStorage login!
             sessionStorage.setItem('spy_token', token)
+            localStorage.removeItem('ta_active_group_id')
             navigate('/ta/groups')
         }
     }, [token, navigate])

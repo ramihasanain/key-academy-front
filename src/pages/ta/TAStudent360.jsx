@@ -10,7 +10,9 @@ export const TAStudent360 = ({ studentIdProp, groupId, onClose }) => {
     const id = studentIdProp || params.id
     const navigate = useNavigate()
     const { activeGroupId } = useTAActiveGroup()
-    const effectiveGroupId = groupId ?? activeGroupId
+    // وضع المراقبة (أدمن): لا نرسل group_id من localStorage — قد يكون قديماً من مساعد آخر
+    const isSpyMode = !!sessionStorage.getItem('spy_token')
+    const effectiveGroupId = isSpyMode ? (groupId ?? null) : (groupId ?? activeGroupId)
     const [data, setData] = useState(null)
     const [loading, setLoading] = useState(true)
 
@@ -24,8 +26,12 @@ export const TAStudent360 = ({ studentIdProp, groupId, onClose }) => {
                 })
                 if (res.ok) {
                     setData(await res.json())
-                } else {
+                } else if (res.status === 403) {
                     alert('لا تملك صلاحية الوصول إلى بيانات هذا الطالب (خارج مجموعتك).')
+                    if (onClose) onClose()
+                    else navigate('/ta')
+                } else {
+                    alert('حدث خطأ أثناء تحميل ملف الطالب. حاول مرة أخرى.')
                     if (onClose) onClose()
                     else navigate('/ta')
                 }
