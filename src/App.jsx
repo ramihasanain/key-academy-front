@@ -77,6 +77,11 @@ const AdminQuickFillCourses = lazy(() =>
     default: m.AdminQuickFillCourses,
   })),
 );
+const AdminCopyLesson = lazy(() =>
+  import("./pages/hq/AdminCopyLesson").then((m) => ({
+    default: m.AdminCopyLesson,
+  })),
+);
 
 const TALayout = lazy(() =>
   import("./pages/ta/TALayout").then((m) => ({ default: m.TALayout })),
@@ -338,6 +343,7 @@ function App() {
               <Route path="teacherassistants/new" element={<AssistantWizard />} />
               <Route path="teacherassistants/:id/360" element={<TA360View />} />
               <Route path="quick-courses" element={<AdminQuickFillCourses />} />
+              <Route path="copy-lesson" element={<AdminCopyLesson />} />
               <Route path=":model" element={<AdminModelGrid />} />
               <Route path=":model/:id" element={<AdminModelForm />} />
             </Route>

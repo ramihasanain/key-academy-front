@@ -96,8 +96,9 @@ export const AdminLayout = () => {
         if (modelPath === '') return true // Dashboard accessible by all staff
 
         const pathMap = {
-            'users': 'view_user', 'students': 'view_user', 'courses': 'view_course',
+            'users': 'view_user', 'students': 'view_user',             'courses': 'view_course',
             'quick-courses': 'add_course',
+            'copy-lesson': 'change_lesson',
             'teachers': 'view_teacher', 'enrollments': 'view_enrollment',
             'contactmessages': 'view_contactmessage', 'faqs': 'view_faqitem',
             'muted-students': 'view_user',
@@ -129,6 +130,7 @@ export const AdminLayout = () => {
         { path: 'students', icon: <HiOutlineUsers />, label: 'الطلاب المسجلين' },
         { path: 'courses', icon: <HiOutlineBookOpen />, label: 'المناهج والدورات' },
         { path: 'quick-courses', icon: <HiOutlineBookOpen />, label: 'التعبئة السريعة (Excel)' },
+        { path: 'copy-lesson', icon: <HiOutlineDocumentText />, label: 'نسخ درس بين الدورات' },
         { path: 'teachers', icon: <HiOutlineAcademicCap />, label: 'الأساتذة' },
         { path: 'teacherassistants', icon: <HiOutlineBriefcase />, label: 'مساعدي الأساتذة' },
         { path: 'ta-manager', icon: <HiOutlineUserGroup />, label: 'أداء المساعدين (تقييم)' },
