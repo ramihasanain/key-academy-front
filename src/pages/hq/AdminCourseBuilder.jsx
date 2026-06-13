@@ -313,7 +313,7 @@ export const AdminCourseBuilder = ({ id }) => {
     const addLesson = (mIndex) => {
         const newMods = [...modules]
         newMods[mIndex].lessons.push({
-            localId: Date.now(), title: '', video_url: '', cover_image: '', order: newMods[mIndex].lessons.length + 1, is_locked: true,
+            localId: Date.now(), title: '', video_url: '', cover_image: '', order: newMods[mIndex].lessons.length + 1, is_locked: true, is_published: false,
             interactive_html: '', lesson_text: '', virtual_lab_slug: '', doc_file: null, showAdvanced: true, quizzes: [], json_data: { ad_video_id: '', in_video_quizzes: [
                 { time: 0, hint: '', question: '', options: ['', ''], correct: 0, explanations: ['', ''] },
                 { time: 0, hint: '', question: '', options: ['', ''], correct: 0, explanations: ['', ''] },
@@ -334,6 +334,32 @@ export const AdminCourseBuilder = ({ id }) => {
         newMods[mIndex].lessons[lIndex][field] = val
         newMods[mIndex].lessons[lIndex]._dirty = true
         setModules(newMods)
+    }
+
+    const handleLessonPublishToggle = async (mIndex, lIndex, published) => {
+        const less = modules[mIndex].lessons[lIndex]
+        updateLesson(mIndex, lIndex, 'is_published', published)
+        if (!less.id) return
+
+        const tk = localStorage.getItem('access_token')
+        try {
+            const res = await fetch(`${API}/api/hq/lessons/${less.id}/`, {
+                method: 'PATCH',
+                headers: { Authorization: `Bearer ${tk}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ is_published: published }),
+            })
+            if (!res.ok) {
+                const data = await res.json().catch(() => ({}))
+                throw new Error(data.detail || data.error || 'فشل تحديث حالة النشر')
+            }
+            const newMods = [...modules]
+            newMods[mIndex].lessons[lIndex].is_published = published
+            newMods[mIndex].lessons[lIndex]._dirty = false
+            setModules(newMods)
+        } catch (err) {
+            updateLesson(mIndex, lIndex, 'is_published', !published)
+            alert(err.message)
+        }
     }
 
     // --- Quiz Operations ---
@@ -1135,7 +1161,7 @@ export const AdminCourseBuilder = ({ id }) => {
 
                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
                                         {mod.lessons.map((less, lIndex) => (
-                                            <div key={less.localId} style={{ background: 'var(--hq-surface)', borderRadius: '12px', border: '1px solid var(--hq-border)', padding: '15px' }}>
+                                            <div key={less.localId} style={{ background: 'var(--hq-surface)', borderRadius: '12px', border: `1px solid ${less.is_published ? 'var(--hq-border)' : '#fca5a5'}`, padding: '15px' }}>
                                                 {/* Lesson Generic Top Bar (Just Title & Video Link) */}
                                                 <div style={{ display: 'flex', gap: '12px', alignItems: 'center', marginBottom: less.showAdvanced ? '15px' : '0' }}>
                                                     <div style={{ width: '24px', height: '24px', background: '#e2e8f0', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem', color: '#64748b', fontWeight: 'bold' }}>{lIndex + 1}</div>
@@ -1146,6 +1172,20 @@ export const AdminCourseBuilder = ({ id }) => {
                                                         <div style={{ display: 'flex', alignItems: 'center', border: '1px solid #d1d5db', borderRadius: '8px', background: 'white' }}>
                                                             <span style={{ padding: '0 10px', color: '#94a3b8' }}><HiOutlineVideoCamera size={18} /></span>
                                                             <input type="text" placeholder="رابط الفيديو (Video URL)..." value={less.video_url} onChange={e => updateLesson(mIndex, lIndex, 'video_url', e.target.value)} style={{ width: '100%', padding: '10px 15px 10px 0', border: 'none', background: 'transparent', outline: 'none', direction: 'ltr' }} />
+                                                        </div>
+                                                    </div>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '5px', background: 'white', padding: '8px 12px', borderRadius: '8px', border: `1px solid ${less.is_published ? '#86efac' : '#fca5a5'}` }}>
+                                                        <span style={{ fontSize: '0.8rem', fontWeight: 'bold', color: less.is_published ? '#16a34a' : '#ef4444' }}>
+                                                            {less.is_published ? 'منشور' : 'غير منشور'}
+                                                        </span>
+                                                        <div className="hq-toggle-switch publish-toggle">
+                                                            <input
+                                                                type="checkbox"
+                                                                id={`l-pub-${less.localId}`}
+                                                                checked={!!less.is_published}
+                                                                onChange={e => handleLessonPublishToggle(mIndex, lIndex, e.target.checked)}
+                                                            />
+                                                            <label htmlFor={`l-pub-${less.localId}`}></label>
                                                         </div>
                                                     </div>
                                                     <div style={{ display: 'flex', alignItems: 'center', gap: '5px', background: 'white', padding: '8px 12px', borderRadius: '8px', border: '1px solid #d1d5db' }}>
