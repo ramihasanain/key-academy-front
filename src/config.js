@@ -32,6 +32,7 @@ window.fetch = async function(...args) {
         
 
 // Auto-inject the latest token if available to prevent race conditions during state updates
+        config = config || {};
         const currentToken = localStorage.getItem('access_token');
         if (config && config.headers) {
              if (config.headers instanceof Headers) {
