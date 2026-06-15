@@ -270,10 +270,11 @@ const StudentDashboard = () => {
             browseCoursesFetchedRef.current = true;
 
             setLoadingCourses(true);
-            fetch('https://key-academy-cloud.fra1.digitaloceanspaces.com/landing-data/courses/list.json')
+            fetch(`${API}/api/courses/`)
                 .then(res => res.json())
                 .then(data => {
-                    setAllCourses(data);
+                    const list = Array.isArray(data) ? data : (data.results || []);
+                    setAllCourses(list);
                     setLoadingCourses(false);
                 })
                 .catch(err => {
@@ -283,9 +284,17 @@ const StudentDashboard = () => {
         }
     }, [activeTab]);
 
+    // Pre-filter courses by user's grade (same logic as mobile app)
+    const gradeFilteredCourses = useMemo(() => {
+        if (!userData?.grade) return allCourses;
+        if (userData.grade.includes('الثالث')) return allCourses.filter(c => (c.grade || '').includes('الثالث'));
+        if (userData.grade.includes('السادس')) return allCourses.filter(c => (c.grade || '').includes('السادس'));
+        return allCourses;
+    }, [allCourses, userData?.grade]);
+
     const availableTeachers = useMemo(() => {
         const teacherMap = new Map();
-        allCourses.forEach(course => {
+        gradeFilteredCourses.forEach(course => {
             if (!teacherMap.has(course.teacher_id)) {
                 teacherMap.set(course.teacher_id, {
                     id: course.teacher_id,
@@ -294,16 +303,16 @@ const StudentDashboard = () => {
             }
         });
         return Array.from(teacherMap.values());
-    }, [allCourses]);
+    }, [gradeFilteredCourses]);
 
     const filteredCourses = useMemo(() => {
-        return allCourses.filter(course => {
+        return gradeFilteredCourses.filter(course => {
             const matchesTeacher = filterTeacher === 'الكل' || String(course.teacher_id) === String(filterTeacher);
             const matchesSubject = filterSubject === 'الكل' || course.subject === filterSubject;
             const matchesGrade = filterGrade === 'الكل' || course.grade === filterGrade;
             return matchesTeacher && matchesSubject && matchesGrade;
         });
-    }, [allCourses, filterTeacher, filterSubject, filterGrade]);
+    }, [gradeFilteredCourses, filterTeacher, filterSubject, filterGrade]);
 
     const navItems = [
         { id: 'my-courses', label: 'دوراتي الحالية', icon: <HiOutlineBookOpen /> },

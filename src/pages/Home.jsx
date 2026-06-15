@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { Helmet } from 'react-helmet-async'
 import { API } from '../config'
+import { useAuth } from '../contexts/AuthContext'
 import { motion } from 'framer-motion'
 import { Swiper, SwiperSlide } from 'swiper/react'
 import { Autoplay, Pagination, EffectCards } from 'swiper/modules'
@@ -68,22 +69,28 @@ const aiFeaturesData = [
 
 const Home = () => {
     const [teachers, setTeachers] = useState([])
-    
-
+    const { userData } = useAuth()
 
     useEffect(() => {
         const fetchTeachers = async () => {
             try {
-                const data = await fetchJsonOnceWhilePending('https://key-academy-cloud.fra1.digitaloceanspaces.com/landing-data/teachers/list.json')
-                if (Array.isArray(data)) {
-                    setTeachers(data)
-                }
+                const data = await fetchJsonOnceWhilePending(`${API}/api/teachers/`)
+                const list = Array.isArray(data) ? data : (data.results || [])
+                if (list.length > 0) setTeachers(list)
             } catch (err) {
                 console.error('Error fetching teachers:', err)
             }
         }
         fetchTeachers()
     }, [])
+
+    // Filter carousel by user's grade when logged in (same logic as mobile app)
+    const displayTeachers = useMemo(() => {
+        if (!userData?.grade) return teachers
+        if (userData.grade.includes('الثالث')) return teachers.filter(t => (t.grade || '').includes('الثالث'))
+        if (userData.grade.includes('السادس')) return teachers.filter(t => (t.grade || '').includes('السادس'))
+        return teachers
+    }, [teachers, userData?.grade])
 
     return (
         <div className="page-transition">
@@ -223,7 +230,7 @@ const Home = () => {
                         breakpoints={{ 480: { slidesPerView: 2 }, 768: { slidesPerView: 3 }, 1024: { slidesPerView: 4 } }}
                         style={{ paddingBottom: '50px' }}
                     >
-                        {teachers.map((teacher, i) => {
+                        {displayTeachers.map((teacher, i) => {
                             // Fallback to cyclic colors only if color is completely missing
                             const fallbackColors = ['blue', 'pink', 'orange', 'purple', 'green', 'teal'];
                             const colorValue = teacher.color || fallbackColors[i % fallbackColors.length];

@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { API } from '../config'
+import { useAuth } from '../contexts/AuthContext'
 import { motion } from 'framer-motion'
 import { FaStar, FaDna, FaPenNib } from 'react-icons/fa'
 import {
@@ -20,7 +21,7 @@ import SectionTitle from '../components/SectionTitle'
 import ParticleBackground from '../components/ParticleBackground'
 import './Teachers.css'
 
-let teachersRequestPromise = null
+let teachersApiPromise = null
 
 const fadeInUp = {
     hidden: { opacity: 0, y: 30 },
@@ -45,62 +46,55 @@ const ClearEiffelTowerIcon = () => (
 
 const Teachers = ({ profilePathPrefix = '/teachers' }) => {
     const [searchParams] = useSearchParams()
+    const { userData } = useAuth()
     const [allTeachers, setAllTeachers] = useState([])
     const [loading, setLoading] = useState(true)
-    const [filter, setFilter] = useState({ 
-        grade: searchParams.get('grade') || 'all', 
-        branch: searchParams.get('branch') || 'all', 
-        subject: searchParams.get('subject') || 'all' 
+    const [filter, setFilter] = useState({
+        grade: searchParams.get('grade') || 'all',
+        branch: searchParams.get('branch') || 'all',
+        subject: searchParams.get('subject') || 'all'
     })
 
+    // Auto-set grade filter based on logged-in user's grade (same logic as mobile app)
     useEffect(() => {
-        const cachedTeachers = sessionStorage.getItem('cached_teachers_list');
-        if (cachedTeachers) {
-            try { 
-                setAllTeachers(JSON.parse(cachedTeachers));
-                setLoading(false); // Instant load!
+        if (userData?.grade && !searchParams.get('grade')) {
+            if (userData.grade.includes('الثالث')) {
+                setFilter(f => ({ ...f, grade: 'الثالث' }))
+            } else if (userData.grade.includes('السادس')) {
+                setFilter(f => ({ ...f, grade: 'السادس' }))
+            }
+        }
+    }, [userData?.grade])
+
+    useEffect(() => {
+        const cached = sessionStorage.getItem('cached_api_teachers_list');
+        if (cached) {
+            try {
+                setAllTeachers(JSON.parse(cached));
+                setLoading(false);
             } catch(e) {}
         }
 
-        if (!teachersRequestPromise) {
-            teachersRequestPromise = fetch('https://key-academy-cloud.fra1.digitaloceanspaces.com/landing-data/teachers/list.json')
+        if (!teachersApiPromise) {
+            teachersApiPromise = fetch(`${API}/api/teachers/`)
             .then(res => {
                 if (!res.ok) throw new Error('Failed to fetch')
                 return res.json()
             })
         }
 
-        teachersRequestPromise
+        teachersApiPromise
             .then(data => {
-                if (Array.isArray(data)) {
-                    // Prevent image double-fetching due to new AWS S3 signatures
-                    const cachedTeachers = sessionStorage.getItem('cached_teachers_list');
-                    if (cachedTeachers) {
-                        try {
-                            const cachedObj = JSON.parse(cachedTeachers);
-                            const cachedMap = {};
-                            cachedObj.forEach(t => cachedMap[t.id] = t);
-                            
-                            data = data.map(newT => {
-                                const oldT = cachedMap[newT.id];
-                                if (oldT && oldT.image && newT.image) {
-                                    if (oldT.image.split('?')[0] === newT.image.split('?')[0]) {
-                                        newT.image = oldT.image; 
-                                    }
-                                }
-                                return newT;
-                            });
-                        } catch(e) {}
-                    }
-
-                    setAllTeachers(data);
+                const list = Array.isArray(data) ? data : (data.results || [])
+                if (list.length > 0) {
+                    setAllTeachers(list);
                     setLoading(false);
-                    sessionStorage.setItem('cached_teachers_list', JSON.stringify(data));
+                    sessionStorage.setItem('cached_api_teachers_list', JSON.stringify(list));
                 }
             })
             .catch(err => {
                 console.error('Error fetching teachers:', err);
-                if (!sessionStorage.getItem('cached_teachers_list')) setLoading(false);
+                if (!sessionStorage.getItem('cached_api_teachers_list')) setLoading(false);
             })
     }, [])
 
