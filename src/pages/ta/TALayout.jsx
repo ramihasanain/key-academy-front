@@ -157,8 +157,8 @@ const TALayoutShell = ({ profile }) => {
                 <header className="hq-topbar ta-topbar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '15px 30px', flexWrap: 'wrap', gap: '12px' }}>
                     <div className="hq-tb-left" style={{ display: 'flex', alignItems: 'center', gap: '20px', flexWrap: 'wrap' }}>
                         <button className="hq-mobile-toggle" onClick={() => setIsMobileOpen(!isMobileOpen)}>☰</button>
-                        {profile?.ta_info?.teacher_image ? (
-                            <img src={profile.ta_info.teacher_image} alt="Teacher" style={{ width: '50px', height: '50px', borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--hq-primary)' }} />
+                        {(activeGroup?.teacher_image || profile?.ta_info?.teacher_image) ? (
+                            <img src={activeGroup?.teacher_image || profile.ta_info.teacher_image} alt="Teacher" style={{ width: '50px', height: '50px', borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--hq-primary)' }} />
                         ) : (
                             <div style={{ width: '50px', height: '50px', borderRadius: '50%', background: 'var(--hq-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px', fontWeight: 'bold', color: '#fff' }}>👨‍🏫</div>
                         )}
