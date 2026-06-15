@@ -244,6 +244,13 @@ export const TAExams = () => {
                                         </div>
 
                                         {isGraded(sub) ? (
+                                            sub.is_absent ? (
+                                                <div className="ta-grade-absent-panel">
+                                                    <HiOutlineXCircle size={36} />
+                                                    <span className="ta-grade-absent-label">متغيب عن الامتحان</span>
+                                                    <span className="ta-grade-absent-score">العلامة: 0 / {selectedExam.total_mark}</span>
+                                                </div>
+                                            ) : (
                                             <div className="ta-grade-done-panel">
                                                 <div className="ta-grade-done-main">
                                                     <HiOutlineCheckCircle size={28} />
@@ -258,17 +265,15 @@ export const TAExams = () => {
                                                     </div>
                                                 </div>
                                                 <div className="ta-grade-done-actions">
-                                                    {!sub.is_absent && (
-                                                        <button
-                                                            type="button"
-                                                            className="ta-regrade-btn"
-                                                            onClick={() => reopenGrading(sub.id)}
-                                                            disabled={reopeningId === sub.id}
-                                                        >
-                                                            <HiOutlinePencilSquare size={18} />
-                                                            {reopeningId === sub.id ? 'جاري الفتح...' : 'إعادة تصحيح'}
-                                                        </button>
-                                                    )}
+                                                    <button
+                                                        type="button"
+                                                        className="ta-regrade-btn"
+                                                        onClick={() => reopenGrading(sub.id)}
+                                                        disabled={reopeningId === sub.id}
+                                                    >
+                                                        <HiOutlinePencilSquare size={18} />
+                                                        {reopeningId === sub.id ? 'جاري الفتح...' : 'إعادة تصحيح'}
+                                                    </button>
                                                     {sub.file_url && (
                                                         <a href={sub.file_url} target="_blank" rel="noreferrer" className="ta-download-btn">
                                                             <HiOutlineArrowDownTray size={16} /> تحميل
@@ -276,6 +281,7 @@ export const TAExams = () => {
                                                     )}
                                                 </div>
                                             </div>
+                                            )
                                         ) : (
                                             <button
                                                 type="button"

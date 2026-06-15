@@ -1297,6 +1297,38 @@
     font-size: 0.88rem;
 }
 
+/* ── Absent graded panel ── */
+.ta-grade-absent-panel {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+    border: 2px solid #f87171;
+    border-radius: 14px;
+    padding: 24px 20px;
+    text-align: center;
+    color: #b91c1c;
+}
+
+.ta-grade-absent-panel svg {
+    color: #ef4444;
+}
+
+.ta-grade-absent-label {
+    font-size: 1.45rem;
+    font-weight: 900;
+    color: #b91c1c;
+    letter-spacing: 0.01em;
+}
+
+.ta-grade-absent-score {
+    font-size: 0.95rem;
+    color: #ef4444;
+    font-weight: 700;
+}
+
 /* ── Absent student card ── */
 .ta-submission-card--absent {
     border-color: #fca5a5;
