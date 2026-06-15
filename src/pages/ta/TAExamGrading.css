@@ -1296,3 +1296,50 @@
     font-weight: 700;
     font-size: 0.88rem;
 }
+
+/* ── Absent student card ── */
+.ta-submission-card--absent {
+    border-color: #fca5a5;
+    background: #fff5f5;
+}
+
+.ta-submission-status--absent {
+    background: #fee2e2 !important;
+    color: #b91c1c !important;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.ta-absent-hint {
+    color: #ef4444;
+    font-size: 0.82rem;
+    margin: 2px 0 0;
+}
+
+.ta-absent-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+    border: 2px dashed #fca5a5;
+    color: #b91c1c;
+    padding: 14px 18px;
+    border-radius: 12px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s;
+    margin-top: 4px;
+}
+
+.ta-absent-btn:hover:not(:disabled) {
+    background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+    border-color: #f87171;
+}
+
+.ta-absent-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}

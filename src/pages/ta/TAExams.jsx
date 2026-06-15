@@ -7,6 +7,8 @@ import {
     HiOutlinePencilSquare,
     HiOutlineClipboardDocumentCheck,
     HiOutlineCheckCircle,
+    HiOutlineXCircle,
+    HiOutlineExclamationTriangle,
 } from 'react-icons/hi2'
 import './TAExamGrading.css'
 
@@ -28,6 +30,7 @@ export const TAExams = () => {
     const [loadingSubs, setLoadingSubs] = useState(false)
     const [reopeningId, setReopeningId] = useState(null)
     const [activeStatList, setActiveStatList] = useState(null)
+    const [markingAbsentId, setMarkingAbsentId] = useState(null)
 
     useEffect(() => {
         const fetchExams = async () => {
@@ -93,6 +96,29 @@ export const TAExams = () => {
             alert('حدث خطأ')
         } finally {
             setReopeningId(null)
+        }
+    }
+
+    const markAbsent = async (student) => {
+        if (!window.confirm(`هل تريد تأكيد غياب "${student.student_name}" عن الامتحان؟\nسيتم تسجيل علامة 0 تلقائياً.`)) return
+        const tk = sessionStorage.getItem('spy_token') || localStorage.getItem('access_token')
+        setMarkingAbsentId(student.student_id)
+        try {
+            const res = await fetch(`${API}/api/interactions/exams/ta-mark-absent/`, {
+                method: 'POST',
+                headers: { Authorization: `Bearer ${tk}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ exam_id: selectedExam.id, student_id: student.student_id }),
+            })
+            if (!res.ok) {
+                const err = await res.json().catch(() => ({}))
+                alert(err.error || 'حدث خطأ')
+                return
+            }
+            await fetchSubmissions(selectedExam.id)
+        } catch {
+            alert('حدث خطأ في الاتصال')
+        } finally {
+            setMarkingAbsentId(null)
         }
     }
 
@@ -199,7 +225,7 @@ export const TAExams = () => {
                         </div>
                     )}
 
-                    {submissions.length === 0 ? (
+                    {submissions.length === 0 && notSubmittedStudents.length === 0 ? (
                         <p className="ta-exams-empty">لا يوجد تسليمات بعد.</p>
                     ) : (
                         <div className="ta-submissions-list">
@@ -262,6 +288,30 @@ export const TAExams = () => {
                                     </div>
                                 )
                             })}
+
+                            {notSubmittedStudents.map((student) => (
+                                <div key={`absent-${student.student_id}`} className="ta-submission-card ta-submission-card--absent">
+                                    <div className="ta-submission-top">
+                                        <div>
+                                            <h4>{student.student_name}</h4>
+                                            <p className="ta-absent-hint">لم يرفع ورقة الامتحان</p>
+                                        </div>
+                                        <span className="ta-submission-status ta-submission-status--absent">
+                                            <HiOutlineXCircle size={14} style={{ verticalAlign: 'middle', marginLeft: 4 }} />
+                                            لم يسلّم
+                                        </span>
+                                    </div>
+                                    <button
+                                        type="button"
+                                        className="ta-absent-btn"
+                                        onClick={() => markAbsent(student)}
+                                        disabled={markingAbsentId === student.student_id}
+                                    >
+                                        <HiOutlineExclamationTriangle size={18} />
+                                        {markingAbsentId === student.student_id ? 'جاري التسجيل...' : 'تأكيد التغيب — علامة 0'}
+                                    </button>
+                                </div>
+                            ))}
                         </div>
                     )}
                 </div>
