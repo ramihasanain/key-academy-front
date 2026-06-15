@@ -258,15 +258,17 @@ export const TAExams = () => {
                                                     </div>
                                                 </div>
                                                 <div className="ta-grade-done-actions">
-                                                    <button
-                                                        type="button"
-                                                        className="ta-regrade-btn"
-                                                        onClick={() => reopenGrading(sub.id)}
-                                                        disabled={reopeningId === sub.id}
-                                                    >
-                                                        <HiOutlinePencilSquare size={18} />
-                                                        {reopeningId === sub.id ? 'جاري الفتح...' : 'إعادة تصحيح'}
-                                                    </button>
+                                                    {!sub.is_absent && (
+                                                        <button
+                                                            type="button"
+                                                            className="ta-regrade-btn"
+                                                            onClick={() => reopenGrading(sub.id)}
+                                                            disabled={reopeningId === sub.id}
+                                                        >
+                                                            <HiOutlinePencilSquare size={18} />
+                                                            {reopeningId === sub.id ? 'جاري الفتح...' : 'إعادة تصحيح'}
+                                                        </button>
+                                                    )}
                                                     {sub.file_url && (
                                                         <a href={sub.file_url} target="_blank" rel="noreferrer" className="ta-download-btn">
                                                             <HiOutlineArrowDownTray size={16} /> تحميل
