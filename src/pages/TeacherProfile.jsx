@@ -5,6 +5,7 @@ import { motion } from 'framer-motion'
 import { FaBriefcase, FaTrophy, FaChalkboardTeacher } from 'react-icons/fa'
 import { HiOutlineDocumentText } from 'react-icons/hi2'
 import ParticleBackground from '../components/ParticleBackground'
+import { API } from '../config'
 import './Teachers.css'
 
 
@@ -26,7 +27,7 @@ const getTeacherProfile = async (id) => {
     if (!id) return null
 
     if (!teacherRequestCache.has(id)) {
-        const request = fetch(`https://key-academy-cloud.fra1.digitaloceanspaces.com/landing-data/teachers/details/${id}.json`)
+        const request = fetch(`${API}/api/teachers/${id}/`)
             .then(res => {
                 if (!res.ok) throw new Error('Failed to load teacher profile')
                 return res.json()
