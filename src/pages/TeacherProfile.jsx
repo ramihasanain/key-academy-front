@@ -79,7 +79,7 @@ const TeacherProfile = ({ readOnlyParent = false }) => {
         return <div className="page-transition profile-page" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}><div style={{ fontSize: '1.2rem', color: 'var(--text-muted)' }}>عذراً، الأستاذ غير موجود</div></div>
     }
 
-    const displayedCourses = (teacher.courses || []).map(c => ({
+    const displayedCourses = (teacher.courses || []).filter(c => Number(c.price) !== 0).map(c => ({
         id: c.id,
         slug: c.slug,
         title: c.title,
