@@ -124,10 +124,12 @@ export const TAExams = () => {
 
     const isGraded = (sub) => sub.grading_status === 'graded' || sub.grade != null
 
+    const absentSubmissions = submissions.filter((s) => s.is_absent)
+
     const statLists = {
         submitted: {
             title: 'الطلاب الذين سلّموا',
-            names: submissions.map((s) => s.student_name).sort((a, b) => a.localeCompare(b, 'ar')),
+            names: submissions.filter((s) => !s.is_absent).map((s) => s.student_name).sort((a, b) => a.localeCompare(b, 'ar')),
         },
         not_submitted: {
             title: 'الطلاب الذين لم يسلّموا',
@@ -136,9 +138,13 @@ export const TAExams = () => {
         graded: {
             title: 'الطلاب الذين تم تصحيحهم',
             names: submissions
-                .filter((s) => s.grade != null)
+                .filter((s) => s.grade != null && !s.is_absent)
                 .map((s) => s.student_name)
                 .sort((a, b) => a.localeCompare(b, 'ar')),
+        },
+        absent: {
+            title: 'الطلاب المتغيبون',
+            names: absentSubmissions.map((s) => s.student_name).sort((a, b) => a.localeCompare(b, 'ar')),
         },
     }
 
@@ -202,8 +208,16 @@ export const TAExams = () => {
                             className={`stat yellow clickable ${activeStatList === 'graded' ? 'active' : ''}`}
                             onClick={() => toggleStatList('graded')}
                         >
-                            <b>{submissions.filter((s) => s.grade != null).length}</b>
+                            <b>{submissions.filter((s) => s.grade != null && !s.is_absent).length}</b>
                             <span>تم التصحيح</span>
+                        </button>
+                        <button
+                            type="button"
+                            className={`stat orange clickable ${activeStatList === 'absent' ? 'active' : ''}`}
+                            onClick={() => toggleStatList('absent')}
+                        >
+                            <b>{absentSubmissions.length}</b>
+                            <span>متغيب</span>
                         </button>
                     </div>
 

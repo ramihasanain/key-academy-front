@@ -1090,6 +1090,7 @@
 .ta-exams-stats .stat.green { background: #ecfdf5; border-color: #a7f3d0; } .ta-exams-stats .stat.green b { color: #059669; }
 .ta-exams-stats .stat.red { background: #fff1f2; border-color: #fecdd3; } .ta-exams-stats .stat.red b { color: #e11d48; }
 .ta-exams-stats .stat.yellow { background: #fffbeb; border-color: #fde68a; } .ta-exams-stats .stat.yellow b { color: #d97706; }
+.ta-exams-stats .stat.orange { background: #fff7ed; border-color: #fed7aa; } .ta-exams-stats .stat.orange b { color: #c2410c; }
 
 .ta-submissions-list {
     display: flex;
