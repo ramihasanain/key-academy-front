@@ -13,9 +13,15 @@ export const Student360View = ({ id }) => {
     const [data, setData] = useState(null)
     const [loading, setLoading] = useState(true)
     const [toggling, setToggling] = useState(false)
-    const isSuperAdmin = (() => {
-        try { return JSON.parse(localStorage.getItem('user') || '{}')?.is_superuser === true } catch { return false }
-    })()
+    const [isSuperAdmin, setIsSuperAdmin] = useState(false)
+
+    useEffect(() => {
+        const tk = localStorage.getItem('access_token')
+        fetch(`${API}/api/hq/me/`, { headers: { Authorization: `Bearer ${tk}` } })
+            .then(r => r.ok ? r.json() : null)
+            .then(d => { if (d?.is_superuser) setIsSuperAdmin(true) })
+            .catch(() => {})
+    }, [])
     const [dialog, setDialog] = useState(null)
     const [subjectFilter, setSubjectFilter] = useState('');
     const [courseFilter, setCourseFilter] = useState('');
