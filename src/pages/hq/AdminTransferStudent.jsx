@@ -161,7 +161,7 @@ export const AdminTransferStudent = () => {
                         تم نقل الطالب <strong>{student?.full_name || student?.username}</strong> بنجاح تام
                     </p>
                     <div style={{
-                        display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr',
+                        display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)',
                         gap: 12, marginBottom: 32,
                     }}>
                         {[
@@ -169,6 +169,10 @@ export const AdminTransferStudent = () => {
                             { label: 'تقدم منقول', value: result.progress_moved },
                             { label: 'ملاحظات', value: result.notes_moved },
                             { label: 'أسئلة', value: result.qa_moved },
+                            { label: 'رسائل', value: result.msgs_moved },
+                            { label: 'محاولات اختبار', value: result.quiz_moved },
+                            { label: 'ذكاء اصطناعي', value: result.ai_moved },
+                            { label: 'جلسات فيديو', value: result.sessions_moved },
                         ].map(item => (
                             <div key={item.label} style={{
                                 background: '#f0fdf4', borderRadius: 10, padding: '14px 8px',
@@ -325,6 +329,10 @@ export const AdminTransferStudent = () => {
                                 { label: 'سجلات التقدم', value: preview.summary.progress_records, color: '#166534' },
                                 { label: 'الملاحظات', value: preview.summary.notes, color: '#7c3aed' },
                                 { label: 'الأسئلة', value: preview.summary.qa_posts, color: '#b45309' },
+                                { label: 'الرسائل', value: preview.summary.messages, color: '#0891b2' },
+                                { label: 'محاولات اختبار', value: preview.summary.quiz_attempts, color: '#be185d' },
+                                { label: 'جلسات ذكاء اصطناعي', value: preview.summary.ai_usage, color: '#0284c7' },
+                                { label: 'جلسات فيديو', value: preview.summary.video_sessions, color: '#047857' },
                             ].map(item => (
                                 <div key={item.label} style={{
                                     background: '#fff', borderRadius: 8, padding: '12px 10px', textAlign: 'center',
@@ -366,7 +374,7 @@ export const AdminTransferStudent = () => {
                             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
                                 <thead>
                                     <tr style={{ background: '#f8fafc' }}>
-                                        {['#', 'الوحدة (قبل)', 'الدرس (قبل)', 'الوحدة (بعد)', 'الدرس (بعد)', 'تقدم', 'ملاحظات', 'أسئلة'].map(h => (
+                                        {['#', 'الوحدة (قبل)', 'الدرس (قبل)', 'الوحدة (بعد)', 'الدرس (بعد)', 'تقدم', 'ملاحظات', 'أسئلة', 'رسائل'].map(h => (
                                             <th key={h} style={{
                                                 padding: '10px 12px', textAlign: 'right',
                                                 fontWeight: 600, color: '#64748b',
@@ -437,6 +445,13 @@ export const AdminTransferStudent = () => {
                                                     : <span style={{ color: '#cbd5e1' }}>—</span>
                                                 }
                                             </td>
+                                            {/* رسائل */}
+                                            <td style={{ padding: '9px 12px' }}>
+                                                {row.messages > 0
+                                                    ? <Badge color="blue">{row.messages}</Badge>
+                                                    : <span style={{ color: '#cbd5e1' }}>—</span>
+                                                }
+                                            </td>
                                         </tr>
                                     ))}
                                 </tbody>
@@ -458,7 +473,11 @@ export const AdminTransferStudent = () => {
                             <strong>«{preview.to_course.title}»</strong> مع جميع بياناته
                             ({preview.summary.progress_records} تقدم ·{' '}
                             {preview.summary.notes} ملاحظة ·{' '}
-                            {preview.summary.qa_posts} سؤال).
+                            {preview.summary.qa_posts} سؤال ·{' '}
+                            {preview.summary.messages} رسالة ·{' '}
+                            {preview.summary.quiz_attempts} محاولة اختبار ·{' '}
+                            {preview.summary.ai_usage} جلسة ذكاء اصطناعي ·{' '}
+                            {preview.summary.video_sessions} جلسة فيديو).
                         </div>
                         <button
                             className="admin-btn admin-btn-primary"
