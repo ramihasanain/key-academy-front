@@ -87,6 +87,11 @@ const AdminUnpublishedLessons = lazy(() =>
     default: m.AdminUnpublishedLessons,
   })),
 );
+const AdminTransferStudent = lazy(() =>
+  import("./pages/hq/AdminTransferStudent").then((m) => ({
+    default: m.AdminTransferStudent,
+  })),
+);
 
 const TALayout = lazy(() =>
   import("./pages/ta/TALayout").then((m) => ({ default: m.TALayout })),
@@ -343,6 +348,7 @@ function App() {
                 element={<AdminModerationHistory />}
               />
               <Route path="students/:id/360" element={<Student360View />} />
+              <Route path="students/:id/transfer" element={<AdminTransferStudent />} />
               <Route path="ta-manager" element={<TAManagerDashboard />} />
               <Route path="teachers/:id/360" element={<Teacher360View />} />
               <Route path="teacherassistants/new" element={<AssistantWizard />} />
