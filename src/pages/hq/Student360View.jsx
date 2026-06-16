@@ -13,6 +13,9 @@ export const Student360View = ({ id }) => {
     const [data, setData] = useState(null)
     const [loading, setLoading] = useState(true)
     const [toggling, setToggling] = useState(false)
+    const isSuperAdmin = (() => {
+        try { return JSON.parse(localStorage.getItem('user') || '{}')?.is_superuser === true } catch { return false }
+    })()
     const [dialog, setDialog] = useState(null)
     const [subjectFilter, setSubjectFilter] = useState('');
     const [courseFilter, setCourseFilter] = useState('');
@@ -261,15 +264,17 @@ export const Student360View = ({ id }) => {
                         }}>
                         {student.is_active ? <><HiOutlineNoSymbol size={20} /> تجميد الحساب</> : <><HiOutlineCheckCircle size={20} /> تنشيط تدريجي</>}
                     </button>
-                    <button
-                        onClick={() => navigate(`/hq/students/${finalId}/transfer`)}
-                        style={{
-                            padding: '10px 20px', borderRadius: '8px', border: 'none', cursor: 'pointer',
-                            display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 'bold', fontSize: '0.9rem',
-                            background: 'rgba(99, 102, 241, 0.1)', color: '#6366f1',
-                        }}>
-                        🔄 نقل بين الدورات
-                    </button>
+                    {isSuperAdmin && (
+                        <button
+                            onClick={() => navigate(`/hq/students/${finalId}/transfer`)}
+                            style={{
+                                padding: '10px 20px', borderRadius: '8px', border: 'none', cursor: 'pointer',
+                                display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 'bold', fontSize: '0.9rem',
+                                background: 'rgba(99, 102, 241, 0.1)', color: '#6366f1',
+                            }}>
+                            🔄 نقل بين الدورات
+                        </button>
+                    )}
                 </div>
             </div>
 
