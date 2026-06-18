@@ -323,15 +323,19 @@ export const TAExams = () => {
                                             لم يسلّم
                                         </span>
                                     </div>
-                                    <button
-                                        type="button"
-                                        className="ta-absent-btn"
-                                        onClick={() => markAbsent(student)}
-                                        disabled={markingAbsentId === student.student_id}
-                                    >
-                                        <HiOutlineExclamationTriangle size={18} />
-                                        {markingAbsentId === student.student_id ? 'جاري التسجيل...' : 'تأكيد التغيب — علامة 0'}
-                                    </button>
+                                    {selectedExam.can_mark_absent ? (
+                                        <button
+                                            type="button"
+                                            className="ta-absent-btn"
+                                            onClick={() => markAbsent(student)}
+                                            disabled={markingAbsentId === student.student_id}
+                                        >
+                                            <HiOutlineExclamationTriangle size={18} />
+                                            {markingAbsentId === student.student_id ? 'جاري التسجيل...' : 'تأكيد التغيب — علامة 0'}
+                                        </button>
+                                    ) : (
+                                        <p className="ta-absent-hint">يمكن تأكيد التغيب بعد انتهاء وقت الامتحان</p>
+                                    )}
                                 </div>
                             ))}
                         </div>
