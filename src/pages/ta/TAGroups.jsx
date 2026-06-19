@@ -480,11 +480,18 @@ export const TAGroups = () => {
             if (res.ok) {
                 appendMessage(await res.json())
             } else {
-                let errMsg = FEATURE_LOCKED_MESSAGE
+                let errMsg = ''
                 try {
                     const err = await res.json()
-                    errMsg = err.error || err.detail || errMsg
+                    errMsg = err.error || err.detail || ''
                 } catch { /* ignore */ }
+                if (!errMsg) {
+                    errMsg = res.status === 413
+                        ? 'حجم الملف كبير جداً، جرّب ملفاً أصغر.'
+                        : res.status === 403
+                            ? FEATURE_LOCKED_MESSAGE
+                            : `تعذّر رفع الملف (رمز ${res.status}). حاول مرة أخرى.`
+                }
                 showChatBlocked(errMsg)
             }
         } else {
@@ -854,6 +861,7 @@ export const TAGroups = () => {
                                                 type="file"
                                                 ref={fileInputRef}
                                                 className="ta-chat-file-input"
+                                                accept="image/*,audio/*,video/*,application/pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv,.zip,.rar,.7z"
                                                 onChange={e => setFile(e.target.files[0])}
                                             />
 
