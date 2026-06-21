@@ -617,6 +617,7 @@ export const ExamPaperAnnotator = ({
                     type="button"
                     className={currentPage === i ? 'active' : ''}
                     onClick={() => setCurrentPage(i)}
+                    title={p.label || `ملف ${i + 1}`}
                 >
                     {p.label || `ملف ${i + 1}`}
                 </button>

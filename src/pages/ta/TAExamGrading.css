@@ -341,6 +341,8 @@
     padding: 12px 16px;
     background: #f8fafc;
     border-bottom: 1px solid #e2e8f0;
+    max-width: 100%;
+    min-width: 0;
 }
 
 .exam-annotator-pager button {
@@ -352,6 +354,10 @@
     font-size: 0.85rem;
     font-weight: 700;
     color: #475569;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .exam-annotator-pager button.active {
@@ -865,6 +871,7 @@
 
     .exam-annotator-mobile-panels .exam-annotator-pager button {
         min-height: 44px;
+        max-width: 100%;
     }
 
     .exam-annotator-hint {
