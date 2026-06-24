@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import { API } from '../../config'
 import { ExamPaperAnnotator, exportAnnotatedPages } from '../../components/exam/ExamPaperAnnotator'
 import { exportPdfWithAnnotations, hasGradingAnnotations } from '../../components/exam/examAnnotatorUtils'
@@ -48,6 +48,9 @@ function authHeaders(json = false) {
 export const TAExamGradingWorkspace = () => {
     const { submissionId } = useParams()
     const navigate = useNavigate()
+    const location = useLocation()
+    // نفس الواجهة تُستخدم للمساعد (/ta) وللأستاذ (/teacher) — مسار العودة يُشتق من العنوان
+    const examsPath = location.pathname.startsWith('/teacher') ? '/teacher/exams' : '/ta/exams'
     const [workspace, setWorkspace] = useState(null)
     const [loading, setLoading] = useState(true)
     const [grade, setGrade] = useState('')
@@ -225,7 +228,7 @@ export const TAExamGradingWorkspace = () => {
         return (
             <div className="exam-grading-page">
                 <p style={{ color: '#ef4444' }}>{message || 'تعذر تحميل الورقة'}</p>
-                <button type="button" className="exam-grading-back" onClick={() => navigate('/ta/exams')}>العودة</button>
+                <button type="button" className="exam-grading-back" onClick={() => navigate(examsPath)}>العودة</button>
             </div>
         )
     }
@@ -416,7 +419,7 @@ export const TAExamGradingWorkspace = () => {
                         </button>
                         {headerOpen && (
                             <div className="exam-grading-header-details">
-                                <button type="button" className="exam-grading-back" onClick={() => navigate('/ta/exams')}>
+                                <button type="button" className="exam-grading-back" onClick={() => navigate(examsPath)}>
                                     <HiOutlineArrowRight size={18} /> العودة للامتحانات
                                 </button>
                                 <p className="exam-grading-header-meta">{exam.module_title}</p>
@@ -427,7 +430,7 @@ export const TAExamGradingWorkspace = () => {
                 ) : (
                     <>
                         <div>
-                            <button type="button" className="exam-grading-back" onClick={() => navigate('/ta/exams')}>
+                            <button type="button" className="exam-grading-back" onClick={() => navigate(examsPath)}>
                                 <HiOutlineArrowRight size={18} /> العودة
                             </button>
                             <h1 style={{ marginTop: '14px' }}>تصحيح — {submission.student_name}</h1>

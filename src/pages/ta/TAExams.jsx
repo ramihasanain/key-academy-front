@@ -22,6 +22,8 @@ export const TAExams = () => {
     const navigate = useNavigate()
     const location = useLocation()
     const { activeGroupId } = useOutletContext() || {}
+    // نفس الصفحة تُستخدم للمساعد (/ta) وللأستاذ (/teacher) — نشتق المسار الأساس من العنوان الحالي
+    const basePath = location.pathname.startsWith('/teacher') ? '/teacher/exams' : '/ta/exams'
     const [exams, setExams] = useState([])
     const [loading, setLoading] = useState(true)
     const [selectedExam, setSelectedExam] = useState(null)
@@ -73,7 +75,7 @@ export const TAExams = () => {
     }
 
     useEffect(() => {
-        if (selectedExam?.id && location.pathname.endsWith('/ta/exams')) {
+        if (selectedExam?.id && location.pathname.endsWith('/exams')) {
             fetchSubmissions(selectedExam.id)
         }
     }, [location.pathname])
@@ -91,7 +93,7 @@ export const TAExams = () => {
                 alert(err.error || 'تعذر إعادة فتح التصحيح')
                 return
             }
-            navigate(`/ta/exams/grade/${subId}`)
+            navigate(`${basePath}/grade/${subId}`)
         } catch {
             alert('حدث خطأ')
         } finally {
@@ -300,7 +302,7 @@ export const TAExams = () => {
                                             <button
                                                 type="button"
                                                 className="ta-grade-online-btn"
-                                                onClick={() => navigate(`/ta/exams/grade/${sub.id}`)}
+                                                onClick={() => navigate(`${basePath}/grade/${sub.id}`)}
                                             >
                                                 <HiOutlinePencilSquare size={24} />
                                                 تصحيح الورقة أونلاين

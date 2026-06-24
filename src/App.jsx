@@ -406,6 +406,8 @@ function App() {
               <Route path="lectures" element={<TeacherLectures />} />
               <Route path="qa" element={<TAQA />} />
               <Route path="groups" element={<TAGroups />} />
+              <Route path="exams" element={<TAExams />} />
+              <Route path="exams/grade/:submissionId" element={<TAExamGradingWorkspace />} />
               <Route path="students" element={<TAStudentStats />} />
               <Route path="students/:id/360" element={<TAStudent360 />} />
               <Route path="muted" element={<TAMutedStudents />} />

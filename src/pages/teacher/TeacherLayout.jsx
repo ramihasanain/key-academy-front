@@ -11,7 +11,8 @@ import {
     HiOutlineIdentification,
     HiOutlineNoSymbol,
     HiOutlineClock,
-    HiOutlineVideoCamera
+    HiOutlineVideoCamera,
+    HiOutlineClipboardDocumentCheck
 } from 'react-icons/hi2'
 import '../hq/Admin.css'
 import '../ta/TAResponsive.css'
@@ -87,6 +88,7 @@ export const TeacherLayout = () => {
         { path: 'courses', icon: <HiOutlinePresentationChartLine />, label: 'إدارة الدورات والحصص' },
         { path: 'assistants', icon: <HiOutlineUsers />, label: 'أداء كادر المساعدين' },
         { path: 'students', icon: <HiOutlineIdentification />, label: 'بيانات الطلاب وتقييمهم' },
+        { path: 'exams', icon: <HiOutlineClipboardDocumentCheck />, label: 'تصحيح الامتحانات' },
         { path: 'qa', icon: <HiOutlineChatBubbleLeftRight />, label: 'الأسئلة والنقاشات' },
         { path: 'groups', icon: <HiOutlineUserGroup />, label: 'مجموعات الدردشة' },
         { path: 'lectures', icon: <HiOutlineVideoCamera />, label: 'محاضرات المنهاج' },
