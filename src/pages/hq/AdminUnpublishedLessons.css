@@ -1,0 +1,308 @@
+/* ── جدول نشر الدروس (الدروس غير المنشورة) ── */
+.unpub-page {
+    font-family: 'Tajawal', 'Cairo', sans-serif;
+}
+
+.unpub-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+}
+
+.unpub-head h1 {
+    margin: 0 0 6px;
+    font-size: 1.5rem;
+    color: #0f172a;
+}
+
+.unpub-head p {
+    margin: 0;
+    color: #64748b;
+    font-size: 0.92rem;
+    line-height: 1.7;
+}
+
+.unpub-hint-note {
+    color: #94a3b8;
+    font-size: 0.84rem;
+}
+
+.unpub-summary {
+    display: flex;
+    gap: 12px;
+}
+
+.unpub-stat {
+    text-align: center;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 12px 18px;
+    min-width: 92px;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.05);
+}
+
+.unpub-stat b {
+    display: block;
+    font-size: 1.7rem;
+    color: #ef4444;
+    line-height: 1.1;
+}
+
+.unpub-stat span {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #64748b;
+}
+
+.unpub-stat--scheduled b {
+    color: #4f46e5;
+}
+
+.unpub-toolbar {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.unpub-search {
+    flex: 1;
+    min-width: 220px;
+    padding: 12px 16px;
+    border-radius: 12px;
+    border: 1px solid #cbd5e1;
+    font-family: inherit;
+    font-size: 0.92rem;
+}
+
+.unpub-refresh {
+    border: 1px solid #cbd5e1;
+    background: #fff;
+    color: #475569;
+    padding: 0 20px;
+    border-radius: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.unpub-refresh:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.unpub-empty {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 48px 24px;
+    text-align: center;
+    color: #64748b;
+    font-weight: 600;
+}
+
+.unpub-empty--done {
+    color: #16a34a;
+    background: #f0fdf4;
+    border-color: #bbf7d0;
+}
+
+.unpub-agenda {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+/* ── بطاقة اليوم ── */
+.unpub-day {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 4px 16px rgba(15, 23, 42, 0.05);
+    border-right: 5px solid #cbd5e1;
+}
+
+.unpub-day--today { border-right-color: #4f46e5; }
+.unpub-day--overdue { border-right-color: #ef4444; }
+.unpub-day--upcoming { border-right-color: #10b981; }
+.unpub-day--none { border-right-color: #cbd5e1; }
+
+.unpub-day-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    flex-wrap: wrap;
+    padding: 16px 18px;
+    background: #f8fafc;
+    border-bottom: 1px solid #eef2f7;
+}
+
+.unpub-day-title {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.unpub-day-date {
+    font-size: 1.08rem;
+    font-weight: 800;
+    color: #0f172a;
+}
+
+.unpub-day-meta {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.84rem;
+    font-weight: 700;
+    color: #64748b;
+}
+
+.unpub-day-badge {
+    padding: 2px 10px;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 800;
+}
+
+.unpub-day-badge--today { background: #e0e7ff; color: #4338ca; }
+.unpub-day-badge--overdue { background: #fee2e2; color: #b91c1c; }
+.unpub-day-badge--upcoming { background: #dcfce7; color: #15803d; }
+
+.unpub-publish-day {
+    border: none;
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: #fff;
+    padding: 11px 18px;
+    border-radius: 12px;
+    font-weight: 800;
+    font-size: 0.9rem;
+    cursor: pointer;
+    font-family: inherit;
+    box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4);
+    transition: transform 0.12s ease, box-shadow 0.2s ease;
+}
+
+.unpub-publish-day:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(16, 185, 129, 0.5);
+}
+
+.unpub-publish-day:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* ── قائمة الدروس داخل اليوم ── */
+.unpub-lessons {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.unpub-lesson {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+    padding: 14px 18px;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.unpub-lesson:last-child {
+    border-bottom: none;
+}
+
+.unpub-lesson-info {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+    flex: 1;
+}
+
+.unpub-lesson-info strong {
+    color: #0f172a;
+    font-size: 0.96rem;
+}
+
+.unpub-lesson-info span {
+    color: #64748b;
+    font-size: 0.82rem;
+}
+
+.unpub-lesson-actions {
+    display: flex;
+    align-items: flex-end;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.unpub-date-field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.unpub-date-field span {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #94a3b8;
+}
+
+.unpub-date-field input {
+    padding: 9px 12px;
+    border-radius: 10px;
+    border: 1px solid #cbd5e1;
+    font-family: inherit;
+    font-size: 0.88rem;
+    color: #334155;
+}
+
+.unpub-publish-one {
+    border: 1px solid #c7d2fe;
+    background: #eef2ff;
+    color: #4338ca;
+    padding: 10px 18px;
+    border-radius: 10px;
+    font-weight: 800;
+    font-size: 0.88rem;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.15s ease;
+}
+
+.unpub-publish-one:hover:not(:disabled) {
+    background: #e0e7ff;
+}
+
+.unpub-publish-one:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+@media (max-width: 600px) {
+    .unpub-lesson {
+        align-items: stretch;
+    }
+    .unpub-lesson-actions {
+        width: 100%;
+        align-items: center;
+    }
+    .unpub-date-field {
+        flex: 1;
+    }
+    .unpub-date-field input {
+        width: 100%;
+    }
+    .unpub-publish-day {
+        width: 100%;
+    }
+}
