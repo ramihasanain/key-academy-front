@@ -908,6 +908,340 @@
     to { opacity: 1; }
 }
 
+/* ════════════════════════════════════════════════════════════
+   الدوك العائم للتصحيح على الموبايل — أدوات تظهر/تختفي بنعومة
+   ════════════════════════════════════════════════════════════ */
+
+.annotator-dock,
+.annotator-zoomdock,
+.annotator-pagerdock {
+    position: fixed;
+    z-index: 10040;
+    display: flex;
+    background: rgba(15, 23, 42, 0.82);
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 12px 34px rgba(0, 0, 0, 0.38);
+    transition: opacity 0.28s ease, transform 0.32s cubic-bezier(0.22, 1, 0.36, 1), visibility 0.32s;
+    will-change: transform, opacity;
+}
+
+/* ── دوك الأدوات: عمودي على الحافة اليسرى ── */
+.annotator-dock {
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    left: 8px;
+    top: 50%;
+    transform: translate(0, -50%);
+    padding: 6px;
+    border-radius: 18px;
+}
+
+.annotator-dock--hidden {
+    opacity: 0;
+    visibility: hidden;
+    transform: translate(-135%, -50%);
+    pointer-events: none;
+}
+
+/* ── دوك التكبير: عمودي على الحافة اليمنى ── */
+.annotator-zoomdock {
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    right: 8px;
+    top: 50%;
+    transform: translate(0, -50%);
+    padding: 6px;
+    border-radius: 18px;
+}
+
+.annotator-zoomdock--hidden {
+    opacity: 0;
+    visibility: hidden;
+    transform: translate(135%, -50%);
+    pointer-events: none;
+}
+
+.annotator-zoomdock-val {
+    color: #e2e8f0;
+    font-size: 0.74rem;
+    font-weight: 800;
+    min-width: 40px;
+    text-align: center;
+}
+
+.annotator-zoomdock-reset {
+    font-size: 0.78rem;
+    font-weight: 900;
+    letter-spacing: 0.02em;
+}
+
+/* ── دوك التنقل بين الصفحات: أعلى المنتصف ── */
+.annotator-pagerdock {
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    top: calc(60px + env(safe-area-inset-top, 0px));
+    left: 50%;
+    transform: translate(-50%, 0);
+    padding: 6px 8px;
+    border-radius: 14px;
+    max-width: calc(100vw - 24px);
+}
+
+.annotator-pagerdock--hidden {
+    opacity: 0;
+    visibility: hidden;
+    transform: translate(-50%, -140%);
+    pointer-events: none;
+}
+
+.annotator-pagerdock-nav {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #e2e8f0;
+}
+
+.annotator-pagerdock-nav button {
+    width: 38px;
+    height: 38px;
+    border: none;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.08);
+    color: #e2e8f0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.annotator-pagerdock-nav button:disabled {
+    opacity: 0.35;
+}
+
+.annotator-pagerdock-nav span {
+    font-weight: 800;
+    font-size: 0.85rem;
+    min-width: 50px;
+    text-align: center;
+}
+
+.annotator-pagerdock-files {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border: none;
+    background: rgba(255, 255, 255, 0.08);
+    color: #e2e8f0;
+    padding: 8px 14px;
+    border-radius: 10px;
+    font-weight: 800;
+    font-family: inherit;
+    font-size: 0.85rem;
+    cursor: pointer;
+    max-width: 62vw;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.annotator-pagerdock-files svg {
+    flex-shrink: 0;
+    transition: transform 0.2s ease;
+}
+
+.annotator-pagerdock-files svg.is-open {
+    transform: rotate(180deg);
+}
+
+.annotator-pagerdock-sheet {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    width: 60vw;
+    max-width: 320px;
+    max-height: 46vh;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    animation: annotator-pop-down 0.16s ease;
+}
+
+.annotator-pagerdock-sheet button {
+    border: none;
+    border-radius: 10px;
+    padding: 11px 12px;
+    background: rgba(255, 255, 255, 0.06);
+    color: #e2e8f0;
+    text-align: right;
+    font-family: inherit;
+    font-weight: 700;
+    font-size: 0.88rem;
+    cursor: pointer;
+}
+
+.annotator-pagerdock-sheet button.is-active {
+    background: linear-gradient(135deg, #6366f1, #4f46e5);
+    color: #fff;
+}
+
+/* ── أزرار الدوك المشتركة ── */
+.annotator-dock-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border: none;
+    border-radius: 13px;
+    background: rgba(255, 255, 255, 0.07);
+    color: #e2e8f0;
+    cursor: pointer;
+    flex-shrink: 0;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    transition: background 0.15s ease, transform 0.12s ease, color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.annotator-dock-btn:active {
+    transform: scale(0.88);
+}
+
+.annotator-dock-btn.is-active {
+    background: linear-gradient(135deg, #6366f1, #4f46e5);
+    color: #fff;
+    box-shadow: 0 4px 16px rgba(99, 102, 241, 0.55);
+}
+
+.annotator-dock-btn.pin.is-on {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: #fff;
+    box-shadow: 0 4px 16px rgba(245, 158, 11, 0.5);
+}
+
+.annotator-dock-divider {
+    width: 26px;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.14);
+    margin: 2px 0;
+    flex-shrink: 0;
+}
+
+.annotator-dock-color-dot {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.85);
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.2);
+}
+
+/* ── منتقي الألوان المنبثق بجانب الدوك ── */
+.annotator-dock-colors {
+    position: absolute;
+    left: calc(100% + 8px);
+    top: 50%;
+    transform: translateY(-50%);
+    display: grid;
+    grid-template-columns: repeat(2, auto);
+    gap: 8px;
+    padding: 10px;
+    background: rgba(15, 23, 42, 0.94);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 14px;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+    animation: annotator-pop-side 0.16s ease;
+}
+
+.annotator-dock-colors button {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    cursor: pointer;
+}
+
+.annotator-dock-colors button.is-active {
+    border-color: #fff;
+    box-shadow: 0 0 0 2px #6366f1;
+}
+
+/* ── زر إرجاع الأدوات حين تكون مخفية ── */
+.annotator-reveal-fab {
+    position: fixed;
+    left: 10px;
+    top: 50%;
+    z-index: 10041;
+    width: 48px;
+    height: 48px;
+    border: none;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #6366f1, #4f46e5);
+    color: #fff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 24px rgba(99, 102, 241, 0.55);
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: opacity 0.28s ease, transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), visibility 0.3s;
+}
+
+.annotator-reveal-fab.is-shown {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(-50%) scale(1);
+}
+
+.annotator-reveal-fab.is-gone {
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-50%) scale(0.5);
+    pointer-events: none;
+}
+
+/* ── شارة الورقة المقفلة ── */
+.annotator-locked-chip {
+    position: fixed;
+    top: calc(60px + env(safe-area-inset-top, 0px));
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10040;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(15, 23, 42, 0.82);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    color: #6ee7b7;
+    padding: 8px 16px;
+    border-radius: 999px;
+    font-size: 0.82rem;
+    font-weight: 800;
+    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.32);
+}
+
+@keyframes annotator-pop-side {
+    from { opacity: 0; transform: translateY(-50%) scale(0.85); }
+    to { opacity: 1; transform: translateY(-50%) scale(1); }
+}
+
+@keyframes annotator-pop-down {
+    from { opacity: 0; transform: translateY(-6px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .annotator-dock,
+    .annotator-zoomdock,
+    .annotator-pagerdock,
+    .annotator-reveal-fab {
+        transition-duration: 0.01ms;
+    }
+}
+
 /* ── TA Exams list page ── */
 .ta-exams-page {
     padding: 16px;

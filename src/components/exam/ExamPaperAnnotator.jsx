@@ -14,7 +14,10 @@ import {
     HiOutlineArrowsPointingOut,
     HiOutlineChevronLeft,
     HiOutlineChevronRight,
+    HiOutlineChevronDown,
     HiOutlineHandRaised,
+    HiOutlineMapPin,
+    HiOutlineWrenchScrewdriver,
 } from 'react-icons/hi2'
 import {
     GRADING_DATA_VERSION,
@@ -28,8 +31,6 @@ import {
     rasterizePdfPage,
     exportAnnotatedPages,
 } from './examAnnotatorUtils'
-import { CollapsibleSection } from '../CollapsibleSection'
-import '../CollapsibleSection.css'
 
 pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/legacy/build/pdf.worker.min.mjs`
 
@@ -208,6 +209,11 @@ export const ExamPaperAnnotator = ({
     const [textPrompt, setTextPrompt] = useState(null)
     const [fullscreen, setFullscreen] = useState(false)
     const [imageBlobUrls, setImageBlobUrls] = useState({})
+    // ── الدوك العائم على الموبايل: يظهر/يختفي بنعومة + إمكانية التثبيت ──
+    const [dockVisible, setDockVisible] = useState(true)
+    const [dockPinned, setDockPinned] = useState(false)
+    const [colorsOpen, setColorsOpen] = useState(false)
+    const [pagerOpen, setPagerOpen] = useState(false)
 
     const wrapRefs = useRef({})
     const canvasRefs = useRef({})
@@ -215,6 +221,34 @@ export const ExamPaperAnnotator = ({
     const stageRef = useRef(null)
     const pinchRef = useRef({ distance: 0, scale: 1 })
     const isPinchingRef = useRef(false)
+    const dockHideTimerRef = useRef(null)
+
+    const revealDock = useCallback(() => {
+        if (dockHideTimerRef.current) {
+            clearTimeout(dockHideTimerRef.current)
+            dockHideTimerRef.current = null
+        }
+        setDockVisible(true)
+    }, [])
+
+    const hideDock = useCallback(() => {
+        if (dockPinned) return
+        setColorsOpen(false)
+        setDockVisible(false)
+    }, [dockPinned])
+
+    const scheduleReveal = useCallback((delay = 320) => {
+        if (dockHideTimerRef.current) clearTimeout(dockHideTimerRef.current)
+        dockHideTimerRef.current = setTimeout(() => setDockVisible(true), delay)
+    }, [])
+
+    const toggleDockPinned = useCallback(() => {
+        setDockPinned((prev) => {
+            const next = !prev
+            if (next) revealDock()
+            return next
+        })
+    }, [revealDock])
 
     useEffect(() => {
         setLocalPages(normalizePages(gradingData))
@@ -345,6 +379,31 @@ export const ExamPaperAnnotator = ({
         }
     }, [isMobile, scale])
 
+    // إخفاء الدوك أثناء سحب/تمرير الورقة، وإرجاعه بعد التوقف
+    useEffect(() => {
+        const stage = stageRef.current
+        if (!stage || !isMobile) return undefined
+        let idleTimer = null
+        const onScroll = () => {
+            if (!dockPinned) {
+                setColorsOpen(false)
+                setPagerOpen(false)
+                setDockVisible(false)
+            }
+            if (idleTimer) clearTimeout(idleTimer)
+            idleTimer = setTimeout(() => setDockVisible(true), 650)
+        }
+        stage.addEventListener('scroll', onScroll, { passive: true })
+        return () => {
+            stage.removeEventListener('scroll', onScroll)
+            if (idleTimer) clearTimeout(idleTimer)
+        }
+    }, [isMobile, dockPinned])
+
+    useEffect(() => () => {
+        if (dockHideTimerRef.current) clearTimeout(dockHideTimerRef.current)
+    }, [])
+
     useEffect(() => {
         if (!onPageRefsReady) return
         const refs = pages.flatMap((p) => {
@@ -388,6 +447,7 @@ export const ExamPaperAnnotator = ({
         const pos = getCanvasPos(e, canvas)
 
         if (activeTool === TOOLS.pen) {
+            if (isMobile) hideDock()
             drawingRef.current = {
                 type: 'pen',
                 color: activeColor,
@@ -453,6 +513,7 @@ export const ExamPaperAnnotator = ({
         )
         drawingRef.current = null
         updatePageAnnotations(pageKey, [...pageAnnotations, stroke])
+        if (isMobile && !dockPinned) scheduleReveal(280)
     }
 
     const undoLast = () => {
@@ -534,27 +595,20 @@ export const ExamPaperAnnotator = ({
     }
 
     const showPager = pages.length > 1 || (isPdf && pdfNumPages > 1)
-    const toolLabels = {
-        [TOOLS.pan]: 'تحريك',
-        [TOOLS.pen]: 'قلم',
-        [TOOLS.text]: 'نص',
-        [TOOLS.check]: 'صح',
-        [TOOLS.cross]: 'خطأ',
-        [TOOLS.eraser]: 'محو',
-    }
     const isPanMode = activeTool === TOOLS.pan
-    const activeToolLabel = toolLabels[activeTool] || 'أدوات'
+
+    const toolItems = [
+        [TOOLS.pan, HiOutlineHandRaised, 'تحريك'],
+        [TOOLS.pen, HiOutlinePencil, 'قلم'],
+        [TOOLS.text, HiOutlineChatBubbleBottomCenterText, 'نص'],
+        [TOOLS.check, HiOutlineCheck, 'صح'],
+        [TOOLS.cross, HiOutlineXMark, 'خطأ'],
+        [TOOLS.eraser, HiOutlineTrash, 'محو'],
+    ]
 
     const toolButtons = !readOnly && (
         <div className="exam-annotator-tools">
-            {[
-                [TOOLS.pan, HiOutlineHandRaised, 'تحريك'],
-                [TOOLS.pen, HiOutlinePencil, 'قلم'],
-                [TOOLS.text, HiOutlineChatBubbleBottomCenterText, 'نص'],
-                [TOOLS.check, HiOutlineCheck, 'صح'],
-                [TOOLS.cross, HiOutlineXMark, 'خطأ'],
-                [TOOLS.eraser, HiOutlineTrash, 'محو'],
-            ].map(([tool, Icon, label]) => (
+            {toolItems.map(([tool, Icon, label]) => (
                 <button
                     key={tool}
                     type="button"
@@ -581,31 +635,6 @@ export const ExamPaperAnnotator = ({
                     aria-label="لون"
                 />
             ))}
-        </div>
-    )
-
-    const zoomControls = (
-        <div className="exam-annotator-zoom-row">
-            <button type="button" className="exam-annotator-zoom-btn" onClick={() => setScale((s) => Math.max(0.4, s - 0.15))}>
-                <HiOutlineMagnifyingGlassMinus size={20} />
-            </button>
-            <span className="exam-annotator-zoom">{Math.round(scale * 100)}%</span>
-            <button type="button" className="exam-annotator-zoom-btn" onClick={() => setScale((s) => Math.min(3, s + 0.15))}>
-                <HiOutlineMagnifyingGlassPlus size={20} />
-            </button>
-            <button type="button" className="exam-annotator-zoom-btn" onClick={() => setScale(1)} title="الحجم الأصلي">
-                1:1
-            </button>
-            <button type="button" className="exam-annotator-zoom-btn" onClick={() => setFullscreen((f) => !f)} title="ملء الشاشة">
-                <HiOutlineArrowsPointingOut size={20} />
-            </button>
-        </div>
-    )
-
-    const actionButtons = !readOnly && (
-        <div className="exam-annotator-actions">
-            <button type="button" onClick={undoLast} title="تراجع"><HiOutlineArrowUturnLeft size={18} /> تراجع</button>
-            <button type="button" onClick={clearPage} title="مسح"><HiOutlineTrash size={18} /> مسح الصفحة</button>
         </div>
     )
 
@@ -644,90 +673,178 @@ export const ExamPaperAnnotator = ({
         </div>
     )
 
+    const mobileFloating = isMobile && (
+        <>
+            <button
+                type="button"
+                className={`annotator-reveal-fab ${dockVisible ? 'is-gone' : 'is-shown'}`}
+                onClick={revealDock}
+                aria-label="إظهار الأدوات"
+            >
+                {readOnly ? <HiOutlineMagnifyingGlassPlus size={24} /> : <HiOutlineWrenchScrewdriver size={24} />}
+            </button>
+
+            {readOnly && (
+                <div className="annotator-locked-chip">
+                    <HiOutlineCheck size={16} />
+                    <span>مقفلة — عرض فقط</span>
+                </div>
+            )}
+
+            {!readOnly && (
+                <div className={`annotator-dock ${dockVisible ? '' : 'annotator-dock--hidden'}`}>
+                    <button
+                        type="button"
+                        className={`annotator-dock-btn pin ${dockPinned ? 'is-on' : ''}`}
+                        onClick={toggleDockPinned}
+                        aria-label={dockPinned ? 'إلغاء التثبيت' : 'تثبيت الأدوات'}
+                        title={dockPinned ? 'الأدوات مثبتة' : 'تثبيت الأدوات'}
+                    >
+                        <HiOutlineMapPin size={20} />
+                    </button>
+                    <div className="annotator-dock-divider" />
+                    {toolItems.map(([tool, Icon, label]) => (
+                        <button
+                            key={tool}
+                            type="button"
+                            className={`annotator-dock-btn ${activeTool === tool ? 'is-active' : ''}`}
+                            onClick={() => { setActiveTool(tool); setColorsOpen(false) }}
+                            aria-label={label}
+                            title={label}
+                        >
+                            <Icon size={22} />
+                        </button>
+                    ))}
+                    <div className="annotator-dock-divider" />
+                    <button
+                        type="button"
+                        className={`annotator-dock-btn color ${colorsOpen ? 'is-active' : ''}`}
+                        onClick={() => setColorsOpen((o) => !o)}
+                        aria-label="اللون"
+                        title="اللون"
+                    >
+                        <span className="annotator-dock-color-dot" style={{ background: activeColor }} />
+                    </button>
+                    <button type="button" className="annotator-dock-btn" onClick={undoLast} aria-label="تراجع" title="تراجع">
+                        <HiOutlineArrowUturnLeft size={20} />
+                    </button>
+                    <button type="button" className="annotator-dock-btn" onClick={clearPage} aria-label="مسح الصفحة" title="مسح الصفحة">
+                        <HiOutlineTrash size={20} />
+                    </button>
+
+                    {colorsOpen && (
+                        <div className="annotator-dock-colors">
+                            {COLORS.map((c) => (
+                                <button
+                                    key={c}
+                                    type="button"
+                                    className={activeColor === c ? 'is-active' : ''}
+                                    style={{ background: c }}
+                                    onClick={() => { setActiveColor(c); setColorsOpen(false) }}
+                                    aria-label="لون"
+                                />
+                            ))}
+                        </div>
+                    )}
+                </div>
+            )}
+
+            <div className={`annotator-zoomdock ${dockVisible ? '' : 'annotator-zoomdock--hidden'}`}>
+                <button type="button" className="annotator-dock-btn" onClick={() => setScale((s) => Math.min(3, s + 0.15))} aria-label="تكبير">
+                    <HiOutlineMagnifyingGlassPlus size={20} />
+                </button>
+                <span className="annotator-zoomdock-val">{Math.round(scale * 100)}%</span>
+                <button type="button" className="annotator-dock-btn" onClick={() => setScale((s) => Math.max(0.4, s - 0.15))} aria-label="تصغير">
+                    <HiOutlineMagnifyingGlassMinus size={20} />
+                </button>
+                <button type="button" className="annotator-dock-btn" onClick={() => setScale(1)} aria-label="الحجم الأصلي" title="الحجم الأصلي">
+                    <span className="annotator-zoomdock-reset">1:1</span>
+                </button>
+                <button type="button" className="annotator-dock-btn" onClick={() => setFullscreen((f) => !f)} aria-label="ملء الشاشة">
+                    <HiOutlineArrowsPointingOut size={20} />
+                </button>
+            </div>
+
+            {showPager && (
+                <div className={`annotator-pagerdock ${dockVisible ? '' : 'annotator-pagerdock--hidden'}`}>
+                    {isPdf && pdfNumPages > 1 && (
+                        <div className="annotator-pagerdock-nav">
+                            <button type="button" disabled={pdfSubPage <= 1} onClick={() => setPdfSubPage((p) => Math.max(1, p - 1))} aria-label="الصفحة السابقة">
+                                <HiOutlineChevronRight size={18} />
+                            </button>
+                            <span>{pdfSubPage} / {pdfNumPages}</span>
+                            <button type="button" disabled={pdfSubPage >= pdfNumPages} onClick={() => setPdfSubPage((p) => Math.min(pdfNumPages, p + 1))} aria-label="الصفحة التالية">
+                                <HiOutlineChevronLeft size={18} />
+                            </button>
+                        </div>
+                    )}
+                    {pages.length > 1 && (
+                        <button
+                            type="button"
+                            className="annotator-pagerdock-files"
+                            onClick={() => setPagerOpen((o) => !o)}
+                        >
+                            {activePage?.label || `ملف ${currentPage + 1}`}
+                            <HiOutlineChevronDown size={16} className={pagerOpen ? 'is-open' : ''} />
+                        </button>
+                    )}
+                    {pagerOpen && pages.length > 1 && (
+                        <div className="annotator-pagerdock-sheet">
+                            {pages.map((p, i) => (
+                                <button
+                                    key={p.index}
+                                    type="button"
+                                    className={currentPage === i ? 'is-active' : ''}
+                                    onClick={() => { setCurrentPage(i); setPagerOpen(false) }}
+                                >
+                                    {p.label || `ملف ${i + 1}`}
+                                </button>
+                            ))}
+                        </div>
+                    )}
+                </div>
+            )}
+        </>
+    )
+
     if (!pages.length) {
         return <div className="exam-annotator-empty">لا توجد صفحات — تأكد من رفع الطالب ملف PDF أو صورة</div>
     }
 
     return (
         <div className={`exam-annotator ${fullscreen ? 'fullscreen' : ''} ${isMobile ? 'is-mobile' : ''}`}>
-            <div className="exam-annotator-sticky-head">
-                {isMobile ? (
-                    <div className={`exam-annotator-mobile-panels ${readOnly ? 'readonly' : ''}`}>
+            {!isMobile && (
+                <div className="exam-annotator-sticky-head">
+                    <div className={`exam-annotator-toolbar ${readOnly ? 'readonly' : ''}`}>
                         {readOnly ? (
-                            <div className="exam-annotator-locked-banner-mobile">
+                            <div className="exam-annotator-locked-label">
                                 <HiOutlineCheck size={18} />
                                 <span>الورقة مقفلة — للعرض فقط</span>
                             </div>
                         ) : (
-                            <CollapsibleSection
-                                className="collapsible-section--dark"
-                                title="أدوات التصحيح"
-                                subtitle={activeToolLabel}
-                                badge={activeToolLabel}
-                            >
+                            <>
                                 {toolButtons}
                                 {colorButtons}
-                                {actionButtons}
-                            </CollapsibleSection>
+                            </>
                         )}
-
-                        <CollapsibleSection
-                            className="collapsible-section--dark"
-                            title="تكبير الورقة"
-                            subtitle="قرّب بإصبعين أو استخدم الأزرار"
-                            badge={`${Math.round(scale * 100)}%`}
-                            defaultOpen
-                        >
-                            {zoomControls}
-                        </CollapsibleSection>
-
-                        {showPager && (
-                            <CollapsibleSection
-                                className="collapsible-section--dark"
-                                title="التنقل بين الصفحات"
-                                subtitle={
-                                    isPdf && pdfNumPages > 1
-                                        ? `${activePage?.label || 'ملف'} · ص ${pdfSubPage}/${pdfNumPages}`
-                                        : (activePage?.label || `ملف ${currentPage + 1}`)
-                                }
-                            >
-                                {pagerBlock}
-                            </CollapsibleSection>
-                        )}
-                    </div>
-                ) : (
-                    <>
-                        <div className={`exam-annotator-toolbar ${readOnly ? 'readonly' : ''}`}>
-                            {readOnly ? (
-                                <div className="exam-annotator-locked-label">
-                                    <HiOutlineCheck size={18} />
-                                    <span>الورقة مقفلة — للعرض فقط</span>
-                                </div>
-                            ) : (
+                        <div className="exam-annotator-actions exam-annotator-actions--desktop">
+                            {!readOnly && (
                                 <>
-                                    {toolButtons}
-                                    {colorButtons}
+                                    <button type="button" onClick={undoLast} title="تراجع"><HiOutlineArrowUturnLeft size={18} /></button>
+                                    <button type="button" onClick={clearPage} title="مسح"><HiOutlineTrash size={18} /></button>
                                 </>
                             )}
-                            <div className="exam-annotator-actions exam-annotator-actions--desktop">
-                                {!readOnly && (
-                                    <>
-                                        <button type="button" onClick={undoLast} title="تراجع"><HiOutlineArrowUturnLeft size={18} /></button>
-                                        <button type="button" onClick={clearPage} title="مسح"><HiOutlineTrash size={18} /></button>
-                                    </>
-                                )}
-                                <button type="button" onClick={() => setScale((s) => Math.max(0.4, s - 0.15))}><HiOutlineMagnifyingGlassMinus size={18} /></button>
-                                <span className="exam-annotator-zoom">{Math.round(scale * 100)}%</span>
-                                <button type="button" onClick={() => setScale((s) => Math.min(3, s + 0.15))}><HiOutlineMagnifyingGlassPlus size={18} /></button>
-                                <button type="button" onClick={() => setFullscreen((f) => !f)} title="ملء الشاشة">
-                                    <HiOutlineArrowsPointingOut size={18} />
-                                </button>
-                            </div>
+                            <button type="button" onClick={() => setScale((s) => Math.max(0.4, s - 0.15))}><HiOutlineMagnifyingGlassMinus size={18} /></button>
+                            <span className="exam-annotator-zoom">{Math.round(scale * 100)}%</span>
+                            <button type="button" onClick={() => setScale((s) => Math.min(3, s + 0.15))}><HiOutlineMagnifyingGlassPlus size={18} /></button>
+                            <button type="button" onClick={() => setFullscreen((f) => !f)} title="ملء الشاشة">
+                                <HiOutlineArrowsPointingOut size={18} />
+                            </button>
                         </div>
-                        {pagerBlock}
-                    </>
-                )}
-            </div>
+                    </div>
+                    {pagerBlock}
+                </div>
+            )}
 
             <div className={`exam-annotator-stage ${isPanMode ? 'pan-active' : ''}`} ref={stageRef}>
                 <div
@@ -763,15 +880,7 @@ export const ExamPaperAnnotator = ({
                 </div>
             </div>
 
-            {isMobile && (
-                <p className="exam-annotator-hint">
-                    {readOnly
-                        ? 'اسحب الورقة للتنقل — قرّب بإصبعين للتكبير'
-                        : isPanMode
-                            ? 'وضع التحريك: اسحب وقرّب بدون رسم — اختر القلم للتصحيح'
-                            : 'ارسم بإصبع واحد · قرّب بإصبعين · اختر «تحريك» للتنقل بدون رسم'}
-                </p>
-            )}
+            {mobileFloating}
         </div>
     )
 }
