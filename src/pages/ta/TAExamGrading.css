@@ -1168,14 +1168,14 @@
     box-shadow: 0 0 0 2px #6366f1;
 }
 
-/* ── زر إرجاع الأدوات حين تكون مخفية ── */
-.annotator-reveal-fab {
+/* ── زر تبديل القوائم: ثابت دائماً — كبسة تخفي، كبسة ترجّع ── */
+.annotator-toggle-fab {
     position: fixed;
     left: 10px;
-    top: 50%;
-    z-index: 10041;
-    width: 48px;
-    height: 48px;
+    top: calc(64px + env(safe-area-inset-top, 0px));
+    z-index: 10042;
+    width: 46px;
+    height: 46px;
     border: none;
     border-radius: 50%;
     background: linear-gradient(135deg, #6366f1, #4f46e5);
@@ -1186,28 +1186,24 @@
     box-shadow: 0 8px 24px rgba(99, 102, 241, 0.55);
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
-    transition: opacity 0.28s ease, transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), visibility 0.3s;
+    touch-action: manipulation;
+    transition: background 0.2s ease, transform 0.12s ease, box-shadow 0.2s ease;
 }
 
-.annotator-reveal-fab.is-shown {
-    opacity: 1;
-    visibility: visible;
-    transform: translateY(-50%) scale(1);
+.annotator-toggle-fab:active {
+    transform: scale(0.9);
 }
 
-.annotator-reveal-fab.is-gone {
-    opacity: 0;
-    visibility: hidden;
-    transform: translateY(-50%) scale(0.5);
-    pointer-events: none;
+.annotator-toggle-fab.is-collapsed {
+    background: linear-gradient(135deg, #475569, #334155);
+    box-shadow: 0 8px 22px rgba(15, 23, 42, 0.45);
 }
 
 /* ── شارة الورقة المقفلة ── */
 .annotator-locked-chip {
     position: fixed;
-    top: calc(60px + env(safe-area-inset-top, 0px));
-    left: 50%;
-    transform: translateX(-50%);
+    top: calc(64px + env(safe-area-inset-top, 0px));
+    right: 10px;
     z-index: 10040;
     display: inline-flex;
     align-items: center;
@@ -1216,11 +1212,19 @@
     -webkit-backdrop-filter: blur(10px);
     backdrop-filter: blur(10px);
     color: #6ee7b7;
-    padding: 8px 16px;
+    padding: 8px 14px;
     border-radius: 999px;
-    font-size: 0.82rem;
+    font-size: 0.78rem;
     font-weight: 800;
     box-shadow: 0 8px 22px rgba(0, 0, 0, 0.32);
+    transition: opacity 0.28s ease, transform 0.3s ease, visibility 0.3s;
+}
+
+.annotator-locked-chip.is-hidden {
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-140%);
+    pointer-events: none;
 }
 
 @keyframes annotator-pop-side {

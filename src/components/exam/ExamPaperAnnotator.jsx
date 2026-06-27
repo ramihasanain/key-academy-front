@@ -17,7 +17,8 @@ import {
     HiOutlineChevronDown,
     HiOutlineHandRaised,
     HiOutlineMapPin,
-    HiOutlineWrenchScrewdriver,
+    HiOutlineEye,
+    HiOutlineEyeSlash,
 } from 'react-icons/hi2'
 import {
     GRADING_DATA_VERSION,
@@ -212,6 +213,7 @@ export const ExamPaperAnnotator = ({
     // ── الدوك العائم على الموبايل: يظهر/يختفي بنعومة + إمكانية التثبيت ──
     const [dockVisible, setDockVisible] = useState(true)
     const [dockPinned, setDockPinned] = useState(false)
+    const [dockCollapsed, setDockCollapsed] = useState(false) // إخفاء يدوي بزر التبديل
     const [colorsOpen, setColorsOpen] = useState(false)
     const [pagerOpen, setPagerOpen] = useState(false)
 
@@ -246,6 +248,16 @@ export const ExamPaperAnnotator = ({
         setDockPinned((prev) => {
             const next = !prev
             if (next) revealDock()
+            return next
+        })
+    }, [revealDock])
+
+    const toggleDockCollapsed = useCallback(() => {
+        setColorsOpen(false)
+        setPagerOpen(false)
+        setDockCollapsed((prev) => {
+            const next = !prev
+            if (!next) revealDock()
             return next
         })
     }, [revealDock])
@@ -673,26 +685,29 @@ export const ExamPaperAnnotator = ({
         </div>
     )
 
+    const docksShown = dockVisible && !dockCollapsed
+
     const mobileFloating = isMobile && (
         <>
             <button
                 type="button"
-                className={`annotator-reveal-fab ${dockVisible ? 'is-gone' : 'is-shown'}`}
-                onClick={revealDock}
-                aria-label="إظهار الأدوات"
+                className={`annotator-toggle-fab ${dockCollapsed ? 'is-collapsed' : ''}`}
+                onClick={toggleDockCollapsed}
+                aria-label={dockCollapsed ? 'إظهار القوائم' : 'إخفاء القوائم'}
+                title={dockCollapsed ? 'إظهار القوائم' : 'إخفاء القوائم'}
             >
-                {readOnly ? <HiOutlineMagnifyingGlassPlus size={24} /> : <HiOutlineWrenchScrewdriver size={24} />}
+                {dockCollapsed ? <HiOutlineEye size={24} /> : <HiOutlineEyeSlash size={24} />}
             </button>
 
             {readOnly && (
-                <div className="annotator-locked-chip">
+                <div className={`annotator-locked-chip ${docksShown ? '' : 'is-hidden'}`}>
                     <HiOutlineCheck size={16} />
                     <span>مقفلة — عرض فقط</span>
                 </div>
             )}
 
             {!readOnly && (
-                <div className={`annotator-dock ${dockVisible ? '' : 'annotator-dock--hidden'}`}>
+                <div className={`annotator-dock ${docksShown ? '' : 'annotator-dock--hidden'}`}>
                     <button
                         type="button"
                         className={`annotator-dock-btn pin ${dockPinned ? 'is-on' : ''}`}
@@ -749,7 +764,7 @@ export const ExamPaperAnnotator = ({
                 </div>
             )}
 
-            <div className={`annotator-zoomdock ${dockVisible ? '' : 'annotator-zoomdock--hidden'}`}>
+            <div className={`annotator-zoomdock ${docksShown ? '' : 'annotator-zoomdock--hidden'}`}>
                 <button type="button" className="annotator-dock-btn" onClick={() => setScale((s) => Math.min(3, s + 0.15))} aria-label="تكبير">
                     <HiOutlineMagnifyingGlassPlus size={20} />
                 </button>
@@ -766,7 +781,7 @@ export const ExamPaperAnnotator = ({
             </div>
 
             {showPager && (
-                <div className={`annotator-pagerdock ${dockVisible ? '' : 'annotator-pagerdock--hidden'}`}>
+                <div className={`annotator-pagerdock ${docksShown ? '' : 'annotator-pagerdock--hidden'}`}>
                     {isPdf && pdfNumPages > 1 && (
                         <div className="annotator-pagerdock-nav">
                             <button type="button" disabled={pdfSubPage <= 1} onClick={() => setPdfSubPage((p) => Math.max(1, p - 1))} aria-label="الصفحة السابقة">
