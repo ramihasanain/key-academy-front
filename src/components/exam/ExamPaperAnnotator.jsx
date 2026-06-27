@@ -62,9 +62,11 @@ function useMediaQuery(query) {
     return matches
 }
 
-function PdfPageView({ url, pageNumber, scale, token, onNumPages, onRenderSuccess, onRenderSchedule }) {
+function PdfPageView({ url, pageNumber, scale, token, baseWidth, onNumPages, onRenderSuccess, onRenderSchedule }) {
     const [pdfSource, setPdfSource] = useState(null)
     const [loadError, setLoadError] = useState(false)
+    const fallbackWidth = Math.min(typeof window !== 'undefined' ? window.innerWidth - 48 : 900, 900)
+    const renderWidth = (baseWidth || fallbackWidth) * scale
 
     useEffect(() => {
         let revoked = null
@@ -120,7 +122,7 @@ function PdfPageView({ url, pageNumber, scale, token, onNumPages, onRenderSucces
         >
             <Page
                 pageNumber={pageNumber}
-                width={Math.min(typeof window !== 'undefined' ? window.innerWidth - 48 : 900, 900) * scale}
+                width={renderWidth}
                 renderTextLayer={false}
                 renderAnnotationLayer={false}
                 onRenderSuccess={() => {
@@ -178,7 +180,6 @@ function RasterPdfPageView({ url, pageNumber, scale, token, onNumPages, onRender
             alt="صفحة PDF"
             draggable={false}
             className="exam-annotator-image exam-annotator-image--raster"
-            style={{ width: `${scale * 100}%`, maxWidth: 'none' }}
             onLoad={() => {
                 onRenderSuccess?.()
                 onRenderSchedule?.()
@@ -209,6 +210,8 @@ export const ExamPaperAnnotator = ({
     const [localPages, setLocalPages] = useState(() => normalizePages(gradingData))
     const [textPrompt, setTextPrompt] = useState(null)
     const [fullscreen, setFullscreen] = useState(false)
+    // العرض الأساسي للورقة عند تكبير 100% — يُقاس من منطقة العرض ليبقى الكانفس مطابقاً للصورة عند أي تكبير
+    const [baseWidth, setBaseWidth] = useState(0)
     const [imageBlobUrls, setImageBlobUrls] = useState({})
     // ── الدوك العائم على الموبايل: يظهر/يختفي بنعومة + إمكانية التثبيت ──
     const [dockVisible, setDockVisible] = useState(true)
@@ -297,6 +300,26 @@ export const ExamPaperAnnotator = ({
             })
         })
     }, [pages, authToken])
+
+    // قياس العرض المتاح لمنطقة العرض (بدون الحشوة) — الأساس الذي يُضرب بنسبة التكبير
+    useEffect(() => {
+        const stage = stageRef.current
+        if (!stage) return undefined
+        const measure = () => {
+            const cs = window.getComputedStyle(stage)
+            const padX = (parseFloat(cs.paddingLeft) || 0) + (parseFloat(cs.paddingRight) || 0)
+            const avail = stage.clientWidth - padX
+            if (avail > 0) setBaseWidth(Math.round(Math.min(avail, 900)))
+        }
+        measure()
+        const ro = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(measure) : null
+        ro?.observe(stage)
+        window.addEventListener('resize', measure)
+        return () => {
+            ro?.disconnect()
+            window.removeEventListener('resize', measure)
+        }
+    }, [fullscreen])
 
     const emitChange = useCallback(
         (nextPages) => {
@@ -444,9 +467,12 @@ export const ExamPaperAnnotator = ({
         const rect = canvas.getBoundingClientRect()
         const clientX = e.clientX ?? e.touches?.[0]?.clientX ?? 0
         const clientY = e.clientY ?? e.touches?.[0]?.clientY ?? 0
+        // تحويل من بكسلات العرض إلى بكسلات الكانفس (مهم عند اختلاف الحجم بسبب التكبير/التقريب)
+        const scaleX = rect.width ? canvas.width / rect.width : 1
+        const scaleY = rect.height ? canvas.height / rect.height : 1
         return {
-            x: clientX - rect.left,
-            y: clientY - rect.top,
+            x: (clientX - rect.left) * scaleX,
+            y: (clientY - rect.top) * scaleY,
         }
     }
 
@@ -580,6 +606,7 @@ export const ExamPaperAnnotator = ({
                     pageNumber={pdfSubPage}
                     scale={scale}
                     token={authToken}
+                    baseWidth={baseWidth}
                     onNumPages={setPdfNumPages}
                     onRenderSuccess={syncCanvasSize}
                     onRenderSchedule={scheduleCanvasSync}
@@ -594,7 +621,6 @@ export const ExamPaperAnnotator = ({
                     alt={page.label}
                     draggable={false}
                     className="exam-annotator-image"
-                    style={{ width: `${scale * 100}%`, maxWidth: 'none' }}
                     onLoad={syncCanvasSize}
                 />
             )
@@ -865,6 +891,7 @@ export const ExamPaperAnnotator = ({
                 <div
                     className="exam-annotator-page-wrap"
                     ref={(el) => { wrapRefs.current[pageKey] = el }}
+                    style={baseWidth ? { width: `${baseWidth * scale}px`, maxWidth: 'none' } : undefined}
                 >
                     {activePage && renderPageContent(activePage)}
                     <canvas
