@@ -246,7 +246,11 @@ export const TAExams = () => {
                     ) : (
                         <div className="ta-submissions-list">
                             {submissions.map((sub) => {
-                                const st = STATUS_BADGE[sub.grading_status] || STATUS_BADGE.pending
+                                // الورقة التي لها علامة تُعرض دائماً كـ«تم التصحيح» حتى لو
+                                // انزاحت حالتها في الباك-إند إلى «قيد التصحيح» بعد فتحٍ لم يُحفَظ.
+                                const st = isGraded(sub)
+                                    ? STATUS_BADGE.graded
+                                    : (STATUS_BADGE[sub.grading_status] || STATUS_BADGE.pending)
                                 return (
                                     <div key={sub.id} className="ta-submission-card">
                                         <div className="ta-submission-top">
