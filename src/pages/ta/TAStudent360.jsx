@@ -140,7 +140,7 @@ export const TAStudent360 = ({ studentIdProp, groupId, onClose }) => {
                             <table style={{ width: '100%', textAlign: 'right', borderCollapse: 'collapse' }}>
                                 <thead>
                                     <tr style={{ borderBottom: '1px solid var(--hq-border)', color: 'var(--hq-text-muted)', fontSize: '0.85rem' }}>
-                                        <th style={{ paddingBottom: '10px' }}>الامتحان</th>
+                                        <th style={{ paddingBottom: '10px' }}>الامتحان / الدرس</th>
                                         <th style={{ paddingBottom: '10px' }}>النتيجة</th>
                                         <th style={{ paddingBottom: '10px' }}>التاريخ</th>
                                         <th style={{ paddingBottom: '10px' }}>الحالة</th>
@@ -149,10 +149,16 @@ export const TAStudent360 = ({ studentIdProp, groupId, onClose }) => {
                                 <tbody>
                                     {quizzes.map((q, i) => (
                                         <tr key={i} style={{ borderBottom: '1px solid rgba(255,255,255,0.03)' }}>
-                                            <td style={{ padding: '10px 0', color: 'var(--hq-primary-text)' }}>{q.quiz_title}</td>
-                                            <td style={{ padding: '10px 0', fontWeight: 'bold', color: 'var(--hq-primary-text)' }}>{q.score}/{q.total_questions}</td>
-                                            <td style={{ padding: '10px 0', color: 'var(--hq-primary-text)' }}>{new Date(q.date).toLocaleDateString('ar-EG')}</td>
                                             <td style={{ padding: '10px 0' }}>
+                                                <div style={{ color: 'var(--hq-primary-text)', fontWeight: 'bold' }}>{q.quiz_title}</div>
+                                                <div style={{ fontSize: '0.8rem', color: 'var(--hq-primary)', marginTop: '3px', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                                                    <HiOutlineBookOpen size={13} /> {q.lesson_title || 'غير مرتبط بدرس'}
+                                                </div>
+                                                {q.module_title && <div style={{ fontSize: '0.72rem', color: 'var(--hq-text-muted)', marginTop: '2px' }}>{q.module_title}</div>}
+                                            </td>
+                                            <td style={{ padding: '10px 0', fontWeight: 'bold', color: 'var(--hq-primary-text)', verticalAlign: 'top' }}>{q.score}/{q.total_questions}</td>
+                                            <td style={{ padding: '10px 0', color: 'var(--hq-primary-text)', verticalAlign: 'top' }}>{new Date(q.date).toLocaleDateString('ar-EG')}</td>
+                                            <td style={{ padding: '10px 0', verticalAlign: 'top' }}>
                                                 {q.passed ? <span style={{ color: '#10b981', background: 'rgba(16,185,129,0.1)', padding: '2px 8px', borderRadius: '6px', fontSize: '0.8rem' }}>ناجح ✨</span> : <span style={{ color: '#ef4444', background: 'rgba(239,68,68,0.1)', padding: '2px 8px', borderRadius: '6px', fontSize: '0.8rem' }}>راسب</span>}
                                             </td>
                                         </tr>
