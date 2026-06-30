@@ -23,6 +23,7 @@ export const AssistantWizard = () => {
         phone: '',
         creation_password: '',
         is_active: true,
+        grade_track: '',
     })
     const [selectedTeacherIds, setSelectedTeacherIds] = useState([])
     const [teacherConfigs, setTeacherConfigs] = useState({})
@@ -71,6 +72,7 @@ export const AssistantWizard = () => {
         setError('')
         try {
             const body = {
+                grade_track: form.grade_track,
                 teachers: selectedTeacherIds.map(id => ({
                     teacher_id: id,
                     students_per_group: teacherConfigs[id] || 50,
@@ -129,7 +131,7 @@ export const AssistantWizard = () => {
     }
 
     const canNext = () => {
-        if (step === 0) return form.name && form.phone && form.creation_password
+        if (step === 0) return form.grade_track && form.name && form.phone && form.creation_password
         if (step === 1) return selectedTeacherIds.length > 0
         if (step === 2) return selectedTeacherIds.every(id => (teacherConfigs[id] || 0) >= 1)
         return true
@@ -174,6 +176,19 @@ export const AssistantWizard = () => {
 
             {step === 0 && (
                 <div className="hq-form-card" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                    <label className="hq-label">المرحلة الدراسية *</label>
+                    <select
+                        className="hq-input"
+                        value={form.grade_track}
+                        onChange={e => setForm({ ...form, grade_track: e.target.value })}
+                    >
+                        <option value="">— اختر المرحلة —</option>
+                        <option value="sixth">السادس</option>
+                        <option value="third">الثالث</option>
+                    </select>
+                    <p style={{ fontSize: '12px', color: 'var(--hq-text-muted)', margin: '-8px 0 0' }}>
+                        المساعد يُربط بمرحلة واحدة فقط — رح يُوزّع عليه طلاب هذه المرحلة دون غيرها.
+                    </p>
                     <label className="hq-label">اسم المساعد *</label>
                     <input className="hq-input" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} />
                     <label className="hq-label">رقم الهاتف (اسم المستخدم) *</label>
@@ -252,7 +267,15 @@ export const AssistantWizard = () => {
             {step === 3 && preview && (
                 <div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-                        <h3 style={{ margin: 0 }}>معاينة التوزيع — تأكد قبل الحفظ</h3>
+                        <h3 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            معاينة التوزيع — تأكد قبل الحفظ
+                            <span style={{
+                                background: form.grade_track === 'third' ? '#7c3aed' : '#0ea5e9',
+                                color: 'white', fontSize: '12px', padding: '3px 10px', borderRadius: '20px',
+                            }}>
+                                {form.grade_track === 'third' ? 'الثالث' : 'السادس'}
+                            </span>
+                        </h3>
                         <button
                             className="hq-btn"
                             onClick={() => runPreview(Math.floor(Math.random() * 2 ** 32))}
