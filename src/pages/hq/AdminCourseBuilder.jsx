@@ -1051,7 +1051,7 @@ export const AdminCourseBuilder = ({ id }) => {
                             <label htmlFor="crs-pub"></label>
                         </div>
                     </div>
-                    {isMathSubject(course.subject) && (
+                    {(isMathSubject(course.subject) || isMathSubject(course.title)) && (
                         <button className="hq-btn-secondary" onClick={handleFixMathFormat} title="يصلح انعكاس التعابير الرياضية (مثل ظهور 2√7 كـ 7√2) في كل الأسئلة والخيارات" style={{ background: '#0d9488', color: 'white', border: 'none', padding: '12px 20px', borderRadius: '10px', fontSize: '1.05rem', boxShadow: '0 4px 6px rgba(13, 148, 136, 0.3)', display: 'flex', alignItems: 'center', gap: '6px' }}>
                             <HiOutlineSparkles /> اصلاح فورمات الرياضيات
                         </button>
