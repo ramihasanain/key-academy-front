@@ -5,6 +5,40 @@ import { HiOutlineArrowRight, HiOutlineCheckCircle, HiOutlinePlus, HiOutlineTras
 import './Admin.css'
 import 'mathlive'
 
+// ================== إصلاح فورمات الرياضيات (Bidi/RTL) ==================
+// المشكلة: تعبير مثل "2√7" مخزَّن صح منطقياً، لكن خوارزمية Unicode Bidi
+// تعكسه بصرياً داخل النص العربي (RTL) فيظهر "7√2". الحل: تغليف كل تعبير
+// رياضي بمحارف العزل LTR (U+2066 … U+2069) فيُعرض من اليسار لليمين دائماً
+// في المحرّر وشاشة الطالب معاً، دون تغيير المحتوى المنطقي.
+const LRI = '\u2066' // LEFT-TO-RIGHT ISOLATE
+const PDI = '\u2069' // POP DIRECTIONAL ISOLATE
+// أي محارف عزل/علامات اتجاه سابقة (لجعل العملية قابلة للتكرار بدون تراكم)
+const BIDI_MARKS_RE = /[\u2066\u2067\u2068\u2069\u200E\u200F؜]/g
+// الرموز التي تُسبّب الانعكاس فعلياً (وجود أيٍّ منها يعني أن المقطع رياضي)
+const MATH_OPS = '√∛∜^×÷/<>≤≥≠±∓∑∏∫'
+// مقطع "قابل لأن يكون رياضياً": أرقام/حروف لاتينية/رموز رياضية — بدون حروف عربية
+const MATH_RUN_RE = /[0-9A-Za-z٠-٩.,%°()\[\]{}\s√∛∜^\/×÷*+\-=<>≤≥≠±∓∑∏∫|]+/g
+
+export const fixMathFormat = (input) => {
+    if (!input || typeof input !== 'string') return input
+    // 1) إزالة أي عزل/علامات سابقة حتى لا تتراكم عند إعادة التشغيل
+    const clean = input.replace(BIDI_MARKS_RE, '')
+    // 2) تغليف كل مقطع رياضي (يحتوي رمز عملية + مُعامل) بعزل LTR
+    return clean.replace(MATH_RUN_RE, (m) => {
+        const hasOp = [...MATH_OPS].some(c => m.includes(c))
+        const hasOperand = /[0-9A-Za-z٠-٩]/.test(m)
+        if (!hasOp || !hasOperand) return m // ليس تعبيراً رياضياً — اتركه كما هو
+        const lead = m.match(/^\s*/)[0]
+        const trail = m.match(/\s*$/)[0]
+        const core = m.slice(lead.length, m.length - trail.length)
+        return lead + LRI + core + PDI + trail
+    })
+}
+
+// المادة رياضيات؟ (نص المادة يُحفظ عربياً حرّاً مثل "الرياضيات")
+export const isMathSubject = (subject) => typeof subject === 'string' && /رياضيات|math/i.test(subject)
+// =====================================================================
+
 const MathInput = ({ value, onChange }) => {
     const mf = useRef(null);
     useEffect(() => {
@@ -604,6 +638,56 @@ export const AdminCourseBuilder = ({ id }) => {
         alert('تم لخبطة خيارات جميع أسئلة هذا الاختبار بنجاح!');
     };
 
+    // إصلاح فورمات الرياضيات لكامل الكورس: يغلّف كل تعبير رياضي بعزل LTR
+    // فيُعرض صحيحاً (2√7 بدل 7√2) في المحرّر وعند الطالب. قابل للتكرار بأمان.
+    const handleFixMathFormat = () => {
+        const newMods = [...modules]
+        let changed = 0
+        const fixField = (obj, key) => {
+            if (!obj || typeof obj[key] !== 'string') return
+            const fixed = fixMathFormat(obj[key])
+            if (fixed !== obj[key]) { obj[key] = fixed; changed++ }
+        }
+        const fixArray = (obj, key) => {
+            if (!obj || !Array.isArray(obj[key])) return
+            obj[key] = obj[key].map(v => {
+                if (typeof v !== 'string') return v
+                const fixed = fixMathFormat(v)
+                if (fixed !== v) changed++
+                return fixed
+            })
+        }
+        newMods.forEach(mod => {
+            (mod.lessons || []).forEach(less => {
+                // 1) أسئلة اختبارات المحرّك الذكي (Quizzes)
+                (less.quizzes || []).forEach(qz => {
+                    (qz.questions || []).forEach(qs => {
+                        fixField(qs, 'text')
+                        fixArray(qs, 'options')
+                        fixArray(qs, 'options_explanations')
+                        // نتجاوز معادلات MATH_EQUATION لأنها LaTeX عبر mathlive
+                        if (qs.question_type !== 'MATH_EQUATION') fixField(qs, 'model_answer')
+                        qs._dirty = true
+                    })
+                })
+                // 2) أسئلة داخل الفيديو (in-video quizzes)
+                const ivqs = less.json_data?.in_video_quizzes
+                if (Array.isArray(ivqs)) {
+                    ivqs.forEach(ivq => {
+                        fixField(ivq, 'question')
+                        fixArray(ivq, 'options')
+                        fixArray(ivq, 'explanations')
+                    })
+                    less._dirty = true
+                }
+            })
+        })
+        setModules(newMods)
+        alert(changed > 0
+            ? `تم إصلاح فورمات الرياضيات في ${changed} حقلاً. اضغط "حفظ التعديلات" لتثبيت التغييرات.`
+            : 'كل التعابير الرياضية مضبوطة بالفعل — لا حاجة لأي إصلاح.')
+    }
+
     const handleShuffleSingleSurprise = (mIndex, lIndex, qzIdx) => {
         const newMods = [...modules];
         const quiz = newMods[mIndex].lessons[lIndex].json_data.in_video_quizzes[qzIdx];
@@ -967,6 +1051,11 @@ export const AdminCourseBuilder = ({ id }) => {
                             <label htmlFor="crs-pub"></label>
                         </div>
                     </div>
+                    {isMathSubject(course.subject) && (
+                        <button className="hq-btn-secondary" onClick={handleFixMathFormat} title="يصلح انعكاس التعابير الرياضية (مثل ظهور 2√7 كـ 7√2) في كل الأسئلة والخيارات" style={{ background: '#0d9488', color: 'white', border: 'none', padding: '12px 20px', borderRadius: '10px', fontSize: '1.05rem', boxShadow: '0 4px 6px rgba(13, 148, 136, 0.3)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <HiOutlineSparkles /> اصلاح فورمات الرياضيات
+                        </button>
+                    )}
                     {!isNew && (
                         <button className="hq-btn-secondary" onClick={openCopyModal} style={{ background: '#3b82f6', color: 'white', border: 'none', padding: '12px 20px', borderRadius: '10px', fontSize: '1.05rem', boxShadow: '0 4px 6px rgba(59, 130, 246, 0.3)' }}>
                             نسخ محتوى دورة
