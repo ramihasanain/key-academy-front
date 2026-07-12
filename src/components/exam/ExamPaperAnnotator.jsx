@@ -439,6 +439,24 @@ export const ExamPaperAnnotator = ({
         if (dockHideTimerRef.current) clearTimeout(dockHideTimerRef.current)
     }, [])
 
+    // قائمة الملفات تنغلق بالضغط خارجها أو بـ Escape — لا تبقى مفتوحة فوق الورقة
+    useEffect(() => {
+        if (!pagerOpen) return undefined
+        const onPointerDown = (e) => {
+            const inside = e.target?.closest?.('.exam-annotator-files, .annotator-pagerdock')
+            if (!inside) setPagerOpen(false)
+        }
+        const onKeyDown = (e) => {
+            if (e.key === 'Escape') setPagerOpen(false)
+        }
+        document.addEventListener('pointerdown', onPointerDown)
+        document.addEventListener('keydown', onKeyDown)
+        return () => {
+            document.removeEventListener('pointerdown', onPointerDown)
+            document.removeEventListener('keydown', onKeyDown)
+        }
+    }, [pagerOpen])
+
     useEffect(() => {
         if (!onPageRefsReady) return
         const refs = pages.flatMap((p) => {
@@ -678,17 +696,38 @@ export const ExamPaperAnnotator = ({
 
     const pagerBlock = showPager && (
         <div className="exam-annotator-pager">
-            {pages.length > 1 && pages.map((p, i) => (
-                <button
-                    key={p.index}
-                    type="button"
-                    className={currentPage === i ? 'active' : ''}
-                    onClick={() => setCurrentPage(i)}
-                    title={p.label || `ملف ${i + 1}`}
-                >
-                    {p.label || `ملف ${i + 1}`}
-                </button>
-            ))}
+            {pages.length > 1 && (
+                <div className="exam-annotator-files">
+                    <button
+                        type="button"
+                        className="exam-annotator-files-trigger"
+                        onClick={() => setPagerOpen((o) => !o)}
+                        aria-expanded={pagerOpen}
+                        title={activePage?.label || `ملف ${currentPage + 1}`}
+                    >
+                        <span className="exam-annotator-files-count">{currentPage + 1} / {pages.length}</span>
+                        <span className="exam-annotator-files-name">
+                            {activePage?.label || `ملف ${currentPage + 1}`}
+                        </span>
+                        <HiOutlineChevronDown size={16} className={pagerOpen ? 'is-open' : ''} />
+                    </button>
+                    {pagerOpen && (
+                        <div className="exam-annotator-files-menu">
+                            {pages.map((p, i) => (
+                                <button
+                                    key={p.index}
+                                    type="button"
+                                    className={currentPage === i ? 'is-active' : ''}
+                                    onClick={() => { setCurrentPage(i); setPagerOpen(false) }}
+                                    title={p.label || `ملف ${i + 1}`}
+                                >
+                                    {p.label || `ملف ${i + 1}`}
+                                </button>
+                            ))}
+                        </div>
+                    )}
+                </div>
+            )}
             {isPdf && pdfNumPages > 1 && (
                 <div className="exam-annotator-pdf-nav">
                     <button
