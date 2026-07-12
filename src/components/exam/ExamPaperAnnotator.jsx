@@ -262,15 +262,24 @@ export const ExamPaperAnnotator = ({
         setHeadCollapsed((prev) => !prev)
     }, [])
 
+    // الزر يقرأ الحالة الظاهرة فعلياً (وليس dockCollapsed وحده) — وإلا كبسة كاملة تضيع
+    // كلما كانت الأدوات مخفية تلقائياً بسبب السحب أو الرسم
     const toggleDockCollapsed = useCallback(() => {
         setColorsOpen(false)
         setPagerOpen(false)
-        setDockCollapsed((prev) => {
-            const next = !prev
-            if (!next) revealDock()
-            return next
-        })
-    }, [revealDock])
+        const shown = dockVisible && !dockCollapsed
+        if (shown) {
+            if (dockHideTimerRef.current) {
+                clearTimeout(dockHideTimerRef.current)
+                dockHideTimerRef.current = null
+            }
+            setDockCollapsed(true)
+            setDockVisible(true) // يبقى الإخفاء اليدوي هو المصدر الوحيد للحالة
+        } else {
+            setDockCollapsed(false)
+            revealDock()
+        }
+    }, [dockVisible, dockCollapsed, revealDock])
 
     useEffect(() => {
         setLocalPages(normalizePages(gradingData))
@@ -424,7 +433,7 @@ export const ExamPaperAnnotator = ({
     // إخفاء الدوك أثناء سحب/تمرير الورقة، وإرجاعه بعد التوقف
     useEffect(() => {
         const stage = stageRef.current
-        if (!stage || !isMobile) return undefined
+        if (!stage || !isMobile || dockCollapsed) return undefined
         let idleTimer = null
         const onScroll = () => {
             if (!dockPinned) {
@@ -440,7 +449,7 @@ export const ExamPaperAnnotator = ({
             stage.removeEventListener('scroll', onScroll)
             if (idleTimer) clearTimeout(idleTimer)
         }
-    }, [isMobile, dockPinned])
+    }, [isMobile, dockPinned, dockCollapsed])
 
     useEffect(() => () => {
         if (dockHideTimerRef.current) clearTimeout(dockHideTimerRef.current)
@@ -763,12 +772,12 @@ export const ExamPaperAnnotator = ({
         <>
             <button
                 type="button"
-                className={`annotator-toggle-fab ${dockCollapsed ? 'is-collapsed' : ''}`}
+                className={`annotator-toggle-fab ${docksShown ? '' : 'is-collapsed'}`}
                 onClick={toggleDockCollapsed}
-                aria-label={dockCollapsed ? 'إظهار القوائم' : 'إخفاء القوائم'}
-                title={dockCollapsed ? 'إظهار القوائم' : 'إخفاء القوائم'}
+                aria-label={docksShown ? 'إخفاء القوائم' : 'إظهار القوائم'}
+                title={docksShown ? 'إخفاء القوائم' : 'إظهار القوائم'}
             >
-                {dockCollapsed ? <HiOutlineEye size={24} /> : <HiOutlineEyeSlash size={24} />}
+                {docksShown ? <HiOutlineEyeSlash size={24} /> : <HiOutlineEye size={24} />}
             </button>
 
             {readOnly && (
