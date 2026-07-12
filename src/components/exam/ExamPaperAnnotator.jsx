@@ -219,6 +219,8 @@ export const ExamPaperAnnotator = ({
     const [dockCollapsed, setDockCollapsed] = useState(false) // إخفاء يدوي بزر التبديل
     const [colorsOpen, setColorsOpen] = useState(false)
     const [pagerOpen, setPagerOpen] = useState(false)
+    // إخفاء شريط الأدوات على الشاشات الكبيرة — نفس زر الإخفاء/الإظهار الموجود على الموبايل
+    const [headCollapsed, setHeadCollapsed] = useState(false)
 
     const wrapRefs = useRef({})
     const canvasRefs = useRef({})
@@ -254,6 +256,11 @@ export const ExamPaperAnnotator = ({
             return next
         })
     }, [revealDock])
+
+    const toggleHeadCollapsed = useCallback(() => {
+        setPagerOpen(false)
+        setHeadCollapsed((prev) => !prev)
+    }, [])
 
     const toggleDockCollapsed = useCallback(() => {
         setColorsOpen(false)
@@ -894,6 +901,18 @@ export const ExamPaperAnnotator = ({
     return (
         <div className={`exam-annotator ${fullscreen ? 'fullscreen' : ''} ${isMobile ? 'is-mobile' : ''}`}>
             {!isMobile && (
+                <button
+                    type="button"
+                    className={`annotator-toggle-fab annotator-toggle-fab--desktop ${headCollapsed ? 'is-collapsed' : ''}`}
+                    onClick={toggleHeadCollapsed}
+                    aria-label={headCollapsed ? 'إظهار الأدوات' : 'إخفاء الأدوات'}
+                    title={headCollapsed ? 'إظهار الأدوات' : 'إخفاء الأدوات'}
+                >
+                    {headCollapsed ? <HiOutlineEye size={22} /> : <HiOutlineEyeSlash size={22} />}
+                </button>
+            )}
+
+            {!isMobile && !headCollapsed && (
                 <div className="exam-annotator-sticky-head">
                     <div className={`exam-annotator-toolbar ${readOnly ? 'readonly' : ''}`}>
                         {readOnly ? (
