@@ -1,0 +1,323 @@
+/* ── أجهزة الطلاب (توزيع المنصات + الكود) ── */
+.sdev-page {
+    font-family: 'Tajawal', 'Cairo', sans-serif;
+}
+
+.sdev-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+}
+
+.sdev-head h1 {
+    margin: 0 0 6px;
+    font-size: 1.5rem;
+    color: #0f172a;
+}
+
+.sdev-head p {
+    margin: 0;
+    color: #64748b;
+    font-size: 0.92rem;
+    line-height: 1.7;
+}
+
+.sdev-refresh {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 9px 18px;
+    font-family: inherit;
+    font-weight: 700;
+    font-size: 0.85rem;
+    color: #334155;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+}
+
+.sdev-refresh:hover:not(:disabled) {
+    background: #f8fafc;
+    border-color: #cbd5e1;
+}
+
+.sdev-refresh:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+/* تنبيه حدود البيانات — مقصود يكون ملفتاً، الأرقام تُقرأ غلط بدونه */
+.sdev-note {
+    background: #fffbeb;
+    border: 1px solid #fde68a;
+    border-radius: 12px;
+    padding: 12px 16px;
+    color: #78350f;
+    font-size: 0.85rem;
+    line-height: 1.8;
+    margin-bottom: 18px;
+}
+
+.sdev-tiles {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px;
+    margin-bottom: 10px;
+}
+
+.sdev-tile {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 14px 16px;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.05);
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.sdev-tile-label {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #64748b;
+}
+
+.sdev-tile-value {
+    font-size: 1.7rem;
+    line-height: 1.15;
+    color: #0f172a;
+}
+
+.sdev-tile-sub {
+    font-size: 0.75rem;
+    color: #94a3b8;
+}
+
+.sdev-tile--android .sdev-tile-value { color: #16a34a; }
+.sdev-tile--ios .sdev-tile-value { color: #2563eb; }
+.sdev-tile--code .sdev-tile-value { color: #7c3aed; }
+.sdev-tile--muted .sdev-tile-value { color: #94a3b8; }
+
+.sdev-facet-hint {
+    margin: 0 0 18px;
+    font-size: 0.78rem;
+    color: #94a3b8;
+    line-height: 1.7;
+}
+
+.sdev-toolbar {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 14px 16px;
+    margin-bottom: 18px;
+}
+
+.sdev-field {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    min-width: 150px;
+}
+
+.sdev-field--grow {
+    flex: 1;
+    min-width: 220px;
+}
+
+.sdev-field > span {
+    font-size: 0.76rem;
+    font-weight: 700;
+    color: #64748b;
+}
+
+.sdev-field select,
+.sdev-field input {
+    font-family: inherit;
+    font-size: 0.88rem;
+    padding: 9px 12px;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    background: #f8fafc;
+    color: #0f172a;
+    outline: none;
+    transition: border-color 0.15s, background 0.15s;
+}
+
+.sdev-field select:focus,
+.sdev-field input:focus {
+    border-color: #6366f1;
+    background: #fff;
+}
+
+.sdev-table-wrap {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    overflow-x: auto;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.05);
+}
+
+.sdev-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 760px;
+}
+
+.sdev-table thead th {
+    text-align: right;
+    font-size: 0.76rem;
+    font-weight: 800;
+    color: #64748b;
+    background: #f8fafc;
+    padding: 12px 16px;
+    border-bottom: 1px solid #e2e8f0;
+    white-space: nowrap;
+}
+
+.sdev-table tbody td {
+    padding: 12px 16px;
+    border-bottom: 1px solid #f1f5f9;
+    font-size: 0.88rem;
+    color: #334155;
+    vertical-align: middle;
+}
+
+.sdev-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.sdev-table tbody tr:hover {
+    background: #f8fafc;
+}
+
+.sdev-num {
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+}
+
+.sdev-student {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.sdev-student strong {
+    color: #0f172a;
+    font-size: 0.9rem;
+}
+
+.sdev-student span {
+    font-size: 0.75rem;
+    color: #94a3b8;
+    direction: ltr;
+    text-align: right;
+}
+
+.sdev-grade {
+    font-size: 0.8rem;
+    color: #64748b;
+    white-space: nowrap;
+}
+
+.sdev-date {
+    font-size: 0.8rem;
+    color: #94a3b8;
+    white-space: nowrap;
+}
+
+.sdev-badges {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.sdev-badge {
+    font-size: 0.74rem;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 999px;
+    white-space: nowrap;
+}
+
+.sdev-badge--android { background: #dcfce7; color: #15803d; }
+.sdev-badge--ios { background: #dbeafe; color: #1d4ed8; }
+.sdev-badge--none { background: #f1f5f9; color: #94a3b8; }
+
+.sdev-code {
+    font-size: 0.74rem;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 999px;
+    white-space: nowrap;
+}
+
+.sdev-code--yes { background: #ede9fe; color: #6d28d9; }
+.sdev-code--no { background: #f1f5f9; color: #94a3b8; }
+
+.sdev-empty {
+    background: #fff;
+    border: 1px dashed #cbd5e1;
+    border-radius: 14px;
+    padding: 44px 20px;
+    text-align: center;
+    color: #94a3b8;
+    font-size: 0.92rem;
+}
+
+.sdev-empty--error {
+    border-color: #fecaca;
+    background: #fef2f2;
+    color: #b91c1c;
+}
+
+.sdev-pager {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    margin-top: 16px;
+    font-size: 0.82rem;
+    color: #64748b;
+}
+
+.sdev-pager button {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 8px 18px;
+    font-family: inherit;
+    font-weight: 700;
+    font-size: 0.82rem;
+    color: #334155;
+    cursor: pointer;
+}
+
+.sdev-pager button:hover:not(:disabled) {
+    background: #f8fafc;
+    border-color: #cbd5e1;
+}
+
+.sdev-pager button:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+@media (max-width: 640px) {
+    .sdev-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .sdev-field,
+    .sdev-field--grow {
+        min-width: 0;
+    }
+}

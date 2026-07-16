@@ -5,7 +5,8 @@ import {
     HiOutlineHome, HiOutlineUsers, HiOutlineAcademicCap,
     HiOutlineBookOpen, HiOutlineCreditCard, HiOutlineChatBubbleLeftRight,
     HiOutlineCog, HiOutlineArrowRightOnRectangle, HiOutlineBell, HiOutlineBars3,
-    HiOutlineDocumentText, HiOutlineBriefcase, HiOutlineUserGroup, HiOutlineNoSymbol, HiOutlineClock
+    HiOutlineDocumentText, HiOutlineBriefcase, HiOutlineUserGroup, HiOutlineNoSymbol, HiOutlineClock,
+    HiOutlineDevicePhoneMobile
 } from 'react-icons/hi2'
 import './Admin.css'
 
@@ -104,6 +105,7 @@ export const AdminLayout = () => {
             'contactmessages': 'view_contactmessage', 'faqs': 'view_faqitem',
             'muted-students': 'view_user',
             'moderation-history': 'view_user',
+            'student-devices': 'view_user',
             'ta-manager': 'view_ta_performance'
         }
         const needed = pathMap[modelPath]
@@ -129,6 +131,7 @@ export const AdminLayout = () => {
         { path: 'branches', icon: <HiOutlineBookOpen />, label: 'الفروع الدراسية' },
         { path: 'subjects', icon: <HiOutlineDocumentText />, label: 'المواد الدراسية' },
         { path: 'students', icon: <HiOutlineUsers />, label: 'الطلاب المسجلين' },
+        { path: 'student-devices', icon: <HiOutlineDevicePhoneMobile />, label: 'أجهزة الطلاب' },
         { path: 'courses', icon: <HiOutlineBookOpen />, label: 'المناهج والدورات' },
         { path: 'quick-courses', icon: <HiOutlineBookOpen />, label: 'التعبئة السريعة (Excel)' },
         { path: 'copy-lesson', icon: <HiOutlineDocumentText />, label: 'نسخ درس بين الدورات' },
