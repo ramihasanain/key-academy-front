@@ -14,6 +14,9 @@ export const TAStudentStats = () => {
     const { activeGroupId } = useOutletContext() || {}
     const [stats, setStats] = useState(null)
     const [loading, setLoading] = useState(true)
+    // Filter for the bottom "All Students" table, driven by clicking the top cards.
+    // 'all' | 'engaged' | 'inactive'
+    const [studentFilter, setStudentFilter] = useState('all')
 
     const handleActivityClick = async (act) => {
         // Optimistic UI update
@@ -72,6 +75,26 @@ export const TAStudentStats = () => {
         fetchStats()
     }, [activeGroupId, courseId])
 
+    const tableRef = React.useRef(null)
+
+    const selectFilter = (f) => {
+        // Clicking the already-active card resets the filter.
+        setStudentFilter(prev => (prev === f ? 'all' : f))
+        setTimeout(() => tableRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50)
+    }
+
+    const filteredStudents = (stats?.allStudents || []).filter(st => {
+        if (studentFilter === 'engaged') return st.engaged === true
+        if (studentFilter === 'inactive') return st.engaged === false
+        return true
+    })
+
+    const filterLabels = {
+        all: 'القائمة الشاملة للطلاب',
+        engaged: 'الطلاب المتفاعلين (هذا الأسبوع)',
+        inactive: 'الطلاب غير النشطين',
+    }
+
     if (loading) return <div className="hq-loading">جاري تحليل الأداء...</div>
 
     return (
@@ -93,12 +116,19 @@ export const TAStudentStats = () => {
 
             {/* Top Stat Cards */}
             <div className="ta-grid-cards" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 280px), 1fr))', gap: '20px', marginBottom: '35px' }}>
-                <div style={{
+                <div
+                    onClick={() => selectFilter('all')}
+                    title="عرض جميع الطلاب"
+                    style={{
                     background: 'linear-gradient(135deg, rgba(56, 189, 248, 0.1), rgba(56, 189, 248, 0.02))',
-                    border: '1px solid rgba(56, 189, 248, 0.2)',
+                    border: `1px solid ${studentFilter === 'all' ? 'rgba(56, 189, 248, 0.7)' : 'rgba(56, 189, 248, 0.2)'}`,
+                    boxShadow: studentFilter === 'all' ? '0 0 0 1px rgba(56,189,248,0.4), 0 8px 24px rgba(56,189,248,0.15)' : 'none',
                     borderRadius: '20px', padding: '25px', display: 'flex', alignItems: 'center', gap: '20px',
-                    backdropFilter: 'blur(10px)'
-                }}>
+                    backdropFilter: 'blur(10px)', cursor: 'pointer', transition: 'border-color 0.2s, box-shadow 0.2s, transform 0.1s'
+                }}
+                    onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-3px)'}
+                    onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}
+                >
                     <div style={{ background: 'rgba(56, 189, 248, 0.2)', color: '#38bdf8', padding: '18px', borderRadius: '16px' }}>
                         <HiOutlineUsers size={34} />
                     </div>
@@ -108,12 +138,19 @@ export const TAStudentStats = () => {
                     </div>
                 </div>
 
-                <div style={{
+                <div
+                    onClick={() => selectFilter('engaged')}
+                    title="عرض الطلاب المتفاعلين هذا الأسبوع"
+                    style={{
                     background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(16, 185, 129, 0.02))',
-                    border: '1px solid rgba(16, 185, 129, 0.2)',
+                    border: `1px solid ${studentFilter === 'engaged' ? 'rgba(16, 185, 129, 0.7)' : 'rgba(16, 185, 129, 0.2)'}`,
+                    boxShadow: studentFilter === 'engaged' ? '0 0 0 1px rgba(16,185,129,0.4), 0 8px 24px rgba(16,185,129,0.15)' : 'none',
                     borderRadius: '20px', padding: '25px', display: 'flex', alignItems: 'center', gap: '20px',
-                    backdropFilter: 'blur(10px)'
-                }}>
+                    backdropFilter: 'blur(10px)', cursor: 'pointer', transition: 'border-color 0.2s, box-shadow 0.2s, transform 0.1s'
+                }}
+                    onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-3px)'}
+                    onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}
+                >
                     <div style={{ background: 'rgba(16, 185, 129, 0.2)', color: '#10b981', padding: '18px', borderRadius: '16px' }}>
                         <HiOutlineChartBar size={34} />
                     </div>
@@ -126,12 +163,19 @@ export const TAStudentStats = () => {
                     </div>
                 </div>
 
-                <div style={{
+                <div
+                    onClick={() => selectFilter('inactive')}
+                    title="عرض الطلاب غير النشطين"
+                    style={{
                     background: 'linear-gradient(135deg, rgba(239, 68, 68, 0.08), rgba(239, 68, 68, 0.02))',
-                    border: '1px solid rgba(239, 68, 68, 0.2)',
+                    border: `1px solid ${studentFilter === 'inactive' ? 'rgba(239, 68, 68, 0.7)' : 'rgba(239, 68, 68, 0.2)'}`,
+                    boxShadow: studentFilter === 'inactive' ? '0 0 0 1px rgba(239,68,68,0.4), 0 8px 24px rgba(239,68,68,0.15)' : 'none',
                     borderRadius: '20px', padding: '25px', display: 'flex', alignItems: 'center', gap: '20px',
-                    backdropFilter: 'blur(10px)'
-                }}>
+                    backdropFilter: 'blur(10px)', cursor: 'pointer', transition: 'border-color 0.2s, box-shadow 0.2s, transform 0.1s'
+                }}
+                    onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-3px)'}
+                    onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}
+                >
                     <div style={{ background: 'rgba(239, 68, 68, 0.15)', color: '#ef4444', padding: '18px', borderRadius: '16px' }}>
                         <HiOutlineExclamationTriangle size={34} />
                     </div>
@@ -259,12 +303,21 @@ export const TAStudentStats = () => {
             </div>
 
             {/* Bottom Row: All Students Table */}
-            <div className="hq-card" style={{ padding: 0, overflow: 'hidden', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '20px', marginTop: '30px' }}>
-                <div style={{ padding: '20px', borderBottom: '1px solid rgba(255,255,255,0.06)', background: 'rgba(255,255,255,0.02)' }}>
+            <div ref={tableRef} className="hq-card" style={{ padding: 0, overflow: 'hidden', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '20px', marginTop: '30px', scrollMarginTop: '20px' }}>
+                <div style={{ padding: '20px', borderBottom: '1px solid rgba(255,255,255,0.06)', background: 'rgba(255,255,255,0.02)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' }}>
                     <h3 style={{ margin: 0, color: 'var(--hq-primary-text)', fontSize: '1.2rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
                         <HiOutlineUsers color="#38bdf8" size={24} />
-                        القائمة الشاملة للطلاب
+                        {filterLabels[studentFilter]}
+                        <span style={{ fontSize: '0.9rem', color: 'var(--hq-text-muted)', fontWeight: 'normal' }}>({filteredStudents.length})</span>
                     </h3>
+                    {studentFilter !== 'all' && (
+                        <button
+                            onClick={() => setStudentFilter('all')}
+                            style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.12)', color: 'var(--hq-text-muted)', padding: '6px 14px', borderRadius: '10px', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 'bold' }}
+                        >
+                            ✕ إلغاء الفلترة
+                        </button>
+                    )}
                 </div>
                 <div className="ta-table-wrap" style={{ overflowX: 'auto' }}>
                     <table className="ta-wide-table" style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'right' }}>
@@ -278,13 +331,15 @@ export const TAStudentStats = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            {(!stats?.allStudents || stats.allStudents.length === 0) ? (
+                            {(filteredStudents.length === 0) ? (
                                 <tr>
                                     <td colSpan="5" style={{ padding: '50px', textAlign: 'center', color: 'var(--hq-text-muted)' }}>
-                                        لا يوجد طلاب مضافين تحت إشرافك حتى الآن.
+                                        {studentFilter === 'engaged' ? 'لا يوجد طلاب متفاعلون هذا الأسبوع.'
+                                            : studentFilter === 'inactive' ? 'لا يوجد طلاب غير نشطين. 🎉'
+                                            : 'لا يوجد طلاب مضافين تحت إشرافك حتى الآن.'}
                                     </td>
                                 </tr>
-                            ) : stats.allStudents.map(student => (
+                            ) : filteredStudents.map(student => (
                                 <tr key={student.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.04)', transition: 'background 0.2s', cursor: 'pointer' }}
                                     onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.02)'}
                                     onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
