@@ -479,6 +479,32 @@
     -webkit-overflow-scrolling: touch;
 }
 
+/* منع تحديد النص/الصور وقائمة (نسخ/بحث/ترجمة) الأصلية عند الرسم بالقلم على الورقة */
+.exam-annotator,
+.exam-annotator-stage,
+.exam-annotator-page-wrap,
+.exam-annotator-canvas,
+.exam-annotator-image,
+.exam-annotator-page-wrap .react-pdf__Page,
+.exam-annotator-page-wrap .react-pdf__Page__textContent {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+}
+
+/* استثناء الحقول القابلة للكتابة (تعليق نصّي / اسم الطالب...) حتى تبقى قابلة للتحديد */
+.exam-annotator input,
+.exam-annotator textarea,
+.exam-annotator [contenteditable="true"],
+.exam-annotator-text-popup,
+.exam-annotator-text-popup * {
+    -webkit-user-select: text;
+    user-select: text;
+    -webkit-touch-callout: default;
+}
+
 .exam-annotator.fullscreen {
     position: fixed;
     inset: 0;

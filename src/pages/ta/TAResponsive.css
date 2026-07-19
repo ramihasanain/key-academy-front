@@ -67,31 +67,6 @@
 /* القائمة المنسدلة للمجموعات */
 .ta-layout .ta-group-select {
     max-width: 100%;
-    min-width: 260px;
-    padding: 8px 14px;
-    /* مساحة كافية على اليسار للسهم المخصص حتى لا يتداخل مع النص */
-    padding-left: 34px;
-    border: 2px solid var(--hq-primary);
-    border-radius: 8px;
-    font-weight: 600;
-    font-family: inherit;
-    color: var(--hq-text-main, #1e293b);
-    direction: rtl;
-    text-align: right;
-    cursor: pointer;
-    /* إلغاء مظهر النظام الافتراضي (سهم iOS/Safari) الذي يظهر بشكل غريب في RTL */
-    appearance: none;
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    background-color: #fff;
-    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238b5cf6' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
-    background-repeat: no-repeat;
-    background-position: left 12px center;
-    background-size: 16px;
-}
-.ta-layout .ta-group-select:focus {
-    outline: none;
-    box-shadow: 0 0 0 3px var(--hq-primary-bg, rgba(139, 92, 246, 0.2));
 }
 
 /* ============================ TABLET (≤1024px) ============================ */

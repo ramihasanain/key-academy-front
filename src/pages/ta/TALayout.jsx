@@ -173,6 +173,10 @@ const TALayoutShell = ({ profile }) => {
                                 className="ta-group-select"
                                 value={activeGroupId || ''}
                                 onChange={e => setActiveGroupId(parseInt(e.target.value, 10))}
+                                style={{
+                                    padding: '8px 12px', borderRadius: '8px', border: '2px solid var(--hq-primary)',
+                                    fontWeight: '600', minWidth: '260px', background: 'white',
+                                }}
                             >
                                 {groups.map(g => (
                                     <option key={g.id} value={g.id}>
