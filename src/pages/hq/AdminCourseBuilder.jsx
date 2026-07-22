@@ -517,7 +517,7 @@ export const AdminCourseBuilder = ({ id }) => {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${tk}`
                 },
-                body: JSON.stringify({ lesson_text: less.lesson_text, type: 'surprise' })
+                body: JSON.stringify({ lesson_text: less.lesson_text, type: 'surprise', subject: [course.subject, course.title].filter(Boolean).join(' ') })
             });
             const data = await res.json();
             if (!res.ok) throw new Error(data.error || 'Network error');
@@ -560,7 +560,7 @@ export const AdminCourseBuilder = ({ id }) => {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${tk}`
                 },
-                body: JSON.stringify({ lesson_text: less.lesson_text, type: 'text_100' })
+                body: JSON.stringify({ lesson_text: less.lesson_text, type: 'text_100', subject: [course.subject, course.title].filter(Boolean).join(' ') })
             });
             const data = await res.json();
             if (!res.ok) throw new Error(data.error || 'Network error');
