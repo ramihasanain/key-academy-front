@@ -82,14 +82,22 @@ export const TAStudentsList = () => {
                                     <th style={{ padding: '15px 20px', color: 'var(--hq-text-muted)', fontWeight: 'bold' }}>الطالب</th>
                                     <th style={{ padding: '15px 20px', color: 'var(--hq-text-muted)', fontWeight: 'bold' }}>الحالة</th>
                                     <th style={{ padding: '15px 20px', color: 'var(--hq-text-muted)', fontWeight: 'bold' }}>الانضمام</th>
+                                    <th style={{ padding: '15px 20px', color: 'var(--hq-text-muted)', fontWeight: 'bold' }}>تاريخ التفعيل</th>
                                     <th style={{ padding: '15px 20px', color: 'var(--hq-text-muted)', fontWeight: 'bold', width: '150px' }}>الإجراء</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {students.map((student) => (
+                                {students.map((student) => {
+                                    const isNew = student.activated_at && (Date.now() - new Date(student.activated_at).getTime()) < 7 * 24 * 60 * 60 * 1000
+                                    return (
                                     <tr key={student.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.03)', transition: 'background 0.2s', ':hover': { background: 'rgba(255,255,255,0.01)' } }}>
                                         <td style={{ padding: '15px 20px' }}>
-                                            <div style={{ color: 'var(--hq-primary-text)', fontWeight: 'bold', fontSize: '1.05rem' }}>{student.name}</div>
+                                            <div style={{ color: 'var(--hq-primary-text)', fontWeight: 'bold', fontSize: '1.05rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                {student.name}
+                                                {isNew && (
+                                                    <span style={{ color: '#3b82f6', background: 'rgba(59,130,246,0.12)', border: '1px solid rgba(59,130,246,0.3)', padding: '2px 8px', borderRadius: '8px', fontSize: '0.7rem', fontWeight: 'bold', letterSpacing: '0.5px' }}>NEW</span>
+                                                )}
+                                            </div>
                                             <div style={{ fontSize: '0.85rem', color: 'var(--hq-text-muted)', marginTop: '2px' }}>@{student.username}</div>
                                         </td>
                                         <td style={{ padding: '15px 20px' }}>
@@ -104,6 +112,9 @@ export const TAStudentsList = () => {
                                         <td style={{ padding: '15px 20px', color: 'var(--hq-text-muted)', fontSize: '0.9rem' }}>
                                             {new Date(student.date_joined).toLocaleDateString('ar-EG')}
                                         </td>
+                                        <td style={{ padding: '15px 20px', fontSize: '0.9rem', color: isNew ? '#3b82f6' : 'var(--hq-text-muted)', fontWeight: isNew ? 'bold' : 'normal' }}>
+                                            {student.activated_at ? new Date(student.activated_at).toLocaleDateString('ar-EG') : '—'}
+                                        </td>
                                         <td style={{ padding: '15px 20px' }}>
                                             <button
                                                 onClick={() => navigate(`/ta/student/${student.id}/360`)}
@@ -113,7 +124,8 @@ export const TAStudentsList = () => {
                                             </button>
                                         </td>
                                     </tr>
-                                ))}
+                                    )
+                                })}
                             </tbody>
                         </table>
                     </div>
