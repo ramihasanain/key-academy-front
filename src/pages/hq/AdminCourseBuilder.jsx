@@ -370,6 +370,20 @@ export const AdminCourseBuilder = ({ id }) => {
         setModules(newMods)
     }
 
+    // تغيير ترتيب الدرس (تحريك للأعلى/الأسفل) — يعيد ترقيم order لكل دروس الفصل
+    const moveLesson = (mIndex, lIndex, dir) => {
+        const target = lIndex + dir
+        const newMods = [...modules]
+        const lessons = [...newMods[mIndex].lessons]
+        if (target < 0 || target >= lessons.length) return
+        const tmp = lessons[lIndex]; lessons[lIndex] = lessons[target]; lessons[target] = tmp
+        lessons.forEach((l, i) => {
+            if (l.order !== i + 1) { l.order = i + 1; l._dirty = true }
+        })
+        newMods[mIndex].lessons = lessons
+        setModules(newMods)
+    }
+
     const handleLessonPublishToggle = async (mIndex, lIndex, published) => {
         const less = modules[mIndex].lessons[lIndex]
         updateLesson(mIndex, lIndex, 'is_published', published)
@@ -1253,7 +1267,17 @@ export const AdminCourseBuilder = ({ id }) => {
                                             <div key={less.localId} style={{ background: 'var(--hq-surface)', borderRadius: '12px', border: `1px solid ${less.is_published ? 'var(--hq-border)' : '#fca5a5'}`, padding: '15px' }}>
                                                 {/* Lesson Generic Top Bar (Just Title & Video Link) */}
                                                 <div style={{ display: 'flex', gap: '12px', alignItems: 'center', marginBottom: less.showAdvanced ? '15px' : '0' }}>
-                                                    <div style={{ width: '24px', height: '24px', background: '#e2e8f0', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem', color: '#64748b', fontWeight: 'bold' }}>{lIndex + 1}</div>
+                                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                                                        <button onClick={() => moveLesson(mIndex, lIndex, -1)} disabled={lIndex === 0} title="تحريك للأعلى"
+                                                            style={{ border: '1px solid #d1d5db', background: 'white', borderRadius: '5px', cursor: lIndex === 0 ? 'not-allowed' : 'pointer', opacity: lIndex === 0 ? 0.35 : 1, lineHeight: 0, padding: '2px', color: '#475569' }}>
+                                                            <HiOutlineChevronUp size={13} />
+                                                        </button>
+                                                        <button onClick={() => moveLesson(mIndex, lIndex, 1)} disabled={lIndex === mod.lessons.length - 1} title="تحريك للأسفل"
+                                                            style={{ border: '1px solid #d1d5db', background: 'white', borderRadius: '5px', cursor: lIndex === mod.lessons.length - 1 ? 'not-allowed' : 'pointer', opacity: lIndex === mod.lessons.length - 1 ? 0.35 : 1, lineHeight: 0, padding: '2px', color: '#475569' }}>
+                                                            <HiOutlineChevronDown size={13} />
+                                                        </button>
+                                                    </div>
+                                                    <div style={{ width: '24px', height: '24px', background: '#e2e8f0', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem', color: '#64748b', fontWeight: 'bold', flexShrink: 0 }}>{lIndex + 1}</div>
                                                     <div style={{ flex: 1 }}>
                                                         <input type="text" placeholder="عنوان الدرس..." value={less.title} onChange={e => updateLesson(mIndex, lIndex, 'title', e.target.value)} style={{ width: '100%', padding: '10px 15px', borderRadius: '8px', border: '1px solid #d1d5db', outline: 'none', background: 'white', fontWeight: 'bold' }} />
                                                     </div>
