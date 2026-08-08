@@ -67,7 +67,10 @@ export const TAExamGradingWorkspace = () => {
     const pageRefsRef = useRef([])
     const gradePanelRef = useRef(null)
     const saveTimerRef = useRef(null)
+    const gradingDataRef = useRef(null)
     const authToken = sessionStorage.getItem('spy_token') || localStorage.getItem('access_token')
+
+    useEffect(() => { gradingDataRef.current = gradingData }, [gradingData])
 
     const loadWorkspace = useCallback(async () => {
         setLoading(true)
@@ -116,6 +119,27 @@ export const TAExamGradingWorkspace = () => {
         if (saveTimerRef.current) clearTimeout(saveTimerRef.current)
         saveTimerRef.current = setTimeout(() => saveAnnotations(data), 1200)
     }
+
+    // تدوير صورة مقلوبة رفعها الطالب — السيرفر يعدّل الملف نفسه ويدوّر التعليقات معه
+    const handleRotatePage = useCallback(async (page, direction) => {
+        // نحفظ أي تعليقات معلّقة أولاً حتى يدوّرها السيرفر مع الصورة ولا تضيع
+        if (saveTimerRef.current) clearTimeout(saveTimerRef.current)
+        await saveAnnotations(gradingDataRef.current)
+
+        const res = await fetch(`${API}/api/interactions/exams/ta-rotate-page/${submissionId}/`, {
+            method: 'POST',
+            headers: authHeaders(true),
+            body: JSON.stringify({ page_index: page.index, direction }),
+        })
+        if (!res.ok) {
+            const err = await res.json().catch(() => ({}))
+            throw new Error(err.error || 'فشل تدوير الصفحة')
+        }
+        const data = await res.json()
+        setWorkspace((prev) => (prev ? { ...prev, pages: data.pages } : prev))
+        const gd = data.grading_data || {}
+        setGradingData(gd.pages ? gd : { version: 1, pages: gd })
+    }, [submissionId, saveAnnotations])
 
     const reopenGrading = async () => {
         if (!window.confirm('إعادة فتح الورقة للتعديل؟')) return
@@ -485,6 +509,7 @@ export const TAExamGradingWorkspace = () => {
                         readOnly={isLocked}
                         onPageRefsReady={(refs) => { pageRefsRef.current = refs }}
                         authToken={authToken}
+                        onRotatePage={handleRotatePage}
                     />
                 </div>
 

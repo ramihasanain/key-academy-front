@@ -1974,3 +1974,13 @@
     opacity: 0.6;
     cursor: not-allowed;
 }
+
+/* ── زر تدوير الصورة المقلوبة — يدور أثناء انتظار السيرفر ── */
+@keyframes annotator-rotate-spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.is-rotating svg {
+    animation: annotator-rotate-spin 0.9s linear infinite;
+}

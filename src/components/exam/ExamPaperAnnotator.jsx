@@ -19,6 +19,7 @@ import {
     HiOutlineMapPin,
     HiOutlineEye,
     HiOutlineEyeSlash,
+    HiOutlineArrowPath,
 } from 'react-icons/hi2'
 import {
     GRADING_DATA_VERSION,
@@ -195,6 +196,7 @@ export const ExamPaperAnnotator = ({
     readOnly = false,
     onPageRefsReady,
     authToken = null,
+    onRotatePage = null,
 }) => {
     const isMobile = useMediaQuery('(max-width: 768px)')
     const [activeTool, setActiveTool] = useState(() => (
@@ -212,7 +214,9 @@ export const ExamPaperAnnotator = ({
     const [fullscreen, setFullscreen] = useState(false)
     // العرض الأساسي للورقة عند تكبير 100% — يُقاس من منطقة العرض ليبقى الكانفس مطابقاً للصورة عند أي تكبير
     const [baseWidth, setBaseWidth] = useState(0)
+    // { [index]: { sourceUrl, blobUrl } } — sourceUrl يكشف تغيّر الملف (مثلاً بعد التدوير) فيُعاد التحميل
     const [imageBlobUrls, setImageBlobUrls] = useState({})
+    const [rotating, setRotating] = useState(false)
     // ── الدوك العائم على الموبايل: يظهر/يختفي بنعومة + إمكانية التثبيت ──
     const [dockVisible, setDockVisible] = useState(true)
     const [dockPinned, setDockPinned] = useState(false)
@@ -304,14 +308,18 @@ export const ExamPaperAnnotator = ({
         setPdfNumPages(1)
     }, [currentPage])
 
+    const imageBlobUrlsRef = useRef({})
+    useEffect(() => { imageBlobUrlsRef.current = imageBlobUrls }, [imageBlobUrls])
+
     useEffect(() => {
         pages.forEach((p) => {
             if (p.type !== 'image' || p.url.startsWith('data:')) return
+            if (imageBlobUrlsRef.current[p.index]?.sourceUrl === p.url) return
             loadFileForViewer(p.url, authToken).then((loaded) => {
                 if (!loaded?.url) return
                 setImageBlobUrls((prev) => {
-                    if (prev[p.index]) return prev
-                    return { ...prev, [p.index]: loaded.url }
+                    if (prev[p.index]?.sourceUrl === p.url) return prev
+                    return { ...prev, [p.index]: { sourceUrl: p.url, blobUrl: loaded.url } }
                 })
             })
         })
@@ -593,6 +601,21 @@ export const ExamPaperAnnotator = ({
         updatePageAnnotations(pageKey, pageAnnotations.slice(0, -1))
     }
 
+    // تدوير صورة مقلوبة — التعديل دائم (يُحفظ في السيرفر) فيظهر معدّلاً للطالب أيضاً
+    const canRotate = !readOnly && !!onRotatePage && activePage?.type === 'image'
+
+    const rotatePage = async (direction) => {
+        if (!onRotatePage || !activePage || rotating) return
+        setRotating(true)
+        try {
+            await onRotatePage(activePage, direction)
+        } catch (err) {
+            window.alert(err?.message || 'فشل تدوير الصفحة')
+        } finally {
+            setRotating(false)
+        }
+    }
+
     const clearPage = () => {
         if (!window.confirm('مسح كل التعليقات على هذه الصفحة؟')) return
         updatePageAnnotations(pageKey, [])
@@ -648,7 +671,7 @@ export const ExamPaperAnnotator = ({
             )
         }
         if (page.type === 'image') {
-            const src = imageBlobUrls[page.index] || page.url
+            const src = imageBlobUrls[page.index]?.blobUrl || page.url
             return (
                 <img
                     src={src}
@@ -856,6 +879,18 @@ export const ExamPaperAnnotator = ({
                 <button type="button" className="annotator-dock-btn" onClick={() => setScale(1)} aria-label="الحجم الأصلي" title="الحجم الأصلي">
                     <span className="annotator-zoomdock-reset">1:1</span>
                 </button>
+                {canRotate && (
+                    <button
+                        type="button"
+                        className={`annotator-dock-btn ${rotating ? 'is-rotating' : ''}`}
+                        onClick={() => rotatePage('cw')}
+                        disabled={rotating}
+                        aria-label="تدوير الصورة"
+                        title="تدوير الصورة"
+                    >
+                        <HiOutlineArrowPath size={20} />
+                    </button>
+                )}
                 <button type="button" className="annotator-dock-btn" onClick={() => setFullscreen((f) => !f)} aria-label="ملء الشاشة">
                     <HiOutlineArrowsPointingOut size={20} />
                 </button>
@@ -940,6 +975,27 @@ export const ExamPaperAnnotator = ({
                                 <>
                                     <button type="button" onClick={undoLast} title="تراجع"><HiOutlineArrowUturnLeft size={18} /></button>
                                     <button type="button" onClick={clearPage} title="مسح"><HiOutlineTrash size={18} /></button>
+                                </>
+                            )}
+                            {canRotate && (
+                                <>
+                                    <button
+                                        type="button"
+                                        onClick={() => rotatePage('ccw')}
+                                        disabled={rotating}
+                                        title="تدوير لليسار"
+                                    >
+                                        <HiOutlineArrowPath size={18} style={{ transform: 'scaleX(-1)' }} />
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => rotatePage('cw')}
+                                        disabled={rotating}
+                                        title="تدوير لليمين"
+                                        className={rotating ? 'is-rotating' : ''}
+                                    >
+                                        <HiOutlineArrowPath size={18} />
+                                    </button>
                                 </>
                             )}
                             <button type="button" onClick={() => setScale((s) => Math.max(0.4, s - 0.15))}><HiOutlineMagnifyingGlassMinus size={18} /></button>
