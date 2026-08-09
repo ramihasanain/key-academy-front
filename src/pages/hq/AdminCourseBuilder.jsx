@@ -513,14 +513,24 @@ export const AdminCourseBuilder = ({ id }) => {
         }
     }
 
+    // "15:30" أو "1:15:30" أو "45" (دقائق) → ثواني
+    const parseDurationToSeconds = (raw) => {
+        if (!raw) return 0
+        const parts = String(raw).trim().match(/\d+/g)
+        if (!parts) return 0
+        if (parts.length === 1) return parseInt(parts[0], 10) * 60
+        if (parts.length === 2) return parseInt(parts[0], 10) * 60 + parseInt(parts[1], 10)
+        return parseInt(parts[0], 10) * 3600 + parseInt(parts[1], 10) * 60 + parseInt(parts[2], 10)
+    }
+
     const handleGenerateSurpriseQuestions = async (mIndex, lIndex) => {
         const less = modules[mIndex].lessons[lIndex];
         if (!less.lesson_text || less.lesson_text.trim() === '') {
             alert('يجب إضافة نص للدرس أولاً لتتمكن من توليد الأسئلة.');
             return;
         }
-        
-        const confirmGen = window.confirm('سيتم توليد 3 أسئلة فجائية باستخدام الذكاء الاصطناعي وسيتم مسح الأسئلة الفجائية الحالية. هل أنت متأكد؟');
+
+        const confirmGen = window.confirm('سيتم توليد 3 أسئلة فجائية باستخدام الذكاء الاصطناعي (كل سؤال من ربعه الزمني: 0-25%، 25-50%، 50-75%) وسيتم مسح الأسئلة الفجائية الحالية. هل أنت متأكد؟');
         if (!confirmGen) return;
 
         try {
@@ -531,7 +541,12 @@ export const AdminCourseBuilder = ({ id }) => {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${tk}`
                 },
-                body: JSON.stringify({ lesson_text: less.lesson_text, type: 'surprise', subject: [course.subject, course.title].filter(Boolean).join(' ') })
+                body: JSON.stringify({
+                    lesson_text: less.lesson_text,
+                    type: 'surprise',
+                    subject: [course.subject, course.title].filter(Boolean).join(' '),
+                    video_duration_seconds: parseDurationToSeconds(less.duration)
+                })
             });
             const data = await res.json();
             if (!res.ok) throw new Error(data.error || 'Network error');
@@ -548,7 +563,14 @@ export const AdminCourseBuilder = ({ id }) => {
                 }));
                 newMods[mIndex].lessons[lIndex]._dirty = true;
                 setModules(newMods);
-                alert('تم توليد الأسئلة الفجائية بنجاح!');
+                if (data.timeline_detected) {
+                    const ranges = data.questions
+                        .map((q, i) => `${i + 1}) ${q.window_label || ''} → ${q.hint || ''}`)
+                        .join('\n');
+                    alert(`تم توليد الأسئلة الفجائية بنجاح!\nمدة الفيديو المستخرجة من النص: ${data.video_duration}\n${ranges}`);
+                } else {
+                    alert('تم توليد الأسئلة الفجائية بنجاح!\nتنبيه: لا توجد توقيتات (مثل 12:34) داخل نص الدرس، لذلك تم التقسيم حسب طول النص وليس حسب زمن الفيديو، والتلميحات فارغة. أضف التوقيتات للنص لتقسيم زمني دقيق.');
+                }
             }
         } catch (error) {
             console.error(error);
