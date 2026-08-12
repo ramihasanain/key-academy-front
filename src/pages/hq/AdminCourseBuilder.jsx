@@ -97,6 +97,10 @@ export const AdminCourseBuilder = ({ id }) => {
     const [allCourses, setAllCourses] = useState([])
     const [sourceCourseId, setSourceCourseId] = useState('')
     const [copying, setCopying] = useState(false)
+    // خيارات النسخ — الامتحانات الأسبوعية مستثناة افتراضياً (دورات الدفعات الجديدة تأخذ امتحاناتها لاحقاً)
+    const [copyWeeklyExams, setCopyWeeklyExams] = useState(false)
+    const [copyQuizzes, setCopyQuizzes] = useState(true)
+    const [copyMinisterialDocs, setCopyMinisterialDocs] = useState(true)
     const [courseDirty, setCourseDirty] = useState(false)
 
     const FILE_FIELDS = ['doc_file', 'cover_image', 'hero_image', 'file', 'exam_file']
@@ -167,7 +171,12 @@ export const AdminCourseBuilder = ({ id }) => {
             const res = await fetch(`${API}/api/hq/courses/${id}/copy-content/`, {
                 method: 'POST',
                 headers: { 'Authorization': `Bearer ${tk}`, 'Content-Type': 'application/json' },
-                body: JSON.stringify({ source_course_id: sourceCourseId })
+                body: JSON.stringify({
+                    source_course_id: sourceCourseId,
+                    copy_weekly_exams: copyWeeklyExams,
+                    copy_quizzes: copyQuizzes,
+                    copy_ministerial_docs: copyMinisterialDocs,
+                })
             })
             const data = await res.json()
             if (!res.ok) throw new Error(data.error || 'فشل النسخ')
@@ -1153,6 +1162,26 @@ export const AdminCourseBuilder = ({ id }) => {
                         <label>الترتيب (الأقل يظهر أولاً)</label>
                         <input type="number" value={course.order || 0} onChange={e => markCourseDirty({ ...course, order: parseInt(e.target.value) || 0 })} />
                     </div>
+
+                    <div className="hq-df-group">
+                        <label>جمهور الدورة (نظام الدفعات)</label>
+                        <select value={course.audience || 'all'} onChange={e => markCourseDirty({ ...course, audience: e.target.value })}>
+                            <option value="all">الكل (الوضع الحالي)</option>
+                            <option value="new">الطلاب الجدد فقط</option>
+                            <option value="legacy">الطلاب القدامى فقط</option>
+                        </select>
+                        <small style={{ color: '#94a3b8', fontSize: '0.75rem' }}>يعمل فقط عند تفعيل نظام الدفعات من إعدادات المنصة</small>
+                    </div>
+
+                    <div className="hq-df-group">
+                        <label>دورة مجانية بالكامل</label>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px', background: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                            <input type="checkbox" id="crs-free" checked={!!course.is_free} onChange={e => markCourseDirty({ ...course, is_free: e.target.checked })} />
+                            <label htmlFor="crs-free" style={{ margin: 0, fontSize: '0.85rem', color: course.is_free ? '#10b981' : '#64748b', fontWeight: 'bold' }}>
+                                {course.is_free ? 'تُضاف تلقائياً لحساب طلاب جمهورها' : 'دورة مدفوعة عادية'}
+                            </label>
+                        </div>
+                    </div>
                 </div>
 
                 <div className="hq-df-grid" style={{ gridTemplateColumns: '1fr', marginTop: '20px' }}>
@@ -1624,6 +1653,23 @@ export const AdminCourseBuilder = ({ id }) => {
                                     لا توجد دورات أخرى لنفس الأستاذ يمكن النسخ منها.
                                 </p>
                             )}
+                        </div>
+
+                        <div style={{ marginBottom: '25px', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '15px' }}>
+                            <label style={{ display: 'block', marginBottom: '10px', fontWeight: 'bold', color: '#475569' }}>ماذا يُنسخ مع الدروس؟</label>
+                            <label style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px', cursor: 'pointer', color: '#1e293b' }}>
+                                <input type="checkbox" checked={copyWeeklyExams} onChange={e => setCopyWeeklyExams(e.target.checked)} />
+                                <span>الامتحانات الأسبوعية</span>
+                                <span style={{ fontSize: '0.78rem', color: '#94a3b8' }}>(مستثناة افتراضياً — نزّلها يدوياً لاحقاً)</span>
+                            </label>
+                            <label style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px', cursor: 'pointer', color: '#1e293b' }}>
+                                <input type="checkbox" checked={copyQuizzes} onChange={e => setCopyQuizzes(e.target.checked)} />
+                                <span>كويزات الدروس وأسئلتها</span>
+                            </label>
+                            <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', color: '#1e293b' }}>
+                                <input type="checkbox" checked={copyMinisterialDocs} onChange={e => setCopyMinisterialDocs(e.target.checked)} />
+                                <span>ملفات الدورة (الملزمات والوزاريات القديمة)</span>
+                            </label>
                         </div>
 
                         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>

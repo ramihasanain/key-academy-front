@@ -87,6 +87,11 @@ const AdminUnpublishedLessons = lazy(() =>
     default: m.AdminUnpublishedLessons,
   })),
 );
+const AdminCourseSchedule = lazy(() =>
+  import("./pages/hq/AdminCourseSchedule").then((m) => ({
+    default: m.AdminCourseSchedule,
+  })),
+);
 const AdminStudentDevices = lazy(() =>
   import("./pages/hq/AdminStudentDevices").then((m) => ({
     default: m.AdminStudentDevices,
@@ -361,6 +366,7 @@ function App() {
               <Route path="quick-courses" element={<AdminQuickFillCourses />} />
               <Route path="copy-lesson" element={<AdminCopyLesson />} />
               <Route path="unpublished-lessons" element={<AdminUnpublishedLessons />} />
+              <Route path="course-schedule" element={<AdminCourseSchedule />} />
               <Route path="student-devices" element={<AdminStudentDevices />} />
               <Route path=":model" element={<AdminModelGrid />} />
               <Route path=":model/:id" element={<AdminModelForm />} />
