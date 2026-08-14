@@ -1174,12 +1174,22 @@ export const AdminCourseBuilder = ({ id }) => {
                     </div>
 
                     <div className="hq-df-group">
-                        <label>دورة مجانية بالكامل</label>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px', background: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-                            <input type="checkbox" id="crs-free" checked={!!course.is_free} onChange={e => markCourseDirty({ ...course, is_free: e.target.checked })} />
-                            <label htmlFor="crs-free" style={{ margin: 0, fontSize: '0.85rem', color: course.is_free ? '#10b981' : '#64748b', fontWeight: 'bold' }}>
-                                {course.is_free ? 'تُضاف تلقائياً لحساب طلاب جمهورها' : 'دورة مدفوعة عادية'}
-                            </label>
+                        <label>نوع الدورة (مدفوعة / مجانية)</label>
+                        <div
+                            onClick={() => markCourseDirty({ ...course, is_free: !course.is_free })}
+                            style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '12px', borderRadius: '8px', cursor: 'pointer', userSelect: 'none', background: course.is_free ? '#f0fdf4' : '#f8fafc', border: `1.5px solid ${course.is_free ? '#86efac' : '#e2e8f0'}` }}
+                        >
+                            <input type="checkbox" id="crs-free" checked={!!course.is_free} readOnly style={{ pointerEvents: 'none', width: '17px', height: '17px' }} />
+                            <div style={{ margin: 0 }}>
+                                <div style={{ fontSize: '0.9rem', fontWeight: 'bold', color: course.is_free ? '#16a34a' : '#334155' }}>
+                                    {course.is_free ? '✅ مجانية بالكامل' : 'مدفوعة عادية (تُباع بكود)'}
+                                </div>
+                                <div style={{ fontSize: '0.75rem', color: '#94a3b8', marginTop: '2px' }}>
+                                    {course.is_free
+                                        ? 'تُضاف تلقائياً مجاناً في «دوراتي» لكل طالب من جمهورها'
+                                        : 'علّم المربع لتحويلها إلى مجانية تُضاف تلقائياً للطلاب'}
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
