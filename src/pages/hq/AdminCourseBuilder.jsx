@@ -97,6 +97,7 @@ export const AdminCourseBuilder = ({ id }) => {
     const [allCourses, setAllCourses] = useState([])
     const [sourceCourseId, setSourceCourseId] = useState('')
     const [copying, setCopying] = useState(false)
+    const [copyProgress, setCopyProgress] = useState('')
     // خيارات النسخ — الامتحانات الأسبوعية مستثناة افتراضياً (دورات الدفعات الجديدة تأخذ امتحاناتها لاحقاً)
     const [copyWeeklyExams, setCopyWeeklyExams] = useState(false)
     const [copyQuizzes, setCopyQuizzes] = useState(true)
@@ -161,11 +162,14 @@ export const AdminCourseBuilder = ({ id }) => {
         } catch (e) { console.error("Error fetching courses", e) }
     }
 
+    // النسخ يعمل بالخلفية على السيرفر (Celery) — نستطلع تقدمه كل ثانيتين
+    // بدل انتظار طلب واحد طويل كان يضرب مهلة البوابة بالدورات الكبيرة.
     const handleCopyContent = async () => {
         if (!sourceCourseId) return alert('يرجى اختيار الدورة المراد النسخ منها.')
         if (!window.confirm('تنبيه: هذا الإجراء سيقوم بحذف جميع المحتويات الحالية (الفصول، الدروس، الامتحانات) للدورة الحالية واستبدالها بمحتويات الدورة المحددة. هل أنت متأكد؟')) return
 
         setCopying(true)
+        setCopyProgress('جاري بدء النسخ...')
         const tk = localStorage.getItem('access_token')
         try {
             const res = await fetch(`${API}/api/hq/courses/${id}/copy-content/`, {
@@ -179,13 +183,46 @@ export const AdminCourseBuilder = ({ id }) => {
                 })
             })
             const data = await res.json()
-            if (!res.ok) throw new Error(data.error || 'فشل النسخ')
-            alert('تم نسخ المحتويات بنجاح!')
-            window.location.reload()
+            if (!res.ok) throw new Error(data.error || 'فشل بدء النسخ')
+
+            const jobId = data.job_id
+            const startedAt = Date.now()
+            const poll = async () => {
+                if (Date.now() - startedAt > 15 * 60 * 1000) {
+                    throw new Error('انتهت مهلة متابعة النسخ — تحقق من الدورة بعد قليل.')
+                }
+                const sRes = await fetch(`${API}/api/hq/copy-jobs/${jobId}/`, {
+                    headers: { 'Authorization': `Bearer ${tk}` },
+                })
+                const s = await sRes.json().catch(() => ({}))
+                if (s.state === 'done') {
+                    const c = s.copied || {}
+                    alert(`تم النسخ بنجاح! (${c.modules ?? '؟'} وحدة، ${c.lessons ?? '؟'} درس)`)
+                    window.location.reload()
+                    return
+                }
+                if (s.state === 'failed') {
+                    throw new Error(s.error || 'فشل النسخ على السيرفر')
+                }
+                if (s.state === 'running' && s.total_modules) {
+                    setCopyProgress(`جاري النسخ... ${s.done_modules}/${s.total_modules} وحدة (${s.lessons_done} درس)`)
+                } else {
+                    setCopyProgress('جاري النسخ...')
+                }
+                setTimeout(() => poll().catch(onPollError), 2000)
+            }
+            const onPollError = (err) => {
+                console.error(err)
+                alert('حدث خطأ: ' + err.message)
+                setCopying(false)
+                setCopyProgress('')
+            }
+            poll().catch(onPollError)
         } catch (err) {
             console.error(err)
             alert('حدث خطأ: ' + err.message)
             setCopying(false)
+            setCopyProgress('')
         }
     }
 
@@ -1718,7 +1755,7 @@ export const AdminCourseBuilder = ({ id }) => {
                         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
                             <button onClick={() => setCopyModalOpen(false)} style={{ padding: '10px 20px', borderRadius: '8px', border: '1px solid #cbd5e1', background: 'white', color: '#64748b', cursor: 'pointer' }}>إلغاء</button>
                             <button onClick={handleCopyContent} disabled={copying || !sourceCourseId} style={{ padding: '10px 20px', borderRadius: '8px', border: 'none', background: '#ef4444', color: 'white', fontWeight: 'bold', cursor: (copying || !sourceCourseId) ? 'not-allowed' : 'pointer' }}>
-                                {copying ? 'جاري الاستنساخ...' : 'موافق، ابدأ الاستنساخ'}
+                                {copying ? (copyProgress || 'جاري الاستنساخ...') : 'موافق، ابدأ الاستنساخ'}
                             </button>
                         </div>
                     </div>
