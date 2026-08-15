@@ -120,7 +120,7 @@ export const AdminCourseBuilder = ({ id }) => {
     const stripEntityForSave = (obj, extraRemove = []) => {
         const out = { ...obj }
         ;[
-            'localId', '_dirty', 'showAdvanced', 'showBuilder', 'lessons', 'quizzes', 'questions',
+            'localId', '_dirty', '_heavyLoaded', 'showAdvanced', 'showBuilder', 'lessons', 'quizzes', 'questions',
             'is_exam', 'weekly_exams', 'exam_id', 'exam_file', 'exam_start_time', 'exam_end_time',
             'exam_total_mark', 'exam_instructions',
             ...extraRemove,
@@ -208,7 +208,8 @@ export const AdminCourseBuilder = ({ id }) => {
 
                 const [modRes, lessRes, quizRes, questRes, docsRes, examRes] = await Promise.all([
                     fetch(`${API}/api/hq/modules/?page_size=5000&course=${id}`, { headers }),
-                    fetch(`${API}/api/hq/lessons/?page_size=5000&module__course=${id}`, { headers }),
+                    // omit: الحقول الثقيلة (نص الدرس وكود السلايدات) تُجلب عند فتح «متقدم» لكل درس
+                    fetch(`${API}/api/hq/lessons/?page_size=5000&module__course=${id}&omit=lesson_text,interactive_html`, { headers }),
                     fetch(`${API}/api/hq/quizzes/?page_size=5000&lesson__module__course=${id}`, { headers }),
                     fetch(`${API}/api/hq/questions/?page_size=10000&quiz__lesson__module__course=${id}`, { headers }),
                     fetch(`${API}/api/hq/ministerialdocs/?page_size=1000&course=${id}`, { headers }),
@@ -254,7 +255,7 @@ export const AdminCourseBuilder = ({ id }) => {
                         lessons: moduleLessons.map(l => {
                             const lessonQuizzes = allQuizzes.filter(q => q.lesson == l.id)
                             return {
-                                ...l, localId: l.id, showAdvanced: false,
+                                ...l, localId: l.id, showAdvanced: false, _heavyLoaded: false,
                                 json_data: l.json_data || { ad_video_id: '', in_video_quizzes: [] },
                                 quizzes: lessonQuizzes.map(qz => {
                                     const quizQuestions = allQuestions.filter(qs => qs.quiz == qz.id).sort((a, b) => a.order - b.order)
@@ -357,7 +358,7 @@ export const AdminCourseBuilder = ({ id }) => {
         const newMods = [...modules]
         newMods[mIndex].lessons.push({
             localId: Date.now(), title: '', video_url: '', cover_image: '', order: newMods[mIndex].lessons.length + 1, is_locked: true, is_published: false,
-            interactive_html: '', lesson_text: '', virtual_lab_slug: '', doc_file: null, showAdvanced: true, quizzes: [], json_data: { ad_video_id: '', in_video_quizzes: [
+            interactive_html: '', lesson_text: '', virtual_lab_slug: '', doc_file: null, showAdvanced: true, _heavyLoaded: true, quizzes: [], json_data: { ad_video_id: '', in_video_quizzes: [
                 { time: 0, hint: '', question: '', options: ['', ''], correct: 0, explanations: ['', ''] },
                 { time: 0, hint: '', question: '', options: ['', ''], correct: 0, explanations: ['', ''] },
                 { time: 0, hint: '', question: '', options: ['', ''], correct: 0, explanations: ['', ''] }
@@ -377,6 +378,38 @@ export const AdminCourseBuilder = ({ id }) => {
         newMods[mIndex].lessons[lIndex][field] = val
         newMods[mIndex].lessons[lIndex]._dirty = true
         setModules(newMods)
+    }
+
+    // الحقول الثقيلة (نص الدرس + كود السلايدات) لا تُحمّل مع القائمة (omit) —
+    // تُجلب هنا عند أول فتح لقسم «متقدم» أو قبل توليد الأسئلة بالذكاء الاصطناعي.
+    // ترجع نسخة الدرس بعد التحميل للاستخدام الفوري (تفادياً لقدم حالة الـ state).
+    const ensureLessonHeavy = async (mIndex, lIndex) => {
+        const less = modules[mIndex]?.lessons?.[lIndex]
+        if (!less) return null
+        if (less._heavyLoaded || !less.id) return less
+        try {
+            const tk = localStorage.getItem('access_token')
+            const res = await fetch(`${API}/api/hq/lessons/${less.id}/`, { headers: { Authorization: `Bearer ${tk}` } })
+            if (!res.ok) return less
+            const full = await res.json()
+            const mergedHtml = less.interactive_html || full.interactive_html || ''
+            const mergedText = less.lesson_text || full.lesson_text || ''
+            setModules(prev => {
+                const copy = [...prev]
+                const target = copy[mIndex]?.lessons?.[lIndex]
+                if (!target || target.id !== full.id || target._heavyLoaded) return prev
+                // دمج بلا تعليم الدرس كمعدَّل — هذه قراءة وليست تعديلاً،
+                // ولا نمس قيمة كتبها المستخدم أثناء الجلب.
+                if (!target.interactive_html) target.interactive_html = full.interactive_html || ''
+                if (!target.lesson_text) target.lesson_text = full.lesson_text || ''
+                target._heavyLoaded = true
+                return copy
+            })
+            return { ...less, interactive_html: mergedHtml, lesson_text: mergedText, _heavyLoaded: true }
+        } catch (e) {
+            console.error('lazy lesson load failed', e)
+            return less
+        }
     }
 
     // تغيير ترتيب الدرس (تحريك للأعلى/الأسفل) — يعيد ترقيم order لكل دروس الفصل
@@ -533,7 +566,7 @@ export const AdminCourseBuilder = ({ id }) => {
     }
 
     const handleGenerateSurpriseQuestions = async (mIndex, lIndex) => {
-        const less = modules[mIndex].lessons[lIndex];
+        const less = (await ensureLessonHeavy(mIndex, lIndex)) || modules[mIndex].lessons[lIndex];
         if (!less.lesson_text || less.lesson_text.trim() === '') {
             alert('يجب إضافة نص للدرس أولاً لتتمكن من توليد الأسئلة.');
             return;
@@ -588,7 +621,7 @@ export const AdminCourseBuilder = ({ id }) => {
     };
 
     const handleGenerateTextQuestions = async (mIndex, lIndex, qzIndex) => {
-        const less = modules[mIndex].lessons[lIndex];
+        const less = (await ensureLessonHeavy(mIndex, lIndex)) || modules[mIndex].lessons[lIndex];
         if (!less.lesson_text || less.lesson_text.trim() === '') {
             alert('يجب إضافة نص للدرس أولاً لتتمكن من توليد الأسئلة.');
             return;
@@ -1369,7 +1402,7 @@ export const AdminCourseBuilder = ({ id }) => {
                                                             <label htmlFor={`l-lock-${less.localId}`}></label>
                                                         </div>
                                                     </div>
-                                                    <button className="hq-action-btn edit" onClick={() => updateLesson(mIndex, lIndex, 'showAdvanced', !less.showAdvanced)} title="متقدم ومستندات" style={{ background: less.showAdvanced ? 'var(--hq-primary)' : 'white', color: less.showAdvanced ? 'white' : 'var(--hq-primary-text)' }}><HiOutlineCog /></button>
+                                                    <button className="hq-action-btn edit" onClick={() => { if (!less.showAdvanced) ensureLessonHeavy(mIndex, lIndex); updateLesson(mIndex, lIndex, 'showAdvanced', !less.showAdvanced) }} title="متقدم ومستندات" style={{ background: less.showAdvanced ? 'var(--hq-primary)' : 'white', color: less.showAdvanced ? 'white' : 'var(--hq-primary-text)' }}><HiOutlineCog /></button>
                                                     <button className="hq-action-btn delete" onClick={() => removeLesson(mIndex, lIndex)}><HiOutlineTrash /></button>
                                                 </div>
 
