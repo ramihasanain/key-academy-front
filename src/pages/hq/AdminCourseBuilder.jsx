@@ -190,6 +190,8 @@ export const AdminCourseBuilder = ({ id }) => {
             const jobId = data.job_id
             const startedAt = Date.now()
             let unknownStreak = 0
+            let lastSignature = ''
+            let lastChangeAt = Date.now()
             const poll = async () => {
                 if (Date.now() - startedAt > 20 * 60 * 1000) {
                     setCopyJob(prev => ({ ...prev, state: 'failed', error: 'انتهت مهلة المتابعة (20 دقيقة) بلا نتيجة نهائية.' }))
@@ -224,6 +226,22 @@ export const AdminCourseBuilder = ({ id }) => {
                     setCopyJob({ ...s, jobId })
                     return
                 }
+
+                // كاشف موت الـ worker: مهمة «جارية» بلا أي تغيّر لدقيقتين = الـ worker
+                // انقتل أثناءها (نفدت الذاكرة مثلاً) والحالة علقت — نعلن الفشل بوضوح
+                // بدل الانتظار للأبد.
+                const signature = `${s.state}|${(s.log || []).length}|${s.lessons_done}|${s.done_modules}`
+                if (signature !== lastSignature) {
+                    lastSignature = signature
+                    lastChangeAt = Date.now()
+                } else if (s.state === 'running' && Date.now() - lastChangeAt > 120 * 1000) {
+                    setCopyJob({
+                        ...s, jobId, state: 'failed',
+                        error: 'توقفت المهمة عن التقدم لدقيقتين — الغالب أن الـ worker أعيد تشغيله أثناء النسخ. اضغط «إعادة المحاولة».',
+                    })
+                    return
+                }
+
                 setCopyJob(prev => ({ ...(s.log ? s : prev), state: s.state || prev.state, jobId }))
                 setTimeout(poll, 1500)
             }
