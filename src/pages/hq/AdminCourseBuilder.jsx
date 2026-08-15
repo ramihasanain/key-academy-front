@@ -97,7 +97,7 @@ export const AdminCourseBuilder = ({ id }) => {
     const [allCourses, setAllCourses] = useState([])
     const [sourceCourseId, setSourceCourseId] = useState('')
     const [copying, setCopying] = useState(false)
-    const [copyProgress, setCopyProgress] = useState('')
+    const [copyJob, setCopyJob] = useState(null) // {state, log[], done_modules, total_modules, lessons_done, error, trace}
     // خيارات النسخ — الامتحانات الأسبوعية مستثناة افتراضياً (دورات الدفعات الجديدة تأخذ امتحاناتها لاحقاً)
     const [copyWeeklyExams, setCopyWeeklyExams] = useState(false)
     const [copyQuizzes, setCopyQuizzes] = useState(true)
@@ -162,14 +162,15 @@ export const AdminCourseBuilder = ({ id }) => {
         } catch (e) { console.error("Error fetching courses", e) }
     }
 
-    // النسخ يعمل بالخلفية على السيرفر (Celery) — نستطلع تقدمه كل ثانيتين
-    // بدل انتظار طلب واحد طويل كان يضرب مهلة البوابة بالدورات الكبيرة.
+    // النسخ يعمل بالخلفية على السيرفر (Celery) — النافذة تعرض شريط تقدم
+    // وسجلاً حياً بكل خطوة يرسله السيرفر؛ وعند أي فشل يظهر الخطأ الكامل
+    // (traceback) مع زر ينسخه للحافظة لإرساله للمطور.
     const handleCopyContent = async () => {
         if (!sourceCourseId) return alert('يرجى اختيار الدورة المراد النسخ منها.')
         if (!window.confirm('تنبيه: هذا الإجراء سيقوم بحذف جميع المحتويات الحالية (الفصول، الدروس، الامتحانات) للدورة الحالية واستبدالها بمحتويات الدورة المحددة. هل أنت متأكد؟')) return
 
         setCopying(true)
-        setCopyProgress('جاري بدء النسخ...')
+        setCopyJob({ state: 'starting', log: ['⏳ جاري إرسال طلب النسخ للسيرفر...'] })
         const tk = localStorage.getItem('access_token')
         try {
             const res = await fetch(`${API}/api/hq/courses/${id}/copy-content/`, {
@@ -182,48 +183,73 @@ export const AdminCourseBuilder = ({ id }) => {
                     copy_ministerial_docs: copyMinisterialDocs,
                 })
             })
-            const data = await res.json()
-            if (!res.ok) throw new Error(data.error || 'فشل بدء النسخ')
+            const data = await res.json().catch(() => ({}))
+            if (!res.ok) throw new Error(data.error || `فشل بدء النسخ (HTTP ${res.status})`)
+            if (!data.job_id) throw new Error('السيرفر لم يرجع رقم مهمة — تأكد من رفع آخر نسخة للباك اند.')
 
             const jobId = data.job_id
             const startedAt = Date.now()
+            let unknownStreak = 0
             const poll = async () => {
-                if (Date.now() - startedAt > 15 * 60 * 1000) {
-                    throw new Error('انتهت مهلة متابعة النسخ — تحقق من الدورة بعد قليل.')
-                }
-                const sRes = await fetch(`${API}/api/hq/copy-jobs/${jobId}/`, {
-                    headers: { 'Authorization': `Bearer ${tk}` },
-                })
-                const s = await sRes.json().catch(() => ({}))
-                if (s.state === 'done') {
-                    const c = s.copied || {}
-                    alert(`تم النسخ بنجاح! (${c.modules ?? '؟'} وحدة، ${c.lessons ?? '؟'} درس)`)
-                    window.location.reload()
+                if (Date.now() - startedAt > 20 * 60 * 1000) {
+                    setCopyJob(prev => ({ ...prev, state: 'failed', error: 'انتهت مهلة المتابعة (20 دقيقة) بلا نتيجة نهائية.' }))
                     return
                 }
-                if (s.state === 'failed') {
-                    throw new Error(s.error || 'فشل النسخ على السيرفر')
+                let s = {}
+                try {
+                    const sRes = await fetch(`${API}/api/hq/copy-jobs/${jobId}/`, {
+                        headers: { 'Authorization': `Bearer ${tk}` },
+                    })
+                    s = await sRes.json().catch(() => ({}))
+                    if (sRes.status === 404) s.state = s.state || 'unknown'
+                } catch (e) {
+                    s = { state: 'poll_error', error: String(e) }
                 }
-                if (s.state === 'running' && s.total_modules) {
-                    setCopyProgress(`جاري النسخ... ${s.done_modules}/${s.total_modules} وحدة (${s.lessons_done} درس)`)
+
+                if (s.state === 'unknown') {
+                    // الحالة اختفت من الكاش أو لم تُكتب بعد — نتسامح لثوانٍ قليلة
+                    unknownStreak += 1
+                    if (unknownStreak > 8) {
+                        setCopyJob(prev => ({
+                            ...prev, state: 'failed',
+                            error: 'حالة المهمة غير موجودة على السيرفر — الغالب أن الـ worker لم يستلمها. تحقق من لوغ keyacademy-worker.',
+                        }))
+                        return
+                    }
                 } else {
-                    setCopyProgress('جاري النسخ...')
+                    unknownStreak = 0
                 }
-                setTimeout(() => poll().catch(onPollError), 2000)
+
+                if (s.state === 'done' || s.state === 'failed') {
+                    setCopyJob({ ...s, jobId })
+                    return
+                }
+                setCopyJob(prev => ({ ...(s.log ? s : prev), state: s.state || prev.state, jobId }))
+                setTimeout(poll, 1500)
             }
-            const onPollError = (err) => {
-                console.error(err)
-                alert('حدث خطأ: ' + err.message)
-                setCopying(false)
-                setCopyProgress('')
-            }
-            poll().catch(onPollError)
+            setTimeout(poll, 800)
         } catch (err) {
             console.error(err)
-            alert('حدث خطأ: ' + err.message)
-            setCopying(false)
-            setCopyProgress('')
+            setCopyJob({ state: 'failed', error: err.message, log: [] })
         }
+    }
+
+    const copyJobLogText = () => {
+        const j = copyJob || {}
+        return [
+            `== لوغ نسخ الدورة ==`,
+            `job: ${j.jobId || '؟'} | target course: ${id} | source: ${sourceCourseId}`,
+            `state: ${j.state}`,
+            ...(j.log || []),
+            j.error ? `error: ${j.error}` : '',
+            j.trace ? `--- traceback ---\n${j.trace}` : '',
+        ].filter(Boolean).join('\n')
+    }
+
+    const copyLogToClipboard = () => {
+        navigator.clipboard.writeText(copyJobLogText())
+            .then(() => alert('انتسخ اللوغ — الصقه بالمحادثة.'))
+            .catch(() => window.prompt('انسخ النص يدوياً:', copyJobLogText()))
     }
 
     useEffect(() => {
@@ -1752,11 +1778,60 @@ export const AdminCourseBuilder = ({ id }) => {
                             </label>
                         </div>
 
+                        {/* لوحة التقدم والسجل الحي — تظهر بعد بدء النسخ */}
+                        {copyJob && (
+                            <div style={{ marginBottom: '20px' }}>
+                                {copyJob.state === 'running' && copyJob.total_modules > 0 && (
+                                    <div style={{ marginBottom: '10px' }}>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', fontWeight: 'bold', color: '#334155', marginBottom: '5px' }}>
+                                            <span>الوحدة {copyJob.done_modules}/{copyJob.total_modules}</span>
+                                            <span>{copyJob.lessons_done} درس</span>
+                                        </div>
+                                        <div style={{ height: '10px', background: '#e2e8f0', borderRadius: '999px', overflow: 'hidden' }}>
+                                            <div style={{ height: '100%', width: `${Math.round((copyJob.done_modules / copyJob.total_modules) * 100)}%`, background: '#3b82f6', transition: 'width 0.5s' }} />
+                                        </div>
+                                    </div>
+                                )}
+                                {copyJob.state === 'done' && (
+                                    <div style={{ background: '#f0fdf4', border: '1px solid #86efac', borderRadius: '10px', padding: '12px', color: '#16a34a', fontWeight: 'bold', marginBottom: '10px' }}>
+                                        ✅ اكتمل النسخ بنجاح — {copyJob.copied?.modules ?? '؟'} وحدة، {copyJob.copied?.lessons ?? '؟'} درس
+                                    </div>
+                                )}
+                                {copyJob.state === 'failed' && (
+                                    <div style={{ background: '#fef2f2', border: '1px solid #fca5a5', borderRadius: '10px', padding: '12px', color: '#dc2626', fontWeight: 'bold', marginBottom: '10px' }}>
+                                        ❌ فشل النسخ: {copyJob.error || 'خطأ غير معروف'}
+                                    </div>
+                                )}
+                                <div style={{ background: '#0f172a', color: '#e2e8f0', borderRadius: '10px', padding: '12px', maxHeight: '220px', overflowY: 'auto', fontFamily: 'monospace', fontSize: '0.78rem', direction: 'rtl', textAlign: 'right', whiteSpace: 'pre-wrap' }}>
+                                    {(copyJob.log || []).map((line, i) => <div key={i}>{line}</div>)}
+                                    {copyJob.trace && (
+                                        <div style={{ color: '#fca5a5', marginTop: '8px', direction: 'ltr', textAlign: 'left' }}>{copyJob.trace}</div>
+                                    )}
+                                    {(!copyJob.log || copyJob.log.length === 0) && !copyJob.trace && <div>بانتظار أول تحديث من السيرفر...</div>}
+                                </div>
+                            </div>
+                        )}
+
                         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
-                            <button onClick={() => setCopyModalOpen(false)} style={{ padding: '10px 20px', borderRadius: '8px', border: '1px solid #cbd5e1', background: 'white', color: '#64748b', cursor: 'pointer' }}>إلغاء</button>
-                            <button onClick={handleCopyContent} disabled={copying || !sourceCourseId} style={{ padding: '10px 20px', borderRadius: '8px', border: 'none', background: '#ef4444', color: 'white', fontWeight: 'bold', cursor: (copying || !sourceCourseId) ? 'not-allowed' : 'pointer' }}>
-                                {copying ? (copyProgress || 'جاري الاستنساخ...') : 'موافق، ابدأ الاستنساخ'}
-                            </button>
+                            {copyJob && (copyJob.state === 'failed' || copyJob.trace) && (
+                                <button onClick={copyLogToClipboard} style={{ padding: '10px 20px', borderRadius: '8px', border: '1px solid #f59e0b', background: '#fffbeb', color: '#b45309', fontWeight: 'bold', cursor: 'pointer', marginLeft: 'auto' }}>
+                                    📋 انسخ اللوغ لإرساله
+                                </button>
+                            )}
+                            {copyJob?.state === 'done' ? (
+                                <button onClick={() => window.location.reload()} style={{ padding: '10px 20px', borderRadius: '8px', border: 'none', background: '#16a34a', color: 'white', fontWeight: 'bold', cursor: 'pointer' }}>
+                                    تحديث الصفحة وعرض المحتوى
+                                </button>
+                            ) : (
+                                <>
+                                    <button onClick={() => { setCopyModalOpen(false); if (copyJob?.state === 'failed') { setCopying(false); setCopyJob(null) } }} style={{ padding: '10px 20px', borderRadius: '8px', border: '1px solid #cbd5e1', background: 'white', color: '#64748b', cursor: 'pointer' }}>
+                                        {copying && copyJob?.state !== 'failed' ? 'إخفاء (النسخ مستمر بالخلفية)' : 'إلغاء'}
+                                    </button>
+                                    <button onClick={handleCopyContent} disabled={(copying && copyJob?.state !== 'failed') || !sourceCourseId} style={{ padding: '10px 20px', borderRadius: '8px', border: 'none', background: '#ef4444', color: 'white', fontWeight: 'bold', cursor: ((copying && copyJob?.state !== 'failed') || !sourceCourseId) ? 'not-allowed' : 'pointer' }}>
+                                        {copying && copyJob?.state !== 'failed' ? 'جاري النسخ...' : (copyJob?.state === 'failed' ? 'إعادة المحاولة' : 'موافق، ابدأ الاستنساخ')}
+                                    </button>
+                                </>
+                            )}
                         </div>
                     </div>
                 </div>
