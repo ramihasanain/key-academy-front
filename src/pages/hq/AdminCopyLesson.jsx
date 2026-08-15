@@ -75,7 +75,8 @@ export const AdminCopyLesson = () => {
             try {
                 const [modRes, lesRes] = await Promise.all([
                     fetch(`${API}/api/hq/modules/?page_size=5000&course=${sourceCourseId}`, { headers: authHeaders() }),
-                    fetch(`${API}/api/hq/lessons/?page_size=5000&module__course=${sourceCourseId}`, { headers: authHeaders() }),
+                    // omit: القائمة للعرض فقط — الحقول الثقيلة تُنسخ في الباك اند مباشرة
+                    fetch(`${API}/api/hq/lessons/?page_size=5000&module__course=${sourceCourseId}&omit=lesson_text,interactive_html`, { headers: authHeaders() }),
                 ])
                 if (modRes.ok) {
                     const data = await modRes.json()
