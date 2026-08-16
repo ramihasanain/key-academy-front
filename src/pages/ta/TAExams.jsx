@@ -74,7 +74,12 @@ export const TAExams = () => {
             })
             if (res.ok) {
                 const data = await res.json()
-                setSubmissions(data.submissions)
+                // الأقدم تسليماً أولاً — حتى يُصحَّح مَن سلّم أولاً قبل غيره
+                setSubmissions(
+                    [...data.submissions].sort(
+                        (a, b) => new Date(a.submitted_at) - new Date(b.submitted_at),
+                    ),
+                )
                 setNotSubmittedStudents(data.not_submitted_students || [])
                 setSelectedExam(data.exam)
                 setActiveStatList(null)
@@ -210,9 +215,10 @@ export const TAExams = () => {
     }
 
     // ── الوضع الموحّد: ثلاث تبويبات عبر كل الامتحانات ──
+    // الأقدم تسليماً أولاً — حتى يُصحَّح مَن سلّم أولاً قبل غيره
     const unifiedUngraded = allSubmissions
         .filter((s) => !isGraded(s))
-        .sort((a, b) => new Date(b.submitted_at) - new Date(a.submitted_at))
+        .sort((a, b) => new Date(a.submitted_at) - new Date(b.submitted_at))
     const unifiedGraded = allSubmissions
         .filter(isGraded)
         .sort((a, b) => new Date(b.graded_at || b.submitted_at) - new Date(a.graded_at || a.submitted_at))
