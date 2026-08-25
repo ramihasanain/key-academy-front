@@ -170,6 +170,7 @@ export const AdminTransferStudent = () => {
                             { label: 'ملاحظات', value: result.notes_moved },
                             { label: 'أسئلة', value: result.qa_moved },
                             { label: 'رسائل', value: result.msgs_moved },
+                            { label: 'رسائل نُقلت لغرفة المجموعة الجديدة', value: result.chat_room_msgs_moved },
                             { label: 'محاولات اختبار', value: result.quiz_moved },
                             { label: 'ذكاء اصطناعي', value: result.ai_moved },
                             { label: 'جلسات فيديو', value: result.sessions_moved },
